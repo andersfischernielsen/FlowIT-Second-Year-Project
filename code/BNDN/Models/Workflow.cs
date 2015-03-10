@@ -10,6 +10,6 @@ namespace Models
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public List<Activity> Activities { get; set; }
+        public virtual List<Activity> Activitys { get; set; }
     }
 }
