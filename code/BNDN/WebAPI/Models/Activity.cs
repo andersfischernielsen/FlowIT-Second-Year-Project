@@ -12,5 +12,6 @@ namespace WebAPI.Models
         public bool Requested { get; set; }
         public bool Excluded { get; set; }
         public string Title { get; set; }
+        public Workflow ParentWorkflow { get; set; }
     }
 }
