@@ -29,5 +29,9 @@ namespace WebAPI.Models
         {
             return new ApplicationDbContext();
         }
+
+        public System.Data.Entity.DbSet<Models.Activity> Activities { get; set; }
+
+        public System.Data.Entity.DbSet<Models.Workflow> Workflows { get; set; }
     }
 }
