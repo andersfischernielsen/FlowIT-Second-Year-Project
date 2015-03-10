@@ -1,7 +1,7 @@
 ﻿using System.Data.Entity;
 using Models;
 
-namespace EntityFramework
+namespace Storage
 {
     public class StorageContext : DbContext
     {

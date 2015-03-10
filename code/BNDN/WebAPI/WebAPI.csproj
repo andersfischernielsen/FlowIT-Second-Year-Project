@@ -282,6 +282,10 @@
       <Project>{375b046c-b250-459f-b6b5-9efb8fcea977}</Project>
       <Name>Models</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Storage\Storage.csproj">
+      <Project>{E765F227-9908-487C-BC6B-9FFCA6F85352}</Project>
+      <Name>Storage</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
