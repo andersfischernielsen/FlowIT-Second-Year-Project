@@ -1,10 +1,8 @@
-Client-Server interface
+Event-Server interface
 =====
 
-Client
+Server
 -----
-
-### Server
 
 **Server responds to the following REST URLs:**
 
@@ -23,7 +21,8 @@ Client
 - RemoveEventFromWorkflow(string workflowId, string url)
 	- This method is called by DELETE requests (see above) and removes the given event URL from the given workflow.
 
-### Event
+Event
+-----
 
 **Events have the following methods:**
 
@@ -31,3 +30,8 @@ Client
 	- This method is called when the Event is instantiated. It tells the server via a POST request (see above) that it wishes to belong to the given workflow. 
 - RemoveEventFromWorkflow(string workflowName, string deadUrl)
 	- When an Event discovers that one of its fellow Events has died (through heartbeating), this method is called. It tells the Server that the given Event URl has died by sending the URL as a JSON object (see above).
+
+Model
+-----
+
+See drawing on [Lucidchart](https://www.lucidchart.com/documents/edit/b38b4c94-fe5b-4454-a906-045781c31c98/1)
