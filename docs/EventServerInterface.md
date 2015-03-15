@@ -1,10 +1,8 @@
-Client-Server interface
+Event-Server interface
 =====
 
-Client
+Server
 -----
-
-### Server
 
 **Server responds to the following REST URLs:**
 
@@ -23,7 +21,8 @@ Client
 - RemoveEventFromWorkflow(string workflowId, string url)
 	- This method is called by DELETE requests (see above) and removes the given event URL from the given workflow.
 
-### Event
+Event
+-----
 
 **Events have the following methods:**
 
