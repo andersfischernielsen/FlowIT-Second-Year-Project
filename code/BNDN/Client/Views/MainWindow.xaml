@@ -1,0 +1,28 @@
+﻿<Window x:Class="Client.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="600" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid x:Name="WorkFlowGrid" Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Label Content="Workflows" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Margin="10,0"/>
+            <ListBox Margin="10" Grid.Row="1"/>
+        </Grid>
+        <Grid x:Name="EventsGrid" Grid.Column="1" Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Label Content="Events" Margin="10,0" VerticalAlignment="Top" FontSize="24" HorizontalAlignment="Left"/>
+            <ListBox Margin="10" Grid.Row="1"/>
+        </Grid>
+
+    </Grid>
+</Window>
