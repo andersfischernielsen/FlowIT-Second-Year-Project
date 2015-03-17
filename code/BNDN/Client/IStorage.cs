@@ -10,12 +10,12 @@ namespace Client
         /// </summary>
         /// <returns></returns>
         IList<WorkflowDto> GetWorkflows();
-
         /// <summary>
-        /// Get all events
+        /// Gets all events from a workflow
         /// </summary>
+        /// <param name="workflow"></param>
         /// <returns></returns>
-        IList<EventAddressDto> GetEvents();
+        IList<EventAddressDto> GetEvents(string workflow);
         /// <summary>
         /// Add event to workflow
         /// 
