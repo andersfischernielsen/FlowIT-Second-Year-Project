@@ -8,7 +8,7 @@ namespace Event
 {
     public interface IEventStorage
     {
-        string Id { get; set; }
+        string Id { get; }
 
         #region InMemoryStorage
         bool Executed { get; set; }
@@ -17,12 +17,12 @@ namespace Event
         #endregion
 
         #region Rules
-        IEnumerable<IPEndPoint> Conditions { get; } 
-        IEnumerable<IPEndPoint> Responses { get; }
-        IEnumerable<IPEndPoint> Exclusions { get; }
-        IEnumerable<IPEndPoint> Inclusions { get; }
+        Task<IEnumerable<IPEndPoint>> Conditions { get; } 
+        Task<IEnumerable<IPEndPoint>> Responses { get; }
+        Task<IEnumerable<IPEndPoint>> Exclusions { get; }
+        Task<IEnumerable<IPEndPoint>> Inclusions { get; }
 
-        void UpdateRules(string id, EventRuleDto rules);
+        Task UpdateRules(string id, EventRuleDto rules);
         #endregion
 
 
@@ -33,18 +33,18 @@ namespace Event
 
 
         #region Preconditions
-        Tuple<bool, bool> GetPrecondition(string id);
-        IEnumerable<String> GetPreconditions();
-        void AddPrecondition(string key, Tuple<bool, bool> state); 
+        Task<Tuple<bool, bool>> GetPrecondition(string id);
+        Task<IEnumerable<string>> GetPreconditions();
+        Task AddPrecondition(string key, Tuple<bool, bool> state); 
         #endregion
 
 
         #region EndPointRegistering
-		IPEndPoint GetEndPointFromId(string id);
-        string GetIdFromEndPoint(IPEndPoint endPoint);
-        void RegisterIdWithEndPoint(string id, IPEndPoint endPoint);
-        bool KnowsId(string id);
-	    void RemoveIdAndEndPoint(string id);
+		Task<IPEndPoint> GetEndPointFromId(string id);
+        Task<string> GetIdFromEndPoint(IPEndPoint endPoint);
+        Task RegisterIdWithEndPoint(string id, IPEndPoint endPoint);
+        Task<bool> KnowsId(string id);
+	    Task RemoveIdAndEndPoint(string id);
         #endregion
     }
 }

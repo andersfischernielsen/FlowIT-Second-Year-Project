@@ -16,14 +16,13 @@ namespace Event
         public bool Included { get; set; }
         public bool Pending { get; set; }
 
-        private HashSet<IPEndPoint> _conditions;
-        private HashSet<IPEndPoint> _responses;
-        private HashSet<IPEndPoint> _exclusions;
-        private HashSet<IPEndPoint> _inclusions;
+        private readonly HashSet<IPEndPoint> _conditions;
+        private readonly HashSet<IPEndPoint> _responses;
+        private readonly HashSet<IPEndPoint> _exclusions;
+        private readonly HashSet<IPEndPoint> _inclusions;
 
         private readonly Dictionary<string, Tuple<bool, bool>> _preconditions = new Dictionary<string, Tuple<bool, bool>>();
 
-        //TODO: IS THIS THE WAY TO GO?
         private Dictionary<string, IPEndPoint> EventEndPoints { get; set; }
         private Dictionary<IPEndPoint, string> EventIds { get; set; }
 
@@ -37,27 +36,27 @@ namespace Event
             EventIds = new Dictionary<IPEndPoint, string>();
         }
 
-        public IEnumerable<IPEndPoint> Conditions
+        public Task<IEnumerable<IPEndPoint>> Conditions
         {
-            get { return _conditions; }
+            get { return Task.Run(() => _conditions.AsEnumerable()); }
         }
 
-        public IEnumerable<IPEndPoint> Responses
+        public Task<IEnumerable<IPEndPoint>> Responses
         {
-            get { return _responses; }
+            get { return Task.Run(() => _responses.AsEnumerable()); }
         }
 
-        public IEnumerable<IPEndPoint> Exclusions
+        public Task<IEnumerable<IPEndPoint>> Exclusions
         {
-            get { return _exclusions; }
+            get { return Task.Run(() => _exclusions.AsEnumerable()); }
         }
 
-        public IEnumerable<IPEndPoint> Inclusions
+        public Task<IEnumerable<IPEndPoint>> Inclusions
         {
-            get { return _inclusions;  }
+            get { return Task.Run(() => _inclusions.AsEnumerable());  }
         }
 
-        public void UpdateRules(string id, EventRuleDto rules)
+        public async Task UpdateRules(string id, EventRuleDto rules)
         {
             var endPoint = EventEndPoints[id];
             if (endPoint == null)
@@ -69,110 +68,135 @@ namespace Event
                 throw new ArgumentNullException("rules");
             }
 
-            // Condition
-            if (rules.Condition)
+            await Task.Run(() =>
             {
-                _conditions.Add(endPoint);
-            }
-            else
-            {
-                _conditions.Remove(endPoint);
-            }
+                // Condition
+                if (rules.Condition)
+                {
+                    _conditions.Add(endPoint);
+                }
+                else
+                {
+                    _conditions.Remove(endPoint);
+                }
 
-            // Exclusion
-            if (rules.Exclusion)
-            {
-                _exclusions.Add(endPoint);
-            }
-            else
-            {
-                _exclusions.Remove(endPoint);
-            }
+                // Exclusion
+                if (rules.Exclusion)
+                {
+                    _exclusions.Add(endPoint);
+                }
+                else
+                {
+                    _exclusions.Remove(endPoint);
+                }
 
-            // Inclusion
-            if (rules.Inclusion)
-            {
-                _inclusions.Add(endPoint);
-            }
-            else
-            {
-                _inclusions.Remove(endPoint);
-            }
+                // Inclusion
+                if (rules.Inclusion)
+                {
+                    _inclusions.Add(endPoint);
+                }
+                else
+                {
+                    _inclusions.Remove(endPoint);
+                }
 
-            // Response
-            if (rules.Response)
-            {
-                _responses.Add(endPoint);
-            }
-            else
-            {
-                _responses.Remove(endPoint);
-            }
+                // Response
+                if (rules.Response)
+                {
+                    _responses.Add(endPoint);
+                }
+                else
+                {
+                    _responses.Remove(endPoint);
+                }
+            });
         }
 
-        public Tuple<bool, bool> GetPrecondition(string id)
+        public async Task<Tuple<bool, bool>> GetPrecondition(string id)
         {
-            lock (_preconditions) { return _preconditions[id]; }
+            return await Task.Run(() =>
+            {
+                lock (_preconditions)
+                {
+                    return _preconditions[id];
+
+                }
+            });
         }
 
-        public IEnumerable<String> GetPreconditions()
+        public async Task<IEnumerable<String>> GetPreconditions()
         {
-            lock (_preconditions)
+            return await Task.Run(() =>
             {
-                return _preconditions.Keys;
-            }
+                lock (_preconditions)
+                {
+                    return _preconditions.Keys;
+                }
+            });
         }
 
-        public void AddPrecondition(string key, Tuple<bool, bool> state)
+        public async Task AddPrecondition(string key, Tuple<bool, bool> state)
         {
-            lock (_preconditions)
+            await Task.Run(() =>
             {
-                _preconditions[key] = state;
-            }
+                lock (_preconditions)
+                {
+                    _preconditions[key] = state;
+                }
+            });
         }
 
         public Task<EventStateDto> EventStateDto
         {
             get
             {
-                lock (_preconditions)
+                return Task.Run(() =>
                 {
-                    return Task.Run(() => new EventStateDto
+                    lock (_preconditions)
                     {
-                        Executed = Executed,
-                        Included = Included,
-                        Pending = Pending,
-                        Executable = _preconditions.Values.All(state => state.Item1 || state.Item2)
-                    });
-                }
+                        return new EventStateDto
+                        {
+                            Executed = Executed,
+                            Included = Included,
+                            Pending = Pending,
+                            Executable = _preconditions.Values.All(state => state.Item1 || state.Item2)
+                        };
+                    }
+                });
             }
         }
 
-        public IPEndPoint GetEndPointFromId(string id)
+        public async Task<IPEndPoint> GetEndPointFromId(string id)
         {
-            return EventEndPoints[id];
+            return await Task.Run(() => EventEndPoints[id]);
         }
 
-        public string GetIdFromEndPoint(IPEndPoint endPoint)
+        public async Task<string> GetIdFromEndPoint(IPEndPoint endPoint)
         {
-            return EventIds[endPoint];
+            return await Task.Run(() => EventIds[endPoint]);
         }
 
-        public void RegisterIdWithEndPoint(string id, IPEndPoint endPoint)
+        public async Task RegisterIdWithEndPoint(string id, IPEndPoint endPoint)
         {
-            EventEndPoints.Add(id, endPoint);
-            EventIds.Add(endPoint, id);
+            await Task.Run(() =>
+            {
+                EventEndPoints.Add(id, endPoint);
+                EventIds.Add(endPoint, id);
+            });
         }
 
-        public bool KnowsId(string id)
+        public async Task<bool> KnowsId(string id)
         {
-            return EventEndPoints.ContainsKey(id);
+            return await Task.Run(() => EventEndPoints.ContainsKey(id));
         }
 
-        public void RemoveIdAndEndPoint(string id)
+        public async Task RemoveIdAndEndPoint(string id)
         {
-            EventIds.Remove(EventEndPoints[id]);
-            EventEndPoints.Remove(id);
+            await Task.Run(() =>
+            {
+                EventIds.Remove(EventEndPoints[id]);
+                EventEndPoints.Remove(id);
+            });
         }
 
         public Task<EventDto> EventDto
@@ -186,10 +210,10 @@ namespace Event
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,
-                    Conditions = _conditions.ToList(),
-                    Exclusions = _exclusions.ToList(),
-                    Responses = _responses.ToList(),
-                    Inclusions = _inclusions.ToList()
+                    Conditions = Conditions.Result,
+                    Exclusions = Exclusions.Result,
+                    Responses = Responses.Result,
+                    Inclusions = Inclusions.Result
                 });
             }
         }

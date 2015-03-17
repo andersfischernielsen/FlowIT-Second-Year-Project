@@ -39,7 +39,7 @@ namespace Event.Controllers
             }
 
             // if new entry, add Event to the endPoints-table.
-            if (InMemoryStorage.KnowsId(id))
+            if (await InMemoryStorage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} already exists!", id));
             }
@@ -50,9 +50,9 @@ namespace Event.Controllers
             }
 
             var endPoint = new IPEndPoint(addresses[0], Request.RequestUri.Port);
-            InMemoryStorage.RegisterIdWithEndPoint(id, endPoint);
+            await InMemoryStorage.RegisterIdWithEndPoint(id, endPoint);
 
-            InMemoryStorage.UpdateRules(id, ruleDto);
+            await InMemoryStorage.UpdateRules(id, ruleDto);
 
             return Ok();
         }
@@ -62,12 +62,12 @@ namespace Event.Controllers
         public async Task<IHttpActionResult> PutRules(string id, [FromBody] EventRuleDto ruleDto)
         {
             // if new entry, add Event to the endPoints-table.
-            if (!InMemoryStorage.KnowsId(id))
+            if (!await InMemoryStorage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
 
-            InMemoryStorage.UpdateRules(id, ruleDto);
+            await InMemoryStorage.UpdateRules(id, ruleDto);
 
             return Ok();
         }
@@ -76,23 +76,22 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteRules(string id)
         {
-            if (!InMemoryStorage.KnowsId(id))
+            if (!await InMemoryStorage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
-            await Task.Run(() =>
-            {
-                InMemoryStorage.UpdateRules(id,
-                    // Set all states to false to remove them from storage.
-                    new EventRuleDto
-                    {
-                        Condition = false,
-                        Exclusion = false,
-                        Inclusion = false,
-                        Response = false
-                    });
-                InMemoryStorage.RemoveIdAndEndPoint(id);
-            });
+
+            await InMemoryStorage.UpdateRules(id,
+                // Set all states to false to remove them from storage.
+                new EventRuleDto
+                {
+                    Condition = false,
+                    Exclusion = false,
+                    Inclusion = false,
+                    Response = false
+                });
+            await InMemoryStorage.RemoveIdAndEndPoint(id);
+
             return Ok();
         }
         #endregion
@@ -119,12 +118,9 @@ namespace Event.Controllers
                 }
                 return BadRequest("Not possible to execute event.");
             }
-            else
-            {
-                // Todo: Is this what should happen when execute is false?
-                InMemoryStorage.Executed = false;
-                return Ok();
-            }
+            // Todo: Is this what should happen when execute is false?
+            InMemoryStorage.Executed = false;
+            return Ok();
         }
         #endregion
     }
