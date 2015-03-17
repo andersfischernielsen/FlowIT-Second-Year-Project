@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common
+﻿namespace Common
 {
     public class EventRuleDto
     {
+        public bool Condition { get; set; }
+        public bool Exclusion { get; set; }
+        public bool Response { get; set; }
+        public bool Inclusion { get; set; }
     }
 }
