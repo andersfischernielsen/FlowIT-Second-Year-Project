@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Client.ViewModels;
 
 namespace Client.Views
 {
@@ -22,6 +23,10 @@ namespace Client.Views
         public LoginView()
         {
             InitializeComponent();
+            var vm = new LoginViewModel(); // this creates an instance of the ViewModel
+            DataContext = vm; // this sets the newly created ViewModel as the DataContext for the View
+            if (vm.CloseAction == null)
+                vm.CloseAction = new Action(() => this.Close());
         }
     }
 }
