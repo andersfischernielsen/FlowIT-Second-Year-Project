@@ -44,6 +44,8 @@ namespace Client.ViewModels
 
         public void Login()
         {
+            // PUT LOGIN LOGIC HERE
+
             var window = new MainWindow();
             window.Show();
             CloseAction.Invoke();
