@@ -11,17 +11,17 @@ namespace Event.Controllers
     [RoutePrefix("event")]
     public class EventController : ApiController
     {
-        public State State { get; set; }
+        public InMemoryStorage InMemoryStorage { get; set; }
         public EventController()
         {
-            State = State.GetState();
+            InMemoryStorage = InMemoryStorage.GetState();
         }
 
         #region EventEvent
         [HttpGet]
         public async Task<EventDto> Get()
         {
-            return await State.EventDto;
+            return await InMemoryStorage.EventDto;
         }
 
         #region Rules
@@ -39,7 +39,7 @@ namespace Event.Controllers
             }
 
             // if new entry, add Event to the endPoints-table.
-            if (State.KnowsId(id))
+            if (InMemoryStorage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} already exists!", id));
             }
@@ -49,51 +49,11 @@ namespace Event.Controllers
                 throw new Exception("Bad address!" + addresses.Length);
             }
 
-            
-
             var endPoint = new IPEndPoint(addresses[0], Request.RequestUri.Port);
-            State.RegisterIdWithEndPoint(id, endPoint);
+            InMemoryStorage.RegisterIdWithEndPoint(id, endPoint);
 
-            // Todo: Refactor code below:
-            // Condition
-            if (ruleDto.Condition)
-            {
-                State.Conditions.Add(endPoint);
-            }
-            else
-            {
-                State.Conditions.Remove(endPoint);
-            }
+            InMemoryStorage.UpdateRules(id, ruleDto);
 
-            // Exclusion
-            if (ruleDto.Exclusion)
-            {
-                State.Exclusions.Add(endPoint);
-            }
-            else
-            {
-                State.Exclusions.Remove(endPoint);
-            }
-
-            // Inclusion
-            if (ruleDto.Inclusion)
-            {
-                State.Inclusions.Add(endPoint);
-            }
-            else
-            {
-                State.Inclusions.Remove(endPoint);
-            }
-
-            // Response
-            if (ruleDto.Response)
-            {
-                State.Responses.Add(endPoint);
-            }
-            else
-            {
-                State.Responses.Remove(endPoint);
-            }
             return Ok();
         }
 
@@ -102,54 +62,13 @@ namespace Event.Controllers
         public async Task<IHttpActionResult> PutRules(string id, [FromBody] EventRuleDto ruleDto)
         {
             // if new entry, add Event to the endPoints-table.
-            if (!State.KnowsId(id))
+            if (!InMemoryStorage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
 
-            var endPoint = State.GetEndPointFromId(id);
+            InMemoryStorage.UpdateRules(id, ruleDto);
 
-            // Todo: Refactor code below:
-
-            // Condition
-            if (ruleDto.Condition)
-            {
-                State.Conditions.Add(endPoint);
-            }
-            else
-            {
-                State.Conditions.Remove(endPoint);
-            }
-
-            // Exclusion
-            if (ruleDto.Exclusion)
-            {
-                State.Exclusions.Add(endPoint);
-            }
-            else
-            {
-                State.Exclusions.Remove(endPoint);
-            }
-
-            // Inclusion
-            if (ruleDto.Inclusion)
-            {
-                State.Inclusions.Add(endPoint);
-            }
-            else
-            {
-                State.Inclusions.Remove(endPoint);
-            }
-
-            // Response
-            if (ruleDto.Response)
-            {
-                State.Responses.Add(endPoint);
-            }
-            else
-            {
-                State.Responses.Remove(endPoint);
-            }
             return Ok();
         }
 
@@ -157,19 +76,22 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteRules(string id)
         {
-            if (!State.KnowsId(id))
+            if (!InMemoryStorage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
-            var endPoint = State.GetEndPointFromId(id);
             await Task.Run(() =>
             {
-                // Todo: Locking or running all 4 statements concurrently.
-                State.Conditions.RemoveWhere(end => end.Equals(endPoint));
-                State.Exclusions.RemoveWhere(end => end.Equals(endPoint));
-                State.Inclusions.RemoveWhere(end => end.Equals(endPoint));
-                State.Responses.RemoveWhere(end => end.Equals(endPoint));
-                State.RemoveIdAndEndPoint(id);
+                InMemoryStorage.UpdateRules(id,
+                    // Set all states to false to remove them from storage.
+                    new EventRuleDto
+                    {
+                        Condition = false,
+                        Exclusion = false,
+                        Inclusion = false,
+                        Response = false
+                    });
+                InMemoryStorage.RemoveIdAndEndPoint(id);
             });
             return Ok();
         }
@@ -182,7 +104,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventStateDto> GetState()
         {
-            return await State.EventStateDto;
+            return await InMemoryStorage.EventStateDto;
         }
 
         [HttpPut]
@@ -190,9 +112,9 @@ namespace Event.Controllers
         {
             if (execute)
             {
-                if ((await (State.EventStateDto)).Executable)
+                if ((await (InMemoryStorage.EventStateDto)).Executable)
                 {
-                    State.Executed = true;
+                    InMemoryStorage.Executed = true;
                     return BadRequest();
                 }
                 return BadRequest("Not possible to execute event.");
@@ -200,7 +122,7 @@ namespace Event.Controllers
             else
             {
                 // Todo: Is this what should happen when execute is false?
-                State.Executed = false;
+                InMemoryStorage.Executed = false;
                 return Ok();
             }
         }
