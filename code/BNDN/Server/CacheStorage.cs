@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Common;
 
-namespace Client
+namespace Server
 {
     public class CacheStorage : IStorage
     {
         private static CacheStorage _instance;
-        private readonly Dictionary<string, List<EventAddressDto>> _cache = new Dictionary<string, List<EventAddressDto>>(); 
+        private readonly Dictionary<WorkflowDto, List<EventAddressDto>> _cache = new Dictionary<WorkflowDto, List<EventAddressDto>>(); 
 
         private CacheStorage()
         {
@@ -28,10 +28,10 @@ namespace Client
 
         public IList<WorkflowDto> GetWorkflows()
         {
-            return _cache.Keys.Select(k => new WorkflowDto {Name = k}).ToList();
+            return _cache.Keys.ToList();
         }
 
-        public IList<EventAddressDto> GetEvents(string workflow)
+        public IList<EventAddressDto> GetEvents(WorkflowDto workflow)
         {
             List<EventAddressDto> list;
             var b =_cache.TryGetValue(workflow, out list);
@@ -45,7 +45,7 @@ namespace Client
             }
         }
 
-        public void AddEventToWorkflow(string workflow, EventAddressDto eventDto)
+        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventDto)
         {
             if (_cache.ContainsKey(workflow))
             {
@@ -66,7 +66,7 @@ namespace Client
             }
         }
 
-        public void RemoveEventFromWorkflow(string workflow, EventAddressDto eventDto)
+        public void RemoveEventFromWorkflow(WorkflowDto workflow, EventAddressDto eventDto)
         {
             if (_cache.ContainsKey(workflow))
             {
