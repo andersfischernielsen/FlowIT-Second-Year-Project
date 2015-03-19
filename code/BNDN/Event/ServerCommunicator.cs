@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using Common;
 using Event.Controllers;
-using Common;
 
 namespace Event
 {
@@ -28,8 +25,8 @@ namespace Event
         {
             _workflowId = workFlowId;
              _eventId = eventId;
-            _serverBaseAddress = "//localhost/api";
-            _httpClient = new AwiaHttpClientToolbox("testAdress");
+            _serverBaseAddress = baseAddress;
+            _httpClient = new AwiaHttpClientToolbox(_serverBaseAddress);
         }
 
 
@@ -42,8 +39,8 @@ namespace Event
         {
             try
             {
-                var list = await _httpClient.ReadList<EventAddressDto>(_serverBaseAddress + "/Workflows/" + workflowId);
-                return list;
+                var a = await _httpClient.ReadList<EventAddressDto>("Workflows/" + workflowId);
+                return a;
             }
             catch (Exception)
             {
@@ -57,14 +54,13 @@ namespace Event
          */
         // TODO: Discuss with Server-implemter what is expected (on ServerSide) to be contained within HeartbeatDto
         // TODO: Exception-handling?
-        public async Task<int> SendHeartbeatToServer()
+        public async void SendHeartbeatToServer()
         {
-            string path = _serverBaseAddress + "/" + _workflowId + "/" + _eventId;
+            string path = _workflowId + "/" + _eventId;
             var heartBeatDto = new HeartBeatDto().EventId = _eventId;
             try
             {
-                var result = await _httpClient.Create(path, heartBeatDto);
-                return result;
+                await _httpClient.Create(path, heartBeatDto);
             }
             catch (Exception)
             {
@@ -77,18 +73,18 @@ namespace Event
         /*
          * SubmitMyselfToServer will inform Server, that this Event wants to join a given workflow
          */
-
-        // TODO: Decide on return-type should be of type Task<...>
-        // TODO: Discuss what information is needed for Server to 'enroll' an event into a workflow? 
+        // TODO: Discuss what information is needed for Server to 'enroll' an event into a workflow?
+        // TODO: Exception handling
         public async void SubmitMyselfToServer()
         {
-            var path = _serverBaseAddress + "/" + _workflowId + "/";
+            // TODO: When posting myself to Server, at what address ("path") should I do that? 
+            var path = _workflowId + "/";
 
             // TODO:  For now, the following is a 'dummy' object; it only represents that we eventually will have to send some info about this event along to Server     
             // DTO should (probably) include id + name of event, and address
             var infoToServerAboutThisEvent = "" + _eventId;
 
-            var result = await _httpClient.Create(path, infoToServerAboutThisEvent);
+            await _httpClient.Create<String>(path, infoToServerAboutThisEvent);
         }
 
 
@@ -100,10 +96,8 @@ namespace Event
         {
             var path = _serverBaseAddress + "/" + _workflowId + "/" + eventToBeDeletedId;
             try
-            {
-                // TODO: Ask Wind why Delete is of generic type a.k.a why the <>s in Delete<>() ...?
-                // Do not care about the <string> - see line above! 
-                await _httpClient.Delete<string>(path);
+            { 
+                await _httpClient.Delete(path);
             }
             catch (Exception)
             {

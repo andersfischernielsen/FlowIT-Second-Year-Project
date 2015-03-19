@@ -7,7 +7,7 @@ namespace Event.Controllers
     interface IServerFromEvent
     {
         Task<IList<EventAddressDto>> GetWorkFlowEvents(int workflowId);
-        Task<int> SendHeartbeatToServer();
+        void SendHeartbeatToServer();
         void SubmitMyselfToServer();
         Task RequestDeletionOfEventAtServer(int eventToBeDeleted);
     }
