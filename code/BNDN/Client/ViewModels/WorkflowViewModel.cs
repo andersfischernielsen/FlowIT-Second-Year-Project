@@ -47,7 +47,7 @@ namespace Client.ViewModels
             {
                 EventList.Clear();
                 var connection = ServerConnection.GetStorage(new Uri("servers")); // todo get the real server address here
-                EventList = new ObservableCollection<EventViewModel>((await connection.GetEventsFromWorkflow(_workflowDto)).Select(eventDto => new EventViewModel(eventDto)));
+                EventList = new ObservableCollection<EventViewModel>((await connection.GetEventsFromWorkflow(_workflowDto)).Select(EventAddressDto => new EventViewModel(EventAddressDto)));
                 if (EventList.Count >= 1)
                 {
                     SelectedEventViewModel = EventList[0];

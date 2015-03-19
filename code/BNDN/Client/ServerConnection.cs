@@ -35,9 +35,9 @@ namespace Client
             return _awiaHttp.ReadList<WorkflowDto>("workflows");
         }
 
-        public Task<IList<EventDto>> GetEventsFromWorkflow(WorkflowDto workflow)
+        public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)
         {
-            return _awiaHttp.ReadList<EventDto>("workflows/" + workflow.Name);
+            return _awiaHttp.ReadList<EventAddressDto>("workflows/" + workflow.Name);
         }
     }
 }

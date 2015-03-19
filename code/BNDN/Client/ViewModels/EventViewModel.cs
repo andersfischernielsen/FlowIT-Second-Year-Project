@@ -9,14 +9,14 @@ namespace Client.ViewModels
 {
     public class EventViewModel : ViewModelBase
     {
-        private EventDto _eventDto;
+        private EventAddressDto __eventAddressDto;
         public EventViewModel()
         {
             
         }
-        public EventViewModel(EventDto eventDto)
+        public EventViewModel(EventAddressDto _eventAddressDto)
         {
-            _eventDto = eventDto;
+            __eventAddressDto = _eventAddressDto;
         }
 
         #region Databindings
