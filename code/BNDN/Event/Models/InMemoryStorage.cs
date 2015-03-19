@@ -5,13 +5,14 @@ using System.Net;
 using System.Threading.Tasks;
 using Common;
 
-namespace Event
+namespace Event.Models
 {
     public class InMemoryStorage : IEventStorage
     {
         private static InMemoryStorage _inMemoryStorage;
 
-        public string Id { get; set; }
+        public string WorkflowId { get; set; }
+        public string EventId { get; set; }
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public bool Pending { get; set; }
@@ -53,7 +54,48 @@ namespace Event
 
         public Task<IEnumerable<IPEndPoint>> Inclusions
         {
-            get { return Task.Run(() => _inclusions.AsEnumerable());  }
+            get { return Task.Run(() => _inclusions.AsEnumerable()); }
+        }
+
+        public async Task<IEnumerable<KeyValuePair<IPEndPoint, List<NotifyDto>>>> GetNotifyDtos()
+        {
+
+            var result = new Dictionary<IPEndPoint, List<NotifyDto>>();
+            foreach (var condition in _conditions)
+            {
+                await AddNotifyDto(result, condition, s => new ConditionDto(s));
+            }
+
+            foreach (var response in _responses)
+            {
+                await AddNotifyDto(result, response, s => new PendingDto(s));
+            }
+
+            foreach (var exclusion in _exclusions)
+            {
+                await AddNotifyDto(result, exclusion, s => new ExcludeDto(s));
+            }
+
+            foreach (var inclusion in _inclusions)
+            {
+                await AddNotifyDto(result, inclusion, s => new IncludeDto(s));
+            }
+
+            return (IEnumerable<KeyValuePair<IPEndPoint, List<NotifyDto>>>)result;
+        }
+
+        private async Task AddNotifyDto<T>(IDictionary<IPEndPoint, List<NotifyDto>> dictionary, IPEndPoint endPoint, Func<string, T> creator)
+            where T : NotifyDto
+        {
+            T dto = creator.Invoke(await GetIdFromEndPoint(endPoint));
+            if (dictionary.ContainsKey(endPoint))
+            {
+                dictionary[endPoint].Add(dto);
+            }
+            else
+            {
+                dictionary.Add(endPoint, new List<NotifyDto> { dto });
+            }
         }
 
         public async Task UpdateRules(string id, EventRuleDto rules)
@@ -206,7 +248,7 @@ namespace Event
                 // Todo: Fix datastructure to remove ToList().
                 return Task.Run(() => new EventDto
                 {
-                    Id = Id,
+                    Id = EventId,
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,

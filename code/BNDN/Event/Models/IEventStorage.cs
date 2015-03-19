@@ -4,13 +4,14 @@ using System.Net;
 using System.Threading.Tasks;
 using Common;
 
-namespace Event
+namespace Event.Models
 {
     public interface IEventStorage
     {
-        string Id { get; }
+        string WorkflowId { get; }
+        string EventId { get; }
 
-        #region InMemoryStorage
+        #region Storage
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; } 
@@ -21,6 +22,8 @@ namespace Event
         Task<IEnumerable<IPEndPoint>> Responses { get; }
         Task<IEnumerable<IPEndPoint>> Exclusions { get; }
         Task<IEnumerable<IPEndPoint>> Inclusions { get; }
+
+        Task<IEnumerable<KeyValuePair<IPEndPoint, List<NotifyDto>>>> GetNotifyDtos();
 
         Task UpdateRules(string id, EventRuleDto rules);
         #endregion

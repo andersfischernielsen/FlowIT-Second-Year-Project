@@ -5,23 +5,25 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Event.Models;
 
 namespace Event.Controllers
 {
     [RoutePrefix("event")]
     public class EventController : ApiController
     {
-        public InMemoryStorage InMemoryStorage { get; set; }
+        public IEventStorage Storage { get; set; }
+        public IEventCommunicator Communicator { get; set; }
         public EventController()
         {
-            InMemoryStorage = InMemoryStorage.GetState();
+            Storage = InMemoryStorage.GetState();
         }
 
         #region EventEvent
         [HttpGet]
         public async Task<EventDto> Get()
         {
-            return await InMemoryStorage.EventDto;
+            return await Storage.EventDto;
         }
 
         #region Rules
@@ -39,7 +41,7 @@ namespace Event.Controllers
             }
 
             // if new entry, add Event to the endPoints-table.
-            if (await InMemoryStorage.KnowsId(id))
+            if (await Storage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} already exists!", id));
             }
@@ -50,9 +52,9 @@ namespace Event.Controllers
             }
 
             var endPoint = new IPEndPoint(addresses[0], Request.RequestUri.Port);
-            await InMemoryStorage.RegisterIdWithEndPoint(id, endPoint);
+            await Storage.RegisterIdWithEndPoint(id, endPoint);
 
-            await InMemoryStorage.UpdateRules(id, ruleDto);
+            await Storage.UpdateRules(id, ruleDto);
 
             return Ok();
         }
@@ -62,12 +64,12 @@ namespace Event.Controllers
         public async Task<IHttpActionResult> PutRules(string id, [FromBody] EventRuleDto ruleDto)
         {
             // if new entry, add Event to the endPoints-table.
-            if (!await InMemoryStorage.KnowsId(id))
+            if (!await Storage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
 
-            await InMemoryStorage.UpdateRules(id, ruleDto);
+            await Storage.UpdateRules(id, ruleDto);
 
             return Ok();
         }
@@ -76,12 +78,12 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteRules(string id)
         {
-            if (!await InMemoryStorage.KnowsId(id))
+            if (!await Storage.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
 
-            await InMemoryStorage.UpdateRules(id,
+            await Storage.UpdateRules(id,
                 // Set all states to false to remove them from storage.
                 new EventRuleDto
                 {
@@ -90,7 +92,7 @@ namespace Event.Controllers
                     Inclusion = false,
                     Response = false
                 });
-            await InMemoryStorage.RemoveIdAndEndPoint(id);
+            await Storage.RemoveIdAndEndPoint(id);
 
             return Ok();
         }
@@ -103,7 +105,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventStateDto> GetState()
         {
-            return await InMemoryStorage.EventStateDto;
+            return await Storage.EventStateDto;
         }
 
         [HttpPut]
@@ -111,15 +113,20 @@ namespace Event.Controllers
         {
             if (execute)
             {
-                if ((await (InMemoryStorage.EventStateDto)).Executable)
+                if (!(await (Storage.EventStateDto)).Executable)
                 {
-                    InMemoryStorage.Executed = true;
-                    return BadRequest();
+                    return BadRequest("Event is not currently executable.");
                 }
-                return BadRequest("Not possible to execute event.");
+                Storage.Executed = true;
+                var notifyDtos = await Storage.GetNotifyDtos();
+                foreach (var pair in notifyDtos)
+                {
+                    Communicator.SendNotify(pair.Key, pair.Value.ToArray());
+                }
+                return Ok(true);
             }
-            // Todo: Is this what should happen when execute is false?
-            InMemoryStorage.Executed = false;
+            // Todo: Is this what should happen when execute is false? Probably every condition should be notified?
+            Storage.Executed = false;
             return Ok();
         }
         #endregion
