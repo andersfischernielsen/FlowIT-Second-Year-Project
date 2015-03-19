@@ -80,14 +80,15 @@ namespace Event
 
         // TODO: Decide on return-type should be of type Task<...>
         // TODO: Discuss what information is needed for Server to 'enroll' an event into a workflow? 
-        public void SubmitMyselfToServer()
+        public async void SubmitMyselfToServer()
         {
             var path = _serverBaseAddress + "/" + _workflowId + "/";
 
             // TODO:  For now, the following is a 'dummy' object; it only represents that we eventually will have to send some info about this event along to Server     
+            // DTO should (probably) include id + name of event, and address
             var infoToServerAboutThisEvent = "" + _eventId;
 
-            var result = _httpClient.Create(path, infoToServerAboutThisEvent);
+            var result = await _httpClient.Create(path, infoToServerAboutThisEvent);
         }
 
 
