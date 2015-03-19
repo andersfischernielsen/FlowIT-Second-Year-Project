@@ -37,6 +37,7 @@ namespace HttpClientToolBox
             if (IdHttpClientMap == null) IdHttpClientMap = new Dictionary<string, AwiaHttpClientToolbox>();
 
             HttpClient = new HttpClient { BaseAddress = uri };
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (authenticationHeader != null)
             {
                 HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
