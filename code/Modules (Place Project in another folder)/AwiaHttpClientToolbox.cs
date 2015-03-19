@@ -91,13 +91,13 @@ namespace HttpClientToolBox
         /// <param name="uri">The uri of the api where T objects are stored</param>
         /// <param name="objectToCreate"> the object to create at the APi</param>
         /// <returns>The object which was created at the API</returns>
-        public async Task<T> Create<T>(string uri, T objectToCreate)
+        public async Task Create<T>(string uri, T objectToCreate)
         {
             try
             {
                 var response = await HttpClient.PostAsJsonAsync(uri, objectToCreate);
                 response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsAsync<T>();
+                //return await response.Content.ReadAsAsync<T>();
             }
             catch (Exception)
             {
@@ -163,6 +163,7 @@ namespace HttpClientToolBox
             {
                 var response = await HttpClient.PutAsJsonAsync(uri, objectToUpdate);
                 response.EnsureSuccessStatusCode();
+                //return await response.Content.ReadAsAsync<T>();
             }
             catch (Exception)
             {
@@ -174,7 +175,7 @@ namespace HttpClientToolBox
         /// </summary>
         /// <param name="uri">The uri of the API indicating a single object</param>
         /// <returns>A Task to await</returns>
-        public async Task Delete<T>(string uri)
+        public async Task Delete<>(string uri)
         {
             try
             {
