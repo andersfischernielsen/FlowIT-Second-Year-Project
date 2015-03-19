@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HttpClientToolBox
+namespace Common
 {
     /// <summary>
     /// <para>The class contains a static Dictionary which all instances of the class will be added to. That way one can access different httpClients without having to create them all over again (for example if login is required each time).</para>
@@ -37,6 +37,7 @@ namespace HttpClientToolBox
             if (IdHttpClientMap == null) IdHttpClientMap = new Dictionary<string, AwiaHttpClientToolbox>();
 
             HttpClient = new HttpClient { BaseAddress = uri };
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (authenticationHeader != null)
             {
                 HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
@@ -90,13 +91,13 @@ namespace HttpClientToolBox
         /// <param name="uri">The uri of the api where T objects are stored</param>
         /// <param name="objectToCreate"> the object to create at the APi</param>
         /// <returns>The object which was created at the API</returns>
-        public async Task<T> Create<T>(string uri, T objectToCreate)
+        public async Task Create<T>(string uri, T objectToCreate)
         {
             try
             {
                 var response = await HttpClient.PostAsJsonAsync(uri, objectToCreate);
                 response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsAsync<T>();
+                //return await response.Content.ReadAsAsync<T>();
             }
             catch (Exception)
             {
@@ -162,6 +163,7 @@ namespace HttpClientToolBox
             {
                 var response = await HttpClient.PutAsJsonAsync(uri, objectToUpdate);
                 response.EnsureSuccessStatusCode();
+                //return await response.Content.ReadAsAsync<T>();
             }
             catch (Exception)
             {
@@ -173,7 +175,7 @@ namespace HttpClientToolBox
         /// </summary>
         /// <param name="uri">The uri of the API indicating a single object</param>
         /// <returns>A Task to await</returns>
-        public async Task Delete<T>(string uri)
+        public async Task Delete(string uri)
         {
             try
             {

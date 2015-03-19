@@ -86,9 +86,14 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="IEventStorage.cs" />
+    <Compile Include="Models\IEventCommunicator.cs" />
+    <Compile Include="Models\IEventStorage.cs" />
+    <Compile Include="Models\InMemoryStorage.cs" />
+    <Compile Include="Models\NotifyDtos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="InMemoryStorage.cs" />
+    <Compile Include="Controllers\IServerFromEvent.cs" />
+    <Compile Include="HeartBeatDto.cs" />
+    <Compile Include="ServerCommunicator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -101,7 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
@@ -134,7 +138,7 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
