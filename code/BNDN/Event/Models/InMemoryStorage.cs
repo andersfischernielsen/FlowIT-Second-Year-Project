@@ -262,11 +262,7 @@ namespace Event.Models
 
         public static InMemoryStorage GetState()
         {
-            if (_inMemoryStorage == null)
-            {
-                return _inMemoryStorage = new InMemoryStorage();
-            }
-            return _inMemoryStorage;
+            return _inMemoryStorage ?? (_inMemoryStorage = new InMemoryStorage());
         }
     }
 }
