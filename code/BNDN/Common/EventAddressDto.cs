@@ -10,6 +10,6 @@ namespace Common
     public class EventAddressDto
     {
         public string Id { get; set; }
-        public IPEndPoint EndPoint { get; set; }
+        public Uri Uri { get; set; }
     }
 }
