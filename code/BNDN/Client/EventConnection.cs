@@ -9,8 +9,8 @@ namespace Client
 {
     public class EventConnection : IEventConnection
     {
-        private AwiaHttpClientToolbox _awiaHttp;
-        private EventAddressDto _eventDto;
+        private readonly AwiaHttpClientToolbox _awiaHttp;
+        private readonly EventAddressDto _eventDto;
 
         public EventConnection(EventAddressDto eventDto)
         {
@@ -26,7 +26,7 @@ namespace Client
 
         public Task Execute(bool b)
         {
-            return _awiaHttp.Update("/event/", b);
+            return _awiaHttp.Update("event/", b);
         }
     }
 }
