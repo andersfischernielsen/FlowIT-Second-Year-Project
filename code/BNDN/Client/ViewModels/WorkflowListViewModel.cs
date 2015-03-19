@@ -33,6 +33,26 @@ namespace Client.ViewModels
         #endregion
 
         #region Actions
+
+        public void GetWorkflows()
+        {
+            Task.Run(async () =>
+            {
+                WorkflowList.Clear();
+                var connection = ServerConnection.GetStorage(new Uri("servers")); // todo get the real server address here
+                WorkflowList = new ObservableCollection<WorkflowViewModel>((await connection.GetWorkflows()).Select(workflowDto => new WorkflowViewModel(workflowDto)));
+                if (WorkflowList.Count >= 1)
+                {
+                    SelectedWorkflowViewModel = WorkflowList[0];
+                }
+                NotifyPropertyChanged("");
+            });
+        }
+
+        public void GetEventsOnWorkflow()
+        {
+            SelectedWorkflowViewModel.GetEvents();
+        }
         #endregion
     }
 }

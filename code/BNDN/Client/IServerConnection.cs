@@ -7,6 +7,6 @@ namespace Client
     public interface IServerConnection
     {
         Task<IList<WorkflowDto>> GetWorkflows();
-        Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow);
+        Task<IList<EventDto>> GetEventsFromWorkflow(WorkflowDto workflow);
     }
 }
