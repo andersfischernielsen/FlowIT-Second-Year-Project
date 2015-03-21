@@ -25,7 +25,20 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Content="Events" Margin="10,0" VerticalAlignment="Top" FontSize="24" HorizontalAlignment="Left"/>
-            <ListBox Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}"/>
+            <ListBox Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="{Binding}"/>
+                            <Button Grid.Column="1" HorizontalAlignment="Right">Do Something</Button>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
     </Grid>
 </Window>
