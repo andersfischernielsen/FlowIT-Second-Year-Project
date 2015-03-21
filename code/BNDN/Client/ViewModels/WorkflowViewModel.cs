@@ -14,6 +14,7 @@ namespace Client.ViewModels
         public WorkflowViewModel()
         {
             EventList = new ObservableCollection<EventViewModel>();
+            _workflowDto = new WorkflowDto();
         }
 
         public WorkflowViewModel(WorkflowDto workflowDto)
@@ -23,6 +24,16 @@ namespace Client.ViewModels
         }
 
         #region Databindings
+
+        public string Name
+        {
+            get { return _workflowDto.Name; }
+            set
+            {
+                _workflowDto.Name = value;
+                NotifyPropertyChanged("Name");
+            }
+        }
 
         public ObservableCollection<EventViewModel> EventList { get; set; }
 
@@ -56,5 +67,11 @@ namespace Client.ViewModels
             });
         }
         #endregion
+
+        public override string ToString()
+        {
+            //.FormatString(this string myString) is an extension.
+            return Name;
+        }
     }
 }
