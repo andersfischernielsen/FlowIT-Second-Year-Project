@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Common;
 
 namespace Client
 {
     public interface IServerConnection
     {
-        IList<WorkflowDto> GetWorkflows();
-        IList<EventAddressDto> GetEventsFromWorkflow(WorkflowDto workflow);
+        Task<IList<WorkflowDto>> GetWorkflows();
+        Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow);
     }
 }
