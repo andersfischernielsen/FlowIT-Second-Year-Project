@@ -38,6 +38,7 @@ namespace Client.ViewModels
                 new EventViewModel(){Id = "ID33", Uri = new Uri("https://www.google.dk/")},
             }
             });
+            SelectedWorkflowViewModel = WorkflowList[0];
         }
 
         #region Databindings

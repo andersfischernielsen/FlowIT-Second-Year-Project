@@ -43,6 +43,11 @@ namespace Client.ViewModels
         #endregion
 
         #region Actions
+
+        public void Execute()
+        {
+            Console.WriteLine("Execute");
+        }
         #endregion
 
         public override string ToString()
