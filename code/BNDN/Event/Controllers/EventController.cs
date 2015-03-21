@@ -127,6 +127,8 @@ namespace Event.Controllers
             await Storage.UpdateRules(id,
                 // Set all states to false to remove them from storage.
                 // This effectively removes all rules associated with the given id.
+                // Possibly - to save memory - it could be null instead.
+                // Todo: Read above
                 new EventRuleDto
                 {
                     Condition = false,
@@ -161,6 +163,7 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="execute">Whether to execute or not?</param>
         /// <returns>A Task resulting in an Http Result.</returns>
+        [Route("{execute:bool}")]
         [HttpPut]
         public async Task<IHttpActionResult> Execute(bool execute)
         {
@@ -174,6 +177,8 @@ namespace Event.Controllers
                 var notifyDtos = await Storage.GetNotifyDtos();
                 foreach (var pair in notifyDtos)
                 {
+                    // Todo, move this functionality into something separate which 
+                    // can also decide whether conditions should be forward or backward checked.
                     Communicator.SendNotify(pair.Key, pair.Value.ToArray());
                 }
                 return Ok(true);
