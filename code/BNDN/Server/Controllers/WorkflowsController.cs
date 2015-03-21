@@ -6,6 +6,7 @@ using Server.Models;
 
 namespace Server.Controllers
 {
+    
     public class WorkflowsController : ApiController
     {
         private IServerStorage Storage { get; set; }
@@ -47,7 +48,7 @@ namespace Server.Controllers
         /// <param name="eventId"></param>
         /// <param name="workflowId"></param>
         /// <param name="eventToAddDto"></param>
-        [Route("Workflows/{workflowId}/{eventId}")]
+        [Route("api/Workflows/{workflowId}/{eventId}")]
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
         // TODO: How does an Event know that an eventId is not already taken?
@@ -58,12 +59,13 @@ namespace Server.Controllers
         }
 
         
-        [Route("Workflows/{workflowId}/{eventId}")]
+        [Route("api/Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
-        public void DeleteEventFromWorkflow(int workflowId, int eventId, [FromBody] EventDto eventToBeRemoved)
+        public void DeleteEventFromWorkflow(int workflowId, int eventId)
         {
             // Delete the given event id from the list of workflow-events.
+            Debug.WriteLine("Yep, we got here!");
             Storage.RemoveEventFromWorkflow(workflowId,eventId);
         }
     }
