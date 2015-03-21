@@ -1,10 +1,9 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Event.Interfaces;
 using Event.Models;
 
 namespace Event.Controllers
@@ -17,21 +16,49 @@ namespace Event.Controllers
     public class EventController : ApiController
     {
         private IEventStorage Storage { get; set; }
-        private IEventCommunicator Communicator { get; set; }
         public EventController()
         {
             Storage = InMemoryStorage.GetState();
-            // Todo: Use an actual implementation of IEventCommunicator.
-            Communicator = null;
         }
+
+        #region State
+        [Route("pending")]
+        [HttpGet]
+        public bool GetPending()
+        {
+            return Storage.Pending;
+        }
+
+        [Route("executed")]
+        [HttpGet]
+        public bool GetExecuted()
+        {
+            return Storage.Executed;
+        }
+
+        [Route("included")]
+        [HttpGet]
+        public bool GetIncluded()
+        {
+            return Storage.Included;
+        }
+
+        [Route("executable")]
+        [HttpGet]
+        public async Task<bool> GetExecutable()
+        {
+            return await ((InMemoryStorage) Storage).Executable();
+        }
+        #endregion
 
         #region EventEvent
         /// <summary>
         /// Get the entire state of the Event, including rules.
         /// </summary>
         /// <returns>A task resulting in a single EventDto which represents the Events current state.</returns>
+        [Route("")]
         [HttpGet]
-        public async Task<EventDto> Get()
+        public async Task<EventDto> GetEvent()
         {
             return await Storage.EventDto;
         }
@@ -62,17 +89,7 @@ namespace Event.Controllers
                 return BadRequest(string.Format("{0} already exists!", id));
             }
 
-            // The following lines is pretty much a hack to get the IPv4-address of the caller.
-            var addresses = (await Dns.GetHostAddressesAsync(Request.RequestUri.Host))
-                .Where(address => address.AddressFamily == AddressFamily.InterNetwork)
-                .ToArray();
-            if (!addresses.Any() || addresses.Length > 1)
-            {
-                throw new Exception("Bad address!" + addresses.Length);
-            }
-
-            var endPoint = new IPEndPoint(addresses[0], Request.RequestUri.Port);
-            await Storage.RegisterIdWithEndPoint(id, endPoint);
+            await Storage.RegisterIdWithUri(id, Request.RequestUri);
 
             await Storage.UpdateRules(id, ruleDto);
 
@@ -137,11 +154,44 @@ namespace Event.Controllers
                     Response = false
                 });
             // Remove the id because it is no longer associated with any rules.
-            await Storage.RemoveIdAndEndPoint(id);
+            await Storage.RemoveIdAndUri(id);
 
             return Ok();
         }
         #endregion
+
+        [Route("notify")]
+        [HttpPut]
+        public async Task<IHttpActionResult> PutNotify([FromBody] IEnumerable<NotifyDto> dtos)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var notifyDtos = dtos as IList<NotifyDto> ?? dtos.ToList();
+            var include = notifyDtos.OfType<IncludeDto>().Any();
+            var exclude = notifyDtos.OfType<ExcludeDto>().Any();
+            var pending = notifyDtos.OfType<PendingDto>().Any();
+
+            if (include && exclude)
+            {
+                return BadRequest("Notification must not contain both include and exclude!");
+            }
+            if (include)
+            {
+                Storage.Included = true;
+            }
+            if (exclude)
+            {
+                Storage.Included = false;
+            }
+            if (pending)
+            {
+                Storage.Pending = true;
+            }
+            // Todo: Await something sensible.
+            return await Task.Run(() => Ok());
+        }
         #endregion
 
         #region ClientEvent
@@ -169,18 +219,18 @@ namespace Event.Controllers
         {
             if (execute)
             {
-                if (!(await (Storage.EventStateDto)).Executable)
+                if (!(await ((InMemoryStorage) Storage).Executable()))
                 {
                     return BadRequest("Event is not currently executable.");
                 }
                 Storage.Executed = true;
                 var notifyDtos = await Storage.GetNotifyDtos();
-                foreach (var pair in notifyDtos)
+                Parallel.ForEach(notifyDtos, async pair =>
                 {
                     // Todo, move this functionality into something separate which 
                     // can also decide whether conditions should be forward or backward checked.
-                    Communicator.SendNotify(pair.Key, pair.Value.ToArray());
-                }
+                    await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
+                });
                 return Ok(true);
             }
             // Todo: Is this what should happen when execute is false? Probably every condition should be notified?

@@ -24,9 +24,4 @@
     {
         public PendingDto(string id) : base(id) { }
     }
-
-    public class ConditionDto : NotifyDto
-    {
-        public ConditionDto(string id) : base(id) { }
-    }
 }
