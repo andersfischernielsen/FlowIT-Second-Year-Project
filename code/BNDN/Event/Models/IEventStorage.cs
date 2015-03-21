@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 using Common;
 
@@ -18,12 +17,12 @@ namespace Event.Models
         #endregion
 
         #region Rules
-        Task<IEnumerable<IPEndPoint>> Conditions { get; }
-        Task<IEnumerable<IPEndPoint>> Responses { get; }
-        Task<IEnumerable<IPEndPoint>> Exclusions { get; }
-        Task<IEnumerable<IPEndPoint>> Inclusions { get; }
+        Task<IEnumerable<Uri>> Conditions { get; }
+        Task<IEnumerable<Uri>> Responses { get; }
+        Task<IEnumerable<Uri>> Exclusions { get; }
+        Task<IEnumerable<Uri>> Inclusions { get; }
 
-        Task<IEnumerable<KeyValuePair<IPEndPoint, List<NotifyDto>>>> GetNotifyDtos();
+        Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos();
 
         Task UpdateRules(string id, EventRuleDto rules);
         #endregion
@@ -35,19 +34,12 @@ namespace Event.Models
         #endregion
 
 
-        #region Preconditions
-        Task<Tuple<bool, bool>> GetPrecondition(string id);
-        Task<IEnumerable<string>> GetPreconditions();
-        Task AddPrecondition(string key, Tuple<bool, bool> state);
-        #endregion
-
-
         #region EndPointRegistering
-        Task<IPEndPoint> GetEndPointFromId(string id);
-        Task<string> GetIdFromEndPoint(IPEndPoint endPoint);
-        Task RegisterIdWithEndPoint(string id, IPEndPoint endPoint);
+        Task<Uri> GetUriFromId(string id);
+        Task<string> GetIdFromUri(Uri endPoint);
+        Task RegisterIdWithUri(string id, Uri endPoint);
         Task<bool> KnowsId(string id);
-        Task RemoveIdAndEndPoint(string id);
+        Task RemoveIdAndUri(string id);
         #endregion
     }
 }

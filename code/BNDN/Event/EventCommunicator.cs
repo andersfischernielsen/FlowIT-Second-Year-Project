@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
+using Event.Models;
 
 namespace Event
 {
@@ -9,24 +12,16 @@ namespace Event
     /// </summary>
     public class EventCommunicator : IEventFromEvent
     {
-
-        public EventCommunicator()
-        {
-
-        }
-
-
-       
         /// <summary>
         /// GetEvent will return a representation of the Event asked for
         /// </summary>
-        /// <param name="eventBaseAddress">The base-address of the event that is asked for</param>
+        /// <param name="eventUri">The base-address of the event that is asked for</param>
         /// <returns>A Task object revealing af EventDto object</returns>
-        public async Task<EventDto> GetEvent(string eventBaseAddress)
+        public async Task<EventDto> GetEvent(Uri eventUri)
         {
-            var httpClient = new AwiaHttpClientToolbox(eventBaseAddress);
-            // It is assumed that a Get-call on the eventBaseAddress will return a EventDto object
-            return await httpClient.Read<EventDto>(eventBaseAddress);
+            var httpClient = new AwiaHttpClientToolbox(eventUri);
+
+            return await httpClient.Read<EventDto>("");
         }
 
 
@@ -35,11 +30,11 @@ namespace Event
         /// </summary>
         /// <param name="eventBaseAddress">The base address of the event whose rules are to be updated</param>
         /// <param name="rules">The rule-set it need to adopt</param>
-        public async void PostEventRules(string eventBaseAddress, EventRuleDto rules)
+        /// <param name="ownId">The id of the calling event</param>
+        public async Task PostEventRules(Uri eventBaseAddress, EventRuleDto rules, string ownId)
         {
             var httpClient = new AwiaHttpClientToolbox(eventBaseAddress);
-            const string rulesPath = "Rules";
-            await httpClient.Create(rulesPath, rules);
+            await httpClient.Create(String.Format("event/rules/{0}", ownId), rules);
         }
 
         /// <summary>
@@ -47,14 +42,12 @@ namespace Event
         /// </summary>
         /// <param name="eventBaseAddress">The base-address of the Event</param>
         /// <param name="replacingRules">The new (replacing ruleset)</param>
+        /// <param name="ownId">The id of the calling event</param>
         // TODO: Will the replacing ruleset contain all rules from this Event (whether or not they all need to be updated) or only those that need to be modified? 
-        public async void UpdateEventRules(string eventBaseAddress, EventRuleDto replacingRules)
+        public async Task UpdateEventRules(Uri eventBaseAddress, EventRuleDto replacingRules, string ownId)
         {
             var httpClient = new AwiaHttpClientToolbox(eventBaseAddress);
-
-            // TODO: At what path are the rules located?
-            const  string rulesPath = "Rules/";
-            await httpClient.Update(rulesPath, replacingRules);
+            await httpClient.Update(String.Format("event/rules/{0}", ownId), replacingRules);
         }
 
         /// <summary>
@@ -62,11 +55,17 @@ namespace Event
         /// is an implementation detail 
         /// </summary>
         /// <param name="eventBaseAddress">The base-address of the Event whose rules are to be deleted</param>
-        public async void DeleteEventRules(string eventBaseAddress)
+        /// <param name="ownId">The id of the calling event</param>
+        public async Task DeleteEventRules(Uri eventBaseAddress, string ownId)
         {
             var httpClient = new AwiaHttpClientToolbox(eventBaseAddress);
-            const string rulesPath = "Rules/";
-            await httpClient.Delete(eventBaseAddress);
+            await httpClient.Delete(String.Format("event/rules/{0}", ownId));
+        }
+
+        public async Task SendNotify(Uri eventUri, IEnumerable<NotifyDto> dtos)
+        {
+            var httpClient = new AwiaHttpClientToolbox(eventUri);
+            await httpClient.Update("event/notify", dtos);
         }
     }
 }

@@ -1,13 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Common;
+using Event.Models;
 
 namespace Event.Interfaces
 {
-    interface IEventFromEvent
+    public interface IEventFromEvent
     {
-        Task<EventDto> GetEvent(string eventBaseAddress);
-        void PostEventRules(string eventBaseAddress, EventRuleDto rules);
-        void UpdateEventRules(string eventBaseAddress, EventRuleDto replacingRules);
-        void DeleteEventRules(string eventBaseAddress);
+        Task<EventDto> GetEvent(Uri eventUri);
+        Task PostEventRules(Uri eventUri, EventRuleDto rules, string ownId);
+        Task UpdateEventRules(Uri eventUri, EventRuleDto replacingRules, string ownId);
+        Task DeleteEventRules(Uri eventUri, string ownId);
+        Task SendNotify(Uri eventUri, IEnumerable<NotifyDto> dtos);
     }
 }

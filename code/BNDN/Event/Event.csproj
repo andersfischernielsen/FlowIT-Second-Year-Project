@@ -89,7 +89,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\IEventCommunicator.cs" />
     <Compile Include="Models\IEventStorage.cs" />
     <Compile Include="Models\InMemoryStorage.cs" />
     <Compile Include="Models\NotifyDtos.cs" />
