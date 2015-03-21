@@ -7,19 +7,19 @@ using Event.Controllers;
 
 namespace Event
 {
-
-    /*
-     * ServerCommunicator is the module through which Event communicates with Server 
-     * ServerCommunicator implements the IServerFromEvent interface
-     */
+    /// <summary>
+    /// ServerCommunicator is the module through which Event has its outgoing communication with Server 
+    /// ServerCommunicator implements the IServerFromEvent interface
+    /// </summary>
     public class ServerCommunicator : IServerFromEvent
     {
         private AwiaHttpClientToolbox _httpClient;
         private string _serverBaseAddress;
         
-        // _eventId represents this Event's id
+        // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of
         private int _eventId;
         private int _workflowId;
+
 
         public ServerCommunicator(String baseAddress, int eventId, int workFlowId)
         {
