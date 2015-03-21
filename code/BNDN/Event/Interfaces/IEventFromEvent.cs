@@ -8,6 +8,8 @@ namespace Event.Interfaces
 {
     public interface IEventFromEvent
     {
+        Task<bool> IsExecuted(Uri eventUri);
+        Task<bool> IsIncluded(Uri eventUri);
         Task<EventDto> GetEvent(Uri eventUri);
         Task PostEventRules(Uri eventUri, EventRuleDto rules, string ownId);
         Task UpdateEventRules(Uri eventUri, EventRuleDto replacingRules, string ownId);

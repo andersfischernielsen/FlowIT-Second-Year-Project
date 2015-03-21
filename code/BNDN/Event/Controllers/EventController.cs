@@ -58,8 +58,9 @@ namespace Event.Controllers
         /// Get the entire state of the Event, including rules.
         /// </summary>
         /// <returns>A task resulting in a single EventDto which represents the Events current state.</returns>
+        [Route("")]
         [HttpGet]
-        public async Task<EventDto> Get()
+        public async Task<EventDto> GetEvent()
         {
             return await Storage.EventDto;
         }
@@ -220,7 +221,7 @@ namespace Event.Controllers
         {
             if (execute)
             {
-                if (!(await (Storage.EventStateDto)).Executable)
+                if (!(await ((InMemoryStorage) Storage).Executable()))
                 {
                     return BadRequest("Event is not currently executable.");
                 }

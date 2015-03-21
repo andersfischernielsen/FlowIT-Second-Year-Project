@@ -12,6 +12,18 @@ namespace Event
     /// </summary>
     public class EventCommunicator : IEventFromEvent
     {
+        public async Task<bool> IsExecuted(Uri eventUri)
+        {
+            var httpClient = new AwiaHttpClientToolbox(eventUri);
+            return await httpClient.Read<bool>("event/executed");
+        }
+
+        public async Task<bool> IsIncluded(Uri eventUri)
+        {
+            var httpClient = new AwiaHttpClientToolbox(eventUri);
+            return await httpClient.Read<bool>("event/included");
+        }
+
         /// <summary>
         /// GetEvent will return a representation of the Event asked for
         /// </summary>

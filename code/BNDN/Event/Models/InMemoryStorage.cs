@@ -22,9 +22,10 @@ namespace Event.Models
             IEventFromEvent eventCommunicator = new EventCommunicator();
             foreach (var condition in await Conditions)
             {
-                var e = await eventCommunicator.GetEvent(condition);
+                var executed = await eventCommunicator.IsExecuted(condition);
+                var included = await eventCommunicator.IsIncluded(condition);
                 // If the condition-event is not executed and currently included
-                if (!e.Executed || e.Included)
+                if (!executed || included)
                 {
                     return false; //Don't check rest because this event is not executable.
                 }
