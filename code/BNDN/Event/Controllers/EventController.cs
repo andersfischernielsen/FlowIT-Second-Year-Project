@@ -189,7 +189,7 @@ namespace Event.Controllers
             {
                 Storage.Pending = true;
             }
-            // Todo: Await something sensible.
+            // Todo: Await something sensible when connected to database.
             return await Task.Run(() => Ok());
         }
         #endregion
@@ -227,8 +227,6 @@ namespace Event.Controllers
                 var notifyDtos = await Storage.GetNotifyDtos();
                 Parallel.ForEach(notifyDtos, async pair =>
                 {
-                    // Todo, move this functionality into something separate which 
-                    // can also decide whether conditions should be forward or backward checked.
                     await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
                 });
                 return Ok(true);

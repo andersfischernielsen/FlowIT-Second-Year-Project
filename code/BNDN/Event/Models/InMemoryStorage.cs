@@ -119,46 +119,23 @@ namespace Event.Models
                 throw new ArgumentNullException("rules");
             }
 
-            await Task.Run(() =>
+            await UpdateRule(rules.Condition, endPoint, _conditions);
+            await UpdateRule(rules.Exclusion, endPoint, _exclusions);
+            await UpdateRule(rules.Inclusion, endPoint, _inclusions);
+            await UpdateRule(rules.Response, endPoint, _responses);
+        }
+
+        private static Task UpdateRule(bool addOrRemove, Uri value, ISet<Uri> collection)
+        {
+            return Task.Run(() =>
             {
-                // Condition
-                if (rules.Condition)
+                if (addOrRemove)
                 {
-                    _conditions.Add(endPoint);
+                    collection.Add(value);
                 }
                 else
                 {
-                    _conditions.Remove(endPoint);
-                }
-
-                // Exclusion
-                if (rules.Exclusion)
-                {
-                    _exclusions.Add(endPoint);
-                }
-                else
-                {
-                    _exclusions.Remove(endPoint);
-                }
-
-                // Inclusion
-                if (rules.Inclusion)
-                {
-                    _inclusions.Add(endPoint);
-                }
-                else
-                {
-                    _inclusions.Remove(endPoint);
-                }
-
-                // Response
-                if (rules.Response)
-                {
-                    _responses.Add(endPoint);
-                }
-                else
-                {
-                    _responses.Remove(endPoint);
+                    collection.Remove(value);
                 }
             });
         }
