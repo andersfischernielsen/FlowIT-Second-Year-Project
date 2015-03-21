@@ -12,7 +12,7 @@ namespace Client.ViewModels
         private EventAddressDto __eventAddressDto;
         public EventViewModel()
         {
-            
+            __eventAddressDto = new EventAddressDto();
         }
         public EventViewModel(EventAddressDto _eventAddressDto)
         {
@@ -20,9 +20,34 @@ namespace Client.ViewModels
         }
 
         #region Databindings
+
+        public string Id
+        {
+            get { return __eventAddressDto.Id; }
+            set
+            {
+                __eventAddressDto.Id = value;
+                NotifyPropertyChanged("Id");
+            }
+        }
+        public Uri Uri
+        {
+            get { return __eventAddressDto.Uri; }
+            set
+            {
+                __eventAddressDto.Uri = value;
+                NotifyPropertyChanged("Uri");
+            }
+        }
+
         #endregion
 
         #region Actions
         #endregion
+
+        public override string ToString()
+        {
+            return "Id: " + Id + " - URI: " + Uri.ToString();
+        }
     }
 }

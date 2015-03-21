@@ -23,5 +23,11 @@
         <Style x:Key="TextLabelStyle" TargetType="Label">
             <Setter Property="FontSize" Value="16"/>
         </Style>
+        <Style x:Key="ListBoxStyle" TargetType="ListBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
     </Application.Resources>
 </Application>
