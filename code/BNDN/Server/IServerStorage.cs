@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Common;
 
-namespace Server.Interfaces
+namespace Server
 {
     interface IServerStorage
     {
-        void RemoveEventFromWorkFlow(int eventId, int workflowId);
-        List<WorkflowDto> GetAllWorkFlows();
-        List<EventAddressDto> GetEventsWithinWorkflow(int workflowId);
+        IEnumerable<WorkflowDto> GetAllWorkflows();
+        IEnumerable<EventAddressDto> GetEventsWithinWorkflow(int workflowId);
         void AddEventToWorkflow(int workflowToAttachToId, int eventId, EventDto eventToBeAddedDto);
+        void RemoveEventFromWorkflow(int workflowId, int eventId);
     }
 }

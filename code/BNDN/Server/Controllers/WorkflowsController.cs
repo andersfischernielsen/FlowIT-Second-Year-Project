@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Web.Http;
 using Common;
-using Server.Interfaces;
 using Server.Models;
 
 namespace Server.Controllers
@@ -20,9 +20,10 @@ namespace Server.Controllers
         /// Returns a list of all workflows currently held at this Server
         /// </summary>
         /// <returns>List of WorkflowDto</returns>
+        // GET: api/workflows
         public IEnumerable<WorkflowDto> Get()
         {
-            return Storage.GetAllWorkFlows();
+            return Storage.GetAllWorkflows();
         }
 
 
@@ -30,11 +31,13 @@ namespace Server.Controllers
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
         /// </summary>
-        /// <param name="workFlowid">Id of the requested workflow</param>
+        /// <param name="workflowId">Id of the requested workflow</param>
         /// <returns>IEnumerable of EventAddressDto</returns>
-        public IEnumerable<EventAddressDto> Get(int workFlowid)
+        [Route("api/workflows/{workflowId}")]
+        public IEnumerable<EventAddressDto> Get(int workflowId)
         {
-            return Storage.GetEventsWithinWorkflow(workFlowid);
+            Debug.WriteLine("Hmm, we got here!");
+            return Storage.GetEventsWithinWorkflow(workflowId);
         }
 
 
@@ -47,38 +50,21 @@ namespace Server.Controllers
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
-        // TODO: How does Event know that an eventId is not already taken?
-        public void PostEventToWorkFlow(string eventId, string workflowId, [FromBody] EventDto eventToAddDto)
+        // TODO: How does an Event know that an eventId is not already taken?
+        public void PostEventToWorkFlow(int eventId, int workflowId, [FromBody] EventDto eventToAddDto)
         {
-            // Extract id's
-            int eventID = ExtractNumberFromString(eventId);
-            int workflowID = ExtractNumberFromString(workflowId);
-
             // Add this Event to the specified workflow
-            Storage.AddEventToWorkflow(workflowID,eventID,eventToAddDto);
+            Storage.AddEventToWorkflow(workflowId,eventId,eventToAddDto);
         }
 
         
-        [Route("Workflows/workflowId/eventId/")]
+        [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
-        public void DeleteEventFromWorkflow(string workflowId, string eventId)
+        // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
+        public void DeleteEventFromWorkflow(int workflowId, int eventId, [FromBody] EventDto eventToBeRemoved)
         {
-            // Extract the ID's
-            int eventID = ExtractNumberFromString(eventId);
-            int workflowID = ExtractNumberFromString(workflowId);
-
             // Delete the given event id from the list of workflow-events.
-            Storage.RemoveEventFromWorkFlow(eventID,workflowID);
-        }
-
-
-        private int ExtractNumberFromString(string input)
-        {
-            // TODO: Exception handling during parsing. 
-            int returnValue = -1;
-            int.TryParse(input, out returnValue);
-
-            return returnValue;
+            Storage.RemoveEventFromWorkflow(workflowId,eventId);
         }
     }
 }
