@@ -19,11 +19,11 @@ namespace Event.Models
 
         public async Task<bool> Executable()
         {
-            IEventFromEvent eventCommunicator = new EventCommunicator();
             foreach (var condition in await Conditions)
             {
-                var executed = await eventCommunicator.IsExecuted(condition);
-                var included = await eventCommunicator.IsIncluded(condition);
+                IEventFromEvent eventCommunicator = new EventCommunicator(condition);
+                var executed = await eventCommunicator.IsExecuted();
+                var included = await eventCommunicator.IsIncluded();
                 // If the condition-event is not executed and currently included
                 if (!executed || included)
                 {

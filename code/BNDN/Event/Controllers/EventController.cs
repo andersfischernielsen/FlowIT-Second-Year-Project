@@ -16,11 +16,9 @@ namespace Event.Controllers
     public class EventController : ApiController
     {
         private IEventStorage Storage { get; set; }
-        private IEventFromEvent Communicator { get; set; }
         public EventController()
         {
             Storage = InMemoryStorage.GetState();
-            Communicator = new EventCommunicator();
         }
 
         #region State
@@ -231,7 +229,7 @@ namespace Event.Controllers
                 {
                     // Todo, move this functionality into something separate which 
                     // can also decide whether conditions should be forward or backward checked.
-                    await Communicator.SendNotify(pair.Key, pair.Value.ToArray());
+                    await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
                 });
                 return Ok(true);
             }

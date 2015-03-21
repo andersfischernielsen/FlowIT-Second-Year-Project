@@ -83,13 +83,13 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EventController.cs" />
-    <Compile Include="EventCommunicator.cs" />
+    <Compile Include="Models\EventCommunicator.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />
     <Compile Include="Interfaces\IServerFromEvent.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\IEventStorage.cs" />
+    <Compile Include="Interfaces\IEventStorage.cs" />
     <Compile Include="Models\InMemoryStorage.cs" />
     <Compile Include="Models\NotifyDtos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

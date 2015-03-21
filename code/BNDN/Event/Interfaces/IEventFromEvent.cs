@@ -8,12 +8,12 @@ namespace Event.Interfaces
 {
     public interface IEventFromEvent
     {
-        Task<bool> IsExecuted(Uri eventUri);
-        Task<bool> IsIncluded(Uri eventUri);
-        Task<EventDto> GetEvent(Uri eventUri);
-        Task PostEventRules(Uri eventUri, EventRuleDto rules, string ownId);
-        Task UpdateEventRules(Uri eventUri, EventRuleDto replacingRules, string ownId);
-        Task DeleteEventRules(Uri eventUri, string ownId);
-        Task SendNotify(Uri eventUri, IEnumerable<NotifyDto> dtos);
+        Task<bool> IsExecuted();
+        Task<bool> IsIncluded();
+        Task<EventDto> GetEvent();
+        Task PostEventRules(EventRuleDto rules, string ownId);
+        Task UpdateEventRules(EventRuleDto replacingRules, string ownId);
+        Task DeleteEventRules(string ownId);
+        Task SendNotify(IEnumerable<NotifyDto> dtos);
     }
 }

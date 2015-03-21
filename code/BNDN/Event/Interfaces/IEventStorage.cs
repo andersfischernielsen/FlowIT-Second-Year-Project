@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Event.Models;
 
-namespace Event.Models
+namespace Event.Interfaces
 {
     public interface IEventStorage
     {
