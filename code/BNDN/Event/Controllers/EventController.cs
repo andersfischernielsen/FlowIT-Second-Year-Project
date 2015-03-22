@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -24,7 +26,9 @@ namespace Event.Controllers
         }
 
         
-        private Uri GetUriOfEvent()
+        [HttpGet]
+        [Route("~/remoteuri")]
+        public async Task<Uri> GetUriOfEvent()
         {
             Uri result = null;
             if (HttpContext.Current != null)
@@ -33,7 +37,32 @@ namespace Event.Controllers
                     ? new Uri("http://localhost:13752")
                     : new Uri(String.Format("http://{0}:13752/", HttpContext.Current.Request.UserHostAddress));
             }
-            return result;
+            return await isEvent(result) ? result : null;
+        }
+
+        /// <summary>
+        /// Returns true when the uri (which should include a port) represents an Event.
+        /// </summary>
+        /// <param name="uri">The URI to test</param>
+        /// <returns>true if the Uri represents an Event, false otherwise.</returns>
+        private async Task<bool> isEvent(Uri uri)
+        {
+            try
+            {
+                await new EventCommunicator(uri).IsIncluded();
+            }
+            catch (HttpRequestException)
+            {
+                // This means that the WebAPI didn't respond or that it failed to answer the call succesfully.
+                return false;
+            }
+            catch (UnsupportedMediaTypeException ex)
+            {
+                // if this happens, something in the Web API has been changed and this method should reflect it.
+                Debug.WriteLine(ex.StackTrace);
+                throw;
+            }
+            return true;
         }
 
         #region State
@@ -104,7 +133,7 @@ namespace Event.Controllers
                 return BadRequest(string.Format("{0} already exists!", id));
             }
 
-            await Storage.RegisterIdWithUri(id, GetUriOfEvent());
+            await Storage.RegisterIdWithUri(id, await GetUriOfEvent());
 
             await Storage.UpdateRules(id, ruleDto);
 
