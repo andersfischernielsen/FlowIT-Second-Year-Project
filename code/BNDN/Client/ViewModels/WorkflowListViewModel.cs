@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common;
 
 namespace Client.ViewModels
 {
@@ -12,6 +13,32 @@ namespace Client.ViewModels
         public WorkflowListViewModel()
         {
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
+            WorkflowList.Add(new WorkflowViewModel(new WorkflowDto()){Name = "Workflow1", EventList = new ObservableCollection<EventViewModel>()
+            {
+                new EventViewModel(){Id = "ID11", Uri = new Uri("https://www.google.dk/")},
+                new EventViewModel(){Id = "ID12", Uri = new Uri("https://www.google.dk/")},
+                new EventViewModel(){Id = "ID13", Uri = new Uri("https://www.google.dk/")},
+            }});
+            WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
+            {
+                Name = "Workflow2",
+                EventList = new ObservableCollection<EventViewModel>()
+            {
+                new EventViewModel(){Id = "ID21", Uri = new Uri("https://www.google.dk/")},
+                new EventViewModel(){Id = "ID22", Uri = new Uri("https://www.google.dk/")},
+                new EventViewModel(){Id = "ID23", Uri = new Uri("https://www.google.dk/")},
+            }
+            }); WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
+            {
+                Name = "Workflow3",
+                EventList = new ObservableCollection<EventViewModel>()
+            {
+                new EventViewModel(){Id = "ID31", Uri = new Uri("https://www.google.dk/")},
+                new EventViewModel(){Id = "ID32", Uri = new Uri("https://www.google.dk/")},
+                new EventViewModel(){Id = "ID33", Uri = new Uri("https://www.google.dk/")},
+            }
+            });
+            SelectedWorkflowViewModel = WorkflowList[0];
         }
 
         #region Databindings
