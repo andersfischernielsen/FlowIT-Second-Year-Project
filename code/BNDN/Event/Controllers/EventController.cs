@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
@@ -19,6 +21,19 @@ namespace Event.Controllers
         public EventController()
         {
             Storage = InMemoryStorage.GetState();
+        }
+
+        
+        private Uri GetUriOfEvent()
+        {
+            Uri result = null;
+            if (HttpContext.Current != null)
+            {
+                result = HttpContext.Current.Request.UserHostAddress == "::1"
+                    ? new Uri("http://localhost:13752")
+                    : new Uri(String.Format("http://{0}:13752/", HttpContext.Current.Request.UserHostAddress));
+            }
+            return result;
         }
 
         #region State
@@ -47,7 +62,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<bool> GetExecutable()
         {
-            return await ((InMemoryStorage) Storage).Executable();
+            return await ((InMemoryStorage)Storage).Executable();
         }
         #endregion
 
@@ -89,7 +104,7 @@ namespace Event.Controllers
                 return BadRequest(string.Format("{0} already exists!", id));
             }
 
-            await Storage.RegisterIdWithUri(id, Request.RequestUri);
+            await Storage.RegisterIdWithUri(id, GetUriOfEvent());
 
             await Storage.UpdateRules(id, ruleDto);
 
@@ -219,7 +234,7 @@ namespace Event.Controllers
         {
             if (execute)
             {
-                if (!(await ((InMemoryStorage) Storage).Executable()))
+                if (!(await ((InMemoryStorage)Storage).Executable()))
                 {
                     return BadRequest("Event is not currently executable.");
                 }

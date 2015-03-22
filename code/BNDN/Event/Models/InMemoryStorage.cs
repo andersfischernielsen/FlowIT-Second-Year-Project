@@ -49,6 +49,7 @@ namespace Event.Models
             _inclusions = new HashSet<Uri>();
             EventUris = new Dictionary<string, Uri>();
             EventIds = new Dictionary<Uri, string>();
+            Included = true;
         }
 
         public Task<IEnumerable<Uri>> Conditions
