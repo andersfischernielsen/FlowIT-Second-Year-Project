@@ -19,7 +19,14 @@ namespace Event.Models
         /// <param name="eventUri">The base-address of the Event whose rules are to be deleted</param>
         public EventCommunicator(Uri eventUri)
         {
-            _httpClient = new AwiaHttpClientToolbox(eventUri);
+            if (AwiaHttpClientToolbox.IdHttpClientMap != null && AwiaHttpClientToolbox.IdHttpClientMap.ContainsKey(eventUri.ToString()))
+            {
+                _httpClient = AwiaHttpClientToolbox.IdHttpClientMap[eventUri.ToString()];
+            }
+            else
+            {
+                _httpClient = new AwiaHttpClientToolbox(eventUri);
+            }
         }
 
         public async Task<bool> IsExecuted()
@@ -58,6 +65,8 @@ namespace Event.Models
         /// <param name="replacingRules">The new (replacing ruleset)</param>
         /// <param name="ownId">The id of the calling event</param>
         // TODO: Will the replacing ruleset contain all rules from this Event (whether or not they all need to be updated) or only those that need to be modified? 
+        // The definition of the PUT-call is that the state will be set to whatever is received, so every rule
+        // must be defined in replacingRules. - Mikael.
         public async Task UpdateEventRules(EventRuleDto replacingRules, string ownId)
         {
             await _httpClient.Update(String.Format("event/rules/{0}", ownId), replacingRules);
