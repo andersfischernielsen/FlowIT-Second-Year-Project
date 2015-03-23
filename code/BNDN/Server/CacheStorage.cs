@@ -5,10 +5,10 @@ using Common;
 
 namespace Server
 {
-    public class CacheStorage : IStorage
+    public class CacheStorage : IServerStorage
     {
         private static CacheStorage _instance;
-        private readonly Dictionary<WorkflowDto, List<EventAddressDto>> _cache = new Dictionary<WorkflowDto, List<EventAddressDto>>(); 
+        private readonly Dictionary<int, List<EventAddressDto>> _cache = new Dictionary<int, List<EventAddressDto>>(); 
 
         private CacheStorage()
         {
@@ -26,15 +26,17 @@ namespace Server
             }
         }
 
-        public IList<WorkflowDto> GetWorkflows()
+        public IList<WorkflowDto> GetAllWorkflows()
         {
-            return _cache.Keys.ToList();
+            var l = _cache.Keys.ToList();
+            var a = l.ConvertAll(x => new WorkflowDto() {Name = x});
+            return a;
         }
 
-        public IList<EventAddressDto> GetEvents(WorkflowDto workflow)
+        public IList<EventAddressDto> GetEventsWithinWorkflow(int workflowId)
         {
             List<EventAddressDto> list;
-            var b =_cache.TryGetValue(workflow, out list);
+            var b = _cache.TryGetValue(workflowId, out list);
             if (b)
             {
                 return list;
@@ -45,15 +47,15 @@ namespace Server
             }
         }
 
-        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventDto)
+        public void AddEventToWorkflow(int workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
-            if (_cache.ContainsKey(workflow))
+            if (_cache.ContainsKey(workflowToAttachToId))
             {
                 List<EventAddressDto> list;
-                var b = _cache.TryGetValue(workflow, out list);
+                var b = _cache.TryGetValue(workflowToAttachToId, out list);
                 if (b)
                 {
-                    list.Add(eventDto);
+                    list.Add(eventToBeAddedDto);
                 }
                 else
                 {
@@ -66,15 +68,15 @@ namespace Server
             }
         }
 
-        public void RemoveEventFromWorkflow(WorkflowDto workflow, EventAddressDto eventDto)
+        public void RemoveEventFromWorkflow(int workflowId, string eventId)
         {
-            if (_cache.ContainsKey(workflow))
+            if (_cache.ContainsKey(workflowId))
             {
                 List<EventAddressDto> list;
-                var b = _cache.TryGetValue(workflow, out list);
+                var b = _cache.TryGetValue(workflowId, out list);
                 if (b)
                 {
-                    list.Remove(eventDto);
+                    list.RemoveAll(x => x.Id == eventId);
                 }
                 else
                 {
