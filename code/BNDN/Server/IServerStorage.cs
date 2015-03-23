@@ -7,7 +7,7 @@ using Common;
 
 namespace Server
 {
-    interface IServerStorage
+    public interface IServerStorage
     {
         /// <summary>
         /// Get all workflows
