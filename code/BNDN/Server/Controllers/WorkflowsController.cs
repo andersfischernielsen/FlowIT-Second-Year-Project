@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Web.Http;
 using Common;
 using Server.Models;
@@ -21,20 +22,22 @@ namespace Server.Controllers
         /// Returns a list of all workflows currently held at this Server
         /// </summary>
         /// <returns>List of WorkflowDto</returns>
-        // GET: api/workflows
+        // GET: /workflows
+        [Route("workflows")]
         public IEnumerable<WorkflowDto> Get()
         {
             return Storage.GetAllWorkflows();
         }
 
 
-        // GET: api/Workflows/5
+        // GET: /Workflows/5
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
         /// </summary>
         /// <param name="workflowId">Id of the requested workflow</param>
         /// <returns>IEnumerable of EventAddressDto</returns>
-        [Route("api/workflows/{workflowId}")]
+        [Route("workflows/{workflowId}")]
+        [HttpGet]
         public IEnumerable<EventAddressDto> Get(int workflowId)
         {
             Debug.WriteLine("Hmm, we got here!");
@@ -48,21 +51,21 @@ namespace Server.Controllers
         /// <param name="eventId"></param>
         /// <param name="workflowId"></param>
         /// <param name="eventToAddDto"></param>
-        [Route("api/Workflows/{workflowId}/{eventId}")]
+        [Route("Workflows/{workflowId}")]
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
         // TODO: How does an Event know that an eventId is not already taken?
-        public void PostEventToWorkFlow(int eventId, int workflowId, [FromBody] EventDto eventToAddDto)
+        public void PostEventToWorkFlow(int workflowId, [FromBody] EventAddressDto eventToAddDto)
         {
             // Add this Event to the specified workflow
-            Storage.AddEventToWorkflow(workflowId,eventId,eventToAddDto);
+            Storage.AddEventToWorkflow(workflowId,eventToAddDto);
         }
 
         
-        [Route("api/Workflows/{workflowId}/{eventId}")]
+        [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
-        public void DeleteEventFromWorkflow(int workflowId, int eventId)
+        public void DeleteEventFromWorkflow(int workflowId, string eventId)
         {
             // Delete the given event id from the list of workflow-events.
             Debug.WriteLine("Yep, we got here!");

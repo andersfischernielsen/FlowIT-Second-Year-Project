@@ -12,7 +12,7 @@ namespace Server.Models
             
         }
 
-        public IEnumerable<WorkflowDto> GetAllWorkflows()
+        public IList<WorkflowDto> GetAllWorkflows()
         {
             // Dummy workflows for now (before deleting: consider if it can be used for testing)
             var dummy1 = new WorkflowDto() {Name = "Pay rent"};
@@ -20,7 +20,7 @@ namespace Server.Models
             return new List<WorkflowDto>() {dummy1, dummy2};
         }
 
-        public IEnumerable<EventAddressDto> GetEventsWithinWorkflow(int workflowId)
+        public IList<EventAddressDto> GetEventsWithinWorkflow(int workflowId)
         {
             switch (workflowId)
             {
@@ -45,13 +45,13 @@ namespace Server.Models
             }
         }
 
-        public void AddEventToWorkflow(int workflowToAttachToId, int eventId, EventDto eventToBeAddedDto)
+        public void AddEventToWorkflow(int workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             // Add Event to specified workflow
             throw new System.NotImplementedException();
         }
 
-        public void RemoveEventFromWorkflow(int workflowId, int eventId)
+        public void RemoveEventFromWorkflow(int workflowId, string eventId)
         {
             // Remove event from specified workflow
             throw new System.NotImplementedException();

@@ -9,9 +9,9 @@ namespace Server
 {
     interface IServerStorage
     {
-        IEnumerable<WorkflowDto> GetAllWorkflows();
-        IEnumerable<EventAddressDto> GetEventsWithinWorkflow(int workflowId);
-        void AddEventToWorkflow(int workflowToAttachToId, int eventId, EventDto eventToBeAddedDto);
-        void RemoveEventFromWorkflow(int workflowId, int eventId);
+        IList<WorkflowDto> GetAllWorkflows();
+        IList<EventAddressDto> GetEventsWithinWorkflow(int workflowId);
+        void AddEventToWorkflow(int workflowToAttachToId,EventAddressDto eventToBeAddedDto);
+        void RemoveEventFromWorkflow(int workflowId, string eventId);
     }
 }
