@@ -85,7 +85,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="IServerStorage.cs" />
-    <Compile Include="IStorage.cs" />
     <Compile Include="Models\WorkflowStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
