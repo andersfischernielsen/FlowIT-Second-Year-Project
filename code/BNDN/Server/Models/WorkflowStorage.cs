@@ -15,8 +15,8 @@ namespace Server.Models
         public IList<WorkflowDto> GetAllWorkflows()
         {
             // Dummy workflows for now (before deleting: consider if it can be used for testing)
-            var dummy1 = new WorkflowDto() {Name = "Pay rent"};
-            var dummy2 = new WorkflowDto() {Name = "How to get good grades"};
+            var dummy1 = new WorkflowDto() {Name = "Pay rent", Id = 1};
+            var dummy2 = new WorkflowDto() {Name = "How to get good grades", Id = 2};
             return new List<WorkflowDto>() {dummy1, dummy2};
         }
 

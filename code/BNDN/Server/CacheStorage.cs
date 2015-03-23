@@ -29,7 +29,7 @@ namespace Server
         public IList<WorkflowDto> GetAllWorkflows()
         {
             var l = _cache.Keys.ToList();
-            var a = l.ConvertAll(x => new WorkflowDto() {Name = x});
+            var a = l.ConvertAll(x => new WorkflowDto() {Id = x, Name = "NoName with current implementation :("});
             return a;
         }
 
