@@ -107,6 +107,19 @@ namespace Event.Controllers
             return await Storage.EventDto;
         }
 
+        [Route("")]
+        [HttpPut]
+        public async Task<IHttpActionResult> PutEvent([FromBody] EventDto eventDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            //Storage.Conditions = eventDto.Conditions;
+
+            return await Task.Run(() => Ok());
+        }
+
         #region Rules
         /// <summary>
         /// Add a rule to this Event.
