@@ -78,17 +78,17 @@ namespace Event.Models
             var result = new Dictionary<Uri, List<NotifyDto>>();
             foreach (var response in _responses)
             {
-                await AddNotifyDto(result, response, s => new PendingDto(s));
+                await AddNotifyDto(result, response, s => new PendingDto {Id = s});
             }
 
             foreach (var exclusion in _exclusions)
             {
-                await AddNotifyDto(result, exclusion, s => new ExcludeDto(s));
+                await AddNotifyDto(result, exclusion, s => new ExcludeDto {Id = s});
             }
 
             foreach (var inclusion in _inclusions)
             {
-                await AddNotifyDto(result, inclusion, s => new IncludeDto(s));
+                await AddNotifyDto(result, inclusion, s => new IncludeDto {Id = s});
             }
 
             return (IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>)result;

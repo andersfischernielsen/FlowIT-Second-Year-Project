@@ -15,12 +15,12 @@ namespace Event
     /// </summary>
     public class ServerCommunicator : IServerFromEvent
     {
-        private HttpClientToolbox _httpClient;
-        private string _serverBaseAddress;
+        private readonly HttpClientToolbox _httpClient;
+        private readonly string _serverBaseAddress;
         
         // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of
-        private int _eventId;
-        private int _workflowId;
+        private readonly int? _eventId;
+        private readonly int? _workflowId;
 
 
         public ServerCommunicator(String baseAddress, int eventId, int workFlowId)
@@ -83,7 +83,7 @@ namespace Event
         public async void SendHeartbeatToServer()
         {
             string path = _workflowId + "/" + _eventId;
-            var heartBeatDto = new HeartBeatDto().EventId = _eventId;
+            var heartBeatDto = new HeartBeatDto().EventId = _eventId.Value;
             try
             {
                 await _httpClient.Create(path, heartBeatDto);
