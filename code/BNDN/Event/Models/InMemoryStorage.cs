@@ -106,19 +106,10 @@ namespace Event.Models
             await UpdateRule(rules.Response, endPoint, await Responses);
         }
 
-        private static Task UpdateRule(bool addOrRemove, Uri value, ISet<Uri> collection)
+        private async static Task UpdateRule(bool shouldAdd, Uri value, ISet<Uri> collection)
         {
-            return Task.Run(() =>
-            {
-                if (addOrRemove)
-                {
-                    collection.Add(value);
-                }
-                else
-                {
-                    collection.Remove(value);
-                }
-            });
+            if (shouldAdd) collection.Add(value);
+            else collection.Remove(value);
         }
 
         public Task<EventStateDto> EventStateDto
