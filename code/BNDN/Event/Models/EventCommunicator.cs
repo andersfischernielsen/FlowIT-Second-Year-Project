@@ -11,7 +11,7 @@ namespace Event.Models
     /// </summary>
     public class EventCommunicator : IEventFromEvent
     {
-        private readonly AwiaHttpClientToolbox _httpClient;
+        private readonly HttpClientToolbox _httpClient;
 
         /// <summary>
         /// 
@@ -19,13 +19,13 @@ namespace Event.Models
         /// <param name="eventUri">The base-address of the Event whose rules are to be deleted</param>
         public EventCommunicator(Uri eventUri)
         {
-            if (AwiaHttpClientToolbox.IdHttpClientMap != null && AwiaHttpClientToolbox.IdHttpClientMap.ContainsKey(eventUri.ToString()))
+            if (HttpClientToolbox.IdHttpClientMap != null && HttpClientToolbox.IdHttpClientMap.ContainsKey(eventUri.ToString()))
             {
-                _httpClient = AwiaHttpClientToolbox.IdHttpClientMap[eventUri.ToString()];
+                _httpClient = HttpClientToolbox.IdHttpClientMap[eventUri.ToString()];
             }
             else
             {
-                _httpClient = new AwiaHttpClientToolbox(eventUri);
+                _httpClient = new HttpClientToolbox(eventUri);
             }
         }
 

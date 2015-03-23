@@ -13,7 +13,7 @@ namespace Event
     /// </summary>
     public class ServerCommunicator : IServerFromEvent
     {
-        private AwiaHttpClientToolbox _httpClient;
+        private HttpClientToolbox _httpClient;
         private string _serverBaseAddress;
         
         // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of
@@ -26,7 +26,7 @@ namespace Event
             _workflowId = workFlowId;
              _eventId = eventId;
             _serverBaseAddress = baseAddress;
-            _httpClient = new AwiaHttpClientToolbox(_serverBaseAddress);
+            _httpClient = new HttpClientToolbox(_serverBaseAddress);
         }
 
 

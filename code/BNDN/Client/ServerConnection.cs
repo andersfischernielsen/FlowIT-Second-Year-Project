@@ -9,7 +9,7 @@ namespace Client
 {
     public class ServerConnection : IServerConnection
     {
-        private static AwiaHttpClientToolbox _awiaHttp;
+        private static HttpClientToolbox _http;
         private static ServerConnection _instance;
 
         private ServerConnection()
@@ -23,21 +23,21 @@ namespace Client
             {
                 _instance = new ServerConnection();
             }
-            if (_awiaHttp == null)
+            if (_http == null)
             {
-                _awiaHttp = new AwiaHttpClientToolbox(uri);
+                _http = new HttpClientToolbox(uri);
             }
             return _instance;
         }
 
         public Task<IList<WorkflowDto>> GetWorkflows()
         {
-            return _awiaHttp.ReadList<WorkflowDto>("workflows");
+            return _http.ReadList<WorkflowDto>("workflows");
         }
 
         public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)
         {
-            return _awiaHttp.ReadList<EventAddressDto>("workflows/" + workflow.Name);
+            return _http.ReadList<EventAddressDto>("workflows/" + workflow.Name);
         }
     }
 }

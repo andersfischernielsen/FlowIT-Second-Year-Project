@@ -13,14 +13,14 @@ namespace Common
     /// <para>Instantiatte the class with a string / uri which represents the rest api's base address for example http://driveit.azurewebsites.net/api/ </para>
     /// <para> Then when you make the CRUD calls, add the object and the rest of the uml eg "cars". If you dont know the object type, just use object </para>
     /// </summary>
-    public class AwiaHttpClientToolbox
+    public class HttpClientToolbox
     {
-        public static Dictionary<string, AwiaHttpClientToolbox> IdHttpClientMap; 
+        public static Dictionary<string, HttpClientToolbox> IdHttpClientMap; 
         public HttpClient HttpClient { get; set; }
 
-        public AwiaHttpClientToolbox(string uri, AuthenticationHeaderValue authenticationHeader = null)
+        public HttpClientToolbox(string uri, AuthenticationHeaderValue authenticationHeader = null)
         {
-            if(IdHttpClientMap==null) IdHttpClientMap = new Dictionary<string, AwiaHttpClientToolbox>();
+            if(IdHttpClientMap==null) IdHttpClientMap = new Dictionary<string, HttpClientToolbox>();
 
             HttpClient = new HttpClient { BaseAddress = new Uri(uri) };
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -32,9 +32,9 @@ namespace Common
             IdHttpClientMap.Add(uri,this);
         }
 
-        public AwiaHttpClientToolbox(Uri uri, AuthenticationHeaderValue authenticationHeader = null)
+        public HttpClientToolbox(Uri uri, AuthenticationHeaderValue authenticationHeader = null)
         {
-            if (IdHttpClientMap == null) IdHttpClientMap = new Dictionary<string, AwiaHttpClientToolbox>();
+            if (IdHttpClientMap == null) IdHttpClientMap = new Dictionary<string, HttpClientToolbox>();
 
             HttpClient = new HttpClient { BaseAddress = uri };
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
