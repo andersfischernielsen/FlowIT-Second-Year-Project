@@ -13,7 +13,7 @@ namespace Event
     /// </summary>
     public class ServerCommunicator : IServerFromEvent
     {
-        private AwiaHttpClientToolbox _httpClient;
+        private HttpClientToolbox _httpClient;
         private string _serverBaseAddress;
         
         // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of
@@ -26,7 +26,7 @@ namespace Event
             _workflowId = workFlowId;
              _eventId = eventId;
             _serverBaseAddress = baseAddress;
-            _httpClient = new AwiaHttpClientToolbox(_serverBaseAddress);
+            _httpClient = new HttpClientToolbox(_serverBaseAddress);
         }
 
 
@@ -39,7 +39,8 @@ namespace Event
         {
             try
             {
-                var a = await _httpClient.ReadList<EventAddressDto>("Workflows/" + workflowId);
+                var path = _serverBaseAddress + "Workflows/" + workflowId;
+                var a = await _httpClient.ReadList<EventAddressDto>(path);
                 return a;
             }
             catch (Exception)
@@ -73,18 +74,15 @@ namespace Event
         /*
          * SubmitMyselfToServer will inform Server, that this Event wants to join a given workflow
          */
-        // TODO: Discuss what information is needed for Server to 'enroll' an event into a workflow?
         // TODO: Exception handling
         public async void SubmitMyselfToServer()
         {
-            // TODO: When posting myself to Server, at what address ("path") should I do that? 
-            var path = _workflowId + "/";
+            // Submitting an event to Server happens at workflows/workflowid
+            var path = "workflows" + _workflowId + "/";
 
-            // TODO:  For now, the following is a 'dummy' object; it only represents that we eventually will have to send some info about this event along to Server     
-            // DTO should (probably) include id + name of event, and address
-            var infoToServerAboutThisEvent = "" + _eventId;
+            var infoToServerAboutThisEvent = new EventAddressDto() {Id = "Dummy", Uri = new Uri("www.dr.dk")};
 
-            await _httpClient.Create<String>(path, infoToServerAboutThisEvent);
+            await _httpClient.Create<EventAddressDto>(path, infoToServerAboutThisEvent);
         }
 
 
@@ -94,7 +92,7 @@ namespace Event
          */
         public async Task RequestDeletionOfEventAtServer(int eventToBeDeletedId)
         {
-            var path = _serverBaseAddress + "/" + _workflowId + "/" + eventToBeDeletedId;
+            var path = _serverBaseAddress + "/workflows/" + _workflowId + "/" + eventToBeDeletedId;
             try
             { 
                 await _httpClient.Delete(path);

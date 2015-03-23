@@ -52,19 +52,33 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public void GetEvents()
+        public async void GetEvents()
         {
-            Task.Run(async () =>
+            SelectedEventViewModel = null;
+            EventList.Clear();
+            
+            try
             {
-                EventList.Clear();
-                var connection = ServerConnection.GetStorage(new Uri("servers")); // todo get the real server address here
-                EventList = new ObservableCollection<EventViewModel>((await connection.GetEventsFromWorkflow(_workflowDto)).Select(EventAddressDto => new EventViewModel(EventAddressDto)));
+                var connection = ServerConnection.GetStorage(new Uri("http://localhost:13768/")); // todo get the real server address here
+
+                var test = await connection.GetEventsFromWorkflow(_workflowDto);
+                EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto)));
                 if (EventList.Count >= 1)
                 {
                     SelectedEventViewModel = EventList[0];
                 }
-                NotifyPropertyChanged("");
-            });
+                else
+                {
+                    SelectedEventViewModel = null;
+                }
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
+            
+            NotifyPropertyChanged("");
         }
         #endregion
 

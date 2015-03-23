@@ -13,32 +13,33 @@ namespace Client.ViewModels
         public WorkflowListViewModel()
         {
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
-            WorkflowList.Add(new WorkflowViewModel(new WorkflowDto()){Name = "Workflow1", EventList = new ObservableCollection<EventViewModel>()
-            {
-                new EventViewModel(){Id = "ID11", Uri = new Uri("https://www.google.dk/")},
-                new EventViewModel(){Id = "ID12", Uri = new Uri("https://www.google.dk/")},
-                new EventViewModel(){Id = "ID13", Uri = new Uri("https://www.google.dk/")},
-            }});
-            WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
-            {
-                Name = "Workflow2",
-                EventList = new ObservableCollection<EventViewModel>()
-            {
-                new EventViewModel(){Id = "ID21", Uri = new Uri("https://www.google.dk/")},
-                new EventViewModel(){Id = "ID22", Uri = new Uri("https://www.google.dk/")},
-                new EventViewModel(){Id = "ID23", Uri = new Uri("https://www.google.dk/")},
-            }
-            }); WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
-            {
-                Name = "Workflow3",
-                EventList = new ObservableCollection<EventViewModel>()
-            {
-                new EventViewModel(){Id = "ID31", Uri = new Uri("https://www.google.dk/")},
-                new EventViewModel(){Id = "ID32", Uri = new Uri("https://www.google.dk/")},
-                new EventViewModel(){Id = "ID33", Uri = new Uri("https://www.google.dk/")},
-            }
-            });
-            SelectedWorkflowViewModel = WorkflowList[0];
+            //WorkflowList.Add(new WorkflowViewModel(new WorkflowDto()){Name = "Workflow1", EventList = new ObservableCollection<EventViewModel>()
+            //{
+            //    new EventViewModel(){Id = "ID11", Uri = new Uri("https://www.google.dk/")},
+            //    new EventViewModel(){Id = "ID12", Uri = new Uri("https://www.google.dk/")},
+            //    new EventViewModel(){Id = "ID13", Uri = new Uri("https://www.google.dk/")},
+            //}});
+            //WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
+            //{
+            //    Name = "Workflow2",
+            //    EventList = new ObservableCollection<EventViewModel>()
+            //{
+            //    new EventViewModel(){Id = "ID21", Uri = new Uri("https://www.google.dk/")},
+            //    new EventViewModel(){Id = "ID22", Uri = new Uri("https://www.google.dk/")},
+            //    new EventViewModel(){Id = "ID23", Uri = new Uri("https://www.google.dk/")},
+            //}
+            //}); WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
+            //{
+            //    Name = "Workflow3",
+            //    EventList = new ObservableCollection<EventViewModel>()
+            //{
+            //    new EventViewModel(){Id = "ID31", Uri = new Uri("https://www.google.dk/")},
+            //    new EventViewModel(){Id = "ID32", Uri = new Uri("https://www.google.dk/")},
+            //    new EventViewModel(){Id = "ID33", Uri = new Uri("https://www.google.dk/")},
+            //}
+            //});
+            //SelectedWorkflowViewModel = WorkflowList[0];
+            GetWorkflows();
         }
 
         #region Databindings
@@ -61,24 +62,36 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public void GetWorkflows()
+        public async void GetWorkflows()
         {
-            Task.Run(async () =>
+            SelectedWorkflowViewModel = null;
+            WorkflowList.Clear();
+            try
             {
-                WorkflowList.Clear();
-                var connection = ServerConnection.GetStorage(new Uri("servers")); // todo get the real server address here
-                WorkflowList = new ObservableCollection<WorkflowViewModel>((await connection.GetWorkflows()).Select(workflowDto => new WorkflowViewModel(workflowDto)));
+                var connection = ServerConnection.GetStorage(new Uri("http://localhost:13768/")); // todo get the real server address here
+
+                var test = await connection.GetWorkflows();
+                WorkflowList = new ObservableCollection<WorkflowViewModel>(test.Select(workflowDto => new WorkflowViewModel(workflowDto)));
                 if (WorkflowList.Count >= 1)
                 {
                     SelectedWorkflowViewModel = WorkflowList[0];
                 }
-                NotifyPropertyChanged("");
-            });
+                else
+                {
+                    SelectedWorkflowViewModel = null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            
+            NotifyPropertyChanged("");
         }
 
         public void GetEventsOnWorkflow()
         {
-            SelectedWorkflowViewModel.GetEvents();
+            if (SelectedWorkflowViewModel != null) SelectedWorkflowViewModel.GetEvents();
         }
         #endregion
     }

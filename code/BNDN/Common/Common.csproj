@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AwiaHttpClientToolbox.cs" />
+    <Compile Include="HttpClientToolbox.cs" />
     <Compile Include="EventAddressDto.cs" />
     <Compile Include="EventDto.cs" />
     <Compile Include="EventRuleDto.cs" />

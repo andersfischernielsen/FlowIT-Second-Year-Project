@@ -9,24 +9,24 @@ namespace Client
 {
     public class EventConnection : IEventConnection
     {
-        private readonly AwiaHttpClientToolbox _awiaHttp;
+        private readonly HttpClientToolbox _http;
         private readonly EventAddressDto _eventDto;
 
         public EventConnection(EventAddressDto eventDto)
         {
             this._eventDto = eventDto;
-            _awiaHttp = new AwiaHttpClientToolbox(_eventDto.Uri);
+            _http = new HttpClientToolbox(_eventDto.Uri);
         }
 
         public Task<EventStateDto> GetState()
         {
-            return _awiaHttp.Read<EventStateDto>("event/state");
+            return _http.Read<EventStateDto>("event/state");
         }
         
 
         public Task Execute(bool b)
         {
-            return _awiaHttp.Update("event/", b);
+            return _http.Update("event/", b);
         }
     }
 }
