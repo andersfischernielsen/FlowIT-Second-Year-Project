@@ -39,7 +39,8 @@ namespace Event
         {
             try
             {
-                var a = await _httpClient.ReadList<EventAddressDto>("Workflows/" + workflowId);
+                var path = _serverBaseAddress + "Workflows/" + workflowId;
+                var a = await _httpClient.ReadList<EventAddressDto>(path);
                 return a;
             }
             catch (Exception)
