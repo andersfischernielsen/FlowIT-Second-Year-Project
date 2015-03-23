@@ -8,6 +8,7 @@ namespace Event.Interfaces
 {
     public interface IEventStorage
     {
+        EventDto EntireEventDto { get; set; } // todo maybe maybe not - see todo in InMemoryStorage.
         string WorkflowId { get; }
         string EventId { get; }
 

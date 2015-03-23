@@ -10,6 +10,7 @@ namespace Event.Models
     public class InMemoryStorage : IEventStorage
     {
         private static InMemoryStorage _inMemoryStorage;
+        public EventDto EntireEventDto { get; set; } // todo Maybe use adapter pattern to simplify entire storage.
 
         public string WorkflowId { get; set; }
         public string EventId { get; set; }

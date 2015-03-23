@@ -115,7 +115,7 @@ namespace Event.Controllers
             {
                 return BadRequest(ModelState);
             }
-            //Storage.Conditions = eventDto.Conditions;
+            Storage.EntireEventDto = eventDto;
 
             return await Task.Run(() => Ok());
         }
