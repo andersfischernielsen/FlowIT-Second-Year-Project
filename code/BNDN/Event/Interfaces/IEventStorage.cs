@@ -19,10 +19,10 @@ namespace Event.Interfaces
         #endregion
 
         #region Rules
-        Task<IEnumerable<Uri>> Conditions { get; }
-        Task<IEnumerable<Uri>> Responses { get; }
-        Task<IEnumerable<Uri>> Exclusions { get; }
-        Task<IEnumerable<Uri>> Inclusions { get; }
+        Task<HashSet<Uri>> Conditions { get; set; }
+        Task<HashSet<Uri>> Responses { get; set;  }
+        Task<HashSet<Uri>> Exclusions { get; set; }
+        Task<HashSet<Uri>> Inclusions { get; set; }
 
         Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos();
 

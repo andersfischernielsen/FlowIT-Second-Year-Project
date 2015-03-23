@@ -34,60 +34,39 @@ namespace Event.Models
             return true; // If all conditions are executed or excluded.
         }
 
-        private readonly HashSet<Uri> _conditions;
-        private readonly HashSet<Uri> _responses;
-        private readonly HashSet<Uri> _exclusions;
-        private readonly HashSet<Uri> _inclusions;
-
         private Dictionary<string, Uri> EventUris { get; set; }
         private Dictionary<Uri, string> EventIds { get; set; }
 
         private InMemoryStorage()
         {
-            _conditions = new HashSet<Uri>();
-            _responses = new HashSet<Uri>();
-            _exclusions = new HashSet<Uri>();
-            _inclusions = new HashSet<Uri>();
             EventUris = new Dictionary<string, Uri>();
             EventIds = new Dictionary<Uri, string>();
             Included = true;
         }
 
-        public Task<IEnumerable<Uri>> Conditions
-        {
-            get { return Task.Run(() => _conditions.AsEnumerable()); }
-        }
-
-        public Task<IEnumerable<Uri>> Responses
-        {
-            get { return Task.Run(() => _responses.AsEnumerable()); }
-        }
-
-        public Task<IEnumerable<Uri>> Exclusions
-        {
-            get { return Task.Run(() => _exclusions.AsEnumerable()); }
-        }
-
-        public Task<IEnumerable<Uri>> Inclusions
-        {
-            get { return Task.Run(() => _inclusions.AsEnumerable()); }
-        }
+        public Task<HashSet<Uri>> Conditions { get; set; }
+                    
+        public Task<HashSet<Uri>> Responses { get; set; }
+                    
+        public Task<HashSet<Uri>> Exclusions { get; set; }
+                    
+        public Task<HashSet<Uri>> Inclusions { get; set; }
 
         public async Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos()
         {
 
             var result = new Dictionary<Uri, List<NotifyDto>>();
-            foreach (var response in _responses)
+            foreach (var response in await Responses)
             {
                 await AddNotifyDto(result, response, s => new PendingDto {Id = s});
             }
 
-            foreach (var exclusion in _exclusions)
+            foreach (var exclusion in await Exclusions)
             {
                 await AddNotifyDto(result, exclusion, s => new ExcludeDto {Id = s});
             }
 
-            foreach (var inclusion in _inclusions)
+            foreach (var inclusion in await Inclusions)
             {
                 await AddNotifyDto(result, inclusion, s => new IncludeDto {Id = s});
             }
@@ -121,10 +100,10 @@ namespace Event.Models
                 throw new ArgumentNullException("rules");
             }
 
-            await UpdateRule(rules.Condition, endPoint, _conditions);
-            await UpdateRule(rules.Exclusion, endPoint, _exclusions);
-            await UpdateRule(rules.Inclusion, endPoint, _inclusions);
-            await UpdateRule(rules.Response, endPoint, _responses);
+            await UpdateRule(rules.Condition, endPoint, await Conditions);
+            await UpdateRule(rules.Exclusion, endPoint, await Exclusions);
+            await UpdateRule(rules.Inclusion, endPoint, await Inclusions);
+            await UpdateRule(rules.Response, endPoint, await Responses);
         }
 
         private static Task UpdateRule(bool addOrRemove, Uri value, ISet<Uri> collection)
