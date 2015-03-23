@@ -37,7 +37,7 @@ namespace Client
 
         public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)
         {
-            return _http.ReadList<EventAddressDto>("workflows/" + workflow.Name);
+            return _http.ReadList<EventAddressDto>("workflows/" + workflow.Id);
         }
     }
 }

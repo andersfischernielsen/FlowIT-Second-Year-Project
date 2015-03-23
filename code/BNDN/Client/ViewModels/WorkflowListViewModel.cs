@@ -83,7 +83,7 @@ namespace Client.ViewModels
             }
             catch (Exception)
             {
-                throw;
+                //throw;
             }
             
             NotifyPropertyChanged("");

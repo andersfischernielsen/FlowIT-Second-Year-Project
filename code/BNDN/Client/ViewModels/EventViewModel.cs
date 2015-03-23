@@ -48,8 +48,16 @@ namespace Client.ViewModels
         {
             Task.Run(async () =>
             {
-                var eventConnection = new EventConnection(__eventAddressDto);
-                await eventConnection.Execute(true);
+                try
+                {
+                    var eventConnection = new EventConnection(__eventAddressDto);
+                    await eventConnection.Execute(true);
+                }
+                catch (Exception)
+                {
+                    
+                    throw;
+                }
             });
         }
         #endregion
