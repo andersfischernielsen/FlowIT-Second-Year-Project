@@ -57,11 +57,20 @@ namespace Client.ViewModels
             Task.Run(async () =>
             {
                 EventList.Clear();
-                var connection = ServerConnection.GetStorage(new Uri("servers")); // todo get the real server address here
+                #if DEBUG
+                var connection = ServerConnection.GetStorage(new Uri("http://localhost:13768/")); // todo get the real server address here
+                #else
+                var connection = ServerConnection.GetStorage(new Uri("Server"));
+                #endif
+
                 EventList = new ObservableCollection<EventViewModel>((await connection.GetEventsFromWorkflow(_workflowDto)).Select(EventAddressDto => new EventViewModel(EventAddressDto)));
                 if (EventList.Count >= 1)
                 {
                     SelectedEventViewModel = EventList[0];
+                }
+                else
+                {
+                    SelectedEventViewModel = null;
                 }
                 NotifyPropertyChanged("");
             });

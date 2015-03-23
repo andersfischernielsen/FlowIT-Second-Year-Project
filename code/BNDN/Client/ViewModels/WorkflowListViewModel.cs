@@ -39,6 +39,7 @@ namespace Client.ViewModels
             }
             });
             SelectedWorkflowViewModel = WorkflowList[0];
+            //GetWorkflows();
         }
 
         #region Databindings
@@ -66,11 +67,20 @@ namespace Client.ViewModels
             Task.Run(async () =>
             {
                 WorkflowList.Clear();
-                var connection = ServerConnection.GetStorage(new Uri("servers")); // todo get the real server address here
+                #if DEBUG
+                var connection = ServerConnection.GetStorage(new Uri("http://localhost:13768/")); // todo get the real server address here
+                #else
+                var connection = ServerConnection.GetStorage(new Uri("servers"));
+                #endif
+
                 WorkflowList = new ObservableCollection<WorkflowViewModel>((await connection.GetWorkflows()).Select(workflowDto => new WorkflowViewModel(workflowDto)));
                 if (WorkflowList.Count >= 1)
                 {
                     SelectedWorkflowViewModel = WorkflowList[0];
+                }
+                else
+                {
+                    SelectedWorkflowViewModel = null;
                 }
                 NotifyPropertyChanged("");
             });

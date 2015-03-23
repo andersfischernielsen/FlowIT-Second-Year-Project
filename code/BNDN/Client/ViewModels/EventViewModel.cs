@@ -46,7 +46,11 @@ namespace Client.ViewModels
 
         public void Execute()
         {
-            Console.WriteLine("Execute");
+            Task.Run(() =>
+            {
+                var eventConnection = new EventConnection(__eventAddressDto);
+                eventConnection.Execute(true);
+            });
         }
         #endregion
 

@@ -18,7 +18,20 @@
             </Grid.RowDefinitions>
             <Label Content="Workflows" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Margin="10,0">
             </Label>
-            <ListBox Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding WorkflowList}" SelectedItem="{Binding SelectedWorkflowViewModel}"/>
+            <ListBox Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding WorkflowList}" SelectedItem="{Binding SelectedWorkflowViewModel}" Margin="10,10,10,60">
+            	<i:Interaction.Triggers>
+            		<i:EventTrigger EventName="SelectionChanged">
+            			<ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetEventsOnWorkflow"/>
+            		</i:EventTrigger>
+            	</i:Interaction.Triggers>
+            </ListBox>
+            <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="170" Style="{DynamicResource ButtonDefaultStyle}">
+            	<i:Interaction.Triggers>
+            		<i:EventTrigger EventName="Click">
+            			<ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetWorkflows"/>
+            		</i:EventTrigger>
+            	</i:Interaction.Triggers>
+            </Button>
         </Grid>
         <Grid x:Name="EventsGrid" Margin="0.269,0,0,0" RenderTransformOrigin="0.5,0.5" Grid.Column="1">
             <Grid.RowDefinitions>
@@ -26,7 +39,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Content="Events" Margin="10,0" VerticalAlignment="Top" FontSize="24" HorizontalAlignment="Left"/>
-            <ListBox x:Name="listBox" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}">
+            <ListBox x:Name="listBox" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}" Margin="10">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
