@@ -26,19 +26,19 @@ namespace Server.Models
             {
                 case 1:
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventA = new EventAddressDto() { Id = "1", Uri = new Uri("http://www.apple.com") };
-                    var eventB = new EventAddressDto() { Id = "2", Uri = new Uri("http://www.ibm.com") };
-                    var eventC = new EventAddressDto() { Id = "3", Uri = new Uri("http://www.samsung.com") };
+                    var eventA = new EventAddressDto { Id = 1, Uri = new Uri("http://www.apple.com") };
+                    var eventB = new EventAddressDto { Id = 2, Uri = new Uri("http://www.ibm.com") };
+                    var eventC = new EventAddressDto { Id = 3, Uri = new Uri("http://www.samsung.com") };
 
-                    return new List<EventAddressDto>() { eventA, eventB, eventC };
+                    return new List<EventAddressDto> { eventA, eventB, eventC };
                 
                 case 2:
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventD = new EventAddressDto() { Id = "1", Uri = new Uri("http://www.opel.dk") };
-                    var eventE = new EventAddressDto() { Id = "2", Uri = new Uri("http://www.ford.dk") };
-                    var eventF = new EventAddressDto() { Id = "3", Uri = new Uri("http://www.nissan.dk") };
+                    var eventD = new EventAddressDto { Id = 1, Uri = new Uri("http://www.opel.dk") };
+                    var eventE = new EventAddressDto { Id = 2, Uri = new Uri("http://www.ford.dk") };
+                    var eventF = new EventAddressDto { Id = 3, Uri = new Uri("http://www.nissan.dk") };
 
-                    return new List<EventAddressDto>() {eventD, eventE, eventF};
+                    return new List<EventAddressDto> {eventD, eventE, eventF};
 
                 default:
                     return new List<EventAddressDto>();
@@ -51,7 +51,7 @@ namespace Server.Models
             throw new System.NotImplementedException();
         }
 
-        public void RemoveEventFromWorkflow(int workflowId, string eventId)
+        public void RemoveEventFromWorkflow(int workflowId, int eventId)
         {
             // Remove event from specified workflow
             throw new System.NotImplementedException();

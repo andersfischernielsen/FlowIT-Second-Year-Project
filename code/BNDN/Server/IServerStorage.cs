@@ -31,6 +31,6 @@ namespace Server
         /// </summary>
         /// <param name="workflowId"></param>
         /// <param name="eventId"></param>
-        void RemoveEventFromWorkflow(int workflowId, string eventId);
+        void RemoveEventFromWorkflow(int workflowId, int eventId);
     }
 }

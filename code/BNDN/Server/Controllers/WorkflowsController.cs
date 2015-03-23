@@ -65,7 +65,7 @@ namespace Server.Controllers
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
-        public void DeleteEventFromWorkflow(int workflowId, string eventId)
+        public void DeleteEventFromWorkflow(int workflowId, int eventId)
         {
             // Delete the given event id from the list of workflow-events.
             Debug.WriteLine("Yep, we got here!");

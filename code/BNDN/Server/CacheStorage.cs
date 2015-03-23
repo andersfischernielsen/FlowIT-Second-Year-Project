@@ -68,7 +68,7 @@ namespace Server
             }
         }
 
-        public void RemoveEventFromWorkflow(int workflowId, string eventId)
+        public void RemoveEventFromWorkflow(int workflowId, int eventId)
         {
             if (_cache.ContainsKey(workflowId))
             {
