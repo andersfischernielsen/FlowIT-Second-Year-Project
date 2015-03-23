@@ -30,9 +30,9 @@ namespace Client
             return _instance;
         }
 
-        public Task<IList<WorkflowDto>> GetWorkflows()
+        public async Task<IList<WorkflowDto>> GetWorkflows()
         {
-            return _http.ReadList<WorkflowDto>("workflows");
+            return await _http.ReadList<WorkflowDto>("workflows");
         }
 
         public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)

@@ -29,7 +29,7 @@ namespace Common
                 HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
             }
 
-            //IdHttpClientMap.Add(uri,this);
+            IdHttpClientMap.Add(uri,this);
         }
 
         public HttpClientToolbox(Uri uri, AuthenticationHeaderValue authenticationHeader = null)
@@ -43,7 +43,7 @@ namespace Common
                 HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
             }
 
-            //IdHttpClientMap.Add(uri.ToString(), this);
+            IdHttpClientMap.Add(uri.ToString(), this);
         }
 
         /// <summary>
