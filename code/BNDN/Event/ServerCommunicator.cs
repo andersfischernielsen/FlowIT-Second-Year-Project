@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Web;
 using Common;
 using Event.Controllers;
+using Event.Interfaces;
+using Event.Models;
 
 namespace Event
 {
@@ -27,6 +29,29 @@ namespace Event
              _eventId = eventId;
             _serverBaseAddress = baseAddress;
             _httpClient = new HttpClientToolbox(_serverBaseAddress);
+        }
+
+        
+        /// <summary>
+        /// Notify the Server of the existence of this Event. This method should be called after the Event has received its
+        /// state (as JSON) after being instantiated. Otherwise it isn't possible to tell the Server what Workflow this
+        /// Event should be part of.
+        /// </summary>
+        public async void NotifyServerOfExistence()
+        {
+            //Event won't do this unless it's been properly initialised.
+            if (!_eventId.HasValue || !_workflowId.HasValue || string.IsNullOrEmpty(_serverBaseAddress)) {
+                return;
+            }
+
+            try {
+                var path = _serverBaseAddress + "Workflows/" + _workflowId;
+                await _httpClient.Create(path, new EventAddressDto {Id = _eventId.Value, Uri = new Uri(_serverBaseAddress)});
+            }
+            catch (Exception ex) {
+                //TODO: Server is down? What do then?
+                throw;
+            }
         }
 
 
@@ -69,22 +94,6 @@ namespace Event
             }
 
         }
-
-
-        /*
-         * SubmitMyselfToServer will inform Server, that this Event wants to join a given workflow
-         */
-        // TODO: Exception handling
-        public async void SubmitMyselfToServer()
-        {
-            // Submitting an event to Server happens at workflows/workflowid
-            var path = "workflows" + _workflowId + "/";
-
-            var infoToServerAboutThisEvent = new EventAddressDto() {Id = "Dummy", Uri = new Uri("www.dr.dk")};
-
-            await _httpClient.Create<EventAddressDto>(path, infoToServerAboutThisEvent);
-        }
-
 
         /**
          * RequestDeletionOfEventAtServer will inform Server that an event with id eventToBeDeletedId

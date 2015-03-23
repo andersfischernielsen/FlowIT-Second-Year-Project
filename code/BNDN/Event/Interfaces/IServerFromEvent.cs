@@ -2,13 +2,12 @@
 using System.Threading.Tasks;
 using Common;
 
-namespace Event.Controllers
+namespace Event.Interfaces
 {
     interface IServerFromEvent
     {
         Task<IList<EventAddressDto>> GetWorkFlowEvents(int workflowId);
         void SendHeartbeatToServer();
-        void SubmitMyselfToServer();
         Task RequestDeletionOfEventAtServer(int eventToBeDeleted);
     }
 }
