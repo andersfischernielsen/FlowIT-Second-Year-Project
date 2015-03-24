@@ -25,7 +25,7 @@ namespace Event.Controllers
             Storage = InMemoryStorage.GetState();
         }
 
-        
+
         [HttpGet]
         [Route("~/remoteuri")]
         public async Task<Uri> GetUriOfEvent()
@@ -267,30 +267,24 @@ namespace Event.Controllers
 
         /// <summary>
         /// Executes this event. Only Clients should invoke this.
+        /// todo: Should be able to return something to the caller.
         /// </summary>
-        /// <param name="execute">Whether to execute or not?</param>
         /// <returns>A Task resulting in an Http Result.</returns>
-        [Route("{execute:bool}")]
+        [Route("executed")]
         [HttpPut]
-        public async Task<IHttpActionResult> Execute(bool execute)
+        public async Task<IHttpActionResult> Execute()
         {
-            if (execute)
+            if (!(await ((InMemoryStorage)Storage).Executable()))
             {
-                if (!(await ((InMemoryStorage)Storage).Executable()))
-                {
-                    return BadRequest("Event is not currently executable.");
-                }
-                Storage.Executed = true;
-                var notifyDtos = await Storage.GetNotifyDtos();
-                Parallel.ForEach(notifyDtos, async pair =>
-                {
-                    await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
-                });
-                return Ok(true);
+                return BadRequest("Event is not currently executable.");
             }
-            // Todo: Is this what should happen when execute is false? Probably every condition should be notified?
-            Storage.Executed = false;
-            return Ok();
+            Storage.Executed = true;
+            var notifyDtos = await Storage.GetNotifyDtos();
+            Parallel.ForEach(notifyDtos, async pair =>
+            {
+                await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
+            });
+            return Ok(true);
         }
         #endregion
     }
