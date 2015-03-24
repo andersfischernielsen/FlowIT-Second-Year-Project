@@ -9,7 +9,7 @@ namespace Common
 {
     public class EventAddressDto
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public Uri Uri { get; set; }
     }
 }
