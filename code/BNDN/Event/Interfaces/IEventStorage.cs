@@ -9,6 +9,7 @@ namespace Event.Interfaces
     public interface IEventStorage
     {
         EventDto EntireEventDto { get; set; } // todo maybe maybe not - see todo in InMemoryStorage.
+        Uri OwnUri { get; set; } //For notifying server about this event. Is fetched when receiving EventDto on creation!
         string WorkflowId { get; }
         string EventId { get; }
 
