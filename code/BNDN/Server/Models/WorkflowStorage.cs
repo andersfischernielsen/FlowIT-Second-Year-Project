@@ -15,28 +15,28 @@ namespace Server.Models
         public IList<WorkflowDto> GetAllWorkflows()
         {
             // Dummy workflows for now (before deleting: consider if it can be used for testing)
-            var dummy1 = new WorkflowDto() {Name = "Pay rent", Id = 1};
-            var dummy2 = new WorkflowDto() {Name = "How to get good grades", Id = 2};
+            var dummy1 = new WorkflowDto() {Name = "Pay rent", Id = "pay"};
+            var dummy2 = new WorkflowDto() {Name = "How to get good grades", Id = "grades"};
             return new List<WorkflowDto>() {dummy1, dummy2};
         }
 
-        public IList<EventAddressDto> GetEventsWithinWorkflow(int workflowId)
+        public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
         {
             switch (workflowId)
             {
-                case 1:
+                case "Computer":
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventA = new EventAddressDto { Id = 1, Uri = new Uri("http://www.apple.com") };
-                    var eventB = new EventAddressDto { Id = 2, Uri = new Uri("http://www.ibm.com") };
-                    var eventC = new EventAddressDto { Id = 3, Uri = new Uri("http://www.samsung.com") };
+                    var eventA = new EventAddressDto { Id = "Apple", Uri = new Uri("http://www.apple.com") };
+                    var eventB = new EventAddressDto { Id = "IBM", Uri = new Uri("http://www.ibm.com") };
+                    var eventC = new EventAddressDto { Id = "Sam", Uri = new Uri("http://www.samsung.com") };
 
                     return new List<EventAddressDto> { eventA, eventB, eventC };
                 
-                case 2:
+                case "Car":
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventD = new EventAddressDto { Id = 1, Uri = new Uri("http://www.opel.dk") };
-                    var eventE = new EventAddressDto { Id = 2, Uri = new Uri("http://www.ford.dk") };
-                    var eventF = new EventAddressDto { Id = 3, Uri = new Uri("http://www.nissan.dk") };
+                    var eventD = new EventAddressDto { Id = "Opel", Uri = new Uri("http://www.opel.dk") };
+                    var eventE = new EventAddressDto { Id = "Ford", Uri = new Uri("http://www.ford.dk") };
+                    var eventF = new EventAddressDto { Id = "Nis", Uri = new Uri("http://www.nissan.dk") };
 
                     return new List<EventAddressDto> {eventD, eventE, eventF};
 
@@ -45,16 +45,20 @@ namespace Server.Models
             }
         }
 
-        public void AddEventToWorkflow(int workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        public void AddEventToWorkflow(String workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             // Add Event to specified workflow
             throw new System.NotImplementedException();
         }
 
-        public void RemoveEventFromWorkflow(int workflowId, int eventId)
+        public void RemoveEventFromWorkflow(string workflowId, string eventId)
         {
-            // Remove event from specified workflow
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        public void AddNewWorkflow(WorkflowDto workflow)
+        {
+            throw new NotImplementedException();
         }
     }
 }

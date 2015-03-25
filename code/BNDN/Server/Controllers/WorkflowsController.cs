@@ -38,7 +38,7 @@ namespace Server.Controllers
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("workflows/{workflowId}")]
         [HttpGet]
-        public IEnumerable<EventAddressDto> Get(int workflowId)
+        public IEnumerable<EventAddressDto> Get(string workflowId)
         {
             Debug.WriteLine("Hmm, we got here!");
             return Storage.GetEventsWithinWorkflow(workflowId);
@@ -55,7 +55,7 @@ namespace Server.Controllers
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
         // TODO: How does an Event know that an eventId is not already taken?
-        public void PostEventToWorkFlow(int workflowId, [FromBody] EventAddressDto eventToAddDto)
+        public void PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
         {
             // Add this Event to the specified workflow
             Storage.AddEventToWorkflow(workflowId,eventToAddDto);
@@ -65,7 +65,7 @@ namespace Server.Controllers
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
-        public void DeleteEventFromWorkflow(int workflowId, int eventId)
+        public void DeleteEventFromWorkflow(string workflowId, string eventId)
         {
             // Delete the given event id from the list of workflow-events.
             Debug.WriteLine("Yep, we got here!");
