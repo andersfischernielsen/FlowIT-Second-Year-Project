@@ -13,13 +13,13 @@ namespace Server
         /// Get all workflows
         /// </summary>
         /// <returns></returns>
-        IList<WorkflowDto> GetAllWorkflows();
+        IEnumerable<WorkflowDto> GetAllWorkflows();
         /// <summary>
         /// Get all events from a workflow
         /// </summary>
         /// <param name="workflowId"></param>
         /// <returns></returns>
-        IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId);
+        IEnumerable<EventAddressDto> GetEventsWithinWorkflow(string workflowId);
         /// <summary>
         /// Add event to a workflow
         /// </summary>

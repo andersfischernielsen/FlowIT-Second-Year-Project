@@ -14,14 +14,14 @@ namespace Server
         {
             _storage = storage;
         }
-        public IList<WorkflowDto> GetAllWorkflows()
+        public IEnumerable<WorkflowDto> GetAllWorkflows()
         {
             return _storage.GetAllWorkflows();
         }
 
-        public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
+        public IEnumerable<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
         {
-            IList<WorkflowDto> l = GetAllWorkflows();
+            IEnumerable<WorkflowDto> l = GetAllWorkflows();
             WorkflowDto w = l.Single(x => x.Id == workflowId);
             var events = _storage.GetEventsOnWorkflow(w);
             return events;

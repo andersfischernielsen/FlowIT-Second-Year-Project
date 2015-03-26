@@ -27,50 +27,20 @@ namespace Server
             }
         }
 
-        public IList<WorkflowDto> GetAllWorkflows()
+        public IEnumerable<WorkflowDto> GetAllWorkflows()
         {
             return _cache.Keys.ToList();
         }
 
-        public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
+        public IEnumerable<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
         {
-<<<<<<< HEAD
-            List<EventAddressDto> list;
+            return _cache[workflow];
+        }
+
+        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
+        {
+            HashSet<EventAddressDto> list;
             _cache.TryGetValue(workflow, out list);
-            return list;
-=======
-            HashSet<EventAddressDto> list;
-            var l = GetAllWorkflows();
-            var w = l.Single(x => x.Id == workflowId); //Throws exception if workflow is not found
-            _cache.TryGetValue(w, out list);
-            return list.ToList();
->>>>>>> c3f63f3fc0375ca5b44a4887fe9b798db060b5f2
-        }
-
-        private bool ContainsEvent(HashSet<EventAddressDto> workflow, EventAddressDto eventAddress)
-        {
-<<<<<<< HEAD
-            List<EventAddressDto> list;
-            var b = _cache.TryGetValue(workflow, out list);
-            list.Add(eventToBeAddedDto);
-=======
-            if (workflow.Contains(eventAddress))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
->>>>>>> c3f63f3fc0375ca5b44a4887fe9b798db060b5f2
-        }
-
-        public void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
-        {
-            var l = GetAllWorkflows();
-            var w = l.Single(x => x.Id == workflowToAttachToId); //Throws exception if workflow is not found
-            HashSet<EventAddressDto> list;
-            _cache.TryGetValue(w, out list);
             if (ContainsEvent(list, eventToBeAddedDto))
             {
                 throw new ArgumentException();
@@ -79,7 +49,21 @@ namespace Server
             {
                 list.Add(eventToBeAddedDto);
             }
+        }
+
+        public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
+        {
             
+        }
+
+        private bool ContainsEvent(HashSet<EventAddressDto> workflow, EventAddressDto eventAddress)
+        {
+            throw new NotImplementedException();
         }
 
         public void RemoveEventFromWorkflow(string workflowId, string eventId)

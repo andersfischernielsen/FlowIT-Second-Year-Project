@@ -10,15 +10,11 @@ namespace Server.Controllers
     
     public class WorkflowsController : ApiController
     {
-        private IServerLogic Storage { get; set; }
+        private IServerLogic ServerLogic { get; set; }
 
         public WorkflowsController()
         {
-<<<<<<< HEAD
-            Storage = new ServerLogic(new WorkflowStorage());
-=======
-            Storage = CacheStorage.GetStorage;
->>>>>>> c3f63f3fc0375ca5b44a4887fe9b798db060b5f2
+            ServerLogic = new ServerLogic(new WorkflowStorage());
         }
 
 
@@ -30,7 +26,7 @@ namespace Server.Controllers
         [Route("workflows")]
         public IEnumerable<WorkflowDto> Get()
         {
-            return Storage.GetAllWorkflows();
+            return ServerLogic.GetAllWorkflows();
         }
 
 
@@ -45,7 +41,7 @@ namespace Server.Controllers
         public IEnumerable<EventAddressDto> Get(string workflowId)
         {
             Debug.WriteLine("Hmm, we got here!");
-            return Storage.GetEventsWithinWorkflow(workflowId);
+            return ServerLogic.GetEventsWithinWorkflow(workflowId);
         }
 
 
@@ -61,7 +57,7 @@ namespace Server.Controllers
         public void PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
         {
             // Add this Event to the specified workflow
-            Storage.AddEventToWorkflow(workflowId,eventToAddDto);
+            ServerLogic.AddEventToWorkflow(workflowId,eventToAddDto);
         }
 
         
@@ -72,7 +68,7 @@ namespace Server.Controllers
         {
             // Delete the given event id from the list of workflow-events.
             Debug.WriteLine("Yep, we got here!");
-            Storage.RemoveEventFromWorkflow(workflowId,eventId);
+            ServerLogic.RemoveEventFromWorkflow(workflowId,eventId);
         }
     }
 }
