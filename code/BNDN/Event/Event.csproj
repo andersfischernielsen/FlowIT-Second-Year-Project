@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EventController.cs" />
+    <Compile Include="Interfaces\IEventLogic.cs" />
     <Compile Include="Models\EventCommunicator.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />
     <Compile Include="Interfaces\IServerFromEvent.cs" />
@@ -88,9 +89,9 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\IEventStorage.cs" />
-    <Compile Include="Models\Logic.cs" />
+    <Compile Include="Models\EventLogic.cs" />
     <Compile Include="Models\NotifyDtos.cs" />
-    <Compile Include="Models\Storage.cs" />
+    <Compile Include="Models\InMemoryStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HeartBeatDto.cs" />
     <Compile Include="ServerCommunicator.cs" />
