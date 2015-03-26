@@ -9,7 +9,7 @@ namespace Server
     public class CacheStorage : IServerStorage
     {
         private static CacheStorage _instance;
-        private readonly Dictionary<WorkflowDto, List<EventAddressDto>> _cache = new Dictionary<WorkflowDto, List<EventAddressDto>>(); 
+        private readonly Dictionary<WorkflowDto, HashSet<EventAddressDto>> _cache = new Dictionary<WorkflowDto, HashSet<EventAddressDto>>(); 
 
         private CacheStorage()
         {
@@ -32,39 +32,63 @@ namespace Server
             return _cache.Keys.ToList();
         }
 
-        public IList<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
+        public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
         {
+<<<<<<< HEAD
             List<EventAddressDto> list;
             _cache.TryGetValue(workflow, out list);
             return list;
+=======
+            HashSet<EventAddressDto> list;
+            var l = GetAllWorkflows();
+            var w = l.Single(x => x.Id == workflowId); //Throws exception if workflow is not found
+            _cache.TryGetValue(w, out list);
+            return list.ToList();
+>>>>>>> c3f63f3fc0375ca5b44a4887fe9b798db060b5f2
         }
 
-        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
+        private bool ContainsEvent(HashSet<EventAddressDto> workflow, EventAddressDto eventAddress)
         {
+<<<<<<< HEAD
             List<EventAddressDto> list;
             var b = _cache.TryGetValue(workflow, out list);
             list.Add(eventToBeAddedDto);
-        }
-
-        public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
-        {
-            if (_cache.ContainsKey(workflow))
+=======
+            if (workflow.Contains(eventAddress))
             {
-                List<EventAddressDto> list;
-                var b = _cache.TryGetValue(workflow, out list);
-                if (b)
-                {
-                    list.RemoveAll(x => x.Id == eventId);
-                }
-                else
-                {
-                    throw new NullReferenceException();
-                }
+                return false;
             }
             else
             {
-                throw new NullReferenceException();
+                return true;
             }
+>>>>>>> c3f63f3fc0375ca5b44a4887fe9b798db060b5f2
+        }
+
+        public void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        {
+            var l = GetAllWorkflows();
+            var w = l.Single(x => x.Id == workflowToAttachToId); //Throws exception if workflow is not found
+            HashSet<EventAddressDto> list;
+            _cache.TryGetValue(w, out list);
+            if (ContainsEvent(list, eventToBeAddedDto))
+            {
+                throw new ArgumentException();
+            }
+            else
+            {
+                list.Add(eventToBeAddedDto);
+            }
+            
+        }
+
+        public void RemoveEventFromWorkflow(string workflowId, string eventId)
+        {
+            var l = GetAllWorkflows();
+            var w = l.Single(x => x.Id == workflowId); // Throws exception if workflow is not found
+            HashSet<EventAddressDto> list;
+            _cache.TryGetValue(w, out list);
+            list.RemoveWhere(x => x.Id == eventId);
         }
 
         public void AddNewWorkflow(WorkflowDto workflow)
@@ -75,7 +99,7 @@ namespace Server
             }
             else
             {
-                _cache.Add(workflow, new List<EventAddressDto>());
+                _cache.Add(workflow, new HashSet<EventAddressDto>());
             }
         }
     }
