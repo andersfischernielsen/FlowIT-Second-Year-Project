@@ -26,7 +26,7 @@ namespace Client
 
         public Task Execute(bool b)
         {
-            return _http.Update("event/", b);
+            return _http.Update("event/executed", b);
         }
     }
 }
