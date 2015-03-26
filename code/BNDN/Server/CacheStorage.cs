@@ -32,12 +32,10 @@ namespace Server
             return _cache.Keys.ToList();
         }
 
-        public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
+        public IList<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
         {
             List<EventAddressDto> list;
-            var l = GetAllWorkflows();
-            var w = l.Single(x => x.Id == workflowId);
-            var b = _cache.TryGetValue(w, out list);
+            var b = _cache.TryGetValue(workflow, out list);
             if (b)
             {
                 return list;
@@ -48,14 +46,12 @@ namespace Server
             }
         }
 
-        public void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
         {
-            var l = GetAllWorkflows();
-            var w = l.Single(x => x.Id == workflowToAttachToId);
-            if (_cache.ContainsKey(w))
+            if (_cache.ContainsKey(workflow))
             {
                 List<EventAddressDto> list;
-                var b = _cache.TryGetValue(w, out list);
+                var b = _cache.TryGetValue(workflow, out list);
                 if (b)
                 {
                     list.Add(eventToBeAddedDto);
@@ -71,14 +67,12 @@ namespace Server
             }
         }
 
-        public void RemoveEventFromWorkflow(string workflowId, string eventId)
+        public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
         {
-            var l = GetAllWorkflows();
-            var w = l.Single(x => x.Id == workflowId);
-            if (_cache.ContainsKey(w))
+            if (_cache.ContainsKey(workflow))
             {
                 List<EventAddressDto> list;
-                var b = _cache.TryGetValue(w, out list);
+                var b = _cache.TryGetValue(workflow, out list);
                 if (b)
                 {
                     list.RemoveAll(x => x.Id == eventId);
