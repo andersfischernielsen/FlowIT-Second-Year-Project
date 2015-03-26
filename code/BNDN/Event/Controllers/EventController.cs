@@ -183,12 +183,19 @@ namespace Event.Controllers
             }
 
             // If the id is not known to this event, the PUT-call shall fail!
-            if (!await Storage.IdExists(id))
+
+            //**** BEGIN HACK ****
+            //TODO: This is a hack. The "outside work" shouldn't know about the Storage instance inside the Logic.
+
+            var hack = (EventLogic) Logic;
+
+            if (!hack.InMemoryStorage.IdExists(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
+            // **** END HACK ****
 
-            await Storage.UpdateRules(id, ruleDto);
+            await Logic.UpdateRules(id, ruleDto);
 
             return Ok();
         }
@@ -202,12 +209,16 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteRules(string id)
         {
-            if (!await Storage.IdExists(id))
+            //**** BEGIN HACK ****
+            //TODO: This is a hack. The "outside work" shouldn't know about the Storage instance inside the Logic.
+            var hack = (EventLogic)Logic;
+
+            if (! hack.InMemoryStorage.IdExists(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
 
-            await Storage.UpdateRules(id,
+            await Logic.UpdateRules(id,
                 // Set all states to false to remove them from storage.
                 // This effectively removes all rules associated with the given id.
                 // Possibly - to save memory - it could be null instead.
@@ -220,7 +231,9 @@ namespace Event.Controllers
                     Response = false
                 });
             // Remove the id because it is no longer associated with any rules.
-            await Storage.RemoveIdAndUri(id);
+            await hack.RemoveIdAndUri(id);
+
+            // **** END HACK ****
 
             return Ok();
         }
