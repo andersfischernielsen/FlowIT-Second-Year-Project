@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common;
 
 namespace Client.ViewModels
 {
     public class WorkflowViewModel : ViewModelBase
     {
-        private WorkflowDto _workflowDto;
+        private readonly WorkflowDto _workflowDto;
         public WorkflowViewModel()
         {
             EventList = new ObservableCollection<EventViewModel>();

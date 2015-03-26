@@ -19,6 +19,7 @@ namespace Server.Controllers
         public WorkflowsController()
         {
             ServerLogic = new ServerLogic(CacheStorage.GetStorage);
+            //ServerLogic = new ServerLogic(new WorkflowStorage());
         }
 
 

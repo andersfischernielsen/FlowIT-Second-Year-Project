@@ -18,15 +18,15 @@ namespace Client
             _http = new HttpClientToolbox(_eventDto.Uri);
         }
 
-        public Task<EventStateDto> GetState()
+        public async Task<EventStateDto> GetState()
         {
-            return _http.Read<EventStateDto>("event/state");
+            return await _http.Read<EventStateDto>("event/state");
         }
         
 
-        public Task Execute(bool b)
+        public async Task Execute(bool b)
         {
-            return _http.Update("event/executed", b);
+            await _http.Update("event/executed", b);
         }
     }
 }

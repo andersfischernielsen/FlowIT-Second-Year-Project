@@ -55,7 +55,6 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
             }
-            
         }
 
         [Route("event")]
@@ -77,7 +76,6 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
             }
-
         }
 
 

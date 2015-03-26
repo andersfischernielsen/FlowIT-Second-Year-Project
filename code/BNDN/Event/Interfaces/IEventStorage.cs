@@ -10,14 +10,16 @@ namespace Event.Interfaces
     {
         #region Ids
         Uri OwnUri { get; set; } //For notifying server about this event. Is fetched when receiving EventDto on creation!
-        string WorkflowId { get; }
-        string EventId { get; }
+        string WorkflowId { get; set; }
+        string EventId { get; set; }
+        string Name { get; set; }
         #endregion
 
         #region State
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
+        LockDto LockDto { get; set; }
         #endregion
 
         #region Rules
@@ -25,6 +27,8 @@ namespace Event.Interfaces
         HashSet<Uri> Responses { get; set; }
         HashSet<Uri> Exclusions { get; set; }
         HashSet<Uri> Inclusions { get; set; }
+        Dictionary<string, Uri> EventUris { get; }
+
         #endregion
 
         #region Id and Uri Handling
