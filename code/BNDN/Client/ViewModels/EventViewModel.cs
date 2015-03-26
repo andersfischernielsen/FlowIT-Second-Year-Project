@@ -21,7 +21,7 @@ namespace Client.ViewModels
 
         #region Databindings
 
-        public int Id
+        public string Id
         {
             get { return __eventAddressDto.Id; }
             set
