@@ -14,7 +14,7 @@ namespace Server.Controllers
 
         public WorkflowsController()
         {
-            Storage = new WorkflowStorage();
+            Storage = CacheStorage.GetStorage;
         }
 
 
@@ -48,7 +48,6 @@ namespace Server.Controllers
         /// <summary>
         /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
         /// </summary>
-        /// <param name="eventId"></param>
         /// <param name="workflowId"></param>
         /// <param name="eventToAddDto"></param>
         [Route("Workflows/{workflowId}")]
