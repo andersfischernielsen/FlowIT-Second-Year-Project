@@ -52,7 +52,7 @@ namespace Server.Storage
             {
                 serverWorkflowModel.ServerEventModels.Add(eventToBeAddedDto);
             }
-            else throw new Exception("Element already Exists");
+            else throw new Exception("Event already exists");
         }
 
         public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)

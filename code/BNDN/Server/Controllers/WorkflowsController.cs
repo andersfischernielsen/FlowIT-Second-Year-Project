@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Web.Http;
 using Common;
 using Server.Models;
@@ -41,8 +44,16 @@ namespace Server.Controllers
         [HttpGet]
         public IEnumerable<EventAddressDto> Get(string workflowId)
         {
-            Debug.WriteLine("Hmm, we got here!");
-            return ServerLogic.GetEventsOnWorkflow(workflowId);
+            try
+            {
+                Debug.WriteLine("Hmm, we got here!");
+                return ServerLogic.GetEventsOnWorkflow(workflowId);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
+            }
+            
         }
 
 
@@ -57,8 +68,38 @@ namespace Server.Controllers
         // TODO: How does an Event know that an eventId is not already taken?
         public void PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
         {
+            try
+            {
+                // Add this Event to the specified workflow
+                ServerLogic.AddEventToWorkflow(workflowId, eventToAddDto);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
+        /// </summary>
+        /// <param name="workflowId"></param>
+        /// <param name="eventToAddDto"></param>
+        [Route("Workflows/{workflowId}")]
+        [HttpPut]
+        // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
+        // TODO: How does an Event know that an eventId is not already taken?
+        public void UpdateEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToBeUpdated)
+        {
+            try
+            {
             // Add this Event to the specified workflow
-            ServerLogic.AddEventToWorkflow(workflowId,eventToAddDto);
+                ServerLogic.UpdateEventOnWorkflow(workflowId, eventToBeUpdated);
+            }
+            catch (Exception ex)
+            {
+                
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
+            }
         }
 
         
@@ -67,9 +108,17 @@ namespace Server.Controllers
         // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
         public void DeleteEventFromWorkflow(string workflowId, string eventId)
         {
-            // Delete the given event id from the list of workflow-events.
-            Debug.WriteLine("Yep, we got here!");
-            ServerLogic.RemoveEventFromWorkflow(workflowId,eventId);
+            try
+            {
+                // Delete the given event id from the list of workflow-events.
+                Debug.WriteLine("Yep, we got here!");
+                ServerLogic.RemoveEventFromWorkflow(workflowId,eventId);
+            }
+            catch (Exception ex)
+            {
+                
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
+            }
         }
     }
 }
