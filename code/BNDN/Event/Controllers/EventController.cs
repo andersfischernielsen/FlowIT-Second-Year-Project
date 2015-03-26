@@ -134,7 +134,6 @@ namespace Event.Controllers
                 //Todo remove from server and add again.
             }
             
-
             Storage.EventId = eventDto.EventId;
             Storage.WorkflowId = eventDto.WorkflowId;
             Storage.Name = eventDto.Name;
@@ -164,13 +163,18 @@ namespace Event.Controllers
             {
                 await Storage.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
             }
-            return Ok();
         }
 
         [Route("")]
         [HttpDelete]
         public async Task DeleteEvent()
         {
+            if (Storage.EventId == null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Event is not initialized!"));
+            }
+
             // Todo: Server address.
             IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", Storage.EventId, Storage.WorkflowId);
 
