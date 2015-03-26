@@ -17,7 +17,7 @@ namespace Server.Storage
         {
             switch (workflow.WorkflowId)
             {
-                case "Computer":
+                case "computer":
                     // Dummy data (before deleting: it may be used for testing...?) 
                     var eventA = new ServerEventModel { EventId = "Apple", Uri = new Uri("http://www.apple.com") };
                     var eventB = new ServerEventModel { EventId = "IBM", Uri = new Uri("http://www.ibm.com") };
@@ -25,7 +25,7 @@ namespace Server.Storage
 
                     return new List<ServerEventModel> { eventA, eventB, eventC };
 
-                case "Car":
+                case "car":
                     // Dummy data (before deleting: it may be used for testing...?) 
                     var eventD = new ServerEventModel { EventId = "Opel", Uri = new Uri("http://www.opel.dk") };
                     var eventE = new ServerEventModel { EventId = "Ford", Uri = new Uri("http://www.ford.dk") };
@@ -56,15 +56,15 @@ namespace Server.Storage
         public IEnumerable<ServerWorkflowModel> GetAllWorkflows()
         {
             // Dummy workflows for now (before deleting: consider if it can be used for testing)
-            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", WorkflowId = "pay" };
-            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", WorkflowId = "grades" };
+            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", WorkflowId = "computer" };
+            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", WorkflowId = "car" };
             return new List<ServerWorkflowModel>() { dummy1, dummy2 };
         }
 
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
-            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", WorkflowId = "pay" };
-            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", WorkflowId = "grades" };
+            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", WorkflowId = "computer" };
+            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", WorkflowId = "car" };
             return new List<ServerWorkflowModel>() { dummy1, dummy2 }.First(model => model.WorkflowId == workflowId);
         }
 
