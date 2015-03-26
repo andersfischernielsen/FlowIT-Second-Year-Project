@@ -7,6 +7,11 @@ namespace Server.Models
 {
     public class ServerWorkflowModel
     {
+        public ServerWorkflowModel()
+        {
+            ServerEventModels = new List<ServerEventModel>();
+        }
+
         public string WorkflowId { get; set; }
         public string Name { get; set; }
 
