@@ -19,14 +19,7 @@ namespace Event.Models
         /// <param name="eventUri">The base-address of the Event whose rules are to be deleted</param>
         public EventCommunicator(Uri eventUri)
         {
-            if (HttpClientToolbox.IdHttpClientMap != null && HttpClientToolbox.IdHttpClientMap.ContainsKey(eventUri.ToString()))
-            {
-                _httpClient = HttpClientToolbox.IdHttpClientMap[eventUri.ToString()];
-            }
-            else
-            {
-                _httpClient = new HttpClientToolbox(eventUri);
-            }
+            _httpClient = new HttpClientToolbox(eventUri);
         }
 
         public async Task<bool> IsExecuted()
