@@ -165,7 +165,7 @@ namespace Event.Models
             {
                 return Task.Run(async () => new EventDto
                 {
-                    Id = EventId,
+                    EventId = EventId,
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,

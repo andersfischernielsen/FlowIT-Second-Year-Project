@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
@@ -56,7 +54,7 @@ namespace Event.Controllers
         }
         #endregion
 
-        #region EventState
+        #region EventDto
         /// <summary>
         /// Get the entire state of the Event, including rules.
         /// </summary>
@@ -93,7 +91,7 @@ namespace Event.Controllers
             Storage.Inclusions = eventDto.Inclusions;
             Storage.Exclusions = eventDto.Exclusions;
             Storage.Conditions = eventDto.Conditions;
-            Storage.Responses = eventDto.Responses;
+            Storage.Responses = eventDto.Responses; 
             Storage.OwnUri = new Uri(Request.RequestUri.Authority);
 
             var dto = new EventAddressDto
@@ -144,6 +142,8 @@ namespace Event.Controllers
             Storage.Exclusions = eventDto.Exclusions;
             Storage.Conditions = eventDto.Conditions;
             Storage.Responses = eventDto.Responses;
+
+            // Todo: This should not be necessary..
             Storage.OwnUri = new Uri(Request.RequestUri.Authority);
 
             var dto = new EventAddressDto
