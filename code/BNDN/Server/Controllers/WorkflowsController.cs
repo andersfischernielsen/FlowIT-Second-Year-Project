@@ -4,17 +4,18 @@ using System.Linq;
 using System.Web.Http;
 using Common;
 using Server.Models;
+using Server.Storage;
 
 namespace Server.Controllers
 {
     
     public class WorkflowsController : ApiController
     {
-        private IServerStorage Storage { get; set; }
+        private IServerLogic ServerLogic { get; set; }
 
         public WorkflowsController()
         {
-            Storage = new WorkflowStorage();
+            ServerLogic = new ServerLogic(new WorkflowStorage());
         }
 
 
@@ -26,7 +27,7 @@ namespace Server.Controllers
         [Route("workflows")]
         public IEnumerable<WorkflowDto> Get()
         {
-            return Storage.GetAllWorkflows();
+            return ServerLogic.GetAllWorkflows();
         }
 
 
@@ -41,14 +42,13 @@ namespace Server.Controllers
         public IEnumerable<EventAddressDto> Get(string workflowId)
         {
             Debug.WriteLine("Hmm, we got here!");
-            return Storage.GetEventsWithinWorkflow(workflowId);
+            return ServerLogic.GetEventsOnWorkflow(workflowId);
         }
 
 
         /// <summary>
         /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
         /// </summary>
-        /// <param name="eventId"></param>
         /// <param name="workflowId"></param>
         /// <param name="eventToAddDto"></param>
         [Route("Workflows/{workflowId}")]
@@ -58,7 +58,7 @@ namespace Server.Controllers
         public void PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
         {
             // Add this Event to the specified workflow
-            Storage.AddEventToWorkflow(workflowId,eventToAddDto);
+            ServerLogic.AddEventToWorkflow(workflowId,eventToAddDto);
         }
 
         
@@ -69,7 +69,7 @@ namespace Server.Controllers
         {
             // Delete the given event id from the list of workflow-events.
             Debug.WriteLine("Yep, we got here!");
-            Storage.RemoveEventFromWorkflow(workflowId,eventId);
+            ServerLogic.RemoveEventFromWorkflow(workflowId,eventId);
         }
     }
 }
