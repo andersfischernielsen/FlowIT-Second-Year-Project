@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -35,7 +34,7 @@ namespace Event.Controllers
             return await Logic.EventDto;
         }
 
-        [Route("")]
+        [Route("event")]
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
@@ -73,7 +72,7 @@ namespace Event.Controllers
             };
 
             // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", logic.EventId, logic.WorkflowId);
+            IServerFromEvent commuicator = new ServerCommunicator("http://localhost:13768/", logic.EventId, logic.WorkflowId);
 
             var otherEvents = await commuicator.PostEventToServer(dto);
 
@@ -83,7 +82,7 @@ namespace Event.Controllers
             }
         }
 
-        [Route("")]
+        [Route("event")]
         [HttpPut]
         public async Task PutEvent([FromBody] EventDto eventDto)
         {
@@ -126,7 +125,7 @@ namespace Event.Controllers
             };
 
             // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", logic.EventId, logic.WorkflowId);
+            IServerFromEvent commuicator = new ServerCommunicator("http://localhost:13768/", logic.EventId, logic.WorkflowId);
 
             var otherEvents = await commuicator.PostEventToServer(dto);
 
@@ -150,7 +149,7 @@ namespace Event.Controllers
             }
 
             // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", logic.EventId, logic.WorkflowId);
+            IServerFromEvent commuicator = new ServerCommunicator("http://localhost:13768/", logic.EventId, logic.WorkflowId);
 
             await commuicator.DeleteEventFromServer();
 
