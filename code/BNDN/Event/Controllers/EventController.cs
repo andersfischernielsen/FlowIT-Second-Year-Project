@@ -19,10 +19,10 @@ namespace Event.Controllers
     [RoutePrefix("event")]
     public class EventController : ApiController
     {
-        private IEventStorage Storage { get; set; }
+        private IEventLogic Logic { get; set; }
         public EventController()
         {
-            Storage = InMemoryStorage.GetState();
+            Logic = EventLogic.GetState();
         }
 
 
@@ -37,7 +37,7 @@ namespace Event.Controllers
                     ? new Uri("http://localhost:13752")
                     : new Uri(String.Format("http://{0}:13752/", HttpContext.Current.Request.UserHostAddress));
             }
-            return await isEvent(result) ? result : null;
+            return await IsEvent(result) ? result : null;
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="uri">The URI to test</param>
         /// <returns>true if the Uri represents an Event, false otherwise.</returns>
-        private async Task<bool> isEvent(Uri uri)
+        private static async Task<bool> IsEvent(Uri uri)
         {
             try
             {
@@ -70,28 +70,28 @@ namespace Event.Controllers
         [HttpGet]
         public bool GetPending()
         {
-            return Storage.Pending;
+            return Logic.Pending;
         }
 
         [Route("executed")]
         [HttpGet]
         public bool GetExecuted()
         {
-            return Storage.Executed;
+            return Logic.Executed;
         }
 
         [Route("included")]
         [HttpGet]
         public bool GetIncluded()
         {
-            return Storage.Included;
+            return Logic.Included;
         }
 
         [Route("executable")]
         [HttpGet]
         public async Task<bool> GetExecutable()
         {
-            return await ((InMemoryStorage)Storage).Executable();
+            return await ((EventLogic)Logic).IsExecutable();
         }
         #endregion
 
@@ -104,7 +104,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent()
         {
-            return await Storage.EventDto;
+            return await Logic.EventDto;
         }
 
         [Route("")]
@@ -115,8 +115,11 @@ namespace Event.Controllers
             {
                 return BadRequest(ModelState);
             }
-            Storage.EntireEventDto = eventDto;
+            //TODO: Implement handling af setting an EventDTO.
+            //Logic.EventDto = eventDto;
+            //TODO: General weird code here. Should fix!
 
+            throw new NotImplementedException();
             return await Task.Run(() => Ok());
         }
 
@@ -141,15 +144,21 @@ namespace Event.Controllers
             }
 
             // if new entry, add Event to the endPoints-table.
-            if (await Storage.KnowsId(id))
+
+            //**** BEGINNING OF HACK ****
+            //TODO: This is a hack. The Storage shouldn't be accessible from outside of the logic.
+            var logic = (EventLogic) Logic;
+
+            if (logic.InMemoryStorage.IdExists(id))
             {
                 return BadRequest(string.Format("{0} already exists!", id));
             }
 
-            await Storage.RegisterIdWithUri(id, await GetUriOfEvent());
+            logic.InMemoryStorage.StoreIdAndUri(id, await GetUriOfEvent());
 
-            await Storage.UpdateRules(id, ruleDto);
+            // **** HACK OVER ****
 
+            await logic.UpdateRules(id, ruleDto);
             return Ok();
         }
 
@@ -174,7 +183,7 @@ namespace Event.Controllers
             }
 
             // If the id is not known to this event, the PUT-call shall fail!
-            if (!await Storage.KnowsId(id))
+            if (!await Storage.IdExists(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
@@ -193,7 +202,7 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteRules(string id)
         {
-            if (!await Storage.KnowsId(id))
+            if (!await Storage.IdExists(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
@@ -236,15 +245,15 @@ namespace Event.Controllers
             }
             if (include)
             {
-                Storage.Included = true;
+                Logic.Included = true;
             }
             if (exclude)
             {
-                Storage.Included = false;
+                Logic.Included = false;
             }
             if (pending)
             {
-                Storage.Pending = true;
+                Logic.Pending = true;
             }
             // Todo: Await something sensible when connected to database.
             return await Task.Run(() => Ok());
@@ -262,7 +271,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventStateDto> GetState()
         {
-            return await Storage.EventStateDto;
+            return await Logic.EventStateDto;
         }
 
         /// <summary>
@@ -274,12 +283,12 @@ namespace Event.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> Execute()
         {
-            if (!(await ((InMemoryStorage)Storage).Executable()))
+            if (!(await ((EventLogic)Logic).IsExecutable()))
             {
                 return BadRequest("Event is not currently executable.");
             }
-            Storage.Executed = true;
-            var notifyDtos = await Storage.GetNotifyDtos();
+            Logic.Executed = true;
+            var notifyDtos = await Logic.GetNotifyDtos();
             Parallel.ForEach(notifyDtos, async pair =>
             {
                 await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
