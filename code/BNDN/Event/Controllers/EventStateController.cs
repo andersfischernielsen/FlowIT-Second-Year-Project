@@ -73,9 +73,9 @@ namespace Event.Controllers
         /// Executes this event. Only Clients should invoke this.
         /// todo: Should be able to return something to the caller.
         /// </summary>
-        [Route("event/executed")]
+        [Route("event/executed/{execute:bool}")]
         [HttpPut]
-        public async Task<IHttpActionResult> Execute()
+        public async Task<IHttpActionResult> Execute(bool execute)
         {
             if (!(await ((EventLogic)Logic).IsExecutable()))
             {
