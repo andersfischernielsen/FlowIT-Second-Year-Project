@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Common;
+using Server.Models;
 
 namespace Server.Storage
 {
@@ -11,49 +13,72 @@ namespace Server.Storage
             
         }
 
-        public IEnumerable<WorkflowDto> GetAllWorkflows()
+        public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
         {
-            // Dummy workflows for now (before deleting: consider if it can be used for testing)
-            var dummy1 = new WorkflowDto() {Name = "Pay rent", Id = "pay"};
-            var dummy2 = new WorkflowDto() {Name = "How to get good grades", Id = "grades"};
-            return new List<WorkflowDto>() {dummy1, dummy2};
-        }
-        public IEnumerable<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
-        {
-            switch (workflow.Id)
+            switch (workflow.WorkflowId)
             {
                 case "Computer":
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventA = new EventAddressDto { Id = "Apple", Uri = new Uri("http://www.apple.com") };
-                    var eventB = new EventAddressDto { Id = "IBM", Uri = new Uri("http://www.ibm.com") };
-                    var eventC = new EventAddressDto { Id = "Sam", Uri = new Uri("http://www.samsung.com") };
+                    var eventA = new ServerEventModel { EventId = "Apple", Uri = new Uri("http://www.apple.com") };
+                    var eventB = new ServerEventModel { EventId = "IBM", Uri = new Uri("http://www.ibm.com") };
+                    var eventC = new ServerEventModel { EventId = "Sam", Uri = new Uri("http://www.samsung.com") };
 
-                    return new List<EventAddressDto> { eventA, eventB, eventC };
+                    return new List<ServerEventModel> { eventA, eventB, eventC };
 
                 case "Car":
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventD = new EventAddressDto { Id = "Opel", Uri = new Uri("http://www.opel.dk") };
-                    var eventE = new EventAddressDto { Id = "Ford", Uri = new Uri("http://www.ford.dk") };
-                    var eventF = new EventAddressDto { Id = "Nis", Uri = new Uri("http://www.nissan.dk") };
+                    var eventD = new ServerEventModel { EventId = "Opel", Uri = new Uri("http://www.opel.dk") };
+                    var eventE = new ServerEventModel { EventId = "Ford", Uri = new Uri("http://www.ford.dk") };
+                    var eventF = new ServerEventModel { EventId = "Nis", Uri = new Uri("http://www.nissan.dk") };
 
-                    return new List<EventAddressDto> { eventD, eventE, eventF };
+                    return new List<ServerEventModel> { eventD, eventE, eventF };
 
                 default:
-                    return new List<EventAddressDto>();
+                    return new List<ServerEventModel>();
             }
         }
 
-        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
+        public void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto)
         {
             throw new NotImplementedException();
         }
 
-        public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
+        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             throw new NotImplementedException();
         }
 
-        public void AddNewWorkflow(WorkflowDto workflow)
+        public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<ServerWorkflowModel> GetAllWorkflows()
+        {
+            // Dummy workflows for now (before deleting: consider if it can be used for testing)
+            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", WorkflowId = "pay" };
+            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", WorkflowId = "grades" };
+            return new List<ServerWorkflowModel>() { dummy1, dummy2 };
+        }
+
+        public ServerWorkflowModel GetWorkflow(string workflowId)
+        {
+            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", WorkflowId = "pay" };
+            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", WorkflowId = "grades" };
+            return new List<ServerWorkflowModel>() { dummy1, dummy2 }.First(model => model.WorkflowId == workflowId);
+        }
+
+        public void AddNewWorkflow(ServerWorkflowModel workflow)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateWorkflow(ServerWorkflowModel workflow)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveWorkflow(ServerWorkflowModel workflow)
         {
             throw new NotImplementedException();
         }

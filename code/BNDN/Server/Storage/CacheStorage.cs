@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Common;
+using Server.Models;
 
 namespace Server.Storage
 {
     public class CacheStorage : IServerStorage
     {
         private static CacheStorage _instance;
-        private readonly Dictionary<WorkflowDto, HashSet<EventAddressDto>> _cache = new Dictionary<WorkflowDto, HashSet<EventAddressDto>>(); 
+        private readonly HashSet<ServerWorkflowModel> _cache = new HashSet<ServerWorkflowModel>();
 
         private CacheStorage()
         {
@@ -26,52 +27,80 @@ namespace Server.Storage
             }
         }
 
-        public IEnumerable<WorkflowDto> GetAllWorkflows()
+        public IEnumerable<ServerWorkflowModel> GetAllWorkflows()
         {
-            return _cache.Keys.ToList();
+            return _cache;
         }
 
-        public IEnumerable<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
+        public ServerWorkflowModel GetWorkflow(string workflowId)
         {
-            return _cache[workflow];
+            return _cache.First(model => model.WorkflowId == workflowId);
         }
 
-        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
+        public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
         {
-            HashSet<EventAddressDto> list;
-            _cache.TryGetValue(workflow, out list);
-            if (ContainsEvent(list, eventToBeAddedDto))
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            if (serverWorkflowModel != null)
+                return serverWorkflowModel.ServerEventModels;
+            return new List<ServerEventModel>();
+        }
+
+        public void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto)
+        {
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            if (serverWorkflowModel != null && !serverWorkflowModel.ServerEventModels.Contains(eventToBeAddedDto))
             {
-                throw new ArgumentException();
+                serverWorkflowModel.ServerEventModels.Add(eventToBeAddedDto);
             }
-            else
-            {
-                list.Add(eventToBeAddedDto);
-            }
+            else throw new Exception("Element already Exists");
         }
 
-        public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
+        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
-            HashSet<EventAddressDto> list;
-            _cache.TryGetValue(workflow, out list);
-            list.RemoveWhere(dto => dto.Id == eventId);
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            if (serverWorkflowModel != null)
+            {
+                var existingElement = serverWorkflowModel.ServerEventModels.First(model => model.EventId == eventToBeUpdated.EventId); // throws exception if not found.
+                var index = serverWorkflowModel.ServerEventModels.IndexOf(existingElement);
+                serverWorkflowModel.ServerEventModels[index] = eventToBeUpdated;
+            }
+            else throw new Exception("Element could not be found");
         }
 
-        private bool ContainsEvent(HashSet<EventAddressDto> workflow, EventAddressDto eventAddress)
+        public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
-            throw new NotImplementedException();
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            if (serverWorkflowModel != null)
+            {
+                var elementToDelete = serverWorkflowModel.ServerEventModels.First(model => model.EventId == eventId);
+                serverWorkflowModel.ServerEventModels.Remove(elementToDelete);
+            }
+            else throw new Exception("Element could not be found");
         }
 
-        public void AddNewWorkflow(WorkflowDto workflow)
+        public void AddNewWorkflow(ServerWorkflowModel workflow)
         {
-            if (_cache.ContainsKey(workflow))
+            var check = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            if (check == null)
             {
-                throw new ArgumentException();
+                _cache.Add(workflow);
             }
-            else
+            else throw new Exception("Workflow Already Exists");
+        }
+
+        public void UpdateWorkflow(ServerWorkflowModel workflow)
+        {
+            var element = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            if (element != null)
             {
-                _cache.Add(workflow, new HashSet<EventAddressDto>());
+                _cache.Add(workflow);
             }
+            else throw new Exception("Workflow not found");
+        }
+
+        public void RemoveWorkflow(ServerWorkflowModel workflow)
+        {
+            _cache.Remove(workflow);
         }
     }
 }
