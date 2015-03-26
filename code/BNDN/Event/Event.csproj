@@ -82,6 +82,8 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EventController.cs" />
     <Compile Include="Interfaces\IEventLogic.cs" />
+    <Compile Include="Controllers\EventRulesController.cs" />
+    <Compile Include="Controllers\EventStateController.cs" />
     <Compile Include="Models\EventCommunicator.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />
     <Compile Include="Interfaces\IServerFromEvent.cs" />
