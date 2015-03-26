@@ -12,6 +12,6 @@ namespace Server.Models
 
 
         public string ServerWorkflowModelId { get; set; }
-        public virtual ServerWorkflowModel WorkflowModelId { get; set; }
+        public virtual ServerWorkflowModel ServerWorkflowModel { get; set; }
     }
 }
