@@ -76,10 +76,12 @@ namespace Event.Controllers
 
             var otherEvents = await commuicator.PostEventToServer(dto);
 
+            /*
             foreach (var otherEvent in otherEvents)
             {
+                // Todo register self with other Events.
                 await Logic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            }
+            }*/
         }
 
         [Route("event")]
