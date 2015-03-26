@@ -84,9 +84,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="IServerLogic.cs" />
     <Compile Include="IServerStorage.cs" />
     <Compile Include="Models\WorkflowStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
