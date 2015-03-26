@@ -9,5 +9,8 @@ namespace Event.Interfaces
         Task<IList<EventAddressDto>> GetWorkFlowEvents(int workflowId);
         void SendHeartbeatToServer();
         Task RequestDeletionOfEventAtServer(int eventToBeDeleted);
+
+        Task DeleteEventFromServer();
+        Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto dto);
     }
 }

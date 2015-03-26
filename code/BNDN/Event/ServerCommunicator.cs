@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using Common;
-using Event.Controllers;
 using Event.Interfaces;
-using Event.Models;
 
 namespace Event
 {
@@ -19,11 +17,11 @@ namespace Event
         private readonly string _serverBaseAddress;
         
         // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of
-        private readonly int? _eventId;
-        private readonly int? _workflowId;
+        private readonly string _eventId;
+        private readonly string _workflowId;
 
 
-        public ServerCommunicator(String baseAddress, int eventId, int workFlowId)
+        public ServerCommunicator(String baseAddress, string eventId, string workFlowId)
         {
             _workflowId = workFlowId;
              _eventId = eventId;
@@ -40,13 +38,13 @@ namespace Event
         public async void NotifyServerOfExistence()
         {
             //Event won't do this unless it's been properly initialised.
-            if (!_eventId.HasValue || !_workflowId.HasValue || string.IsNullOrEmpty(_serverBaseAddress)) {
+            if (string.IsNullOrEmpty(_eventId) || string.IsNullOrEmpty(_workflowId) || string.IsNullOrEmpty(_serverBaseAddress)) {
                 return;
             }
 
             try {
                 var path = _serverBaseAddress + "Workflows/" + _workflowId;
-                await _httpClient.Create(path, new EventAddressDto {Id = _eventId.Value, Uri = new Uri(_serverBaseAddress)});
+                await _httpClient.Create(path, new EventAddressDto {Id = _eventId, Uri = new Uri(_serverBaseAddress)});
             }
             catch (Exception ex) {
                 //TODO: Server is down? What do then?
@@ -64,7 +62,7 @@ namespace Event
         {
             try
             {
-                var path = _serverBaseAddress + "Workflows/" + workflowId;
+                var path = "workflows/" + workflowId;
                 var a = await _httpClient.ReadList<EventAddressDto>(path);
                 return a;
             }
@@ -83,7 +81,7 @@ namespace Event
         public async void SendHeartbeatToServer()
         {
             string path = _workflowId + "/" + _eventId;
-            var heartBeatDto = new HeartBeatDto().EventId = _eventId.Value;
+            var heartBeatDto = new HeartBeatDto().EventId = _eventId;
             try
             {
                 await _httpClient.Create(path, heartBeatDto);
@@ -101,7 +99,7 @@ namespace Event
          */
         public async Task RequestDeletionOfEventAtServer(int eventToBeDeletedId)
         {
-            var path = _serverBaseAddress + "/workflows/" + _workflowId + "/" + eventToBeDeletedId;
+            var path = String.Format("workflows/{0}/{1}", _workflowId, eventToBeDeletedId);
             try
             { 
                 await _httpClient.Delete(path);
@@ -113,5 +111,16 @@ namespace Event
             }
         }
 
+        public async Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto addressDto)
+        {
+            var path = string.Format("{0}/{1}", _workflowId, _eventId);
+            return await _httpClient.Create<EventAddressDto, IEnumerable<EventAddressDto>>(path, addressDto);
+        }
+
+        public async Task DeleteEventFromServer()
+        {
+            var path = string.Format("{0}/{1}", _workflowId, _eventId);
+            await _httpClient.Delete(path);
+        }
     }
 }
