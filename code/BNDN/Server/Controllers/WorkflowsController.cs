@@ -18,7 +18,7 @@ namespace Server.Controllers
 
         public WorkflowsController()
         {
-            ServerLogic = new ServerLogic(new WorkflowStorage());
+            ServerLogic = new ServerLogic(CacheStorage.GetStorage);
         }
 
 
@@ -58,7 +58,7 @@ namespace Server.Controllers
 
 
         /// <summary>
-        /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
+        /// PostNewWorkFlow adds a new workflow with the specified workflowid. 
         /// </summary>
         /// <param name="workflowId"></param>
         /// <param name="eventToAddDto"></param>
@@ -66,16 +66,17 @@ namespace Server.Controllers
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
         // TODO: How does an Event know that an eventId is not already taken?
-        public void PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
+        public void PostWorkFlow(string workflowId, [FromBody] WorkflowDto dto)
         {
+            // Todo see that workflowId matches the dto.
             try
             {
                 // Add this Event to the specified workflow
-                ServerLogic.AddEventToWorkflow(workflowId, eventToAddDto);
+                ServerLogic.AddNewWorkflow(dto);
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
             }
         }
 
@@ -102,7 +103,24 @@ namespace Server.Controllers
             }
         }
 
-        
+        [Route("Workflows/{workflowId}/{eventId}")]
+        [HttpPost]
+        // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
+        // TODO: How does an Event know that an eventId is not already taken?
+        public IEnumerable<EventAddressDto> PostEventToWorkFlow(string workflowId, string eventId, [FromBody] EventAddressDto eventToAddDto)
+        {
+            try
+            {
+                // Add this Event to the specified workflow
+                ServerLogic.AddEventToWorkflow(workflowId, eventToAddDto);
+                return ServerLogic.GetEventsOnWorkflow(workflowId).Where(eventAddressDto => eventAddressDto.Id != eventId);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+            }
+        }
+
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
@@ -117,7 +135,7 @@ namespace Server.Controllers
             catch (Exception ex)
             {
                 
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
             }
         }
     }

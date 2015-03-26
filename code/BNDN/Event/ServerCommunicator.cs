@@ -90,13 +90,13 @@ namespace Event
 
         public async Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto addressDto)
         {
-            var path = string.Format("{0}/{1}", _workflowId, _eventId);
+            var path = string.Format("workflows/{0}/{1}", _workflowId, _eventId);
             return await _httpClient.Create<EventAddressDto, IEnumerable<EventAddressDto>>(path, addressDto);
         }
 
         public async Task DeleteEventFromServer()
         {
-            var path = string.Format("{0}/{1}", _workflowId, _eventId);
+            var path = string.Format("workflows/{0}/{1}", _workflowId, _eventId);
             await _httpClient.Delete(path);
         }
     }

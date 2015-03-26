@@ -77,7 +77,7 @@ namespace Event.Controllers
         /// </summary>
         [Route("event/executed")]
         [HttpPut]
-        public async Task<IHttpActionResult> Execute()
+        public async Task<IHttpActionResult> Execute([FromBody] bool execute)
         {
             if (!Logic.IsAllowedToOperate())
             {
