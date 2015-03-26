@@ -38,6 +38,6 @@ namespace Event.Interfaces
         #endregion
 
         Task ResetState();
-        bool IsAllowedToOperate();
+        bool IsAllowedToOperate(EventAddressDto eventAddressDto);
     }
 }

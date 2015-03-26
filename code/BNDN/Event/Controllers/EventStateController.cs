@@ -25,32 +25,49 @@ namespace Event.Controllers
         #region GET-requests
         [Route("event/pending")]
         [HttpGet]
-        public bool GetPending()
+        public bool GetPending([FromBody] EventAddressDto eventAddressDto)
         {
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+            }
             return Logic.Pending;
+
         }
 
 
 
         [Route("event/executed")]
         [HttpGet]
-        public bool GetExecuted()
+        public bool GetExecuted([FromBody] EventAddressDto eventAddressDto)
         {
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+            }
             return Logic.Executed;
         }
 
 
         [Route("event/included")]
         [HttpGet]
-        public bool GetIncluded()
+        public bool GetIncluded([FromBody] EventAddressDto eventAddressDto)
         {
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+            }
             return Logic.Included;
         }
 
         [Route("event/executable")]
         [HttpGet]
-        public async Task<bool> GetExecutable()
+        public async Task<bool> GetExecutable([FromBody] EventAddressDto eventAddressDto)
         {
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+            }
             return await ((EventLogic)Logic).IsExecutable();
         }
 
@@ -63,12 +80,15 @@ namespace Event.Controllers
         /// which states whether the Event is currently executable</returns>
         [Route("event/state")]
         [HttpGet]
-        public async Task<EventStateDto> GetState()
+        public async Task<EventStateDto> GetState([FromBody] EventAddressDto eventAddressDto)
         {
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+            }
             return await Logic.EventStateDto;
         }
         #endregion
-
 
         #region PUT-requests
         /// <summary>
@@ -79,11 +99,6 @@ namespace Event.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> Execute([FromBody] bool execute)
         {
-            if (!Logic.IsAllowedToOperate())
-            {
-                return BadRequest("This event is already locked by someone else.");
-            }
-
             if (!(await ((EventLogic)Logic).IsExecutable()))
             {
                 return BadRequest("Event is not currently executable.");
@@ -100,9 +115,9 @@ namespace Event.Controllers
 
         [Route("event/included/{boolValueForIncluded}")]
         [HttpPut]
-        public void UpdateIncluded(bool boolValueForIncluded)
+        public void UpdateIncluded([FromBody] EventAddressDto eventAddressDto, bool boolValueForIncluded)
         {
-            if (!Logic.IsAllowedToOperate())
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
             }
@@ -111,9 +126,9 @@ namespace Event.Controllers
 
         [Route("event/pending/{boolValueForPending}")]
         [HttpPut]
-        public void UpdatePending(bool boolValueForPending)
+        public void UpdatePending([FromBody] EventAddressDto eventAddressDto, bool boolValueForPending)
         {
-            if (!Logic.IsAllowedToOperate())
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
             }
@@ -123,9 +138,9 @@ namespace Event.Controllers
 
         [Route("event/executed/{boolValueForExecuted}")]
         [HttpPut]
-        public void UpdateExecuted(bool boolValueForExecuted)
+        public void UpdateExecuted([FromBody] EventAddressDto eventAddressDto, bool boolValueForExecuted)
         {
-            if (!Logic.IsAllowedToOperate())
+            if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
             }
@@ -133,6 +148,7 @@ namespace Event.Controllers
         }
 
         #endregion
+
         #region POST-requests
         [Route("Event/lock")]
         [HttpPost]
@@ -150,15 +166,15 @@ namespace Event.Controllers
 
         [Route("Event/lock")]
         [HttpDelete]
-        public void Unlock([FromBody] LockDto lockDto)
+        public void Unlock([FromBody] EventAddressDto eventAddressDto)
         {
-            if(Logic.LockDto.LockOwner.Equals(lockDto.LockOwner))
+            if(!Logic.IsAllowedToOperate(eventAddressDto))
             {
-                Logic.LockDto = null;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could be unlocked. Event was locked by someone else."));
             }
             else
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could be unlocked. Event was locked by someone else."));
+                Logic.LockDto = null;
             }
         }
         #endregion
