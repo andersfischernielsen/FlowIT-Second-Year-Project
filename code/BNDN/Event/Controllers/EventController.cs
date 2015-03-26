@@ -59,11 +59,11 @@ namespace Event.Controllers
             logic.Included = eventDto.Included;
             logic.Pending = eventDto.Pending;
             logic.Executed = eventDto.Executed;
-            logic.Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            logic.Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            logic.Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            logic.Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses)); 
-            logic.OwnUri = new Uri(Request.RequestUri.Authority);
+            logic.Inclusions = new HashSet<Uri>(eventDto.Inclusions);
+            logic.Exclusions = new HashSet<Uri>(eventDto.Exclusions);
+            logic.Conditions = new HashSet<Uri>(eventDto.Conditions);
+            logic.Responses = new HashSet<Uri>(eventDto.Responses); 
+            logic.OwnUri = new Uri(String.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
 
             var dto = new EventAddressDto
             {
@@ -112,10 +112,10 @@ namespace Event.Controllers
             logic.Included = eventDto.Included;
             logic.Pending = eventDto.Pending;
             logic.Executed = eventDto.Executed;
-            logic.Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            logic.Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            logic.Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            logic.Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses));
+            logic.Inclusions = new HashSet<Uri>(eventDto.Inclusions);
+            logic.Exclusions = new HashSet<Uri>(eventDto.Exclusions);
+            logic.Conditions = new HashSet<Uri>(eventDto.Conditions);
+            logic.Responses = new HashSet<Uri>(eventDto.Responses);
 
             // Todo: This should not be necessary..
             logic.OwnUri = new Uri(Request.RequestUri.Authority);
