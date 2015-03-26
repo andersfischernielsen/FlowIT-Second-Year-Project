@@ -7,85 +7,86 @@ using Event.Interfaces;
 
 namespace Event.Models
 {
-    public class Logic : ILogic
+    public class EventLogic : IEventLogic
     {
         #region Properties
         public Uri OwnUri
         {
-            set { _inMemoryStorage.OwnUri = value; }
-            get { return _inMemoryStorage.OwnUri; }
+            set { InMemoryStorage.OwnUri = value; }
+            get { return InMemoryStorage.OwnUri; }
         }
 
         public string WorkflowId
         {
-            set { _inMemoryStorage.WorkflowId = value; }
-            get { return _inMemoryStorage.WorkflowId; }
+            set { InMemoryStorage.WorkflowId = value; }
+            get { return InMemoryStorage.WorkflowId; }
         }
 
         public string EventId
         {
-            set { _inMemoryStorage.EventId = value; }
-            get { return _inMemoryStorage.EventId; }
+            set { InMemoryStorage.EventId = value; }
+            get { return InMemoryStorage.EventId; }
         }
 
         public bool Executed
         {
-            set { _inMemoryStorage.Executed = value; }
-            get { return _inMemoryStorage.Executed; }
+            set { InMemoryStorage.Executed = value; }
+            get { return InMemoryStorage.Executed; }
         }
 
         public bool Included
         {
-            set { _inMemoryStorage.Included = value; }
-            get { return _inMemoryStorage.Included; }
+            set { InMemoryStorage.Included = value; }
+            get { return InMemoryStorage.Included; }
         }
 
         public bool Pending
         {
-            set { _inMemoryStorage.Pending = value; }
-            get { return _inMemoryStorage.Pending; }
+            set { InMemoryStorage.Pending = value; }
+            get { return InMemoryStorage.Pending; }
         }
 
         public Task<HashSet<Uri>> Conditions
         {
-            set { _inMemoryStorage.Conditions = value; }
-            get { return _inMemoryStorage.Conditions; }
+            set { InMemoryStorage.Conditions = value.Result; }
+            get { return Task.Run(() => InMemoryStorage.Conditions); }
         }
 
         public Task<HashSet<Uri>> Responses
         {
-            set { _inMemoryStorage.Responses = value; }
-            get { return _inMemoryStorage.Responses; }
+            set { InMemoryStorage.Responses = value.Result; }
+            get { return Task.Run( () => InMemoryStorage.Responses); }
         }
 
         public Task<HashSet<Uri>> Exclusions
         {
-            set { _inMemoryStorage.Exclusions = value; }
-            get { return _inMemoryStorage.Exclusions; }
+            set { InMemoryStorage.Exclusions = value.Result; }
+            get { return Task.Run( () => InMemoryStorage.Exclusions); }
         }
 
         public Task<HashSet<Uri>> Inclusions
         {
-            set { _inMemoryStorage.Inclusions = value; }
-            get { return _inMemoryStorage.Inclusions; }
+            set { InMemoryStorage.Inclusions = value.Result; }
+            get { return Task.Run( () => InMemoryStorage.Inclusions); }
         }
         #endregion
 
         #region Init
         //Storage instance for getting and setting data.
-        private readonly InMemoryStorage _inMemoryStorage;
-
+        //TODO: This is a hack! The Storage shouldn't be accessible from outside of the logic.
+        public readonly InMemoryStorage InMemoryStorage;
+        
         //Singleton instance.
-        private static Logic _logic;
+        private static EventLogic _eventLogic;
 
-        public static Logic GetState()
+        public static EventLogic GetState()
         {
-            return _logic ?? (_logic = new Logic());
+            return _eventLogic ?? (_eventLogic = new EventLogic());
         }
 
-        private Logic()
+        private EventLogic()
         {
-            _inMemoryStorage = new InMemoryStorage();
+            InMemoryStorage = new InMemoryStorage();
         }
         #endregion
 
@@ -115,7 +116,7 @@ namespace Event.Models
 
         public async Task UpdateRules(string id, EventRuleDto rules)
         {
-            var endPoint = _inMemoryStorage.EventUris[id];
+            var endPoint = InMemoryStorage.EventUris[id];
             if (endPoint == null)
             {
                 throw new ArgumentException("Nonexistent id", id);
@@ -162,10 +163,10 @@ namespace Event.Models
             return (IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>) result;
         }
 
-        private async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
+        public async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
             where T : NotifyDto
         {
-            var dto = creator.Invoke(await _inMemoryStorage.GetIdFromUri(uri));
+            var dto = creator.Invoke(InMemoryStorage.GetIdFromUri(uri));
 
             if (dictionary.ContainsKey(uri)) { dictionary[uri].Add(dto); }
             else { dictionary.Add(uri, new List<NotifyDto> { dto }); }
@@ -207,17 +208,17 @@ namespace Event.Models
         #region URI Registering
         public Task RegisterIdWithUri(string id, Uri endPoint)
         {
-            return Task.Run(() => _inMemoryStorage.RegisterIdWithUri(id, endPoint));
+            return Task.Run( () => RegisterIdWithUri(id, endPoint));
         }
 
         public Task<bool> KnowsId(string id)
         {
-            return Task.Run(() => _inMemoryStorage.IdExists(id));
+            return Task.Run(() => InMemoryStorage.IdExists(id));
         }
 
         public Task RemoveIdAndUri(string id)
         {
-            return Task.Run(() => _inMemoryStorage.RemoveIdAndUri(id));
+            return Task.Run(() => InMemoryStorage.RemoveIdAndUri(id));
         }
         #endregion
     }
