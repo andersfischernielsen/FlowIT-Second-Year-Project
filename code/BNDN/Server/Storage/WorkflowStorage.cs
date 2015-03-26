@@ -1,9 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Common;
 
-namespace Server.Models
+namespace Server.Storage
 {
     public class WorkflowStorage : IServerStorage
     {
@@ -12,17 +11,16 @@ namespace Server.Models
             
         }
 
-        public IList<WorkflowDto> GetAllWorkflows()
+        public IEnumerable<WorkflowDto> GetAllWorkflows()
         {
             // Dummy workflows for now (before deleting: consider if it can be used for testing)
             var dummy1 = new WorkflowDto() {Name = "Pay rent", Id = "pay"};
             var dummy2 = new WorkflowDto() {Name = "How to get good grades", Id = "grades"};
             return new List<WorkflowDto>() {dummy1, dummy2};
         }
-
-        public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
+        public IEnumerable<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
         {
-            switch (workflowId)
+            switch (workflow.Id)
             {
                 case "Computer":
                     // Dummy data (before deleting: it may be used for testing...?) 
@@ -31,27 +29,26 @@ namespace Server.Models
                     var eventC = new EventAddressDto { Id = "Sam", Uri = new Uri("http://www.samsung.com") };
 
                     return new List<EventAddressDto> { eventA, eventB, eventC };
-                
+
                 case "Car":
                     // Dummy data (before deleting: it may be used for testing...?) 
                     var eventD = new EventAddressDto { Id = "Opel", Uri = new Uri("http://www.opel.dk") };
                     var eventE = new EventAddressDto { Id = "Ford", Uri = new Uri("http://www.ford.dk") };
                     var eventF = new EventAddressDto { Id = "Nis", Uri = new Uri("http://www.nissan.dk") };
 
-                    return new List<EventAddressDto> {eventD, eventE, eventF};
+                    return new List<EventAddressDto> { eventD, eventE, eventF };
 
                 default:
                     return new List<EventAddressDto>();
             }
         }
 
-        public void AddEventToWorkflow(String workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
         {
-            // Add Event to specified workflow
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public void RemoveEventFromWorkflow(string workflowId, string eventId)
+        public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
         {
             throw new NotImplementedException();
         }
