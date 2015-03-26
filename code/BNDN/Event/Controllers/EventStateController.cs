@@ -68,7 +68,7 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
             }
-            return await ((EventLogic)Logic).IsExecutable();
+            return await Logic.IsExecutable();
         }
 
 
@@ -90,6 +90,7 @@ namespace Event.Controllers
         }
         #endregion
 
+        // TODO: We need to decide on a consistent way of updating these values; a) the (bool) value in body or b) the bool value in the url...
         #region PUT-requests
         /// <summary>
         /// Executes this event. Only Clients should invoke this.
@@ -99,11 +100,14 @@ namespace Event.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> Execute([FromBody] bool execute)
         {
-            if (!(await ((EventLogic)Logic).IsExecutable()))
+            if (!(await Logic.IsExecutable()))
             {
                 return BadRequest("Event is not currently executable.");
             }
+            
+            // Is this too early to set it to true; have we (at this point in this mthod) actually executed...? 
             Logic.Executed = true;
+
             var notifyDtos = await Logic.GetNotifyDtos();
             Parallel.ForEach(notifyDtos, async pair =>
             {
@@ -135,18 +139,6 @@ namespace Event.Controllers
             Logic.Pending = boolValueForPending;
         }
 
-
-        [Route("event/executed/{boolValueForExecuted}")]
-        [HttpPut]
-        public void UpdateExecuted([FromBody] EventAddressDto eventAddressDto, bool boolValueForExecuted)
-        {
-            if (!Logic.IsAllowedToOperate(eventAddressDto))
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
-            }
-            Logic.Executed = boolValueForExecuted;
-        }
-
         #endregion
 
         #region POST-requests
@@ -156,7 +148,13 @@ namespace Event.Controllers
         {
             if (Logic.LockDto != null)
             {
+                // There cannot be set a new lock, since a lock is already set.
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could not be acquired. Event is already locked."));
+            }
+            else if (lockDto == null)
+            {
+                // Caller provided a null LockDto
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could not be set. An empty lock was provided."));
             }
             else
             {

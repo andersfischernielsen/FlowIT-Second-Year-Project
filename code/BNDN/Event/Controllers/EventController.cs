@@ -38,124 +38,62 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
-            // Todo: Fix
-            var logic = (EventLogic)Logic;
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
-            if (eventDto == null)
+
+            // Prepare for method-call
+            var ownUri = new Uri(Request.RequestUri.Authority);
+            
+            // Method call
+            try
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Data was null"));
+                await Logic.InitializeEvent(eventDto, ownUri);
             }
-            if (logic.EventId != null)
+            catch (NullReferenceException exception)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Event is already running!"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
             }
-
-            logic.EventId = eventDto.EventId;
-            logic.WorkflowId = eventDto.WorkflowId;
-            logic.Name = eventDto.Name;
-            logic.Included = eventDto.Included;
-            logic.Pending = eventDto.Pending;
-            logic.Executed = eventDto.Executed;
-            logic.Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            logic.Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            logic.Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            logic.Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses)); 
-            logic.OwnUri = new Uri(Request.RequestUri.Authority);
-
-            var dto = new EventAddressDto
-            {
-                Id = logic.EventId,
-                Uri = logic.OwnUri
-            };
-
-            // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://localhost:13768/", logic.EventId, logic.WorkflowId);
-
-            var otherEvents = await commuicator.PostEventToServer(dto);
-
-            /*
-            foreach (var otherEvent in otherEvents)
-            {
-                // Todo register self with other Events.
-                await Logic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            }*/
+            
         }
 
         [Route("event")]
         [HttpPut]
         public async Task PutEvent([FromBody] EventDto eventDto)
         {
-            var logic = (EventLogic)Logic;
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
-            if (eventDto == null)
+
+            // Prepare for method-call
+            var ownUri = new Uri(Request.RequestUri.Authority);
+            try
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Data was null"));
+                await Logic.UpdateEvent(eventDto, ownUri);
             }
-            if (logic.EventId == null)
+            catch (NullReferenceException exception)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Event is not initialized!"));
-            }
-            if (logic.EventId != eventDto.EventId || logic.WorkflowId != eventDto.WorkflowId)
-            {
-                //Todo remove from server and add again.
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
             }
 
-            logic.EventId = eventDto.EventId;
-            logic.WorkflowId = eventDto.WorkflowId;
-            logic.Name = eventDto.Name;
-            logic.Included = eventDto.Included;
-            logic.Pending = eventDto.Pending;
-            logic.Executed = eventDto.Executed;
-            logic.Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            logic.Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            logic.Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            logic.Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses));
-
-            // Todo: This should not be necessary..
-            logic.OwnUri = new Uri(Request.RequestUri.Authority);
-
-            var dto = new EventAddressDto
-            {
-                Id = logic.EventId,
-                Uri = logic.OwnUri
-            };
-
-            // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://localhost:13768/", logic.EventId, logic.WorkflowId);
-
-            var otherEvents = await commuicator.PostEventToServer(dto);
-
-
-            // Todo clear old registered events!
-            foreach (var otherEvent in otherEvents)
-            {
-                await Logic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            }
         }
+
 
         [Route("event")]
         [HttpDelete]
         public async Task DeleteEvent()
         {
-            var logic = (EventLogic) Logic;
-            if (logic.EventId == null)
+            try
+            {
+                await Logic.DeleteEvent();
+            }
+            catch (NullReferenceException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Event is not initialized!"));
+                "Event is not initialized!"));
             }
-
-            // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://localhost:13768/", logic.EventId, logic.WorkflowId);
-
-            await commuicator.DeleteEventFromServer();
-
-            await Logic.ResetState();
         }
         #endregion
     }

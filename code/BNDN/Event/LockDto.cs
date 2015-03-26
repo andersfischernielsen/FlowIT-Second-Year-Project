@@ -5,7 +5,7 @@ using System.Web;
 
 namespace Event
 {
-    internal class LockDto
+    public class LockDto
     {
         //It's expected that LockOwner matches the Id of the EventAddressDto making the lock call.
         public string LockOwner { get; set; }

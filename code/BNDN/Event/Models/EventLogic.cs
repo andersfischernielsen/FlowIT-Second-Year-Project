@@ -91,6 +91,9 @@ namespace Event.Models
         //Singleton instance.
         private static EventLogic _eventLogic;
 
+        // ServerCommunicator
+        private IServerFromEvent ServerCommunicator { get; set; }
+
         public static EventLogic GetState()
         {
             return _eventLogic ?? (_eventLogic = new EventLogic());
@@ -99,6 +102,8 @@ namespace Event.Models
         private EventLogic()
         {
             InMemoryStorage = new InMemoryStorage();
+            // TODO: Server address
+            ServerCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
         }
         #endregion
 
@@ -248,7 +253,108 @@ namespace Event.Models
 
         public bool IsAllowedToOperate(EventAddressDto eventAddressDto)
         {
+            // TODO: Consider implementing an Equals() method on EventAddressDto
             return LockDto.LockOwner.Equals(eventAddressDto.Id);
-        } 
+        }
+
+        // TODO: InitializeEvent and UpdateEvent has a lot of duplicated code, will look into this later
+        public async Task InitializeEvent(EventDto eventDto, Uri ownUri)
+        {
+            if (eventDto == null)
+            {
+                throw new NullReferenceException("Provided EventDto was null");
+            }
+            if (EventId != null)
+            {
+                throw new NullReferenceException("EventId was null");
+            }
+
+            EventId = eventDto.EventId;
+            WorkflowId = eventDto.WorkflowId;
+            Name = eventDto.Name;
+            Included = eventDto.Included;
+            Pending = eventDto.Pending;
+            Executed = eventDto.Executed;
+            Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
+            Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
+            Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
+            Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses));
+            OwnUri = ownUri;
+
+            var dto = new EventAddressDto
+            {
+                Id = EventId,
+                Uri = OwnUri
+            };
+
+           var otherEvents = await ServerCommunicator.PostEventToServer(dto);
+
+            /*
+            foreach (var otherEvent in otherEvents)
+            {
+                // Todo register self with other Events.
+                await Logic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+            }*/
+        }
+
+        public async Task UpdateEvent(EventDto eventDto, Uri ownUri)
+        {
+
+            if (eventDto == null)
+            {
+                throw new NullReferenceException("Provided EventDto was null");
+            }
+            if (EventId != null)
+            {
+                throw new NullReferenceException("EventId was null");
+            }
+
+            if (EventId != eventDto.EventId || WorkflowId != eventDto.WorkflowId)
+            {
+                //Todo remove from server and add again.
+            }
+
+            EventId = eventDto.EventId;
+            WorkflowId = eventDto.WorkflowId;
+            Name = eventDto.Name;
+            Included = eventDto.Included;
+            Pending = eventDto.Pending;
+            Executed = eventDto.Executed;
+            Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
+            Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
+            Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
+            Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses));
+
+           
+
+            // Todo: This should not be necessary..
+            OwnUri = ownUri;
+
+            var dto = new EventAddressDto
+            {
+                Id = EventId,
+                Uri = OwnUri
+            };
+
+            var otherEvents = await ServerCommunicator.PostEventToServer(dto);
+
+
+            // Todo clear old registered events!
+            foreach (var otherEvent in otherEvents)
+            {
+                await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+            }
+        }
+
+        public async Task DeleteEvent()
+        {
+            if (EventId == null)
+            {
+                throw new NullReferenceException();
+            }
+
+            await ServerCommunicator.DeleteEventFromServer();
+            await ResetState();
+        }
     }
 }

@@ -39,5 +39,9 @@ namespace Event.Interfaces
 
         Task ResetState();
         bool IsAllowedToOperate(EventAddressDto eventAddressDto);
+
+        Task InitializeEvent(EventDto eventDto, Uri ownUri);
+        Task UpdateEvent(EventDto eventDto, Uri ownUri);
+        Task DeleteEvent();
     }
 }
