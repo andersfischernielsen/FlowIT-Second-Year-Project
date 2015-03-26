@@ -53,26 +53,14 @@ namespace Server
 
         public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
         {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
-        {
-            
+            HashSet<EventAddressDto> list;
+            _cache.TryGetValue(workflow, out list);
+            list.RemoveWhere(dto => dto.Id == eventId);
         }
 
         private bool ContainsEvent(HashSet<EventAddressDto> workflow, EventAddressDto eventAddress)
         {
             throw new NotImplementedException();
-        }
-
-        public void RemoveEventFromWorkflow(string workflowId, string eventId)
-        {
-            var l = GetAllWorkflows();
-            var w = l.Single(x => x.Id == workflowId); // Throws exception if workflow is not found
-            HashSet<EventAddressDto> list;
-            _cache.TryGetValue(w, out list);
-            list.RemoveWhere(x => x.Id == eventId);
         }
 
         public void AddNewWorkflow(WorkflowDto workflow)
