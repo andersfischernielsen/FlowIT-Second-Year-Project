@@ -17,6 +17,7 @@ namespace Event.Interfaces
         #endregion
 
         #region Rules
+        Task<bool> IsExecutable();
         Task UpdateRules(string id, EventRuleDto rules);
         #endregion
 
@@ -28,5 +29,13 @@ namespace Event.Interfaces
         Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
             where T : NotifyDto;
         #endregion
+
+        #region URI Handling
+        Task RegisterIdWithUri(string id, Uri endPoint);
+        Task<bool> KnowsId(string id);
+        Task RemoveIdAndUri(string id);
+        #endregion
+
+        Task ResetState();
     }
 }

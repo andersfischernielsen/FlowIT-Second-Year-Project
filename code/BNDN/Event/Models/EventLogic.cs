@@ -28,6 +28,12 @@ namespace Event.Models
             get { return InMemoryStorage.EventId; }
         }
 
+        public string Name
+        {
+            set { InMemoryStorage.Name = value; }
+            get { return InMemoryStorage.Name; }
+        }
+
         public bool Executed
         {
             set { InMemoryStorage.Executed = value; }
@@ -55,19 +61,19 @@ namespace Event.Models
         public Task<HashSet<Uri>> Responses
         {
             set { InMemoryStorage.Responses = value.Result; }
-            get { return Task.Run( () => InMemoryStorage.Responses); }
+            get { return Task.Run(() => InMemoryStorage.Responses); }
         }
 
         public Task<HashSet<Uri>> Exclusions
         {
             set { InMemoryStorage.Exclusions = value.Result; }
-            get { return Task.Run( () => InMemoryStorage.Exclusions); }
+            get { return Task.Run(() => InMemoryStorage.Exclusions); }
         }
 
         public Task<HashSet<Uri>> Inclusions
         {
             set { InMemoryStorage.Inclusions = value.Result; }
-            get { return Task.Run( () => InMemoryStorage.Inclusions); }
+            get { return Task.Run(() => InMemoryStorage.Inclusions); }
         }
         #endregion
 
@@ -75,7 +81,7 @@ namespace Event.Models
         //Storage instance for getting and setting data.
         //TODO: This is a hack! The Storage shouldn't be accessible from outside of the logic.
         public readonly InMemoryStorage InMemoryStorage;
-        
+
         //Singleton instance.
         private static EventLogic _eventLogic;
 
@@ -160,7 +166,7 @@ namespace Event.Models
                 await AddNotifyDto(result, inclusion, s => new IncludeDto { Id = s });
             }
 
-            return (IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>) result;
+            return (IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>)result;
         }
 
         public async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
@@ -192,7 +198,7 @@ namespace Event.Models
             {
                 return Task.Run(async () => new EventDto
                 {
-                    Id = EventId,
+                    EventId = EventId,
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,
@@ -208,7 +214,7 @@ namespace Event.Models
         #region URI Registering
         public Task RegisterIdWithUri(string id, Uri endPoint)
         {
-            return Task.Run( () => RegisterIdWithUri(id, endPoint));
+            return Task.Run(() => RegisterIdWithUri(id, endPoint));
         }
 
         public Task<bool> KnowsId(string id)
@@ -221,5 +227,17 @@ namespace Event.Models
             return Task.Run(() => InMemoryStorage.RemoveIdAndUri(id));
         }
         #endregion
+
+
+        public Task ResetState()
+        {
+            return Task.Run(() =>
+            {
+                InMemoryStorage.Name = null;
+                InMemoryStorage.EventId = null;
+                InMemoryStorage.WorkflowId = null;
+                InMemoryStorage.OwnUri = null;
+            });
+        }
     }
 }

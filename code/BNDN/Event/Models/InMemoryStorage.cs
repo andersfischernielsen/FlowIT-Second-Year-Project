@@ -2,22 +2,25 @@ using System;
 using System.Collections.Generic;
 using Event.Interfaces;
 
-namespace Event.Models {
-    public class InMemoryStorage : IEventStorage {
+namespace Event.Models
+{
+    public class InMemoryStorage : IEventStorage
+    {
         public InMemoryStorage()
         {
-            EventUris   = new Dictionary<string, Uri>();
-            EventIds    = new Dictionary<Uri, string>();
-            Conditions  = new HashSet<Uri>();
-            Responses   = new HashSet<Uri>();
-            Exclusions  = new HashSet<Uri>();
-            Inclusions  = new HashSet<Uri>();
+            EventUris = new Dictionary<string, Uri>();
+            EventIds = new Dictionary<Uri, string>();
+            Conditions = new HashSet<Uri>();
+            Responses = new HashSet<Uri>();
+            Exclusions = new HashSet<Uri>();
+            Inclusions = new HashSet<Uri>();
         }
 
         #region Properties
         public Uri OwnUri { get; set; }
         public string WorkflowId { get; set; }
         public string EventId { get; set; }
+        public string Name { get; set; }
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public bool Pending { get; set; }

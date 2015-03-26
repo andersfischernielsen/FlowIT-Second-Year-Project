@@ -18,10 +18,10 @@ namespace Event.Controllers
     [RoutePrefix("event")]
     public class EventController : ApiController
     {
-        private IEventStorage Storage { get; set; }
+        private IEventLogic Logic { get; set; }
         public EventController()
         {
-            Storage = InMemoryStorage.GetState();
+            Logic = EventLogic.GetState();
         }
 
         #region State
@@ -29,28 +29,28 @@ namespace Event.Controllers
         [HttpGet]
         public bool GetPending()
         {
-            return Storage.Pending;
+            return Logic.Pending;
         }
 
         [Route("executed")]
         [HttpGet]
         public bool GetExecuted()
         {
-            return Storage.Executed;
+            return Logic.Executed;
         }
 
         [Route("included")]
         [HttpGet]
         public bool GetIncluded()
         {
-            return Storage.Included;
+            return Logic.Included;
         }
 
         [Route("executable")]
         [HttpGet]
         public async Task<bool> GetExecutable()
         {
-            return await ((InMemoryStorage)Storage).Executable();
+            return await ((EventLogic)Logic).IsExecutable();
         }
         #endregion
 
@@ -63,13 +63,15 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent()
         {
-            return await Storage.EventDto;
+            return await Logic.EventDto;
         }
 
         [Route("")]
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
+            // Todo: Fix
+            var logic = (EventLogic)Logic;
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
@@ -78,36 +80,37 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Data was null"));
             }
-            if (Storage.EventId != null)
+            if (logic.EventId != null)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Event is already running!"));
             }
-            Storage.EventId = eventDto.EventId;
-            Storage.WorkflowId = eventDto.WorkflowId;
-            Storage.Name = eventDto.Name;
-            Storage.Included = eventDto.Included;
-            Storage.Pending = eventDto.Pending;
-            Storage.Executed = eventDto.Executed;
-            Storage.Inclusions = eventDto.Inclusions;
-            Storage.Exclusions = eventDto.Exclusions;
-            Storage.Conditions = eventDto.Conditions;
-            Storage.Responses = eventDto.Responses; 
-            Storage.OwnUri = new Uri(Request.RequestUri.Authority);
+
+            logic.EventId = eventDto.EventId;
+            logic.WorkflowId = eventDto.WorkflowId;
+            logic.Name = eventDto.Name;
+            logic.Included = eventDto.Included;
+            logic.Pending = eventDto.Pending;
+            logic.Executed = eventDto.Executed;
+            logic.Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
+            logic.Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
+            logic.Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
+            logic.Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses)); 
+            logic.OwnUri = new Uri(Request.RequestUri.Authority);
 
             var dto = new EventAddressDto
             {
-                Id = Storage.EventId,
-                Uri = Storage.OwnUri
+                Id = logic.EventId,
+                Uri = logic.OwnUri
             };
 
             // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", Storage.EventId, Storage.WorkflowId);
+            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", logic.EventId, logic.WorkflowId);
 
             var otherEvents = await commuicator.PostEventToServer(dto);
 
             foreach (var otherEvent in otherEvents)
             {
-                await Storage.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+                await Logic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
             }
         }
 
@@ -115,6 +118,7 @@ namespace Event.Controllers
         [HttpPut]
         public async Task PutEvent([FromBody] EventDto eventDto)
         {
+            var logic = (EventLogic)Logic;
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
@@ -123,37 +127,37 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Data was null"));
             }
-            if (Storage.EventId == null)
+            if (logic.EventId == null)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Event is not initialized!"));
             }
-            if (Storage.EventId != eventDto.EventId || Storage.WorkflowId != eventDto.WorkflowId)
+            if (logic.EventId != eventDto.EventId || logic.WorkflowId != eventDto.WorkflowId)
             {
                 //Todo remove from server and add again.
             }
-            
-            Storage.EventId = eventDto.EventId;
-            Storage.WorkflowId = eventDto.WorkflowId;
-            Storage.Name = eventDto.Name;
-            Storage.Included = eventDto.Included;
-            Storage.Pending = eventDto.Pending;
-            Storage.Executed = eventDto.Executed;
-            Storage.Inclusions = eventDto.Inclusions;
-            Storage.Exclusions = eventDto.Exclusions;
-            Storage.Conditions = eventDto.Conditions;
-            Storage.Responses = eventDto.Responses;
+
+            logic.EventId = eventDto.EventId;
+            logic.WorkflowId = eventDto.WorkflowId;
+            logic.Name = eventDto.Name;
+            logic.Included = eventDto.Included;
+            logic.Pending = eventDto.Pending;
+            logic.Executed = eventDto.Executed;
+            logic.Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
+            logic.Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
+            logic.Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
+            logic.Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses));
 
             // Todo: This should not be necessary..
-            Storage.OwnUri = new Uri(Request.RequestUri.Authority);
+            logic.OwnUri = new Uri(Request.RequestUri.Authority);
 
             var dto = new EventAddressDto
             {
-                Id = Storage.EventId,
-                Uri = Storage.OwnUri
+                Id = logic.EventId,
+                Uri = logic.OwnUri
             };
 
             // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", Storage.EventId, Storage.WorkflowId);
+            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", logic.EventId, logic.WorkflowId);
 
             var otherEvents = await commuicator.PostEventToServer(dto);
 
@@ -161,7 +165,7 @@ namespace Event.Controllers
             // Todo clear old registered events!
             foreach (var otherEvent in otherEvents)
             {
-                await Storage.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+                await Logic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
             }
         }
 
@@ -169,18 +173,19 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteEvent()
         {
-            if (Storage.EventId == null)
+            var logic = (EventLogic) Logic;
+            if (logic.EventId == null)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Event is not initialized!"));
             }
 
             // Todo: Server address.
-            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", Storage.EventId, Storage.WorkflowId);
+            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", logic.EventId, logic.WorkflowId);
 
             await commuicator.DeleteEventFromServer();
 
-            await Storage.ResetState();
+            await Logic.ResetState();
         }
         #endregion
 
@@ -206,12 +211,12 @@ namespace Event.Controllers
             }
 
             // if new entry, add Event to the endPoints-table.
-            if (await Storage.KnowsId(id))
+            if (await Logic.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} already exists!", id));
             }
 
-            await Storage.UpdateRules(id, ruleDto);
+            await Logic.UpdateRules(id, ruleDto);
 
             return Ok();
         }
@@ -237,12 +242,12 @@ namespace Event.Controllers
             }
 
             // If the id is not known to this event, the PUT-call shall fail!
-            if (!await Storage.KnowsId(id))
+            if (! await Logic.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
 
-            await Storage.UpdateRules(id, ruleDto);
+            await Logic.UpdateRules(id, ruleDto);
 
             return Ok();
         }
@@ -256,12 +261,12 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteRules(string id)
         {
-            if (!await Storage.KnowsId(id))
+            if (!await Logic.KnowsId(id))
             {
                 return BadRequest(string.Format("{0} does not exist!", id));
             }
 
-            await Storage.UpdateRules(id,
+            await Logic.UpdateRules(id,
                 // Set all states to false to remove them from storage.
                 // This effectively removes all rules associated with the given id.
                 // Possibly - to save memory - it could be null instead.
@@ -274,7 +279,7 @@ namespace Event.Controllers
                     Response = false
                 });
             // Remove the id because it is no longer associated with any rules.
-            await Storage.RemoveIdAndUri(id);
+            await Logic.RemoveIdAndUri(id);
 
             return Ok();
         }
@@ -299,15 +304,15 @@ namespace Event.Controllers
             }
             if (include)
             {
-                Storage.Included = true;
+                Logic.Included = true;
             }
             if (exclude)
             {
-                Storage.Included = false;
+                Logic.Included = false;
             }
             if (pending)
             {
-                Storage.Pending = true;
+                Logic.Pending = true;
             }
             // Todo: Await something sensible when connected to database.
             return await Task.Run(() => Ok());
@@ -325,7 +330,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventStateDto> GetState()
         {
-            return await Storage.EventStateDto;
+            return await Logic.EventStateDto;
         }
 
         /// <summary>
@@ -337,12 +342,12 @@ namespace Event.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> Execute()
         {
-            if (!(await ((InMemoryStorage)Storage).Executable()))
+            if (!(await ((EventLogic)Logic).IsExecutable()))
             {
                 return BadRequest("Event is not currently executable.");
             }
-            Storage.Executed = true;
-            var notifyDtos = await Storage.GetNotifyDtos();
+            Logic.Executed = true;
+            var notifyDtos = await Logic.GetNotifyDtos();
             Parallel.ForEach(notifyDtos, async pair =>
             {
                 await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
