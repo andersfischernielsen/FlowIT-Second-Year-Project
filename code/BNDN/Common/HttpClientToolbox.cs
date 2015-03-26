@@ -105,6 +105,14 @@ namespace Common
             }
         }
 
+        public async Task<TResult> Create<TArgument, TResult>(string uri, TArgument objectToPost)
+        {
+            var response = await HttpClient.PostAsJsonAsync(uri, objectToPost);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadAsAsync<TResult>();
+            return result;
+        }
+
         /// <summary>
         /// Reads all the objects of type T at the webAPI on the string BaseAddress + uri. 
         /// T and the uri string must match.
