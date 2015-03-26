@@ -7,6 +7,6 @@ namespace Event
 {
     class HeartBeatDto
     {
-        public int EventId { get; set; }
+        public string EventId { get; set; }
     }
 }
