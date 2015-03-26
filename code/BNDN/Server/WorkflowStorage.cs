@@ -20,6 +20,26 @@ namespace Server.Models
             return new List<WorkflowDto>() {dummy1, dummy2};
         }
 
+        public IList<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddNewWorkflow(WorkflowDto workflow)
+        {
+            throw new NotImplementedException();
+        }
+
         public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
         {
             switch (workflowId)
@@ -43,22 +63,6 @@ namespace Server.Models
                 default:
                     return new List<EventAddressDto>();
             }
-        }
-
-        public void AddEventToWorkflow(String workflowToAttachToId, EventAddressDto eventToBeAddedDto)
-        {
-            // Add Event to specified workflow
-            throw new System.NotImplementedException();
-        }
-
-        public void RemoveEventFromWorkflow(string workflowId, string eventId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddNewWorkflow(WorkflowDto workflow)
-        {
-            throw new NotImplementedException();
         }
     }
 }

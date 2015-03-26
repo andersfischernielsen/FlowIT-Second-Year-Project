@@ -35,36 +35,15 @@ namespace Server
         public IList<EventAddressDto> GetEventsOnWorkflow(WorkflowDto workflow)
         {
             List<EventAddressDto> list;
-            var b = _cache.TryGetValue(workflow, out list);
-            if (b)
-            {
-                return list;
-            }
-            else
-            {
-                throw new NullReferenceException();
-            }
+            _cache.TryGetValue(workflow, out list);
+            return list;
         }
 
         public void AddEventToWorkflow(WorkflowDto workflow, EventAddressDto eventToBeAddedDto)
         {
-            if (_cache.ContainsKey(workflow))
-            {
-                List<EventAddressDto> list;
-                var b = _cache.TryGetValue(workflow, out list);
-                if (b)
-                {
-                    list.Add(eventToBeAddedDto);
-                }
-                else
-                {
-                    throw new NullReferenceException();
-                }
-            }
-            else
-            {
-                throw new NullReferenceException();
-            }
+            List<EventAddressDto> list;
+            var b = _cache.TryGetValue(workflow, out list);
+            list.Add(eventToBeAddedDto);
         }
 
         public void RemoveEventFromWorkflow(WorkflowDto workflow, string eventId)

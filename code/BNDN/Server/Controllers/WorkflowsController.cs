@@ -10,11 +10,11 @@ namespace Server.Controllers
     
     public class WorkflowsController : ApiController
     {
-        private IServerStorage Storage { get; set; }
+        private IServerLogic Storage { get; set; }
 
         public WorkflowsController()
         {
-            Storage = new WorkflowStorage();
+            Storage = new ServerLogic(new WorkflowStorage());
         }
 
 

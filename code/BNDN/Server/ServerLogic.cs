@@ -16,7 +16,7 @@ namespace Server
         }
         public IList<WorkflowDto> GetAllWorkflows()
         {
-            _storage.GetAllWorkflows();
+            return _storage.GetAllWorkflows();
         }
 
         public IList<EventAddressDto> GetEventsWithinWorkflow(string workflowId)
