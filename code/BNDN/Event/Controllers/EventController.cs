@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
@@ -23,46 +24,6 @@ namespace Event.Controllers
         public EventController()
         {
             Storage = InMemoryStorage.GetState();
-        }
-
-
-        [HttpGet]
-        [Route("~/remoteuri")]
-        public async Task<Uri> GetUriOfEvent()
-        {
-            Uri result = null;
-            if (HttpContext.Current != null)
-            {
-                result = HttpContext.Current.Request.UserHostAddress == "::1"
-                    ? new Uri("http://localhost:13752")
-                    : new Uri(String.Format("http://{0}:13752/", HttpContext.Current.Request.UserHostAddress));
-            }
-            return await isEvent(result) ? result : null;
-        }
-
-        /// <summary>
-        /// Returns true when the uri (which should include a port) represents an Event.
-        /// </summary>
-        /// <param name="uri">The URI to test</param>
-        /// <returns>true if the Uri represents an Event, false otherwise.</returns>
-        private async Task<bool> isEvent(Uri uri)
-        {
-            try
-            {
-                await new EventCommunicator(uri).IsIncluded();
-            }
-            catch (HttpRequestException)
-            {
-                // This means that the WebAPI didn't respond or that it failed to answer the call succesfully.
-                return false;
-            }
-            catch (UnsupportedMediaTypeException ex)
-            {
-                // if this happens, something in the Web API has been changed and this method should reflect it.
-                Debug.WriteLine(ex.StackTrace);
-                throw;
-            }
-            return true;
         }
 
         #region State
@@ -95,7 +56,7 @@ namespace Event.Controllers
         }
         #endregion
 
-        #region EventEvent
+        #region EventState
         /// <summary>
         /// Get the entire state of the Event, including rules.
         /// </summary>
@@ -108,18 +69,118 @@ namespace Event.Controllers
         }
 
         [Route("")]
-        [HttpPut]
-        public async Task<IHttpActionResult> PutEvent([FromBody] EventDto eventDto)
+        [HttpPost]
+        public async Task PostEvent([FromBody] EventDto eventDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
-            Storage.EntireEventDto = eventDto;
+            if (eventDto == null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Data was null"));
+            }
+            if (Storage.EventId != null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Event is already running!"));
+            }
+            Storage.EventId = eventDto.EventId;
+            Storage.WorkflowId = eventDto.WorkflowId;
+            Storage.Name = eventDto.Name;
+            Storage.Included = eventDto.Included;
+            Storage.Pending = eventDto.Pending;
+            Storage.Executed = eventDto.Executed;
+            Storage.Inclusions = eventDto.Inclusions;
+            Storage.Exclusions = eventDto.Exclusions;
+            Storage.Conditions = eventDto.Conditions;
+            Storage.Responses = eventDto.Responses;
+            Storage.OwnUri = new Uri(Request.RequestUri.Authority);
 
-            return await Task.Run(() => Ok());
+            var dto = new EventAddressDto
+            {
+                Id = Storage.EventId,
+                Uri = Storage.OwnUri
+            };
+
+            // Todo: Server address.
+            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", Storage.EventId, Storage.WorkflowId);
+
+            var otherEvents = await commuicator.PostEventToServer(dto);
+
+            foreach (var otherEvent in otherEvents)
+            {
+                await Storage.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+            }
         }
 
+        [Route("")]
+        [HttpPut]
+        public async Task PutEvent([FromBody] EventDto eventDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
+            }
+            if (eventDto == null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Data was null"));
+            }
+            if (Storage.EventId == null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Event is not initialized!"));
+            }
+            if (Storage.EventId != eventDto.EventId || Storage.WorkflowId != eventDto.WorkflowId)
+            {
+                //Todo remove from server and add again.
+            }
+            
+
+            Storage.EventId = eventDto.EventId;
+            Storage.WorkflowId = eventDto.WorkflowId;
+            Storage.Name = eventDto.Name;
+            Storage.Included = eventDto.Included;
+            Storage.Pending = eventDto.Pending;
+            Storage.Executed = eventDto.Executed;
+            Storage.Inclusions = eventDto.Inclusions;
+            Storage.Exclusions = eventDto.Exclusions;
+            Storage.Conditions = eventDto.Conditions;
+            Storage.Responses = eventDto.Responses;
+            Storage.OwnUri = new Uri(Request.RequestUri.Authority);
+
+            var dto = new EventAddressDto
+            {
+                Id = Storage.EventId,
+                Uri = Storage.OwnUri
+            };
+
+            // Todo: Server address.
+            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", Storage.EventId, Storage.WorkflowId);
+
+            var otherEvents = await commuicator.PostEventToServer(dto);
+
+
+            // Todo clear old registered events!
+            foreach (var otherEvent in otherEvents)
+            {
+                await Storage.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+            }
+            return Ok();
+        }
+
+        [Route("")]
+        [HttpDelete]
+        public async Task DeleteEvent()
+        {
+            // Todo: Server address.
+            IServerFromEvent commuicator = new ServerCommunicator("http://serveraddress.azurewebsites.net", Storage.EventId, Storage.WorkflowId);
+
+            await commuicator.DeleteEventFromServer();
+
+            await Storage.ResetState();
+        }
+        #endregion
+
+        #region EventEvent
         #region Rules
         /// <summary>
         /// Add a rule to this Event.
@@ -145,8 +206,6 @@ namespace Event.Controllers
             {
                 return BadRequest(string.Format("{0} already exists!", id));
             }
-
-            await Storage.RegisterIdWithUri(id, await GetUriOfEvent());
 
             await Storage.UpdateRules(id, ruleDto);
 
