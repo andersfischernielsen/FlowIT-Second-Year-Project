@@ -4,6 +4,7 @@ using Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NUnit.Framework;
+using Server.Storage;
 
 namespace Server.Tests
 {

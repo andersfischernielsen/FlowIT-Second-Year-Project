@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Common;
 
-namespace Server
+namespace Server.Storage
 {
     public class CacheStorage : IServerStorage
     {

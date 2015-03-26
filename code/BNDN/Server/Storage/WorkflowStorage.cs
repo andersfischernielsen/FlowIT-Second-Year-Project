@@ -1,9 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Common;
 
-namespace Server.Models
+namespace Server.Storage
 {
     public class WorkflowStorage : IServerStorage
     {
