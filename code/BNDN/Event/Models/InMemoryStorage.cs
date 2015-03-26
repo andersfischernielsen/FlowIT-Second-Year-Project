@@ -10,8 +10,7 @@ namespace Event.Models
     public class InMemoryStorage : IEventStorage
     {
         private static InMemoryStorage _inMemoryStorage;
-        public EventDto EntireEventDto { get; set; } // todo Maybe use adapter pattern to simplify entire storage.
-
+        public Uri OwnUri { get; set; }
         public string WorkflowId { get; set; }
         public string EventId { get; set; }
         public bool Executed { get; set; }
@@ -20,12 +19,17 @@ namespace Event.Models
 
         public async Task<bool> Executable()
         {
+            //If this event is excluded, return false.
+            if (!Included) {
+                return false;
+            }
+
             foreach (var condition in await Conditions)
             {
                 IEventFromEvent eventCommunicator = new EventCommunicator(condition);
                 var executed = await eventCommunicator.IsExecuted();
                 var included = await eventCommunicator.IsIncluded();
-                // If the condition-event is not executed and currently included
+                // If the condition-event is not executed and currently included.
                 if (!executed || included)
                 {
                     return false; //Don't check rest because this event is not executable.
@@ -36,6 +40,11 @@ namespace Event.Models
 
         private Dictionary<string, Uri> EventUris { get; set; }
         private Dictionary<Uri, string> EventIds { get; set; }
+
+        public static InMemoryStorage GetState()
+        {
+            return _inMemoryStorage ?? (_inMemoryStorage = new InMemoryStorage());
+        }
 
         private InMemoryStorage()
         {
@@ -175,11 +184,6 @@ namespace Event.Models
                     Inclusions = await Inclusions
                 });
             }
-        }
-
-        public static InMemoryStorage GetState()
-        {
-            return _inMemoryStorage ?? (_inMemoryStorage = new InMemoryStorage());
         }
     }
 }
