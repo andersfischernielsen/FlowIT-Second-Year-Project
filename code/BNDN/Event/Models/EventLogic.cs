@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
@@ -12,81 +11,81 @@ namespace Event.Models
         #region Properties
         public Uri OwnUri
         {
-            set { InMemoryStorage.OwnUri = value; }
-            get { return InMemoryStorage.OwnUri; }
+            set { Storage.OwnUri = value; }
+            get { return Storage.OwnUri; }
         }
 
         public string WorkflowId
         {
-            set { InMemoryStorage.WorkflowId = value; }
-            get { return InMemoryStorage.WorkflowId; }
+            set { Storage.WorkflowId = value; }
+            get { return Storage.WorkflowId; }
         }
 
         public string EventId
         {
-            set { InMemoryStorage.EventId = value; }
-            get { return InMemoryStorage.EventId; }
+            set { Storage.EventId = value; }
+            get { return Storage.EventId; }
         }
 
         public string Name
         {
-            set { InMemoryStorage.Name = value; }
-            get { return InMemoryStorage.Name; }
+            set { Storage.Name = value; }
+            get { return Storage.Name; }
         }
 
         public LockDto LockDto
         {
-            set { InMemoryStorage.LockDto = value; }
-            get { return InMemoryStorage.LockDto; }
+            set { Storage.LockDto = value; }
+            get { return Storage.LockDto; }
         }
 
         public bool Executed
         {
-            set { InMemoryStorage.Executed = value; }
-            get { return InMemoryStorage.Executed; }
+            set { Storage.Executed = value; }
+            get { return Storage.Executed; }
         }
 
         public bool Included
         {
-            set { InMemoryStorage.Included = value; }
-            get { return InMemoryStorage.Included; }
+            set { Storage.Included = value; }
+            get { return Storage.Included; }
         }
 
         public bool Pending
         {
-            set { InMemoryStorage.Pending = value; }
-            get { return InMemoryStorage.Pending; }
+            set { Storage.Pending = value; }
+            get { return Storage.Pending; }
         }
 
-        public Task<HashSet<Uri>> Conditions
+        public HashSet<Uri> Conditions
         {
-            set { InMemoryStorage.Conditions = value.Result; }
-            get { return Task.Run(() => InMemoryStorage.Conditions); }
+            set { Storage.Conditions = value; }
+            get { return Storage.Conditions; }
         }
 
-        public Task<HashSet<Uri>> Responses
+        public HashSet<Uri> Responses
         {
-            set { InMemoryStorage.Responses = value.Result; }
-            get { return Task.Run(() => InMemoryStorage.Responses); }
+            set { Storage.Responses = value; }
+            get { return Storage.Responses; }
         }
 
-        public Task<HashSet<Uri>> Exclusions
+        public HashSet<Uri> Exclusions
         {
-            set { InMemoryStorage.Exclusions = value.Result; }
-            get { return Task.Run(() => InMemoryStorage.Exclusions); }
+            set { Storage.Exclusions = value; }
+            get { return Storage.Exclusions; }
         }
 
-        public Task<HashSet<Uri>> Inclusions
+        public HashSet<Uri> Inclusions
         {
-            set { InMemoryStorage.Inclusions = value.Result; }
-            get { return Task.Run(() => InMemoryStorage.Inclusions); }
+            set { Storage.Inclusions = value; }
+            get { return Storage.Inclusions; }
         }
         #endregion
 
         #region Init
         //Storage instance for getting and setting data.
         //TODO: This is a hack! The Storage shouldn't be accessible from outside of the logic.
-        public readonly InMemoryStorage InMemoryStorage;
+        public readonly IEventStorage Storage;
 
         //Singleton instance.
         private static EventLogic _eventLogic;
@@ -98,7 +97,7 @@ namespace Event.Models
 
         private EventLogic()
         {
-            InMemoryStorage = new InMemoryStorage();
+            Storage = new InMemoryStorage();
         }
         #endregion
 
@@ -111,7 +110,7 @@ namespace Event.Models
                 return false;
             }
 
-            foreach (var condition in await Conditions)
+            foreach (var condition in Conditions)
             {
                 IEventFromEvent eventCommunicator = new EventCommunicator(condition);
                 var executed = await eventCommunicator.IsExecuted();
@@ -128,20 +127,23 @@ namespace Event.Models
 
         public async Task UpdateRules(string id, EventRuleDto rules)
         {
-            var endPoint = InMemoryStorage.EventUris[id];
-            if (endPoint == null)
+            await Task.Run(() =>
             {
-                throw new ArgumentException("Nonexistent id", id);
-            }
-            if (rules == null)
-            {
-                throw new ArgumentNullException("rules");
-            }
+                var uri = Storage.EventUris[id];
+                if (uri == null)
+                {
+                    throw new ArgumentException("Nonexistent id", id);
+                }
+                if (rules == null)
+                {
+                    throw new ArgumentNullException("rules");
+                }
 
-            UpdateRule(rules.Condition, endPoint, await Conditions);
-            UpdateRule(rules.Exclusion, endPoint, await Exclusions);
-            UpdateRule(rules.Inclusion, endPoint, await Inclusions);
-            UpdateRule(rules.Response, endPoint, await Responses);
+                UpdateRule(rules.Condition, uri, Conditions);
+                UpdateRule(rules.Exclusion, uri, Exclusions);
+                UpdateRule(rules.Inclusion, uri, Inclusions);
+                UpdateRule(rules.Response, uri, Responses);
+            });
         }
 
         private static void UpdateRule(bool shouldAdd, Uri value, ISet<Uri> collection)
@@ -157,17 +159,17 @@ namespace Event.Models
         {
             var result = new Dictionary<Uri, List<NotifyDto>>();
 
-            foreach (var response in await Responses)
+            foreach (var response in Responses)
             {
                 await AddNotifyDto(result, response, s => new PendingDto { Id = s });
             }
 
-            foreach (var exclusion in await Exclusions)
+            foreach (var exclusion in Exclusions)
             {
                 await AddNotifyDto(result, exclusion, s => new ExcludeDto { Id = s });
             }
 
-            foreach (var inclusion in await Inclusions)
+            foreach (var inclusion in Inclusions)
             {
                 await AddNotifyDto(result, inclusion, s => new IncludeDto { Id = s });
             }
@@ -178,10 +180,19 @@ namespace Event.Models
         public async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
             where T : NotifyDto
         {
-            var dto = creator.Invoke(InMemoryStorage.GetIdFromUri(uri));
+            await Task.Run(() =>
+            {
+                var dto = creator.Invoke(Storage.GetIdFromUri(uri));
 
-            if (dictionary.ContainsKey(uri)) { dictionary[uri].Add(dto); }
-            else { dictionary.Add(uri, new List<NotifyDto> { dto }); }
+                if (dictionary.ContainsKey(uri))
+                {
+                    dictionary[uri].Add(dto);
+                }
+                else
+                {
+                    dictionary.Add(uri, new List<NotifyDto> {dto});
+                }
+            });
         }
 
         public Task<EventStateDto> EventStateDto
@@ -202,16 +213,18 @@ namespace Event.Models
         {
             get
             {
-                return Task.Run(async () => new EventDto
+                return Task.Run(() => new EventDto
                 {
                     EventId = EventId,
+                    WorkflowId = WorkflowId,
+                    Name = Name,
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,
-                    Conditions = await Conditions,
-                    Exclusions = await Exclusions,
-                    Responses = await Responses,
-                    Inclusions = await Inclusions
+                    Conditions = Conditions,
+                    Exclusions = Exclusions,
+                    Responses = Responses,
+                    Inclusions = Inclusions
                 });
             }
         }
@@ -225,24 +238,24 @@ namespace Event.Models
 
         public Task<bool> KnowsId(string id)
         {
-            return Task.Run(() => InMemoryStorage.IdExists(id));
+            return Task.Run(() => Storage.IdExists(id));
         }
 
         public Task RemoveIdAndUri(string id)
         {
-            return Task.Run(() => InMemoryStorage.RemoveIdAndUri(id));
+            return Task.Run(() => Storage.RemoveIdAndUri(id));
         }
         #endregion
 
 
-        public Task ResetState()
+        public async Task ResetState()
         {
-            return Task.Run(() =>
+            await Task.Run(() =>
             {
-                InMemoryStorage.Name = null;
-                InMemoryStorage.EventId = null;
-                InMemoryStorage.WorkflowId = null;
-                InMemoryStorage.OwnUri = null;
+                Storage.Name = null;
+                Storage.EventId = null;
+                Storage.WorkflowId = null;
+                Storage.OwnUri = null;
             });
         }
 
