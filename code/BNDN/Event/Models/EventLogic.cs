@@ -34,6 +34,12 @@ namespace Event.Models
             get { return InMemoryStorage.Name; }
         }
 
+        public LockDto LockDto
+        {
+            set { InMemoryStorage.LockDto = value; }
+            get { return InMemoryStorage.LockDto; }
+        }
+
         public bool Executed
         {
             set { InMemoryStorage.Executed = value; }
@@ -211,7 +217,7 @@ namespace Event.Models
         }
         #endregion
 
-        #region URI Registering
+        #region URI Registration
         public Task RegisterIdWithUri(string id, Uri endPoint)
         {
             return Task.Run(() => RegisterIdWithUri(id, endPoint));
@@ -239,5 +245,11 @@ namespace Event.Models
                 InMemoryStorage.OwnUri = null;
             });
         }
+
+        // TODO: Provide an actual implementation
+        public bool IsAllowedToOperate()
+        {
+            return true;
+        } 
     }
 }

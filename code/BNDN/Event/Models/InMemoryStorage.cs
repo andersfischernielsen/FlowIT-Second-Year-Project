@@ -21,6 +21,7 @@ namespace Event.Models
         public string WorkflowId { get; set; }
         public string EventId { get; set; }
         public string Name { get; set; }
+        public LockDto LockDto { get; set; }
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public bool Pending { get; set; }

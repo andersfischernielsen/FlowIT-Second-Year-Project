@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Web.Http;
+using System.Net.Http;
+using System.Net;
 using Common;
 using Event.Interfaces;
 using Event.Models;
@@ -77,6 +79,11 @@ namespace Event.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> Execute()
         {
+            if (!Logic.IsAllowedToOperate())
+            {
+                return BadRequest("This event is already locked by someone else.");
+            }
+
             if (!(await ((EventLogic)Logic).IsExecutable()))
             {
                 return BadRequest("Event is not currently executable.");
@@ -95,6 +102,10 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdateIncluded(bool boolValueForIncluded)
         {
+            if (!Logic.IsAllowedToOperate())
+            {
+               throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
+            }
             Logic.Included = boolValueForIncluded;
         }
 
@@ -102,6 +113,10 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdatePending(bool boolValueForPending)
         {
+            if (!Logic.IsAllowedToOperate())
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
+            }
             Logic.Pending = boolValueForPending;
         }
 
@@ -110,10 +125,42 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdateExecuted(bool boolValueForExecuted)
         {
+            if (!Logic.IsAllowedToOperate())
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
+            }
             Logic.Executed = boolValueForExecuted;
         }
 
         #endregion
+        #region POST-requests
+        [Route("Event/lock")]
+        [HttpPost]
+        public void Lock([FromBody] LockDto lockDto)
+        {
+            if (Logic.LockDto != null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could not be acquired. Event is already locked."));
+            }
+            else
+            {
+                Logic.LockDto = lockDto;
+            }
+        }
 
+        [Route("Event/lock")]
+        [HttpDelete]
+        public void Unlock([FromBody] LockDto lockDto)
+        {
+            if(Logic.LockDto.LockOwner.Equals(lockDto.LockOwner))
+            {
+                Logic.LockDto = null;
+            }
+            else
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could be unlocked. Event was locked by someone else."));
+            }
+        }
+        #endregion
     }
 }

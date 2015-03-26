@@ -11,6 +11,7 @@ namespace Event.Interfaces
     interface IEventLogic
     {
         #region State
+        LockDto LockDto { get; set; }  
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
@@ -37,5 +38,6 @@ namespace Event.Interfaces
         #endregion
 
         Task ResetState();
+        bool IsAllowedToOperate();
     }
 }
