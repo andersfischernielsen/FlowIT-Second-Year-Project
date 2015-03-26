@@ -42,7 +42,7 @@ namespace Server.Controllers
         public IEnumerable<EventAddressDto> Get(string workflowId)
         {
             Debug.WriteLine("Hmm, we got here!");
-            return ServerLogic.GetEventsWithinWorkflow(workflowId);
+            return ServerLogic.GetEventsOnWorkflow(workflowId);
         }
 
 

@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
+using Event.Models;
+using System;
 
 namespace Event
 {
@@ -16,7 +18,7 @@ namespace Event
         private readonly HttpClientToolbox _httpClient;
         private readonly string _serverBaseAddress;
         
-        // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of
+        // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of.
         private readonly string _eventId;
         private readonly string _workflowId;
 
@@ -38,18 +40,14 @@ namespace Event
         public async void NotifyServerOfExistence()
         {
             //Event won't do this unless it's been properly initialised.
-            if (string.IsNullOrEmpty(_eventId) || string.IsNullOrEmpty(_workflowId) || string.IsNullOrEmpty(_serverBaseAddress)) {
+            if (string.IsNullOrEmpty(_eventId) 
+                    || string.IsNullOrEmpty(_workflowId) 
+                    || string.IsNullOrEmpty(_serverBaseAddress)) {
                 return;
             }
 
-            try {
-                var path = _serverBaseAddress + "Workflows/" + _workflowId;
-                await _httpClient.Create(path, new EventAddressDto {Id = _eventId, Uri = new Uri(_serverBaseAddress)});
-            }
-            catch (Exception ex) {
-                //TODO: Server is down? What do then?
-                throw;
-            }
+            var path = _serverBaseAddress + "Workflows/" + _workflowId;
+            await _httpClient.Create(path, new EventAddressDto {Id = _eventId, Uri = new Uri(_serverBaseAddress)});
         }
 
 
@@ -57,7 +55,6 @@ namespace Event
          * GetWorkFlowEvents returns a Task, that - if successfull - holds a List of EventAddressDto
          * representing the events in the requested workflow. 
          */
-        // TODO: Exception-handling? Is that handled by Wind's HttpClient?
         public async Task<IList<EventAddressDto>> GetWorkFlowEvents(int workflowId)
         {
             try
@@ -77,38 +74,21 @@ namespace Event
          * The method will rely on the eventId that was provided during initialization
          */
         // TODO: Discuss with Server-implemter what is expected (on ServerSide) to be contained within HeartbeatDto
-        // TODO: Exception-handling?
         public async void SendHeartbeatToServer()
         {
-            string path = _workflowId + "/" + _eventId;
-            var heartBeatDto = new HeartBeatDto().EventId = _eventId;
-            try
-            {
-                await _httpClient.Create(path, heartBeatDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
+            var path = _workflowId + "/" + _eventId;
+            var heartBeatDto = new HeartBeatDto {EventId = _eventId};
+            await _httpClient.Create(path, heartBeatDto);
         }
 
         /**
          * RequestDeletionOfEventAtServer will inform Server that an event with id eventToBeDeletedId
          * should be deleted (typically because the event has been detected as being 'dead')
          */
-        public async Task RequestDeletionOfEventAtServer(int eventToBeDeletedId)
+        public async Task RequestDeletionOfEventAtServer(string eventToBeDeletedId)
         {
             var path = String.Format("workflows/{0}/{1}", _workflowId, eventToBeDeletedId);
-            try
-            { 
-                await _httpClient.Delete(path);
-            }
-            catch (Exception)
-            {
-                
-                throw;
-            }
+            await _httpClient.Delete(path);
         }
 
         public async Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto addressDto)

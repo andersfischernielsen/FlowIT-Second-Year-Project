@@ -10,6 +10,6 @@ namespace Server.Models
         public string WorkflowId { get; set; }
         public string Name { get; set; }
 
-        public virtual IEnumerable<ServerEventModel> ServerEventModels { get; set; }
+        public virtual IList<ServerEventModel> ServerEventModels { get; set; }
     }
 }
