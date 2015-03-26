@@ -9,10 +9,11 @@ namespace Server.Storage
     public class CacheStorage : IServerStorage
     {
         private static CacheStorage _instance;
-        private readonly HashSet<ServerWorkflowModel> _cache = new HashSet<ServerWorkflowModel>();
+        private readonly HashSet<ServerWorkflowModel> _cache;
 
         private CacheStorage()
         {
+            _cache = new HashSet<ServerWorkflowModel>();
         }
 
         public static CacheStorage GetStorage
@@ -34,7 +35,7 @@ namespace Server.Storage
 
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
-            return _cache.First(model => model.WorkflowId == workflowId);
+            return _cache.FirstOrDefault(model => model.WorkflowId == workflowId);
         }
 
         public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
@@ -75,7 +76,7 @@ namespace Server.Storage
                 var elementToDelete = serverWorkflowModel.ServerEventModels.First(model => model.EventId == eventId);
                 serverWorkflowModel.ServerEventModels.Remove(elementToDelete);
             }
-            else throw new Exception("Element could not be found");
+            else throw new Exception("Workflow could not be found");
         }
 
         public void AddNewWorkflow(ServerWorkflowModel workflow)
