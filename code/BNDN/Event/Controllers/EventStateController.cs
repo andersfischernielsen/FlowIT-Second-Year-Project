@@ -100,6 +100,12 @@ namespace Event.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> Execute([FromBody] bool execute)
         {
+            // Check if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                BadRequest("Event is currently locked");
+            }
+
             if (!(await Logic.IsExecutable()))
             {
                 return BadRequest("Event is not currently executable.");
