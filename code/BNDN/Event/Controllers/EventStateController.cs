@@ -104,16 +104,27 @@ namespace Event.Controllers
             {
                 return BadRequest("Event is not currently executable.");
             }
-            
-            // Is this too early to set it to true; have we (at this point in this mthod) actually executed...? 
-            Logic.Executed = true;
 
-            var notifyDtos = await Logic.GetNotifyDtos();
-            Parallel.ForEach(notifyDtos, async pair =>
+            LockLogic ll = new LockLogic();
+            if (await ll.LockAll())
             {
-                await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
-            });
-            return Ok(true);
+                var notifyDtos = await Logic.GetNotifyDtos();
+
+                //TODO: Det her er dårlig stil åbenbart: http://stackoverflow.com/questions/23137393/parallel-foreach-and-async-await-issue. Ved ikke hvad løsningen er dog
+                Parallel.ForEach(notifyDtos, async pair =>
+                {
+                    await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
+                });
+
+                Logic.Executed = true;
+
+                if (!await ll.UnlockAll())
+                {
+                    //Kunne ikke unlocke alt, hvad skal der ske?
+                }
+                return Ok(true);
+            }
+            throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Another transaction is going on, try again later"));
         }
 
 
@@ -141,7 +152,7 @@ namespace Event.Controllers
 
         #endregion
 
-        #region POST-requests
+        #region Lock-related
         [Route("Event/lock")]
         [HttpPost]
         public void Lock([FromBody] LockDto lockDto)

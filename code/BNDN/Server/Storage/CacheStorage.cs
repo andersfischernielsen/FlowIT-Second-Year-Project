@@ -35,7 +35,7 @@ namespace Server.Storage
 
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
-            return _cache.FirstOrDefault(model => model.WorkflowId == workflowId);
+            return _cache.First(model => model.WorkflowId == workflowId);
         }
 
         public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)

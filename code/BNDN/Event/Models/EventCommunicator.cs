@@ -79,5 +79,25 @@ namespace Event.Models
         {
             await _httpClient.Update("event/notify", dtos);
         }
+
+        /// <summary>
+        /// Tries to lock the event
+        /// </summary>
+        /// <param name="lockDto"></param>
+        /// <returns></returns>
+        public async Task Lock(LockDto lockDto)
+        {
+            await _httpClient.Create("event/lock", lockDto);
+        }
+
+        /// <summary>
+        /// TODO: BIG TODO.. You cant send json with delete call at this moment with the httptoolbox!!
+        /// </summary>
+        /// <param name="unlockDto"></param>
+        /// <returns></returns>
+        public async Task Unlock(EventAddressDto unlockDto)
+        {
+            await _httpClient.Delete("event/lock");
+        }
     }
 }
