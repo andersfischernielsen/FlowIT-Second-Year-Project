@@ -100,13 +100,10 @@ namespace Event.Models
 
         private EventLogic()
         {
-<<<<<<< HEAD
-            InMemoryStorage = new InMemoryStorage();
             // TODO: Server address
             ServerCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
-=======
+
             Storage = new InMemoryStorage();
->>>>>>> 6e99f9a05ac508b4afb546b2527789bc3ee35050
         }
         #endregion
 
@@ -292,10 +289,11 @@ namespace Event.Models
             Included = eventDto.Included;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
-            Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses));
+            // TODO: Review if the awaiting done here is legal / intended or not, blame Morten!
+            Inclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
+            Exclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
+            Conditions = await Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
+            Responses = await Task.Run(() => new HashSet<Uri>(eventDto.Responses));
             OwnUri = ownUri;
 
             var dto = new EventAddressDto
@@ -337,10 +335,10 @@ namespace Event.Models
             Included = eventDto.Included;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
-            Inclusions = Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            Exclusions = Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            Conditions = Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            Responses = Task.Run(() => new HashSet<Uri>(eventDto.Responses));
+            Inclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
+            Exclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
+            Conditions = await Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
+            Responses = await Task.Run(() => new HashSet<Uri>(eventDto.Responses));
 
            
 
@@ -372,6 +370,11 @@ namespace Event.Models
 
             await ServerCommunicator.DeleteEventFromServer();
             await ResetState();
+        }
+
+        public bool IsLocked()
+        {
+            return LockDto == null;
         }
     }
 }
