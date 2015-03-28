@@ -28,26 +28,26 @@ namespace Event.Controllers
         /// <returns>A task resulting in a Http Result.</returns>
         [Route("event/rules/{id}")]
         [HttpPost]
-        public async Task<IHttpActionResult> PostRules(string id, [FromBody] EventRuleDto ruleDto)
+        public async Task PostRules(string id, [FromBody] EventRuleDto ruleDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                BadRequest(ModelState);
             }
             if (ruleDto == null)
             {
-                return BadRequest("Request requires data");
+                BadRequest("Request requires data");
             }
 
             // if new entry, add Event to the endPoints-table.
             if (await Logic.KnowsId(id))
             {
-                return BadRequest(string.Format("{0} already exists!", id));
+                BadRequest(string.Format("{0} already exists!", id));
             }
 
             await Logic.UpdateRules(id, ruleDto);
 
-            return Ok();
+            Ok();
         }
 
 
@@ -61,26 +61,26 @@ namespace Event.Controllers
         /// <returns>A task resulting in a Http Result.</returns>
         [Route("event/rules/{id}")]
         [HttpPut]
-        public async Task<IHttpActionResult> PutRules(string id, [FromBody] EventRuleDto ruleDto)
+        public async Task PutRules(string id, [FromBody] EventRuleDto ruleDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                BadRequest(ModelState);
             }
             if (ruleDto == null)
             {
-                return BadRequest("Request requires data");
+                BadRequest("Request requires data");
             }
 
             // If the id is not known to this event, the PUT-call shall fail!
             if (!await Logic.KnowsId(id))
             {
-                return BadRequest(string.Format("{0} does not exist!", id));
+                BadRequest(string.Format("{0} does not exist!", id));
             }
 
             await Logic.UpdateRules(id, ruleDto);
 
-            return Ok();
+            Ok();
         }
 
 
@@ -91,11 +91,11 @@ namespace Event.Controllers
         /// <returns>A task resulting in an Http Result.</returns>
         [Route("event/rules/{id}")]
         [HttpDelete]
-        public async Task<IHttpActionResult> DeleteRules(string id)
+        public async Task DeleteRules(string id)
         {
             if (!await Logic.KnowsId(id))
             {
-                return BadRequest(string.Format("{0} does not exist!", id));
+                BadRequest(string.Format("{0} does not exist!", id));
             }
 
             await Logic.UpdateRules(id,
@@ -113,7 +113,7 @@ namespace Event.Controllers
             // Remove the id because it is no longer associated with any rules.
             await Logic.RemoveIdAndUri(id);
 
-            return Ok();
+            Ok();
         }
 
     }

@@ -95,7 +95,7 @@ namespace Event.Controllers
         /// </summary>
         [Route("event/executed")]
         [HttpPut]
-        public async Task<IHttpActionResult> Execute([FromBody] bool execute)
+        public async Task Execute([FromBody] bool execute)
         {
             // Check if Event is currently locked
             if (Logic.IsLocked())
@@ -105,7 +105,7 @@ namespace Event.Controllers
 
             if (!(await Logic.IsExecutable()))
             {
-                return BadRequest("Event is not currently executable.");
+                BadRequest("Event is not currently executable.");
             }
             
             // Is this too early to set it to true; have we (at this point in this mthod) actually executed...? 
@@ -116,7 +116,8 @@ namespace Event.Controllers
             {
                 await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
             });
-            return Ok(true);
+
+            Ok(true);
         }
 
 
