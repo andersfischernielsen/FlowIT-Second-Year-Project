@@ -35,8 +35,6 @@ namespace Event.Controllers
 
         }
 
-
-
         [Route("event/executed")]
         [HttpGet]
         public bool GetExecuted([FromBody] EventAddressDto eventAddressDto)
@@ -47,7 +45,6 @@ namespace Event.Controllers
             }
             return Logic.Executed;
         }
-
 
         [Route("event/included")]
         [HttpGet]
@@ -71,7 +68,6 @@ namespace Event.Controllers
             return await Logic.IsExecutable();
         }
 
-
         /// <summary>
         /// Returns the current state of the events.
         /// </summary>
@@ -84,7 +80,8 @@ namespace Event.Controllers
         {
             if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "Cannot access this property. The event is locked."));
             }
             return await Logic.EventStateDto;
         }
