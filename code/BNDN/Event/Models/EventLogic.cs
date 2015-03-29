@@ -280,7 +280,7 @@ namespace Event.Models
             }
             if (EventId != null)
             {
-                throw new NullReferenceException("EventId was null");
+                throw new NullReferenceException("EventId was not null");
             }
 
             EventId = eventDto.EventId;
