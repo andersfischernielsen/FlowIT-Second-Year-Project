@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Net.Http;
 using System.Net;
@@ -207,7 +208,7 @@ namespace Event.Controllers
         [HttpPost]
         public void Lock([FromBody] LockDto lockDto)
         {
-            if (Logic.LockDto != null)
+            if (Logic.IsLocked())
             {
                 // There cannot be set a new lock, since a lock is already set.
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
@@ -217,8 +218,17 @@ namespace Event.Controllers
             {
                 // Caller provided a null LockDto
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Lock could not be set. An empty lock was provided."));
+                    "Lock could not be set. An empty (null) lock was provided."));
             }
+            
+            // Checks that the provided lockDto actually has sensible values for its fields.
+            // TODO: Consider refactoring this logic into other (logic-handling class) class
+            if (String.IsNullOrEmpty(lockDto.LockOwner) || String.IsNullOrWhiteSpace(lockDto.LockOwner))
+            {
+                // Reject request on setting the lockDto
+                ResponseMessage(new HttpResponseMessage(HttpStatusCode.BadRequest));
+            }
+
 
             Logic.LockDto = lockDto;
         }

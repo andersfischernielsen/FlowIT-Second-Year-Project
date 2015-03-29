@@ -32,8 +32,13 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent()
         {
-            // TODO: Discuss: Should we place a lock-check here, aswell, before carrying on?
-            // This will require an EventAddressDto to be sent along in this call, too!
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
             return await Logic.EventDto;
         }
 
@@ -46,7 +51,13 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
-            // TODO: Again, discuss that if the Event is currently locked, a caller should not be allowed to execute this method, should he?
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
@@ -79,7 +90,12 @@ namespace Event.Controllers
         [HttpPut]
         public async Task PutEvent([FromBody] EventDto eventDto)
         {
-            // TODO: Dicuss, again how can we (and should we) do locking here?
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
 
             if (!ModelState.IsValid)
             {
@@ -105,7 +121,12 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteEvent()
         {
-            // TODO: Implement locking check
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
 
             try
             {

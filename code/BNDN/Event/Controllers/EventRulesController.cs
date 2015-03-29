@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
@@ -30,7 +32,13 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostRules(string id, [FromBody] EventRuleDto ruleDto)
         {
-            // TODO: Implement locking
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
             if (!ModelState.IsValid)
             {
                 BadRequest(ModelState);
@@ -64,7 +72,13 @@ namespace Event.Controllers
         [HttpPut]
         public async Task PutRules(string id, [FromBody] EventRuleDto ruleDto)
         {
-            // TODO: Implement locking
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
             if (!ModelState.IsValid)
             {
                 BadRequest(ModelState);
@@ -95,7 +109,13 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteRules(string id)
         {
-            // TODO: Implement locking
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
             if (!await Logic.KnowsId(id))
             {
                 BadRequest(string.Format("{0} does not exist!", id));

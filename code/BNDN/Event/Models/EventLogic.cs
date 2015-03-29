@@ -375,7 +375,7 @@ namespace Event.Models
 
         public bool IsLocked()
         {
-            return LockDto == null;
+            return LockDto != null;
         }
     }
 }
