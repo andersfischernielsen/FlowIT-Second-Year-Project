@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Event.Controllers;
 using Event.Models;
 using NUnit.Framework;
 
@@ -23,6 +24,7 @@ namespace Event.tests
         public void IsExecutedFailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"));
+            
             try
             {
                 var result = eventCommunicator.IsExecuted().Result;
@@ -37,7 +39,7 @@ namespace Event.tests
         [ExpectedException(typeof(HttpResponseException))]
         public void IsIncludedFailsOnWrongUri()
         {
-            var eventCommunicator = new EventCommunicator(new Uri("http://test.dk"));
+            var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"));
             try
             {
                 var result = eventCommunicator.IsIncluded().Result;
@@ -47,7 +49,6 @@ namespace Event.tests
                 
                 throw ex.InnerException;
             }
-
         }
 
     }
