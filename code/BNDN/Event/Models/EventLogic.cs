@@ -101,9 +101,9 @@ namespace Event.Models
         private EventLogic()
         {
             // TODO: Server address
+            Storage = new InMemoryStorage();
             ServerCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
 
-            Storage = new InMemoryStorage();
         }
         #endregion
 
