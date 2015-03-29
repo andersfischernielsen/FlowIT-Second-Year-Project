@@ -74,3 +74,4 @@
 * Bad cases:
     * eventId is not part of workflowId.
     * workflowId does not exist.
+    * eventId does not exist.
