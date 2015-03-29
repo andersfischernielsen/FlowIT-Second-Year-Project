@@ -7,7 +7,7 @@ using Event.Models;
 namespace Event.Controllers
 {
     /// <summary>
-    /// EventRulesController handles the incoming requests that modifies this Event's rules-set.
+    /// EventRulesController handles the incoming requests that modifies this Event's rule-set.
     /// </summary>
     public class EventRulesController : ApiController
     {
@@ -15,7 +15,7 @@ namespace Event.Controllers
 
         public EventRulesController()
         {
-            // Fetches Singleton-storage
+            // Fetches Singleton Logic layer. 
             Logic = EventLogic.GetState();
         }
 
@@ -30,6 +30,7 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostRules(string id, [FromBody] EventRuleDto ruleDto)
         {
+            // TODO: Implement locking
             if (!ModelState.IsValid)
             {
                 BadRequest(ModelState);
@@ -63,6 +64,7 @@ namespace Event.Controllers
         [HttpPut]
         public async Task PutRules(string id, [FromBody] EventRuleDto ruleDto)
         {
+            // TODO: Implement locking
             if (!ModelState.IsValid)
             {
                 BadRequest(ModelState);
@@ -93,6 +95,7 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteRules(string id)
         {
+            // TODO: Implement locking
             if (!await Logic.KnowsId(id))
             {
                 BadRequest(string.Format("{0} does not exist!", id));
