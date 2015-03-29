@@ -101,9 +101,9 @@ namespace Event.Models
         private EventLogic()
         {
             // TODO: Server address
+            Storage = new InMemoryStorage();
             ServerCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
 
-            Storage = new InMemoryStorage();
         }
         #endregion
 
@@ -267,6 +267,7 @@ namespace Event.Models
 
         public bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto)
         {
+            if (LockDto == null) return true;
             // TODO: Consider implementing an Equals() method on EventAddressDto
             return LockDto.LockOwner.Equals(eventAddressDto.Id);
         }
@@ -280,7 +281,7 @@ namespace Event.Models
             }
             if (EventId != null)
             {
-                throw new NullReferenceException("EventId was null");
+                throw new NullReferenceException("EventId was not null");
             }
 
             EventId = eventDto.EventId;

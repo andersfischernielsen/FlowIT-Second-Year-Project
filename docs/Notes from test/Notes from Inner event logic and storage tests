@@ -1,0 +1,5 @@
+#Notes from Inner event logic and storage tests.
+
+## EventLogic
+ - To test IsExecutable, EventLogic needs to use dependency injection or refer to a property for EventCommunicator, such that a mock can be used.
+

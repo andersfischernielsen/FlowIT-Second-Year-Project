@@ -22,6 +22,11 @@ namespace Server.Controllers
             //ServerLogic = new ServerLogic(new WorkflowStorage());
         }
 
+        public WorkflowsController(IServerLogic serverLogic)
+        {
+            ServerLogic = serverLogic;
+        }
+
 
         /// <summary>
         /// Returns a list of all workflows currently held at this Server
