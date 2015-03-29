@@ -5,7 +5,7 @@
 * Exceptional cases?
 
 # GET /Workflows/workflowID
-* When the workflow exists, it shall return the WorkflowDto of the current workflow.
+* When the workflow exists, it shall return the list of EventAddressDtos of the current workflow.
 * When no such workflow exists. 404 Not found (?)
 * Test with weird characters/symbols/spaces to see that WebAPI doesn't break.
 
@@ -13,17 +13,24 @@
 * Good case: Post a workflowId that does not exists with a good copy of a WorkflowDto.
 * Bad cases:
     * POST a workflow which already exists (all of the following cases should return BadRequest of some kind) (check [this stackoverflow](http://stackoverflow.com/questions/3825990/http-response-code-for-post-when-resource-already-exists) to see other people views on which status code should be returned!)
-        * With the current WorkflowDto
-        * With another WorkflowDto
-        * With an empty WorkflowDto
+        * These are probably a logic/storage test:
+            * With the current WorkflowDto
+            * With another WorkflowDto
+            * With an empty WorkflowDto
         * Without any Dto.
-        * With nonsense data (something which is not JSON)
-        * With a wrong object type.
+        * With nonsense data (something which is not JSON) (This is integration testing/testing of WebAPI ModelState (bad?))
+        * With a wrong object type. (Cannot be done without running the WebApi)
     * POST a workflow which does not exist (all of the following cases should return BadRequest of some kind)
         * With an empty WorkflowDto
         * Without any Dto.
-        * With nonsense data (something which is not JSON)
+        * With nonsense data (something which is not JSON) (This is integration testing/testing of WebAPI (bad?))
         * With a wrong object type.
+
+# DELETE /Workflows/workflowId
+* Good case: WorkflowId existed and was empty.
+* Bad cases:
+    * WorkflowId did not exist
+    * Workflow with WorkflowId is not empty (it has events which is part of the workflow).
 
 # PUT /Workflows/workflowId EventAddressDto (Shouldn't this be something else?)
 * I think this test will be interesting because the Route say one thing (Update workflow) while the method does something else (Update an event in a workflow.
