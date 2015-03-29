@@ -265,7 +265,7 @@ namespace Event.Models
             });
         }
 
-        public bool IsAllowedToOperate(EventAddressDto eventAddressDto)
+        public bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto)
         {
             // TODO: Consider implementing an Equals() method on EventAddressDto
             return LockDto.LockOwner.Equals(eventAddressDto.Id);
