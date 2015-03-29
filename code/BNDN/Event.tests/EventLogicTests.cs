@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using Common;
 using Event.Interfaces;
 using Event.Models;
@@ -227,6 +229,263 @@ namespace Event.tests
             Assert.AreEqual("TestName", result.Name);
             Assert.AreEqual("TestId", result.EventId);
         }
+
+
+        #region URI registration
+
+        [Test]
+        public void IdExistsTest()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
+
+            //Act
+            var result = eventLogic.KnowsId("Test").Result;
+
+            //Assert
+            Assert.AreEqual(true, result);
+
+        }
+
+        [Test]
+        public void IdDoesNotExist()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+
+            //Act
+            var result = eventLogic.KnowsId("Test").Result;
+
+            //Assert
+            Assert.AreEqual(false, result);
+        }
+
+        [Test]
+        public void RemoveIdInUriAlreadyExisting()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
+
+            //Act
+            eventLogic.RemoveIdAndUri("Test").Wait();
+            var result = eventLogic.Storage.EventUris.Contains(new KeyValuePair<string, Uri>("Test",new Uri("http://test/")));
+
+            //Assert
+            Assert.AreEqual(false,result);
+        }
+
+        [Test]
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public void RemoveIdInUriNotExisting()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            
+            //Act
+            try
+            {
+                eventLogic.RemoveIdAndUri("Test").Wait();
+            }
+            catch (Exception ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        [Test]
+        public void ResetStateTest()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            eventLogic.Name = "TestName";
+            eventLogic.EventId = "TestId";
+            eventLogic.WorkflowId = "TestWId";
+            eventLogic.OwnUri = new Uri("http://test/");
+
+            //Act
+            eventLogic.ResetState().Wait();
+
+            //Assert
+            Assert.IsNull(eventLogic.Name);
+            Assert.IsNull(eventLogic.EventId);
+            Assert.IsNull(eventLogic.WorkflowId);
+            Assert.IsNull(eventLogic.OwnUri);
+        }
+
+        [Test]
+        //This test only tests that values are set, and not a connection to the server is established.
+        public void InitializeEventRuns()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            var eventDto = new EventDto()
+            {
+                EventId = "TestId",
+                WorkflowId = "TestWId",
+                Name = "TestName",
+                Included = true,
+                Pending = true,
+                Executed = true,
+                Inclusions = new HashSet<Uri>(),
+                Exclusions = new HashSet<Uri>(),
+                Conditions = new HashSet<Uri>(),
+                Responses = new HashSet<Uri>(),
+            };
+
+            //Act
+            try
+            {
+                eventLogic.InitializeEvent(eventDto, new Uri("http://test/")).Wait();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+
+            //Assert
+            Assert.AreEqual(true, eventLogic.Included);
+            Assert.AreEqual(true, eventLogic.Executed);
+            Assert.AreEqual(true, eventLogic.Pending);
+            Assert.AreEqual("TestWId", eventLogic.WorkflowId);
+            Assert.AreEqual("TestName", eventLogic.Name);
+            Assert.AreEqual("TestId", eventLogic.EventId);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Inclusions);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Exclusions);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Conditions);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Responses);
+        }
+
+        [Test]
+        [ExpectedException(typeof(NullReferenceException))]
+        public void InitializeEventEventDtoIsNull()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+
+            //Act
+            try
+            {
+                eventLogic.InitializeEvent(null, new Uri("http://test/")).Wait();
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.AreEqual("Provided EventDto was null", ex.InnerException.Message);
+                throw ex.InnerException;
+            }
+        }
+
+        [Test]
+        [ExpectedException(typeof(NullReferenceException))]
+        public void InitializeEventEventIdIsNotNull()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            eventLogic.EventId = "Test";
+
+            //Act
+            try
+            {
+                eventLogic.InitializeEvent(new EventDto(), new Uri("http://test/")).Wait();
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.AreEqual("EventId was not null", ex.InnerException.Message);
+                throw ex.InnerException;
+            }
+        }
+
+        [Test]
+        //This test only tests that values are set, and not a connection to the server is established.
+        public void UpdateEventRuns()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            var eventDto = new EventDto()
+            {
+                EventId = "TestId",
+                WorkflowId = "TestWId",
+                Name = "TestName",
+                Included = true,
+                Pending = true,
+                Executed = true,
+                Inclusions = new HashSet<Uri>(),
+                Exclusions = new HashSet<Uri>(),
+                Conditions = new HashSet<Uri>(),
+                Responses = new HashSet<Uri>(),
+            };
+
+            //Act
+            try
+            {
+                eventLogic.UpdateEvent(eventDto, new Uri("http://test/")).Wait();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+
+            //Assert
+            Assert.AreEqual(true, eventLogic.Included);
+            Assert.AreEqual(true, eventLogic.Executed);
+            Assert.AreEqual(true, eventLogic.Pending);
+            Assert.AreEqual("TestWId", eventLogic.WorkflowId);
+            Assert.AreEqual("TestName", eventLogic.Name);
+            Assert.AreEqual("TestId", eventLogic.EventId);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Inclusions);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Exclusions);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Conditions);
+            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Responses);
+        }
+
+        [Test]
+        [ExpectedException(typeof(NullReferenceException))]
+        public void UpdateEventEventDtoIsNull()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+
+            //Act
+            try
+            {
+                eventLogic.UpdateEvent(null, new Uri("http://test/")).Wait();
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.AreEqual("Provided EventDto was null", ex.InnerException.Message);
+                throw ex.InnerException;
+            }
+        }
+
+        [Test]
+        [ExpectedException(typeof(NullReferenceException))]
+        public void UpdateEventEventIdIsNull()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+            eventLogic.EventId = null;
+
+            //Act
+            try
+            {
+                eventLogic.UpdateEvent(new EventDto(), new Uri("http://test/")).Wait();
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.AreEqual("EventId was null", ex.InnerException.Message);
+                throw ex.InnerException;
+            }
+        }
+
+      
+        #endregion
 
     }
 }
