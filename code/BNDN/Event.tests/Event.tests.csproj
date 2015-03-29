@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EventControllerTests.cs" />
+    <Compile Include="EventLogicTests.cs" />
     <Compile Include="EventStateControllerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
