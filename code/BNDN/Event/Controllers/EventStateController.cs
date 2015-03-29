@@ -41,7 +41,8 @@ namespace Event.Controllers
         {
             if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "Cannot access this property. The event is locked."));
             }
             return Logic.Executed;
         }
@@ -52,7 +53,8 @@ namespace Event.Controllers
         {
             if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "Cannot access this property. The event is locked."));
             }
             return Logic.Included;
         }
@@ -63,7 +65,8 @@ namespace Event.Controllers
         {
             if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "Cannot access this property. The event is locked."));
             }
             return await Logic.IsExecutable();
         }
@@ -127,7 +130,8 @@ namespace Event.Controllers
         {
             if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
-               throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
+               throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                   "This event is already locked by someone else."));
             }
             Logic.Included = boolValueForIncluded;
         }
@@ -138,7 +142,8 @@ namespace Event.Controllers
         {
             if (!Logic.IsAllowedToOperate(eventAddressDto))
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "This event is already locked by someone else."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "This event is already locked by someone else."));
             }
             Logic.Pending = boolValueForPending;
         }
@@ -153,12 +158,14 @@ namespace Event.Controllers
             if (Logic.LockDto != null)
             {
                 // There cannot be set a new lock, since a lock is already set.
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could not be acquired. Event is already locked."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "Lock could not be acquired. Event is already locked."));
             }
             else if (lockDto == null)
             {
                 // Caller provided a null LockDto
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could not be set. An empty lock was provided."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "Lock could not be set. An empty lock was provided."));
             }
             else
             {
@@ -172,7 +179,8 @@ namespace Event.Controllers
         {
             if(!Logic.IsAllowedToOperate(eventAddressDto))
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Lock could be unlocked. Event was locked by someone else."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
+                    "Lock could be unlocked. Event was locked by someone else."));
             }
             else
             {
