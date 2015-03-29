@@ -38,7 +38,7 @@ namespace Event.Models
         /// <returns>A Task object revealing af EventDto object</returns>
         public async Task<EventDto> GetEvent()
         {
-            return await _httpClient.Read<EventDto>("");
+            return await _httpClient.Read<EventDto>("event");
         }
 
 

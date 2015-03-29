@@ -38,10 +38,15 @@ namespace Event.Interfaces
         #endregion
 
         Task ResetState();
-        bool IsAllowedToOperate(EventAddressDto eventAddressDto);
+        bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto);
+        bool IsLocked();
 
+        // TODO: I (Morten) may have bloated this interface; should we refactor
         Task InitializeEvent(EventDto eventDto, Uri ownUri);
         Task UpdateEvent(EventDto eventDto, Uri ownUri);
         Task DeleteEvent();
+
+
+
     }
 }
