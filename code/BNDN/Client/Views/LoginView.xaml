@@ -6,24 +6,26 @@
     <Window.DataContext>
         <ViewModels:LoginViewModel/>
     </Window.DataContext>
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="59*"/>
-			<RowDefinition Height="31*"/>
-		</Grid.RowDefinitions>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="25*"/>
-			<ColumnDefinition Width="96*"/>
-			<ColumnDefinition Width="25*"/>
-		</Grid.ColumnDefinitions>
-		<TextBox Style="{StaticResource FillTextBoxStyle}" Margin="10,50,10,89" TextWrapping="Wrap" Text="{Binding Username}" Grid.Column="1"/>
-		<TextBox Style="{StaticResource FillTextBoxStyle}" Margin="10,100,10,38" TextWrapping="Wrap" Text="{Binding Password}" Grid.Column="1"/>
-		<Button Style="{StaticResource ButtonDefaultStyle}"  Content="Login" Margin="10,10" VerticalAlignment="Top" Grid.Column="1" Height="47" Grid.Row="1">
-			<i:Interaction.Triggers>
-				<i:EventTrigger EventName="Click">
-					<ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="Login"/>
-				</i:EventTrigger>
-			</i:Interaction.Triggers>
-		</Button>
-	</Grid>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="59*"/>
+            <RowDefinition Height="31*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="25*"/>
+            <ColumnDefinition Width="96*"/>
+            <ColumnDefinition Width="25*"/>
+        </Grid.ColumnDefinitions>
+        <TextBox Style="{StaticResource FillTextBoxStyle}" Margin="10,50,10,89" TextWrapping="Wrap" Text="{Binding Username}" Grid.Column="1"/>
+        <Label Style="{StaticResource HeaderLabelStyle}" FontStyle="Italic" FontSize="18" Content="{Binding Status}" Margin="10,129,10,60" Grid.Column="1"/>
+        <!--<TextBox Style="{StaticResource FillTextBoxStyle}" Margin="10,100,10,38" TextWrapping="Wrap" Text="{Binding Password}" Grid.Column="1"/>
+        -->
+        <Button Style="{StaticResource ButtonDefaultStyle}"  Content="Login" Margin="10,10" VerticalAlignment="Top" Grid.Column="1" Height="47" Grid.Row="1">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="Login"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
+    </Grid>
 </Window>

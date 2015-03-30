@@ -9,6 +9,12 @@ namespace Server
 {
     public interface IServerLogic
     {
+        /// <summary>
+        /// Tries to log in / returns all the roles the user has on all workflows
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
+        RolesOnWorkflowsDto Login(LoginDto loginDto);
         
         /// <summary>
         /// Get all events from a workflow

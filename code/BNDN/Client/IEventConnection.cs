@@ -18,6 +18,6 @@ namespace Client
         /// </summary>
         /// <param name="b"></param>
         /// <returns></returns>
-        Task Execute(bool b);
+        Task Execute(bool b, string workflowId);
     }
 }

@@ -36,6 +36,27 @@ namespace Server
             };
         }
 
+        public RolesOnWorkflowsDto Login(LoginDto loginDto)
+        {
+            var user = _storage.GetUser(loginDto.Username);
+            var rolesModels = _storage.Login(user);
+            var rolesOnWorkflows = new Dictionary<string, IList<string>>();
+            foreach (var roleModel in rolesModels)
+            {
+                IList<string> list;
+
+                if (rolesOnWorkflows.TryGetValue(roleModel.WorklowId, out list))
+                {
+                    list.Add(roleModel.Role);
+                }
+                else
+                {
+                    rolesOnWorkflows.Add(roleModel.WorklowId, new List<string>{roleModel.Role});
+                }
+            }
+            return new RolesOnWorkflowsDto() { RolesOnWorkflows = rolesOnWorkflows };
+        }
+
         public IEnumerable<EventAddressDto> GetEventsOnWorkflow(string workflowId)
         {
             var workflow = _storage.GetWorkflow(workflowId);

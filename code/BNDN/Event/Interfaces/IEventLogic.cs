@@ -15,6 +15,7 @@ namespace Event.Interfaces
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
+        string Role { get; set; }
         #endregion
 
         #region Rules
@@ -25,7 +26,7 @@ namespace Event.Interfaces
         #region DTO Creation
         Task<EventStateDto> EventStateDto { get; }
         Task<EventDto> EventDto { get; }
-        Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos();
+        Task<IEnumerable<Uri>> GetNotifyDtos();
 
         Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
             where T : NotifyDto;

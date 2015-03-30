@@ -92,6 +92,8 @@
     <Compile Include="IServerLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ServerEventModel.cs" />
+    <Compile Include="Models\ServerRolesModel.cs" />
+    <Compile Include="Models\ServerUserModel.cs" />
     <Compile Include="Models\ServerWorkflowModel.cs" />
     <Compile Include="Storage\ServerStorage.cs" />
     <Compile Include="Storage\StorageContext.cs" />

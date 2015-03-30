@@ -11,6 +11,7 @@ namespace Server.Models
     {
         public ServerWorkflowModel()
         {
+            ServerRolesModels = new List<ServerRolesModel>();
             ServerEventModels = new List<ServerEventModel>();
         }
 
@@ -20,5 +21,7 @@ namespace Server.Models
 
         [ForeignKey("EventId")]
         public virtual IList<ServerEventModel> ServerEventModels { get; set; }
+
+        public virtual IList<ServerRolesModel> ServerRolesModels { get; set; }
     }
 }

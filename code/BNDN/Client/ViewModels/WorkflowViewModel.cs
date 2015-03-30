@@ -8,6 +8,7 @@ namespace Client.ViewModels
     public class WorkflowViewModel : ViewModelBase
     {
         private readonly WorkflowDto _workflowDto;
+        public string WorkflowId { get { return _workflowDto.Id; } }
         private readonly WorkflowListViewModel _parent;
         public WorkflowViewModel()
         {

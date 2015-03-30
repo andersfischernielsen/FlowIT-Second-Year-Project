@@ -28,6 +28,17 @@ namespace Client.ViewModels
             }
         }
 
+        private string _status = "";
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                NotifyPropertyChanged("Status");
+            }
+        }
+
         private string _password = "Password";
         public string Password
         {
@@ -42,13 +53,25 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public void Login()
+        public async void Login()
         {
             // PUT LOGIN LOGIC HERE
+            var connection = new ServerConnection(new Uri("http://localhost:13768/"));
+            try
+            {
+                var roles = await connection.Login(Username);
+                Status = "Login successful";
+                EventConnection.RoleForWorkflow = roles.RolesOnWorkflows;
 
-            var window = new MainWindow();
-            window.Show();
-            CloseAction.Invoke();
+                var window = new MainWindow();
+                window.Show();
+                CloseAction.Invoke();
+            }
+            catch (Exception)
+            {
+                Status = "Login failed";
+            }
+            
         }
 
         #endregion
