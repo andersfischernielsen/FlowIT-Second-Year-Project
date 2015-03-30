@@ -16,7 +16,7 @@ namespace Server.Controllers
     {
         private IServerLogic ServerLogic { get; set; }
 
-        public WorkflowsController()
+        public WorkflowsController() 
         {
             ServerLogic = new ServerLogic(CacheStorage.GetStorage);
             //ServerLogic = new ServerLogic(new WorkflowStorage());
@@ -68,7 +68,7 @@ namespace Server.Controllers
         /// <param name="workflowId">Id of the requested workflow</param>
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("login")]
-        [HttpGet]
+        [HttpPost]
         public RolesOnWorkflowsDto Login([FromBody] LoginDto loginDto)
         {
             try

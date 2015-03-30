@@ -9,10 +9,11 @@ namespace Client
     {
         private readonly HttpClientToolbox _http;
 
-        
-        public ServerConnection(Uri uri) : this(new HttpClientToolbox(uri))
+
+        public ServerConnection(Uri uri)
+            : this(new HttpClientToolbox(uri))
         {
-            
+
         }
 
         /// <summary>
@@ -26,10 +27,9 @@ namespace Client
 
         public async Task<RolesOnWorkflowsDto> Login(string username)
         {
-            // Todo: Shouldn't this be a post call with username and stuff in the body?
-            return await _http.Read<RolesOnWorkflowsDto>("login");
+            return await _http.Create<LoginDto, RolesOnWorkflowsDto>("login", new LoginDto { Username = username });
         }
-        
+
         public async Task<IList<WorkflowDto>> GetWorkflows()
         {
             return await _http.ReadList<WorkflowDto>("workflows");
