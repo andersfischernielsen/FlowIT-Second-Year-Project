@@ -9,11 +9,16 @@ namespace Client
     {
         private readonly HttpClientToolbox _http;
 
+        
         public ServerConnection(Uri uri) : this(new HttpClientToolbox(uri))
         {
             
         }
 
+        /// <summary>
+        /// For testing purposes (dependency injection of mocked Toolbox.
+        /// </summary>
+        /// <param name="toolbox"></param>
         public ServerConnection(HttpClientToolbox toolbox)
         {
             _http = toolbox;
