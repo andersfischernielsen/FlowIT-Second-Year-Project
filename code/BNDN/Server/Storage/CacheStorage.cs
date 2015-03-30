@@ -16,12 +16,12 @@ namespace Server.Storage
         {
             _cache = new HashSet<ServerWorkflowModel>()
             {
-                new ServerWorkflowModel(){ Name="TestWorkFlow", WorkflowId = "Test1", ServerRolesModels = new List<ServerRolesModel>(), ServerEventModels = new List<ServerEventModel>()}
+                new ServerWorkflowModel(){ Name="TestWorkFlow", ID = "Test1", ServerRolesModels = new List<ServerRolesModel>(), ServerEventModels = new List<ServerEventModel>()}
             };
             _userCache = new HashSet<ServerUserModel>()
             {
-                new ServerUserModel(){Id = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Teacher",UserId = 1, WorklowId = "Test1"},new ServerRolesModel(){Role="Student",UserId = 1, WorklowId = "Test1"}}},
-                new ServerUserModel(){Id = 2, Name="Fischer",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Teacher",UserId = 2, WorklowId = "Test1"}}}
+                new ServerUserModel(){ID = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher",ServerUserModelID = 1, ServerWorklowModelID = "Test1"},new ServerRolesModel(){ID="Student",ServerUserModelID = 1, ServerWorklowModelID= "Test1"}}},
+                new ServerUserModel(){ID = 2, Name="Fischer",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher",ServerUserModelID = 2, ServerWorklowModelID = "Test1"}}}
             };
         }
 
@@ -44,7 +44,7 @@ namespace Server.Storage
 
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
-            return _cache.First(model => model.WorkflowId == workflowId);
+            return _cache.First(model => model.ID == workflowId);
         }
 
         public ServerUserModel GetUser(string username)
@@ -52,9 +52,9 @@ namespace Server.Storage
             return _userCache.SingleOrDefault(model => model.Name.ToLower() == username.ToLower());
         }
 
-        public IList<ServerRolesModel> Login(ServerUserModel userModel)
+        public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
         {
-            var singleOrDefault = _userCache.SingleOrDefault(model => model.Id == userModel.Id);
+            var singleOrDefault = _userCache.SingleOrDefault(model => model.ID == userModel.ID);
             if (singleOrDefault != null)
                 return singleOrDefault.ServerRolesModels;
             return new List<ServerRolesModel>();
@@ -62,7 +62,7 @@ namespace Server.Storage
 
         public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
         {
-            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (serverWorkflowModel != null)
                 return serverWorkflowModel.ServerEventModels;
             return new List<ServerEventModel>();
@@ -70,7 +70,7 @@ namespace Server.Storage
 
         public void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto)
         {
-            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (serverWorkflowModel != null && !serverWorkflowModel.ServerEventModels.Contains(eventToBeAddedDto))
             {
                 serverWorkflowModel.ServerEventModels.Add(eventToBeAddedDto);
@@ -80,22 +80,22 @@ namespace Server.Storage
 
         public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
-            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (serverWorkflowModel != null)
             {
-                var existingElement = serverWorkflowModel.ServerEventModels.First(model => model.EventId == eventToBeUpdated.EventId); // throws exception if not found.
-                var index = serverWorkflowModel.ServerEventModels.IndexOf(existingElement);
-                serverWorkflowModel.ServerEventModels[index] = eventToBeUpdated;
+                var existingElement = serverWorkflowModel.ServerEventModels.First(model => model.ID == eventToBeUpdated.ID); // throws exception if not found.
+                var index = serverWorkflowModel.ServerEventModels.ToList().IndexOf(existingElement);
+                serverWorkflowModel.ServerEventModels.ToList()[index] = eventToBeUpdated;
             }
             else throw new Exception("Element could not be found");
         }
 
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
-            var serverWorkflowModel = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (serverWorkflowModel != null)
             {
-                var elementToDelete = serverWorkflowModel.ServerEventModels.First(model => model.EventId == eventId);
+                var elementToDelete = serverWorkflowModel.ServerEventModels.First(model => model.ID == eventId);
                 serverWorkflowModel.ServerEventModels.Remove(elementToDelete);
             }
             else throw new Exception("Workflow could not be found");
@@ -103,7 +103,7 @@ namespace Server.Storage
 
         public void AddNewWorkflow(ServerWorkflowModel workflow)
         {
-            var check = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            var check = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (check == null)
             {
                 _cache.Add(workflow);
@@ -113,7 +113,7 @@ namespace Server.Storage
 
         public void UpdateWorkflow(ServerWorkflowModel workflow)
         {
-            var element = _cache.FirstOrDefault(model => model.WorkflowId == workflow.WorkflowId);
+            var element = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (element != null)
             {
                 _cache.Add(workflow);
