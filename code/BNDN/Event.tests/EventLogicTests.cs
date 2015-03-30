@@ -17,17 +17,6 @@ namespace Event.tests
     class EventLogicTests
     {
         [Test]
-        public void SetupLogicStorageIsNotNullTest()
-        {
-            //Arrange
-            var eventLogic = EventLogic.GetState();
-
-            //Act
-            //Assert
-            Assert.IsNotNull(eventLogic.Storage);
-        }
-
-        [Test]
         public void SetupLogicIsNotNullTest()
         {
             //Arrange
@@ -39,9 +28,21 @@ namespace Event.tests
             Assert.IsNotNull(eventLogic);
         }
 
+        [Test]
+        public void SetupLogicStorageIsNotNullTest()
+        {
+            //Arrange
+            var eventLogic = EventLogic.GetState();
+
+            //Act
+            //Assert
+            Assert.IsNotNull(eventLogic.Storage);
+        }
+
+
         #region Rulehandling
         [Test]
-        public void IsExecutableReturnsTrueWhenNoConditionsTest()
+        public void IsExecutable_ShouldReturnTrueWhenNoConditionsExist_Test()
         {
             //Arrange
             var eventLogic = EventLogic.GetState();
@@ -54,7 +55,7 @@ namespace Event.tests
             Assert.AreEqual(true, result);
         }
         [Test]
-        public void IsExecutableReturnsFalseWhenNoConditionsTest()
+        public void IsExecutable_ShouldReturnFalseWhenNoConditionsExist_Test()
         {
             //Arrange
             var eventLogic = EventLogic.GetState();
@@ -104,7 +105,7 @@ namespace Event.tests
             catch (Exception ex)
             {
                 //Assert
-                Assert.AreEqual("Nonexistent id", ex.InnerException.Message);
+                Assert.AreEqual("Nonexistent id\r\nParameter name: Test", ex.InnerException.Message);
                 throw ex.InnerException;
             }
         }
@@ -116,10 +117,7 @@ namespace Event.tests
             var eventLogic = EventLogic.GetState();
             eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
 
-            //Act
-            eventLogic.UpdateRules("Test", new EventRuleDto()).Wait();
-
-            //Assert
+            Assert.DoesNotThrow(() => eventLogic.UpdateRules("Test", new EventRuleDto()).Wait());
         }
 
         [Test]
@@ -128,7 +126,7 @@ namespace Event.tests
             //Arrange
             var eventLogic = EventLogic.GetState();
             eventLogic.Conditions = new HashSet<Uri>();
-            Uri uri = new Uri("http://test/");
+            var uri = new Uri("http://test/");
             eventLogic.Storage.EventUris.Add("Test", uri);
 
             //Act

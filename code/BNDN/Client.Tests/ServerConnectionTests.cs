@@ -12,7 +12,8 @@ namespace Client.Tests
         }
 
         [Test]
-        // Todo: I cannot mock the HttpClientToolbox. Needs some discussion whether to integration test or make it mockable.
+        //TODO: I cannot mock the HttpClientToolbox. Needs some discussion whether to integration test or make it mockable.
+        //TODO: We might need to make methods virtual or setup an interface for this.
         public async void GetWorkflows_Ok()
         {
         }

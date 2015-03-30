@@ -26,7 +26,6 @@ namespace Event.tests
         [Test]
         public void GetEventTest()
         {
-            
 
         }
 

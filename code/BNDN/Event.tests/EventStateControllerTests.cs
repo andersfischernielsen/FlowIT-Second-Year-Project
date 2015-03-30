@@ -64,7 +64,7 @@ namespace Event.tests
             var result = _eventStateController.GetIncluded((_eventAddressDto));
 
             //Assert
-            Assert.AreEqual(true, result);
+            Assert.AreEqual(false, result);
         }
         #endregion
 
@@ -88,7 +88,7 @@ namespace Event.tests
             var result = _eventLogic.Included;
 
             //Assert
-            Assert.AreEqual(false, result);
+            Assert.AreEqual(true, result);
         }
         #endregion
 
