@@ -12,6 +12,7 @@ namespace Event.Models
     public class EventCommunicator : IEventFromEvent
     {
         private readonly HttpClientToolbox _httpClient;
+        private readonly EventLogic _logic;
 
 
         /// <summary>
@@ -21,6 +22,7 @@ namespace Event.Models
         public EventCommunicator(Uri eventUri)
         {
             _httpClient = new HttpClientToolbox(eventUri);
+            _logic = EventLogic.GetState();
         }
 
         /// <summary>
@@ -34,12 +36,12 @@ namespace Event.Models
 
         public async Task<bool> IsExecuted()
         {
-            return await _httpClient.Read<bool>("event/executed");
+            return await _httpClient.Read<bool>("event/executed/" + _logic.EventId);
         }
 
         public async Task<bool> IsIncluded()
         {
-            return await _httpClient.Read<bool>("event/included");
+            return await _httpClient.Read<bool>("event/included/" + _logic.EventId);
         }
 
         /// <summary>
