@@ -41,8 +41,9 @@ namespace Client.ViewModels
             //TODO: Implement exception handling.
             var connection = new ServerConnection(new Uri("http://localhost:13768/")); // todo get the real server address here
 
-            var test = await connection.GetWorkflows();
-            WorkflowList = new ObservableCollection<WorkflowViewModel>(test.Select(workflowDto => new WorkflowViewModel(workflowDto)));
+            var workflows = await connection.GetWorkflows();
+
+            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(workflowDto, this)));
             SelectedWorkflowViewModel = WorkflowList.Count >= 1 ? WorkflowList[0] : null;
 
             NotifyPropertyChanged("");
