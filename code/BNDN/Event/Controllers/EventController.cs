@@ -109,7 +109,7 @@ namespace Event.Controllers
             {
                 await Logic.UpdateEvent(eventDto, ownUri);
             }
-            catch (NullReferenceException exception)
+            catch (NullReferenceException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
             }

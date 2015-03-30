@@ -30,12 +30,12 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="eventAddressDto">Used as a representation for caller of this method</param>
         /// <returns>Event's pending (bool) value</returns>
-        [Route("event/pending")]
+        [Route("event/pending/{id}")]
         [HttpGet]
-        public bool GetPending([FromBody] EventAddressDto eventAddressDto)
+        public bool GetPending(string id)
         {
             // Check is made to see if the caller is allowed to execute this method at the moment
-            if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
             }
@@ -47,12 +47,12 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="eventAddressDto">Content should represent the caller of this method</param>
         /// <returns>Event's current Executed value</returns>
-        [Route("event/executed")]
+        [Route("event/executed/{id}")]
         [HttpGet]
-        public bool GetExecuted([FromBody] EventAddressDto eventAddressDto)
+        public bool GetExecuted(string id)
         {
             // Check is made to see if caller is allowed to execute this method at the moment. 
-            if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
                     "Cannot access this property. The event is locked."));
@@ -65,12 +65,12 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="eventAddressDto">Content should represent caller of the method.</param>
         /// <returns>Current value of Event's (bool) Included value</returns>
-        [Route("event/included")]
+        [Route("event/included/{id}")]
         [HttpGet]
-        public bool GetIncluded([FromBody] EventAddressDto eventAddressDto)
+        public bool GetIncluded(string id)
         {
             // Check is made to see if caller is allowed to execute this method
-            if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
                     "Cannot access this property. The event is locked."));
@@ -83,12 +83,12 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="eventAddressDto">Content should represent caller</param>
         /// <returns>Current value of Event's Executable</returns>
-        [Route("event/executable")]
+        [Route("event/executable/{id}")]
         [HttpGet]
-        public async Task<bool> GetExecutable([FromBody] EventAddressDto eventAddressDto)
+        public async Task<bool> GetExecutable(string id)
         {
             // Check is made to see if caller is allowed to execute this method (at the moment)
-            if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
                     "Cannot access this property. The event is locked."));
@@ -103,12 +103,13 @@ namespace Event.Controllers
         /// <returns>A Task resulting in an EventStateDto which contains 3 
         /// booleans with the current state of the Event, plus a 4th boolean 
         /// which states whether the Event is currently executable</returns>
-        [Route("event/state")]
+        [Route("event/state/{id}")]
         [HttpGet]
-        public async Task<EventStateDto> GetState([FromBody] EventAddressDto eventAddressDto)
+        public async Task<EventStateDto> GetState(string id)
         {
+            //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
             // Check is made to see whether caller is allowed to execute this method at the moment
-            if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            if (!id.Equals("-1") && !Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id=id}))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
                     "Cannot access this property. The event is locked."));
@@ -149,26 +150,32 @@ namespace Event.Controllers
             LockLogic ll = new LockLogic();
             if (await ll.LockAll())
             {
-                var notifyDtos = await Logic.GetNotifyDtos();
-
-                //TODO: Det her er dårlig stil åbenbart: http://stackoverflow.com/questions/23137393/parallel-foreach-and-async-await-issue. Ved ikke hvad løsningen er dog
-                var parallelTasks = Parallel.ForEach(notifyDtos, pair =>
+                var allOk = true;
+                try
                 {
-                    new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray()).Wait();
-                });
+                    await Logic.Execute();
 
-                while (!parallelTasks.IsCompleted)
-                {
+                    Logic.Executed = true;
                 }
-
-                Logic.Executed = true;
+                catch (Exception)
+                {
+                    allOk = false;
+                }
+                
 
                 if (!await ll.UnlockAll())
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at unlocking all the locked events."));
                     //Kunne ikke unlocke alt, hvad skal der ske?
                 }
-                throw new HttpResponseException(HttpStatusCode.OK);
+                if (allOk)
+                {
+                    throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.OK, true));
+                }
+                else
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at updating other events."));
+                }
             }
             throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Another transaction is going on, try again later"));
         }

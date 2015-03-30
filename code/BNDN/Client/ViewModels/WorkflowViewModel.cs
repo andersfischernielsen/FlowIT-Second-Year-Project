@@ -53,27 +53,13 @@ namespace Client.ViewModels
         {
             SelectedEventViewModel = null;
             EventList.Clear();
-            
-            try
-            {
-                var connection = new ServerConnection(new Uri("http://localhost:13768/")); // todo get the real server address here
 
-                var test = await connection.GetEventsFromWorkflow(_workflowDto);
-                EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto)));
-                if (EventList.Count >= 1)
-                {
-                    SelectedEventViewModel = EventList[0];
-                }
-                else
-                {
-                    SelectedEventViewModel = null;
-                }
-            }
-            catch (Exception)
-            {
-                
-                //throw;
-            }
+            //TODO: Get the actual server address here.
+            var connection = new ServerConnection(new Uri(@"http://localhost:13768/"));
+
+            var test = await connection.GetEventsFromWorkflow(_workflowDto);
+            EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto)));
+            SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
             
             NotifyPropertyChanged("");
         }

@@ -12,6 +12,7 @@ namespace Event.Models
     public class EventCommunicator : IEventFromEvent
     {
         private readonly HttpClientToolbox _httpClient;
+        private readonly EventLogic _logic;
 
 
         /// <summary>
@@ -21,6 +22,7 @@ namespace Event.Models
         public EventCommunicator(Uri eventUri)
         {
             _httpClient = new HttpClientToolbox(eventUri);
+            _logic = EventLogic.GetState();
         }
 
         /// <summary>
@@ -34,12 +36,12 @@ namespace Event.Models
 
         public async Task<bool> IsExecuted()
         {
-            return await _httpClient.Read<bool>("event/executed");
+            return await _httpClient.Read<bool>("event/executed/" + _logic.EventId);
         }
 
         public async Task<bool> IsIncluded()
         {
-            return await _httpClient.Read<bool>("event/included");
+            return await _httpClient.Read<bool>("event/included/" + _logic.EventId);
         }
 
         /// <summary>
@@ -85,9 +87,19 @@ namespace Event.Models
             await _httpClient.Delete(String.Format("event/rules/{0}", ownId));
         }
 
+        //TODO: Dont use this.
         public async Task SendNotify(IEnumerable<NotifyDto> dtos)
         {
             await _httpClient.Update("event/notify", dtos);
+        }
+
+        public async Task SendPending(bool newPendingValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/pending/{0}", newPendingValue), lockDto);
+        }
+        public async Task SendIncluded(bool newIncludedValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/included/{0}", newIncludedValue), lockDto);
         }
 
         /// <summary>
@@ -107,7 +119,7 @@ namespace Event.Models
         /// <returns></returns>
         public async Task Unlock(EventAddressDto unlockDto)
         {
-            await _httpClient.Delete("event/lock/"+unlockDto.Id);
+            await _httpClient.Delete(String.Format("event/lock/{0}",unlockDto.Id));
         }
     }
 }
