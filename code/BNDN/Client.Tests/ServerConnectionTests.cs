@@ -16,6 +16,7 @@ namespace Client.Tests
         //TODO: We might need to make methods virtual or setup an interface for this.
         public async void GetWorkflows_Ok()
         {
+            Assert.Fail();
         }
     }
 }
