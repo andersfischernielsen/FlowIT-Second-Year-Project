@@ -14,6 +14,5 @@ namespace Common
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public bool Executable { get; set; }
-        public string Role { get; set; }
     }
 }
