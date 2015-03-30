@@ -295,6 +295,7 @@ namespace Event.Models
             EventId = eventDto.EventId;
             WorkflowId = eventDto.WorkflowId;
             Name = eventDto.Name;
+            Role = eventDto.Role;
             Included = eventDto.Included;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
