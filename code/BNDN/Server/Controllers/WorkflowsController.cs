@@ -84,7 +84,7 @@ namespace Server.Controllers
 
 
         /// <summary>
-        /// PostNewWorkFlow adds a new workflow with the specified workflowid. 
+        /// PostNewWorkFlow adds a new workflow.
         /// </summary>
         /// <param name="workflowDto"></param>
         [Route("Workflows")]
