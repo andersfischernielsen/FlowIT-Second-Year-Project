@@ -36,9 +36,9 @@ namespace Server
             };
         }
 
-        public RolesOnWorkflowsDto Login(LoginDto loginDto)
+        public RolesOnWorkflowsDto Login(string username)
         {
-            var user = _storage.GetUser(loginDto.Username);
+            var user = _storage.GetUser(username);
             var rolesModels = _storage.Login(user);
             var rolesOnWorkflows = new Dictionary<string, IList<string>>();
             foreach (var roleModel in rolesModels)

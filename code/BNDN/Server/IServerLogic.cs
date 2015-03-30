@@ -14,7 +14,7 @@ namespace Server
         /// </summary>
         /// <param name="loginDto"></param>
         /// <returns></returns>
-        RolesOnWorkflowsDto Login(LoginDto loginDto);
+        RolesOnWorkflowsDto Login(string username);
         
         /// <summary>
         /// Get all events from a workflow

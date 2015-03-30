@@ -26,7 +26,7 @@ namespace Client
 
         public async Task<RolesOnWorkflowsDto> Login(string username)
         {
-            return await _http.Read<RolesOnWorkflowsDto>("login");
+            return await _http.Read<RolesOnWorkflowsDto>(string.Format("login/{0}",username));
         }
         
         public async Task<IList<WorkflowDto>> GetWorkflows()

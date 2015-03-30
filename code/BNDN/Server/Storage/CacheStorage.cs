@@ -20,8 +20,7 @@ namespace Server.Storage
             };
             _userCache = new HashSet<ServerUserModel>()
             {
-                new ServerUserModel(){Id = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Teacher",UserId = 1, WorklowId = "Test1"}}},
-                new ServerUserModel(){Id = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Student",UserId = 1, WorklowId = "Test1"}}},
+                new ServerUserModel(){Id = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Teacher",UserId = 1, WorklowId = "Test1"},new ServerRolesModel(){Role="Student",UserId = 1, WorklowId = "Test1"}}},
                 new ServerUserModel(){Id = 2, Name="Fischer",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Teacher",UserId = 2, WorklowId = "Test1"}}}
             };
         }
@@ -50,7 +49,7 @@ namespace Server.Storage
 
         public ServerUserModel GetUser(string username)
         {
-            return _userCache.SingleOrDefault(model => model.Name == username);
+            return _userCache.SingleOrDefault(model => model.Name.ToLower() == username.ToLower());
         }
 
         public IList<ServerRolesModel> Login(ServerUserModel userModel)

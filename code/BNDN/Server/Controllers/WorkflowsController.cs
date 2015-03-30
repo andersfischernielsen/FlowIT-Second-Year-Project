@@ -64,17 +64,17 @@ namespace Server.Controllers
 
         // GET: /Login
         /// <summary>
-        /// Given an workflowId, this method returns all events within that workflow
+        /// Returns the users roles on all workflows.
         /// </summary>
-        /// <param name="workflowId">Id of the requested workflow</param>
-        /// <returns>IEnumerable of EventAddressDto</returns>
-        [Route("login")]
+        /// <param name="username">Id of the requested workflow</param>
+        /// <returns>RolesOnWorkflowsDto</returns>
+        [Route("login/{username}")]
         [HttpGet]
-        public RolesOnWorkflowsDto Login([FromBody] LoginDto loginDto)
+        public RolesOnWorkflowsDto Login(string username)
         {
             try
             {
-                return ServerLogic.Login(loginDto);
+                return ServerLogic.Login(username); 
             }
             catch (Exception ex)
             {
