@@ -20,7 +20,7 @@ namespace Client
 
         public async Task<EventStateDto> GetState()
         {
-            return await _http.Read<EventStateDto>("event/state");
+            return await _http.Read<EventStateDto>("event/state/-1");
         }
         
 
