@@ -21,7 +21,7 @@ namespace Server
             var workflows = _storage.GetAllWorkflows();
             return workflows.Select(model => new WorkflowDto()
             {
-                Id = model.WorkflowId, 
+                Id = model.ID, 
                 Name = model.Name
             });
         }
@@ -31,7 +31,7 @@ namespace Server
             var workflow = _storage.GetWorkflow(workflowId);
             return new WorkflowDto()
             {
-                Id = workflow.WorkflowId, 
+                Id = workflow.ID, 
                 Name = workflow.Name
             };
         }
@@ -45,13 +45,13 @@ namespace Server
             {
                 IList<string> list;
 
-                if (rolesOnWorkflows.TryGetValue(roleModel.WorklowId, out list))
+                if (rolesOnWorkflows.TryGetValue(roleModel.ServerWorklowModelID, out list))
                 {
-                    list.Add(roleModel.Role);
+                    list.Add(roleModel.ID);
                 }
                 else
                 {
-                    rolesOnWorkflows.Add(roleModel.WorklowId, new List<string>{roleModel.Role});
+                    rolesOnWorkflows.Add(roleModel.ServerWorklowModelID, new List<string>{roleModel.ID});
                 }
             }
             return new RolesOnWorkflowsDto() { RolesOnWorkflows = rolesOnWorkflows };
@@ -65,7 +65,7 @@ namespace Server
             //TODO: If the workflow exists, return an empty list, otherwise throw NotFoundException.
             return _storage.GetEventsOnWorkflow(workflow).Select(model => new EventAddressDto()
             {
-                Id = model.EventId,
+                Id = model.ID,
                 Uri = new Uri(model.Uri)
             });
         }
@@ -75,9 +75,9 @@ namespace Server
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
             _storage.AddEventToWorkflow(workflow, new ServerEventModel()
             {
-                EventId = eventToBeAddedDto.Id,
+                ID = eventToBeAddedDto.Id,
                 Uri = eventToBeAddedDto.Uri.ToString(),
-                ServerWorkflowModelId = workflowToAttachToId,
+                ServerWorkflowModelID = workflowToAttachToId,
                 ServerWorkflowModel = workflow
             });
         }
@@ -87,9 +87,9 @@ namespace Server
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
             _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel()
             {
-                EventId = eventToBeAddedDto.Id,
+                ID = eventToBeAddedDto.Id,
                 Uri = eventToBeAddedDto.Uri.ToString(),
-                ServerWorkflowModelId = workflowToAttachToId,
+                ServerWorkflowModelID = workflowToAttachToId,
                 ServerWorkflowModel = workflow
             });
         }
@@ -104,7 +104,7 @@ namespace Server
         {
             _storage.AddNewWorkflow(new ServerWorkflowModel()
             {
-                WorkflowId = workflow.Id,
+                ID = workflow.Id,
                 Name = workflow.Name,
             });
         }
@@ -113,7 +113,7 @@ namespace Server
         {
             _storage.UpdateWorkflow(new ServerWorkflowModel()
             {
-                WorkflowId = workflow.Id,
+                ID = workflow.Id,
                 Name = workflow.Name,
             });
         }
@@ -122,7 +122,7 @@ namespace Server
         {
             _storage.RemoveWorkflow(new ServerWorkflowModel()
             {
-                WorkflowId = workflow.Id,
+                ID = workflow.Id,
                 Name = workflow.Name,
             });
         }

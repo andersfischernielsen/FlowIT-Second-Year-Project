@@ -9,6 +9,10 @@ namespace Server.Storage
 {
     public class StorageContext : DbContext
     {
+        static StorageContext()
+        {
+            Database.SetInitializer(new NullDatabaseInitializer<StorageContext>());
+        }
         public DbSet<ServerEventModel> Events { get; set; }
         public DbSet<ServerWorkflowModel> Workflows { get; set; }
     }

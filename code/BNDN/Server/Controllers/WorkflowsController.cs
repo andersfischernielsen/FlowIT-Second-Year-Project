@@ -44,7 +44,7 @@ namespace Server.Controllers
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
         /// </summary>
-        /// <param name="workflowId">Id of the requested workflow</param>
+        /// <param name="workflowId">ID of the requested workflow</param>
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("workflows/{workflowId}")]
         [HttpGet]
@@ -66,7 +66,7 @@ namespace Server.Controllers
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
         /// </summary>
-        /// <param name="workflowId">Id of the requested workflow</param>
+        /// <param name="workflowId">ID of the requested workflow</param>
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("login")]
         [HttpGet]

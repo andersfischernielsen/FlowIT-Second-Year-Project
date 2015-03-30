@@ -15,13 +15,11 @@ namespace Server.Models
             ServerEventModels = new List<ServerEventModel>();
         }
 
-        [Key]
-        public string WorkflowId { get; set; }
+        public string ID { get; set; }
         public string Name { get; set; }
 
-        [ForeignKey("EventId")]
-        public virtual IList<ServerEventModel> ServerEventModels { get; set; }
+        public virtual ICollection<ServerEventModel> ServerEventModels { get; set; }
 
-        public virtual IList<ServerRolesModel> ServerRolesModels { get; set; }
+        public virtual ICollection<ServerRolesModel> ServerRolesModels { get; set; }
     }
 }

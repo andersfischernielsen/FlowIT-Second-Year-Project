@@ -9,12 +9,11 @@ namespace Server.Models
 {
     public class ServerEventModel
     {
-        [Key]
-        public string EventId { get; set; }
+        public string ID { get; set; }
         public string Uri { get; set; }
 
 
-        public string ServerWorkflowModelId { get; set; }
+        public string ServerWorkflowModelID { get; set; }
 
         public virtual ServerWorkflowModel ServerWorkflowModel { get; set; }
     }

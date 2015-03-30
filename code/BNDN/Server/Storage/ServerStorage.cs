@@ -16,10 +16,20 @@ namespace Server.Storage
             _db = new StorageContext();
         }
 
+        public ServerUserModel GetUser(string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
         {
             IQueryable<ServerEventModel> events = from e in _db.Events
-                where workflow.WorkflowId == e.ServerWorkflowModelId
+                where workflow.ID == e.ServerWorkflowModelID
                 select e;
 
             return events.ToList();
@@ -29,12 +39,12 @@ namespace Server.Storage
         public void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto)
         {
             IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows
-                where eventToBeAddedDto.ServerWorkflowModelId == w.WorkflowId
+                where eventToBeAddedDto.ServerWorkflowModelID == w.ID
                 select w;
 
             if (workflows.Count() != 1)
             {
-                throw new IOException("Multiple or no workflow with given Id.");
+                throw new IOException("Multiple or no workflow with given ID.");
             }
 
             _db.Events.Add(eventToBeAddedDto);
@@ -44,13 +54,13 @@ namespace Server.Storage
         public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             IQueryable<ServerEventModel> events = from e in _db.Events
-                where e.EventId == eventToBeUpdated.EventId
+                where e.ID == eventToBeUpdated.ID
                 select e;
 
             var tempEvent = events.First();
             // TODO: Is it possible to change workflow? 
             tempEvent.ServerWorkflowModel = eventToBeUpdated.ServerWorkflowModel;
-            tempEvent.ServerWorkflowModelId = eventToBeUpdated.ServerWorkflowModelId;
+            tempEvent.ServerWorkflowModelID = eventToBeUpdated.ServerWorkflowModelID;
             tempEvent.Uri = eventToBeUpdated.Uri;
 
             _db.SaveChangesAsync();
@@ -59,7 +69,7 @@ namespace Server.Storage
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
             IQueryable<ServerEventModel> events = from e in _db.Events
-                where e.EventId == eventId
+                where e.ID == eventId
                 select e;
 
             _db.Events.Remove(events.First());
@@ -76,7 +86,7 @@ namespace Server.Storage
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
             IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows
-                where w.WorkflowId == workflowId
+                where w.ID == workflowId
                 select w;
 
             return workflows.First();
@@ -91,7 +101,7 @@ namespace Server.Storage
         public void UpdateWorkflow(ServerWorkflowModel workflow)
         {
             IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows
-                                                  where w.WorkflowId == workflow.WorkflowId
+                                                  where w.ID == workflow.ID
                                                   select w;
 
             var tempWorkflow = workflows.First();
@@ -104,7 +114,7 @@ namespace Server.Storage
         {
             var workflows = 
                 from w in _db.Workflows
-                where w.WorkflowId == workflow.WorkflowId
+                where w.ID == workflow.ID
                 select w;
 
             _db.Workflows.Remove(workflows.First());

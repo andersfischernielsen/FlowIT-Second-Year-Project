@@ -7,10 +7,11 @@ namespace Server.Models
 {
     public class ServerRolesModel
     {
-        public string Role { get; set; }
-        public string WorklowId { get; set; }
-        public virtual ServerWorkflowModel Worklow { get; set; }
-        public int UserId { get; set; }
-        public virtual ServerUserModel User { get; set; }
+        //Formely named as Role
+        public string ID { get; set; }
+        public string ServerWorklowModelID { get; set; }
+        public virtual ServerWorkflowModel ServerWorkflowModel { get; set; }
+        public int ServerUserModelID { get; set; }
+        public virtual ServerUserModel ServerUserModel { get; set; }
     }
 }

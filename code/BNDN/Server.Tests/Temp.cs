@@ -21,7 +21,7 @@ namespace Server.Tests
             var wm = new ServerWorkflowModel
             {
                 Name = "Test",
-                WorkflowId = "2",
+                ID = "2",
                 ServerEventModels = new List<ServerEventModel>()
             };
             s.AddNewWorkflow(wm);

@@ -11,8 +11,8 @@ namespace Server.Models
         {
             ServerRolesModels = new List<ServerRolesModel>();
         }
-        public int Id { get; set; }
+        public int ID { get; set; }
         public string Name { get; set; }
-        public virtual IList<ServerRolesModel> ServerRolesModels { get; set; }
+        public virtual ICollection<ServerRolesModel> ServerRolesModels { get; set; }
     }
 }
