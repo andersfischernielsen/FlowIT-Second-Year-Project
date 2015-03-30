@@ -5,7 +5,8 @@ namespace Common
 {
     public class EventDto
     {
-        public string Id { get; set; }
+        public string EventId { get; set; }
+        public string WorkflowId { get; set; }
         public string Name { get; set; }
         public bool Pending { get; set; }
         public bool Executed { get; set; }

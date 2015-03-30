@@ -8,40 +8,35 @@ namespace Event.Interfaces
 {
     public interface IEventStorage
     {
-        EventDto EntireEventDto { get; set; } // todo maybe maybe not - see todo in InMemoryStorage.
-        string WorkflowId { get; }
-        string EventId { get; }
+        #region Ids
+        Uri OwnUri { get; set; } //For notifying server about this event. Is fetched when receiving EventDto on creation!
+        string WorkflowId { get; set; }
+        string EventId { get; set; }
+        string Name { get; set; }
+        #endregion
 
-        #region Storage
+        #region State
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
+        LockDto LockDto { get; set; }
         #endregion
 
         #region Rules
-        Task<HashSet<Uri>> Conditions { get; set; }
-        Task<HashSet<Uri>> Responses { get; set;  }
-        Task<HashSet<Uri>> Exclusions { get; set; }
-        Task<HashSet<Uri>> Inclusions { get; set; }
+        HashSet<Uri> Conditions { get; set; }
+        HashSet<Uri> Responses { get; set; }
+        HashSet<Uri> Exclusions { get; set; }
+        HashSet<Uri> Inclusions { get; set; }
+        Dictionary<string, Uri> EventUris { get; }
 
-        Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos();
-
-        Task UpdateRules(string id, EventRuleDto rules);
         #endregion
 
-
-        #region DtoMethods
-        Task<EventStateDto> EventStateDto { get; }
-        Task<EventDto> EventDto { get; }
-        #endregion
-
-
-        #region EndPointRegistering
-        Task<Uri> GetUriFromId(string id);
-        Task<string> GetIdFromUri(Uri endPoint);
-        Task RegisterIdWithUri(string id, Uri endPoint);
-        Task<bool> KnowsId(string id);
-        Task RemoveIdAndUri(string id);
+        #region Id and Uri Handling
+        Uri GetUriFromId(string id);
+        string GetIdFromUri(Uri endPoint);
+        void RemoveIdAndUri(string id);
+        void StoreIdAndUri(string id, Uri endPoint);
+        bool IdExists(string id);
         #endregion
     }
 }

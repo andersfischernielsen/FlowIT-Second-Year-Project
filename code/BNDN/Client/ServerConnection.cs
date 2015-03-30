@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Common;
 
@@ -9,27 +7,23 @@ namespace Client
 {
     public class ServerConnection : IServerConnection
     {
-        private static HttpClientToolbox _http;
-        private static ServerConnection _instance;
+        private readonly HttpClientToolbox _http;
 
-        private ServerConnection()
+        
+        public ServerConnection(Uri uri) : this(new HttpClientToolbox(uri))
         {
             
         }
 
-        public static ServerConnection GetStorage(Uri uri)
+        /// <summary>
+        /// For testing purposes (dependency injection of mocked Toolbox.
+        /// </summary>
+        /// <param name="toolbox"></param>
+        public ServerConnection(HttpClientToolbox toolbox)
         {
-            if (_instance == null)
-            {
-                _instance = new ServerConnection();
-            }
-            if (_http == null)
-            {
-                _http = new HttpClientToolbox(uri);
-            }
-            return _instance;
+            _http = toolbox;
         }
-
+        
         public async Task<IList<WorkflowDto>> GetWorkflows()
         {
             return await _http.ReadList<WorkflowDto>("workflows");

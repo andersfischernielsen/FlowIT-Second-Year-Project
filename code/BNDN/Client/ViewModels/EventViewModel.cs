@@ -1,42 +1,84 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common;
 
 namespace Client.ViewModels
 {
     public class EventViewModel : ViewModelBase
     {
-        private EventAddressDto __eventAddressDto;
+        private readonly EventAddressDto _eventAddressDto;
+        private EventStateDto _eventStateDto;
+        private WorkflowViewModel _parent;
+
         public EventViewModel()
         {
-            __eventAddressDto = new EventAddressDto();
+            _eventAddressDto = new EventAddressDto();
+            _eventStateDto = new EventStateDto(){Executable = true};
+            GetState();
         }
-        public EventViewModel(EventAddressDto _eventAddressDto)
+        public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
         {
-            __eventAddressDto = _eventAddressDto;
+            _eventAddressDto = eventAddressDto;
+            _parent = workflow;
+            _eventStateDto = new EventStateDto() { Executable = true };
+            GetState();
         }
 
         #region Databindings
 
-        public int Id
+        public string Id
         {
-            get { return __eventAddressDto.Id; }
+            get { return _eventAddressDto.Id; }
             set
             {
-                __eventAddressDto.Id = value;
+                _eventAddressDto.Id = value;
                 NotifyPropertyChanged("Id");
             }
         }
         public Uri Uri
         {
-            get { return __eventAddressDto.Uri; }
+            get { return _eventAddressDto.Uri; }
             set
             {
-                __eventAddressDto.Uri = value;
+                _eventAddressDto.Uri = value;
                 NotifyPropertyChanged("Uri");
+            }
+        }
+
+        public bool Pending
+        {
+            get { return _eventStateDto.Pending; }
+            set
+            {
+                _eventStateDto.Pending = value;
+                NotifyPropertyChanged("Pending");
+            }
+        }
+        public bool Executed
+        {
+            get { return _eventStateDto.Executed; }
+            set
+            {
+                _eventStateDto.Executed = value;
+                NotifyPropertyChanged("Executed");
+            }
+        }
+        public bool Included
+        {
+            get { return _eventStateDto.Included; }
+            set
+            {
+                _eventStateDto.Included = value;
+                NotifyPropertyChanged("Included");
+            }
+        }
+
+        public bool Executable
+        {
+            get { return _eventStateDto.Executable; }
+            set
+            {
+                _eventStateDto.Executable = value;
+                NotifyPropertyChanged("Executable");
             }
         }
 
@@ -44,27 +86,24 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public void Execute()
+        public async void GetState()
         {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    var eventConnection = new EventConnection(__eventAddressDto);
-                    await eventConnection.Execute(true);
-                }
-                catch (Exception)
-                {
-                    
-                    throw;
-                }
-            });
+            var eventConnection = new EventConnection(_eventAddressDto);
+            _eventStateDto = await eventConnection.GetState();
+            NotifyPropertyChanged("");
+        }
+
+        public async void Execute()
+        {
+            var eventConnection = new EventConnection(_eventAddressDto);
+            await eventConnection.Execute(true);
+            _parent.GetEvents();
         }
         #endregion
 
         public override string ToString()
         {
-            return "Id: " + Id + " - URI: " + Uri.ToString();
+            return string.Format("Id: {0} - URI: {1}", Id, Uri.ToString());
         }
     }
 }

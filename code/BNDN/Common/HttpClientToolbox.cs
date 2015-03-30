@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Common
@@ -15,35 +14,26 @@ namespace Common
     /// </summary>
     public class HttpClientToolbox
     {
-        public static Dictionary<string, HttpClientToolbox> IdHttpClientMap; 
         public HttpClient HttpClient { get; set; }
 
         public HttpClientToolbox(string uri, AuthenticationHeaderValue authenticationHeader = null)
         {
-            if(IdHttpClientMap==null) IdHttpClientMap = new Dictionary<string, HttpClientToolbox>();
-
             HttpClient = new HttpClient { BaseAddress = new Uri(uri) };
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (authenticationHeader != null)
             {
                 HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
             }
-
-            IdHttpClientMap.Add(uri,this);
         }
 
         public HttpClientToolbox(Uri uri, AuthenticationHeaderValue authenticationHeader = null)
         {
-            if (IdHttpClientMap == null) IdHttpClientMap = new Dictionary<string, HttpClientToolbox>();
-
             HttpClient = new HttpClient { BaseAddress = uri };
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (authenticationHeader != null)
             {
                 HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
             }
-
-            IdHttpClientMap.Add(uri.ToString(), this);
         }
 
         /// <summary>
@@ -103,6 +93,14 @@ namespace Common
             {
                 throw;
             }
+        }
+
+        public async Task<TResult> Create<TArgument, TResult>(string uri, TArgument objectToPost)
+        {
+            var response = await HttpClient.PostAsJsonAsync(uri, objectToPost);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadAsAsync<TResult>();
+            return result;
         }
 
         /// <summary>

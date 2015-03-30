@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
@@ -13,284 +12,130 @@ using Event.Models;
 namespace Event.Controllers
 {
     /// <summary>
-    /// The EventController is responsible for handling the Api requests on the {host}/event/* service.
-    /// It must both handle incoming requests from other Events and incoming requests from Clients.
+    /// EventController handles requests regarding the Event as a whole; i.e. requests that manipulates all
+    /// aspects of this Event. 
     /// </summary>
-    [RoutePrefix("event")]
     public class EventController : ApiController
     {
-        private IEventStorage Storage { get; set; }
+        private IEventLogic Logic { get; set; }
         public EventController()
         {
-            Storage = InMemoryStorage.GetState();
+            // Fetches Singleton Logic-layer
+            Logic = EventLogic.GetState();
         }
 
-        
-        [HttpGet]
-        [Route("~/remoteuri")]
-        public async Task<Uri> GetUriOfEvent()
-        {
-            Uri result = null;
-            if (HttpContext.Current != null)
-            {
-                result = HttpContext.Current.Request.UserHostAddress == "::1"
-                    ? new Uri("http://localhost:13752")
-                    : new Uri(String.Format("http://{0}:13752/", HttpContext.Current.Request.UserHostAddress));
-            }
-            return await isEvent(result) ? result : null;
-        }
-
+        #region EventDto
         /// <summary>
-        /// Returns true when the uri (which should include a port) represents an Event.
+        /// Get the entire Event, (namely rules and state for this Event)
         /// </summary>
-        /// <param name="uri">The URI to test</param>
-        /// <returns>true if the Uri represents an Event, false otherwise.</returns>
-        private async Task<bool> isEvent(Uri uri)
-        {
-            try
-            {
-                await new EventCommunicator(uri).IsIncluded();
-            }
-            catch (HttpRequestException)
-            {
-                // This means that the WebAPI didn't respond or that it failed to answer the call succesfully.
-                return false;
-            }
-            catch (UnsupportedMediaTypeException ex)
-            {
-                // if this happens, something in the Web API has been changed and this method should reflect it.
-                Debug.WriteLine(ex.StackTrace);
-                throw;
-            }
-            return true;
-        }
-
-        #region State
-        [Route("pending")]
-        [HttpGet]
-        public bool GetPending()
-        {
-            return Storage.Pending;
-        }
-
-        [Route("executed")]
-        [HttpGet]
-        public bool GetExecuted()
-        {
-            return Storage.Executed;
-        }
-
-        [Route("included")]
-        [HttpGet]
-        public bool GetIncluded()
-        {
-            return Storage.Included;
-        }
-
-        [Route("executable")]
-        [HttpGet]
-        public async Task<bool> GetExecutable()
-        {
-            return await ((InMemoryStorage)Storage).Executable();
-        }
-        #endregion
-
-        #region EventEvent
-        /// <summary>
-        /// Get the entire state of the Event, including rules.
-        /// </summary>
-        /// <returns>A task resulting in a single EventDto which represents the Events current state.</returns>
-        [Route("")]
+        /// <returns>A task containing a single EventDto which represents the Events current state.</returns>
+        [Route("event")]
         [HttpGet]
         public async Task<EventDto> GetEvent()
         {
-            return await Storage.EventDto;
-        }
-
-        [Route("")]
-        [HttpPut]
-        public async Task<IHttpActionResult> PutEvent([FromBody] EventDto eventDto)
-        {
-            if (!ModelState.IsValid)
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
             {
-                return BadRequest(ModelState);
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
             }
-            Storage.EntireEventDto = eventDto;
 
-            return await Task.Run(() => Ok());
+            return await Logic.EventDto;
         }
 
-        #region Rules
         /// <summary>
-        /// Add a rule to this Event.
+        /// Sets up this Event, namely its rules and state
         /// </summary>
-        /// <param name="id">The id of the calling Event.</param>
-        /// <param name="ruleDto">A dto representing the rules which should be between this event and the calling event.</param>
-        /// <returns>A task resulting in a Http Result.</returns>
-        [Route("rules/{id}")]
+        /// <param name="eventDto">The data (ruleset and initial state), this Event should be set to</param>
+        /// <returns></returns>
+        [Route("event")]
         [HttpPost]
-        public async Task<IHttpActionResult> PostRules(string id, [FromBody] EventRuleDto ruleDto)
+        public async Task PostEvent([FromBody] EventDto eventDto)
         {
+            if (eventDto == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
-            }
-            if (ruleDto == null)
-            {
-                return BadRequest("Request requires data");
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
 
-            // if new entry, add Event to the endPoints-table.
-            if (await Storage.KnowsId(id))
-            {
-                return BadRequest(string.Format("{0} already exists!", id));
-            }
+            // Prepare for method-call
+            var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
+            var ownUri = new Uri(s);
+            
+            // Method call
+            await Logic.InitializeEvent(eventDto, ownUri);
 
-            await Storage.RegisterIdWithUri(id, await GetUriOfEvent());
 
-            await Storage.UpdateRules(id, ruleDto);
-
-            return Ok();
+            Ok(true);
         }
 
+
         /// <summary>
-        /// Updates the rules between this Event and the caller.
+        /// This method will override the current info held in this Event, with the data held in 
+        /// the provided EventDto-argument passed to the method call
         /// </summary>
-        /// <param name="id">The id of the calling Event.</param>
-        /// <param name="ruleDto">The complete set of updated rules. 
-        /// If existing rules are not in the dto they will be removed.</param>
-        /// <returns>A task resulting in a Http Result.</returns>
-        [Route("rules/{id}")]
+        /// <param name="eventDto">Holds the data that should override the current data held in this Event</param>
+        /// <returns></returns>
+        [Route("event")]
         [HttpPut]
-        public async Task<IHttpActionResult> PutRules(string id, [FromBody] EventRuleDto ruleDto)
+        public async Task PutEvent([FromBody] EventDto eventDto)
         {
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
-            if (ruleDto == null)
+
+            // Prepare for method-call
+            var ownUri = new Uri(string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
+
+            try
             {
-                return BadRequest("Request requires data");
+                await Logic.UpdateEvent(eventDto, ownUri);
             }
-
-            // If the id is not known to this event, the PUT-call shall fail!
-            if (!await Storage.KnowsId(id))
+            catch (NullReferenceException)
             {
-                return BadRequest(string.Format("{0} does not exist!", id));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
             }
-
-            await Storage.UpdateRules(id, ruleDto);
-
-            return Ok();
         }
 
-        /// <summary>
-        /// Deletes all rules associated with the Event with the given id.
-        /// </summary>
-        /// <param name="id">The id of the calling Event.</param>
-        /// <returns>A task resulting in an Http Result.</returns>
-        [Route("rules/{id}")]
+
+        [Route("event")]
         [HttpDelete]
-        public async Task<IHttpActionResult> DeleteRules(string id)
+        public async Task DeleteEvent()
         {
-            if (!await Storage.KnowsId(id))
+            // Dismiss request if Event is currently locked
+            if (Logic.IsLocked())
             {
-                return BadRequest(string.Format("{0} does not exist!", id));
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
             }
 
-            await Storage.UpdateRules(id,
-                // Set all states to false to remove them from storage.
-                // This effectively removes all rules associated with the given id.
-                // Possibly - to save memory - it could be null instead.
-                // Todo: Read above
-                new EventRuleDto
-                {
-                    Condition = false,
-                    Exclusion = false,
-                    Inclusion = false,
-                    Response = false
-                });
-            // Remove the id because it is no longer associated with any rules.
-            await Storage.RemoveIdAndUri(id);
-
-            return Ok();
-        }
-        #endregion
-
-        [Route("notify")]
-        [HttpPut]
-        public async Task<IHttpActionResult> PutNotify([FromBody] IEnumerable<NotifyDto> dtos)
-        {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                await Logic.DeleteEvent();
             }
-            var notifyDtos = dtos as IList<NotifyDto> ?? dtos.ToList();
-            var include = notifyDtos.OfType<IncludeDto>().Any();
-            var exclude = notifyDtos.OfType<ExcludeDto>().Any();
-            var pending = notifyDtos.OfType<PendingDto>().Any();
-
-            if (include && exclude)
+            catch (NullReferenceException)
             {
-                return BadRequest("Notification must not contain both include and exclude!");
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                "Event is not initialized!"));
             }
-            if (include)
-            {
-                Storage.Included = true;
-            }
-            if (exclude)
-            {
-                Storage.Included = false;
-            }
-            if (pending)
-            {
-                Storage.Pending = true;
-            }
-            // Todo: Await something sensible when connected to database.
-            return await Task.Run(() => Ok());
-        }
-        #endregion
-
-        #region ClientEvent
-        /// <summary>
-        /// Returns the current state of the events.
-        /// </summary>
-        /// <returns>A Task resulting in an EventStateDto which contains 3 
-        /// booleans with the current state of the Event, plus a 4th boolean 
-        /// which states whether the Event is currently executable</returns>
-        [Route("state")]
-        [HttpGet]
-        public async Task<EventStateDto> GetState()
-        {
-            return await Storage.EventStateDto;
-        }
-
-        /// <summary>
-        /// Executes this event. Only Clients should invoke this.
-        /// </summary>
-        /// <param name="execute">Whether to execute or not?</param>
-        /// <returns>A Task resulting in an Http Result.</returns>
-        [Route("{execute:bool}")]
-        [HttpPut]
-        public async Task<IHttpActionResult> Execute(bool execute)
-        {
-            if (execute)
-            {
-                if (!(await ((InMemoryStorage)Storage).Executable()))
-                {
-                    return BadRequest("Event is not currently executable.");
-                }
-                Storage.Executed = true;
-                var notifyDtos = await Storage.GetNotifyDtos();
-                Parallel.ForEach(notifyDtos, async pair =>
-                {
-                    await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
-                });
-                return Ok(true);
-            }
-            // Todo: Is this what should happen when execute is false? Probably every condition should be notified?
-            Storage.Executed = false;
-            return Ok();
         }
         #endregion
     }

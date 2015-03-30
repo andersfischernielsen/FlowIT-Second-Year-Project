@@ -12,31 +12,36 @@ namespace Event.Models
     public class EventCommunicator : IEventFromEvent
     {
         private readonly HttpClientToolbox _httpClient;
+        private readonly EventLogic _logic;
+
 
         /// <summary>
-        /// 
+        /// Create a new EventCommunicator using the provided Uri.
         /// </summary>
-        /// <param name="eventUri">The base-address of the Event whose rules are to be deleted</param>
+        /// <param name="eventUri">The base-address of the Event whose rules are to be deleted.</param>
         public EventCommunicator(Uri eventUri)
         {
-            if (HttpClientToolbox.IdHttpClientMap != null && HttpClientToolbox.IdHttpClientMap.ContainsKey(eventUri.ToString()))
-            {
-                _httpClient = HttpClientToolbox.IdHttpClientMap[eventUri.ToString()];
-            }
-            else
-            {
-                _httpClient = new HttpClientToolbox(eventUri);
-            }
+            _httpClient = new HttpClientToolbox(eventUri);
+            _logic = EventLogic.GetState();
+        }
+
+        /// <summary>
+        /// For testing purposes (inject a mocked HttpClientToolbox).
+        /// </summary>
+        /// <param name="toolbox"> The HttpClientToolbox to use for testing purposes.</param>
+        public EventCommunicator(HttpClientToolbox toolbox)
+        {
+            _httpClient = toolbox;
         }
 
         public async Task<bool> IsExecuted()
         {
-            return await _httpClient.Read<bool>("event/executed");
+            return await _httpClient.Read<bool>("event/executed/" + _logic.EventId);
         }
 
         public async Task<bool> IsIncluded()
         {
-            return await _httpClient.Read<bool>("event/included");
+            return await _httpClient.Read<bool>("event/included/" + _logic.EventId);
         }
 
         /// <summary>
@@ -45,7 +50,7 @@ namespace Event.Models
         /// <returns>A Task object revealing af EventDto object</returns>
         public async Task<EventDto> GetEvent()
         {
-            return await _httpClient.Read<EventDto>("");
+            return await _httpClient.Read<EventDto>("event");
         }
 
 
@@ -82,9 +87,39 @@ namespace Event.Models
             await _httpClient.Delete(String.Format("event/rules/{0}", ownId));
         }
 
+        //TODO: Dont use this.
         public async Task SendNotify(IEnumerable<NotifyDto> dtos)
         {
             await _httpClient.Update("event/notify", dtos);
+        }
+
+        public async Task SendPending(bool newPendingValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/pending/{0}", newPendingValue), lockDto);
+        }
+        public async Task SendIncluded(bool newIncludedValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/included/{0}", newIncludedValue), lockDto);
+        }
+
+        /// <summary>
+        /// Tries to lock the event
+        /// </summary>
+        /// <param name="lockDto"></param>
+        /// <returns></returns>
+        public async Task Lock(LockDto lockDto)
+        {
+            await _httpClient.Create("event/lock", lockDto);
+        }
+
+        /// <summary>
+        /// TODO: BIG TODO.. You cant send json with delete call at this moment with the httptoolbox!!
+        /// </summary>
+        /// <param name="unlockDto"></param>
+        /// <returns></returns>
+        public async Task Unlock(EventAddressDto unlockDto)
+        {
+            await _httpClient.Delete(String.Format("event/lock/{0}",unlockDto.Id));
         }
     }
 }

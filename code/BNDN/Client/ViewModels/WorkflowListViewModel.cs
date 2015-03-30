@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common;
 
 namespace Client.ViewModels
@@ -13,32 +10,6 @@ namespace Client.ViewModels
         public WorkflowListViewModel()
         {
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
-            //WorkflowList.Add(new WorkflowViewModel(new WorkflowDto()){Name = "Workflow1", EventList = new ObservableCollection<EventViewModel>()
-            //{
-            //    new EventViewModel(){Id = "ID11", Uri = new Uri("https://www.google.dk/")},
-            //    new EventViewModel(){Id = "ID12", Uri = new Uri("https://www.google.dk/")},
-            //    new EventViewModel(){Id = "ID13", Uri = new Uri("https://www.google.dk/")},
-            //}});
-            //WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
-            //{
-            //    Name = "Workflow2",
-            //    EventList = new ObservableCollection<EventViewModel>()
-            //{
-            //    new EventViewModel(){Id = "ID21", Uri = new Uri("https://www.google.dk/")},
-            //    new EventViewModel(){Id = "ID22", Uri = new Uri("https://www.google.dk/")},
-            //    new EventViewModel(){Id = "ID23", Uri = new Uri("https://www.google.dk/")},
-            //}
-            //}); WorkflowList.Add(new WorkflowViewModel(new WorkflowDto())
-            //{
-            //    Name = "Workflow3",
-            //    EventList = new ObservableCollection<EventViewModel>()
-            //{
-            //    new EventViewModel(){Id = "ID31", Uri = new Uri("https://www.google.dk/")},
-            //    new EventViewModel(){Id = "ID32", Uri = new Uri("https://www.google.dk/")},
-            //    new EventViewModel(){Id = "ID33", Uri = new Uri("https://www.google.dk/")},
-            //}
-            //});
-            //SelectedWorkflowViewModel = WorkflowList[0];
             GetWorkflows();
         }
 
@@ -66,26 +37,15 @@ namespace Client.ViewModels
         {
             SelectedWorkflowViewModel = null;
             WorkflowList.Clear();
-            try
-            {
-                var connection = ServerConnection.GetStorage(new Uri("http://localhost:13768/")); // todo get the real server address here
 
-                var test = await connection.GetWorkflows();
-                WorkflowList = new ObservableCollection<WorkflowViewModel>(test.Select(workflowDto => new WorkflowViewModel(workflowDto)));
-                if (WorkflowList.Count >= 1)
-                {
-                    SelectedWorkflowViewModel = WorkflowList[0];
-                }
-                else
-                {
-                    SelectedWorkflowViewModel = null;
-                }
-            }
-            catch (Exception)
-            {
-                //throw;
-            }
-            
+            //TODO: Implement exception handling.
+            var connection = new ServerConnection(new Uri("http://localhost:13768/")); // todo get the real server address here
+
+            var workflows = await connection.GetWorkflows();
+
+            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(workflowDto, this)));
+            SelectedWorkflowViewModel = WorkflowList.Count >= 1 ? WorkflowList[0] : null;
+
             NotifyPropertyChanged("");
         }
 

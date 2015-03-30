@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>How to run multiple WebAPIs on IIS Express</title>
+      <style>.markdown-preview { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; line-height: 1.6; overflow: scroll; box-sizing: border-box; padding: 20px; background-color: rgb(255, 255, 255); }
+.markdown-preview code { color: rgb(51, 51, 51); }
+.markdown-preview code, .markdown-preview tt, .markdown-preview pre.editor-colors { font-size: 12px; font-family: Consolas, 'Liberation Mono', Courier, monospace; }
+.markdown-preview a, .markdown-preview a code { color: rgb(65, 131, 196); }
+.markdown-preview ol > li { list-style-type: decimal; }
+.markdown-preview ul > li { list-style-type: disc; }
+.markdown-preview li > pre.editor-colors { display: inline-block; vertical-align: top; width: 100%; }
+.markdown-preview li:last-child > pre.editor-colors { margin-bottom: 0px; }
+.markdown-preview > :first-child { margin-top: 0px !important; }
+.markdown-preview > :last-child { margin-bottom: 0px !important; }
+.markdown-preview a.absent { color: rgb(204, 0, 0); }
+.markdown-preview a.anchor { display: block; padding-left: 30px; margin-left: -30px; cursor: pointer; position: absolute; top: 0px; left: 0px; bottom: 0px; }
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3, .markdown-preview h4, .markdown-preview h5, .markdown-preview h6 { font-family: 'Helvetica Neue', Helvetica, sans-serif; margin: 20px 0px 10px; padding: 0px 0px 10px; font-weight: bold; -webkit-font-smoothing: antialiased; cursor: text; position: relative; }
+.markdown-preview h1 .octicon-link, .markdown-preview h2 .octicon-link, .markdown-preview h3 .octicon-link, .markdown-preview h4 .octicon-link, .markdown-preview h5 .octicon-link, .markdown-preview h6 .octicon-link { display: none; color: rgb(0, 0, 0); }
+.markdown-preview h1:hover a.anchor, .markdown-preview h2:hover a.anchor, .markdown-preview h3:hover a.anchor, .markdown-preview h4:hover a.anchor, .markdown-preview h5:hover a.anchor, .markdown-preview h6:hover a.anchor { text-decoration: none; line-height: 1; padding-left: 0px; margin-left: -22px; top: 15%; }
+.markdown-preview h1:hover a.anchor .octicon-link, .markdown-preview h2:hover a.anchor .octicon-link, .markdown-preview h3:hover a.anchor .octicon-link, .markdown-preview h4:hover a.anchor .octicon-link, .markdown-preview h5:hover a.anchor .octicon-link, .markdown-preview h6:hover a.anchor .octicon-link { display: inline-block; }
+.markdown-preview h1 tt, .markdown-preview h2 tt, .markdown-preview h3 tt, .markdown-preview h4 tt, .markdown-preview h5 tt, .markdown-preview h6 tt, .markdown-preview h1 code, .markdown-preview h2 code, .markdown-preview h3 code, .markdown-preview h4 code, .markdown-preview h5 code, .markdown-preview h6 code { font-size: inherit; }
+.markdown-preview h1 { font-size: 28px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgb(221, 221, 221); color: rgb(0, 0, 0); }
+.markdown-preview h2 { font-size: 24px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgb(238, 238, 238); color: rgb(0, 0, 0); }
+.markdown-preview h3 { font-size: 18px; }
+.markdown-preview h4 { font-size: 16px; }
+.markdown-preview h5 { font-size: 14px; }
+.markdown-preview h6 { color: rgb(119, 119, 119); font-size: 14px; }
+.markdown-preview p, .markdown-preview blockquote, .markdown-preview ul, .markdown-preview ol, .markdown-preview dl, .markdown-preview table, .markdown-preview pre.editor-colors { margin: 15px 0px; }
+.markdown-preview hr { border: 0px none; color: rgb(204, 204, 204); height: 4px; padding: 0px; margin: 15px 0px; background: url('data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC') 0px 0px repeat-x transparent; }
+.markdown-preview > h2:first-child, .markdown-preview > h1:first-child, .markdown-preview > h1:first-child + h2, .markdown-preview > h3:first-child, .markdown-preview > h4:first-child, .markdown-preview > h5:first-child, .markdown-preview > h6:first-child { margin-top: 0px; padding-top: 0px; }
+.markdown-preview a:first-child h1, .markdown-preview a:first-child h2, .markdown-preview a:first-child h3, .markdown-preview a:first-child h4, .markdown-preview a:first-child h5, .markdown-preview a:first-child h6 { margin-top: 0px; padding-top: 0px; }
+.markdown-preview h1 + p, .markdown-preview h2 + p, .markdown-preview h3 + p, .markdown-preview h4 + p, .markdown-preview h5 + p, .markdown-preview h6 + p { margin-top: 0px; }
+.markdown-preview li p.first { display: inline-block; }
+.markdown-preview ul, .markdown-preview ol { padding-left: 30px; }
+.markdown-preview ul.no-list, .markdown-preview ol.no-list { list-style-type: none; padding: 0px; }
+.markdown-preview ul li > :first-child, .markdown-preview ol li > :first-child, .markdown-preview ul li ul:first-of-type, .markdown-preview ol li ul:first-of-type { margin-top: 0px; }
+.markdown-preview ul ul, .markdown-preview ul ol, .markdown-preview ol ol, .markdown-preview ol ul { margin-bottom: 0px; }
+.markdown-preview dl { padding: 0px; }
+.markdown-preview dl dt { font-size: 14px; font-weight: bold; font-style: italic; padding: 0px; margin: 15px 0px 5px; }
+.markdown-preview dl dt:first-child { padding: 0px; }
+.markdown-preview dl dt > :first-child { margin-top: 0px; }
+.markdown-preview dl dt > :last-child { margin-bottom: 0px; }
+.markdown-preview dl dd { margin: 0px 0px 15px; padding: 0px 15px; }
+.markdown-preview dl dd > :first-child { margin-top: 0px; }
+.markdown-preview dl dd > :last-child { margin-bottom: 0px; }
+.markdown-preview blockquote { border-left-width: 4px; border-left-style: solid; border-left-color: rgb(221, 221, 221); padding: 0px 15px; color: rgb(119, 119, 119); }
+.markdown-preview blockquote > :first-child { margin-top: 0px; }
+.markdown-preview blockquote > :last-child { margin-bottom: 0px; }
+.markdown-preview blockquote p { font-size: 16px; line-height: 1.5; }
+.markdown-preview table th { font-weight: bold; }
+.markdown-preview table th, .markdown-preview table td { border: 1px solid rgb(204, 204, 204); padding: 6px 13px; }
+.markdown-preview table tr { border-top-width: 1px; border-top-style: solid; border-top-color: rgb(204, 204, 204); background-color: rgb(255, 255, 255); }
+.markdown-preview table tr:nth-child(2n) { background-color: rgb(248, 248, 248); }
+.markdown-preview img { max-width: 100%; }
+.markdown-preview span.frame { display: block; overflow: hidden; }
+.markdown-preview span.frame > span { border: 1px solid rgb(221, 221, 221); display: block; float: left; overflow: hidden; margin: 13px 0px 0px; padding: 7px; width: auto; }
+.markdown-preview span.frame span img { display: block; float: left; }
+.markdown-preview span.frame span span { clear: both; color: rgb(51, 51, 51); display: block; padding: 5px 0px 0px; }
+.markdown-preview span.align-center { display: block; overflow: hidden; clear: both; }
+.markdown-preview span.align-center > span { display: block; overflow: hidden; margin: 13px auto 0px; text-align: center; }
+.markdown-preview span.align-center span img { margin: 0px auto; text-align: center; }
+.markdown-preview span.align-right { display: block; overflow: hidden; clear: both; }
+.markdown-preview span.align-right > span { display: block; overflow: hidden; margin: 13px 0px 0px; text-align: right; }
+.markdown-preview span.align-right span img { margin: 0px; text-align: right; }
+.markdown-preview span.float-left { display: block; margin-right: 13px; overflow: hidden; float: left; }
+.markdown-preview span.float-left span { margin: 13px 0px 0px; }
+.markdown-preview span.float-right { display: block; margin-left: 13px; overflow: hidden; float: right; }
+.markdown-preview span.float-right > span { display: block; overflow: hidden; margin: 13px auto 0px; text-align: right; }
+.markdown-preview code, .markdown-preview tt { margin: 0px 2px; padding: 0px 5px; border: 1px solid rgb(234, 234, 234); border-radius: 3px; text-shadow: none; background-color: rgb(248, 248, 248); }
+.markdown-preview code { white-space: nowrap; }
+.markdown-preview pre.editor-colors { font-size: 13px; line-height: 19px; overflow: auto; padding: 6px 10px; border-radius: 3px; border: 1px solid rgb(5, 6, 6); background: rgb(29, 31, 33); }
+.markdown-preview kbd { border-radius: 2px; border-width: 1px; border-style: solid; border-color: rgb(221, 221, 221) rgb(204, 204, 204) rgb(204, 204, 204) rgb(221, 221, 221); padding: 1px 4px; line-height: 10px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-image: linear-gradient(rgb(241, 241, 241), rgb(221, 221, 221)); background-color: rgb(221, 221, 221); background-repeat: repeat-x; }
+.markdown-preview .emoji { height: 20px; width: 20px; }
+</style>
+  </head>
+  <body class='markdown-preview'><h1 id="how-to-host-several-instances-of-the-same-webapi-in-iis-express-on-windows-8-1">How to host several instances of the same WebAPI in IIS Express on Windows 8.1</h1>
+<h2 id="general-notes">General notes</h2>
+<ul>
+<li>I&#39;m not sure if the administrator part is necessary in this situation.</li>
+<li>I know that the administrator part is necessary if you want to let external PC&#39;s invoke the instances you host.</li>
+<li>Sometimes multiple IIS Express icons show up in the Notification Area.</li>
+<li>Visual Studio might create new site-entries when you have changed the configuration file manually.<ul>
+<li>If there are name clashes Visual Studio will name the new entries <code>&lt;project name&gt; (&lt;number&gt;)</code> i.e <code>Event (1)</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Compile your program to have an updated .dll file to host from (you don&#39;t need to know the location for now).</li>
+<li>Run the WebAPI at least once from Visual Studio.</li>
+<li>Make sure that IIS Express is not running (check the white/blue IIS Express icon in the Notification Area).</li>
+</ul>
+<h2 id="step-1-configuration">Step 1 - Configuration</h2>
+<ul>
+<li>Open the file <code>applicationhost.config</code> in <code>C:\Users\&lt;your user name&gt;\Documents\IISExpress\config</code> in a text editor.<ul>
+<li>This is an XML-file with the configuration for IIS Express.</li>
+</ul>
+</li>
+<li>Locate the <code>&lt;sites&gt;</code>-tag.</li>
+<li>Find the current entry of the given WebAPI you want to multihost. I.e. <code>&lt;site name=&quot;Event&quot;...</code></li>
+<li>Copy the entry to right before the <code>&lt;siteDefaults&gt;</code>-tag.</li>
+<li>Change the name of the new entry to something like <code>name=&quot;Event1&quot;</code></li>
+<li>Give the entry a new id (just take the next integer in the list).</li>
+<li>Change the port of the instance:<ul>
+<li>Locate the <code>&lt;bindings&gt;</code>-tag inside your <code>&lt;site&gt;</code> and <code>&lt;/site&gt;</code> tags.</li>
+<li>If there is more than one entry of <code>&lt;binding&gt;</code>-tags you will have to update all ports to one that is unused on your machine.</li>
+<li>I could just increment the number by 1, but make sure the port is not already in use by one of the other <code>&lt;site&gt;</code>-entries.</li>
+</ul>
+</li>
+<li>Remember to save the edited configuration file.</li>
+</ul>
+<h2 id="step-2-locating-the-iis-express-server-program-">Step 2 - Locating the IIS Express server-program.</h2>
+<ul>
+<li>Run a Command Prompt as Administrator:<ul>
+<li>Search for <code>cmd</code> in the Start Menu.</li>
+<li>Right click the <code>Command Prompt</code>/<code>Kommandoprompt</code> entry and select <code>Run as administrator</code>/<code>Kør som administrator</code></li>
+<li>Grant access.</li>
+</ul>
+</li>
+<li>Navigate to your <code>IIS Express</code>-installation directory.<ul>
+<li>The next points assumes that this directory is located at <code>C:\Program Files\IIS Express\</code><ul>
+<li><code>cd /</code> to get to the root of your system drive.</li>
+<li><code>cd &quot;Program Files\IIS Express&quot;</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Create new Command Prompt corresponding to the number of WebAPIs that should be hosted<ul>
+<li>Use <code>start cmd</code> to create new Command Prompt-windows.</li>
+</ul>
+</li>
+</ul>
+<h3 id="step-3-running-the-webapi">Step 3 - Running the WebAPI</h3>
+<ul>
+<li>To start a WebAPI write the following command:<ul>
+<li><code>iisexpress /site:&lt;site name&gt;</code> where <code>&lt;site name&gt;</code> is the name it was given in the configuration file during step 1.</li>
+<li>Alternatively:<ul>
+<li><code>iisexpress /siteid:&lt;site id&gt;</code> where <code>&lt;site id&gt;</code> is the id of the site in the configuration file.</li>
+</ul>
+</li>
+<li>If you accidentally runs the server with wrong parameters look at step 4.</li>
+</ul>
+</li>
+</ul>
+<h3 id="step-4-stopping-the-sites">Step 4 - Stopping the sites</h3>
+<ul>
+<li>When you have finished testing your WebAPI (or ran it with wrong parameters) you can stop the sites by doing the following.<ul>
+<li>Locate the IIS Express icon in the Notification Area.</li>
+<li>Right click it, and choose the site you want to stop</li>
+<li>Press <code>Stop site</code> in the submenu of the site you want to stop.</li>
+</ul>
+</li>
+</ul></body>
+</html>

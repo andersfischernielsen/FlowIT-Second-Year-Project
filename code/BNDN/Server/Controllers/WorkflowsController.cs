@@ -1,20 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Web.Http;
 using Common;
 using Server.Models;
+using Server.Storage;
 
 namespace Server.Controllers
 {
     
     public class WorkflowsController : ApiController
     {
-        private IServerStorage Storage { get; set; }
+        private IServerLogic ServerLogic { get; set; }
 
         public WorkflowsController()
         {
-            Storage = new WorkflowStorage();
+            ServerLogic = new ServerLogic(CacheStorage.GetStorage);
+            //ServerLogic = new ServerLogic(new WorkflowStorage());
+        }
+
+        public WorkflowsController(IServerLogic serverLogic)
+        {
+            ServerLogic = serverLogic;
         }
 
 
@@ -26,7 +36,7 @@ namespace Server.Controllers
         [Route("workflows")]
         public IEnumerable<WorkflowDto> Get()
         {
-            return Storage.GetAllWorkflows();
+            return ServerLogic.GetAllWorkflows();
         }
 
 
@@ -38,38 +48,101 @@ namespace Server.Controllers
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("workflows/{workflowId}")]
         [HttpGet]
-        public IEnumerable<EventAddressDto> Get(int workflowId)
+        public IEnumerable<EventAddressDto> Get(string workflowId)
         {
-            Debug.WriteLine("Hmm, we got here!");
-            return Storage.GetEventsWithinWorkflow(workflowId);
+            try
+            {
+                Debug.WriteLine("Hmm, we got here!");
+                return ServerLogic.GetEventsOnWorkflow(workflowId);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
+            }
+            
         }
 
 
         /// <summary>
-        /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
+        /// PostNewWorkFlow adds a new workflow with the specified workflowid. 
         /// </summary>
-        /// <param name="eventId"></param>
         /// <param name="workflowId"></param>
         /// <param name="eventToAddDto"></param>
         [Route("Workflows/{workflowId}")]
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
         // TODO: How does an Event know that an eventId is not already taken?
-        public void PostEventToWorkFlow(int workflowId, [FromBody] EventAddressDto eventToAddDto)
+        public void PostWorkFlow(string workflowId, [FromBody] WorkflowDto dto)
         {
-            // Add this Event to the specified workflow
-            Storage.AddEventToWorkflow(workflowId,eventToAddDto);
+            // Todo see that workflowId matches the dto.
+            try
+            {
+                // Add this Event to the specified workflow
+                ServerLogic.AddNewWorkflow(dto);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
+            }
         }
 
-        
+        /// <summary>
+        /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
+        /// </summary>
+        /// <param name="workflowId"></param>
+        /// <param name="eventToAddDto"></param>
+        [Route("Workflows/{workflowId}")]
+        [HttpPut]
+        // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
+        // TODO: How does an Event know that an eventId is not already taken?
+        public void UpdateEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToBeUpdated)
+        {
+            try
+            {
+            // Add this Event to the specified workflow
+                ServerLogic.UpdateEventOnWorkflow(workflowId, eventToBeUpdated);
+            }
+            catch (Exception ex)
+            {
+                
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
+            }
+        }
+
+        [Route("Workflows/{workflowId}/{eventId}")]
+        [HttpPost]
+        // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
+        // TODO: How does an Event know that an eventId is not already taken?
+        public IEnumerable<EventAddressDto> PostEventToWorkFlow(string workflowId, string eventId, [FromBody] EventAddressDto eventToAddDto)
+        {
+            try
+            {
+                // Add this Event to the specified workflow
+                ServerLogic.AddEventToWorkflow(workflowId, eventToAddDto);
+                return ServerLogic.GetEventsOnWorkflow(workflowId).Where(eventAddressDto => eventAddressDto.Id != eventId);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+            }
+        }
+
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
-        public void DeleteEventFromWorkflow(int workflowId, int eventId)
+        public void DeleteEventFromWorkflow(string workflowId, string eventId)
         {
-            // Delete the given event id from the list of workflow-events.
-            Debug.WriteLine("Yep, we got here!");
-            Storage.RemoveEventFromWorkflow(workflowId,eventId);
+            try
+            {
+                // Delete the given event id from the list of workflow-events.
+                Debug.WriteLine("Yep, we got here!");
+                ServerLogic.RemoveEventFromWorkflow(workflowId,eventId);
+            }
+            catch (Exception ex)
+            {
+                
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
+            }
         }
     }
 }

@@ -1,185 +1,61 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Common;
 using Event.Interfaces;
 
 namespace Event.Models
 {
     public class InMemoryStorage : IEventStorage
     {
-        private static InMemoryStorage _inMemoryStorage;
-        public EventDto EntireEventDto { get; set; } // todo Maybe use adapter pattern to simplify entire storage.
-
-        public string WorkflowId { get; set; }
-        public string EventId { get; set; }
-        public bool Executed { get; set; }
-        public bool Included { get; set; }
-        public bool Pending { get; set; }
-
-        public async Task<bool> Executable()
-        {
-            foreach (var condition in await Conditions)
-            {
-                IEventFromEvent eventCommunicator = new EventCommunicator(condition);
-                var executed = await eventCommunicator.IsExecuted();
-                var included = await eventCommunicator.IsIncluded();
-                // If the condition-event is not executed and currently included
-                if (!executed || included)
-                {
-                    return false; //Don't check rest because this event is not executable.
-                }
-            }
-            return true; // If all conditions are executed or excluded.
-        }
-
-        private Dictionary<string, Uri> EventUris { get; set; }
-        private Dictionary<Uri, string> EventIds { get; set; }
-
-        private InMemoryStorage()
+        public InMemoryStorage()
         {
             EventUris = new Dictionary<string, Uri>();
             EventIds = new Dictionary<Uri, string>();
-            Included = true;
+            Conditions = new HashSet<Uri>();
+            Responses = new HashSet<Uri>();
+            Exclusions = new HashSet<Uri>();
+            Inclusions = new HashSet<Uri>();
         }
 
-        public Task<HashSet<Uri>> Conditions { get; set; }
-                    
-        public Task<HashSet<Uri>> Responses { get; set; }
-                    
-        public Task<HashSet<Uri>> Exclusions { get; set; }
-                    
-        public Task<HashSet<Uri>> Inclusions { get; set; }
+        #region Properties
+        public Uri OwnUri { get; set; }
+        public string WorkflowId { get; set; }
+        public string EventId { get; set; }
+        public string Name { get; set; }
+        public LockDto LockDto { get; set; }
+        public bool Executed { get; set; }
+        public bool Included { get; set; }
+        public bool Pending { get; set; }
+        public Dictionary<string, Uri> EventUris { get; set; }
+        public Dictionary<Uri, string> EventIds { get; set; }
+        public HashSet<Uri> Conditions { get; set; }
+        public HashSet<Uri> Responses { get; set; }
+        public HashSet<Uri> Exclusions { get; set; }
+        public HashSet<Uri> Inclusions { get; set; }
+        #endregion
 
-        public async Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos()
+        #region Methods For Removing/Storing Data
+        public Uri GetUriFromId(string id)
         {
-
-            var result = new Dictionary<Uri, List<NotifyDto>>();
-            foreach (var response in await Responses)
-            {
-                await AddNotifyDto(result, response, s => new PendingDto {Id = s});
-            }
-
-            foreach (var exclusion in await Exclusions)
-            {
-                await AddNotifyDto(result, exclusion, s => new ExcludeDto {Id = s});
-            }
-
-            foreach (var inclusion in await Inclusions)
-            {
-                await AddNotifyDto(result, inclusion, s => new IncludeDto {Id = s});
-            }
-
-            return (IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>)result;
+            return EventUris[id];
         }
-
-        private async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
-            where T : NotifyDto
+        public string GetIdFromUri(Uri endPoint)
         {
-            T dto = creator.Invoke(await GetIdFromUri(uri));
-            if (dictionary.ContainsKey(uri))
-            {
-                dictionary[uri].Add(dto);
-            }
-            else
-            {
-                dictionary.Add(uri, new List<NotifyDto> { dto });
-            }
+            return EventIds[endPoint];
         }
-
-        public async Task UpdateRules(string id, EventRuleDto rules)
+        public void RemoveIdAndUri(string id)
         {
-            var endPoint = EventUris[id];
-            if (endPoint == null)
-            {
-                throw new ArgumentException("Nonexistent id", id);
-            }
-            if (rules == null)
-            {
-                throw new ArgumentNullException("rules");
-            }
-
-            await UpdateRule(rules.Condition, endPoint, await Conditions);
-            await UpdateRule(rules.Exclusion, endPoint, await Exclusions);
-            await UpdateRule(rules.Inclusion, endPoint, await Inclusions);
-            await UpdateRule(rules.Response, endPoint, await Responses);
+            EventIds.Remove(EventUris[id]);
+            EventUris.Remove(id);
         }
-
-        private async static Task UpdateRule(bool shouldAdd, Uri value, ISet<Uri> collection)
+        public bool IdExists(string id)
         {
-            if (shouldAdd) collection.Add(value);
-            else collection.Remove(value);
+            return EventUris.ContainsKey(id);
         }
-
-        public Task<EventStateDto> EventStateDto
+        public void StoreIdAndUri(string id, Uri endPoint)
         {
-            get
-            {
-                return Task.Run(async () => new EventStateDto
-                {
-                    Executed = Executed,
-                    Included = Included,
-                    Pending = Pending,
-                    Executable = await Executable()
-                });
-            }
+            EventUris.Add(id, endPoint);
+            EventIds.Add(endPoint, id);
         }
-
-        public async Task<Uri> GetUriFromId(string id)
-        {
-            return await Task.Run(() => EventUris[id]);
-        }
-
-        public async Task<string> GetIdFromUri(Uri endPoint)
-        {
-            return await Task.Run(() => EventIds[endPoint]);
-        }
-
-        public async Task RegisterIdWithUri(string id, Uri endPoint)
-        {
-            await Task.Run(() =>
-            {
-                EventUris.Add(id, endPoint);
-                EventIds.Add(endPoint, id);
-            });
-        }
-
-        public async Task<bool> KnowsId(string id)
-        {
-            return await Task.Run(() => EventUris.ContainsKey(id));
-        }
-
-        public async Task RemoveIdAndUri(string id)
-        {
-            await Task.Run(() =>
-            {
-                EventIds.Remove(EventUris[id]);
-                EventUris.Remove(id);
-            });
-        }
-
-        public Task<EventDto> EventDto
-        {
-            get
-            {
-                return Task.Run(async () => new EventDto
-                {
-                    Id = EventId,
-                    Pending = Pending,
-                    Executed = Executed,
-                    Included = Included,
-                    Conditions = await Conditions,
-                    Exclusions = await Exclusions,
-                    Responses = await Responses,
-                    Inclusions = await Inclusions
-                });
-            }
-        }
-
-        public static InMemoryStorage GetState()
-        {
-            return _inMemoryStorage ?? (_inMemoryStorage = new InMemoryStorage());
-        }
+        #endregion
     }
 }
