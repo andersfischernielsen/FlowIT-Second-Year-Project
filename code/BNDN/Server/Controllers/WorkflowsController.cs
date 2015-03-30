@@ -52,7 +52,6 @@ namespace Server.Controllers
         {
             try
             {
-                Debug.WriteLine("Hmm, we got here!");
                 return ServerLogic.GetEventsOnWorkflow(workflowId);
             }
             catch (Exception ex)
@@ -87,19 +86,18 @@ namespace Server.Controllers
         /// <summary>
         /// PostNewWorkFlow adds a new workflow with the specified workflowid. 
         /// </summary>
-        /// <param name="workflowId"></param>
-        /// <param name="dto"></param>
-        [Route("Workflows/{workflowId}")]
+        /// <param name="workflowDto"></param>
+        [Route("Workflows")]
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
         // TODO: How does an Event know that an eventId is not already taken?
-        public void PostWorkFlow(string workflowId, [FromBody] WorkflowDto dto)
+        public void PostWorkFlow([FromBody] WorkflowDto workflowDto)
         {
             // Todo see that workflowId matches the dto.
             try
             {
                 // Add this Event to the specified workflow
-                ServerLogic.AddNewWorkflow(dto);
+                ServerLogic.AddNewWorkflow(workflowDto);
             }
             catch (Exception ex)
             {
@@ -111,7 +109,7 @@ namespace Server.Controllers
         /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
         /// </summary>
         /// <param name="workflowId"></param>
-        /// <param name="eventToAddDto"></param>
+        /// <param name="eventToBeUpdated"></param>
         [Route("Workflows/{workflowId}")]
         [HttpPut]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
@@ -130,17 +128,16 @@ namespace Server.Controllers
             }
         }
 
-        [Route("Workflows/{workflowId}/{eventId}")]
+        [Route("Workflows/{workflowId}")]
         [HttpPost]
-        // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
         // TODO: How does an Event know that an eventId is not already taken?
-        public IEnumerable<EventAddressDto> PostEventToWorkFlow(string workflowId, string eventId, [FromBody] EventAddressDto eventToAddDto)
+        public IEnumerable<EventAddressDto> PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
         {
             try
             {
                 // Add this Event to the specified workflow
                 ServerLogic.AddEventToWorkflow(workflowId, eventToAddDto);
-                return ServerLogic.GetEventsOnWorkflow(workflowId).Where(eventAddressDto => eventAddressDto.Id != eventId);
+                return ServerLogic.GetEventsOnWorkflow(workflowId).Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
             }
             catch (Exception ex)
             {
@@ -150,18 +147,15 @@ namespace Server.Controllers
 
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
-        // TODO: Is there any need to supply more than workflowId and eventId of the event that is to be removed?
         public void DeleteEventFromWorkflow(string workflowId, string eventId)
         {
             try
             {
                 // Delete the given event id from the list of workflow-events.
-                Debug.WriteLine("Yep, we got here!");
                 ServerLogic.RemoveEventFromWorkflow(workflowId,eventId);
             }
             catch (Exception ex)
             {
-                
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
             }
         }

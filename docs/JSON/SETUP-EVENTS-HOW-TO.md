@@ -5,11 +5,11 @@
 - Server instance running
 - Three events running
 - For each Event, post seeddata for ONE Event (copy from CourseWorkflow.json into "raw") using "POST" in PostMan AT THE INTENDED EVENT's ADDRESS
-- Example: POST htttp://localhost/13754/event/ 
+- Example: POST on htttp://localhost:13754/event/
 
-PASTE THIS INTO "raw":
+PASTE THIS INTO "raw" and set type to "JSON (application/json)":
 
-json
+
 {
     "EventId": "test1",
     "WorkflowId": "test1",
