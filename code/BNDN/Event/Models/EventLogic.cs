@@ -167,26 +167,28 @@ namespace Event.Models
         #endregion
 
         #region DTO Creation
-        public async Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos()
+        public async Task<IEnumerable<Uri>> GetNotifyDtos()
         {
-            var result = new Dictionary<Uri, List<NotifyDto>>();
+            // Todo: rename method
+
+            var set = new HashSet<Uri>();
 
             foreach (var response in Responses)
             {
-                await AddNotifyDto(result, response, s => new PendingDto { Id = s });
+                set.Add(response);
             }
 
             foreach (var exclusion in Exclusions)
             {
-                await AddNotifyDto(result, exclusion, s => new ExcludeDto { Id = s });
+                set.Add(exclusion);
             }
 
             foreach (var inclusion in Inclusions)
             {
-                await AddNotifyDto(result, inclusion, s => new IncludeDto { Id = s });
+                set.Add(inclusion);
             }
 
-            return (IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>)result;
+            return set;
         }
 
         public async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
@@ -386,7 +388,9 @@ namespace Event.Models
 
         public async Task Execute()
         {
-            var addressDto = new EventAddressDto() {Id = EventId, Uri = OwnUri};
+            Executed = true;
+            Pending = false;
+            var addressDto = new EventAddressDto {Id = EventId, Uri = OwnUri};
             await Task.Run(async () =>
             {
                 foreach (var pending in Responses)
@@ -395,11 +399,11 @@ namespace Event.Models
                 }
                 foreach (var inclusion in Inclusions)
                 {
-                    await new EventCommunicator(inclusion).SendPending(true, addressDto);
+                    await new EventCommunicator(inclusion).SendIncluded(true, addressDto);
                 }
                 foreach (var exclusion in Exclusions)
                 {
-                    await new EventCommunicator(exclusion).SendPending(true, addressDto);
+                    await new EventCommunicator(exclusion).SendIncluded(false, addressDto);
                 }
             });
         }

@@ -13,13 +13,12 @@ namespace Event.Models
     public class LockLogic
     {
         private readonly EventLogic _logic;
-        private IEnumerable<KeyValuePair<Uri, List<NotifyDto>>> _list;
-        private Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> _taskList;
+        private IEnumerable<Uri> _list;
         private HashSet<Uri> _locked; 
         public LockLogic()
         {
             _logic = EventLogic.GetState();
-            _taskList = _logic.GetNotifyDtos(); // ER DET HER DEN RIGTIGE LISTE?
+            _list = _logic.GetNotifyDtos().Result; // ER DET HER DEN RIGTIGE LISTE?
             _locked = new HashSet<Uri>();
         }
 
@@ -27,17 +26,17 @@ namespace Event.Models
         {
             if (_list == null)
             {
-                _list = await _taskList;
+                throw new InvalidOperationException("_list is not instantiated");
             }
             try
             {
                 LockDto lockDto = new LockDto() {LockOwner = _logic.EventId};
                 _logic.LockDto = lockDto;
 
-                foreach (var pair in _list)
+                foreach (var uri in _list)
                 {
-                    new EventCommunicator(pair.Key).Lock(lockDto).Wait();
-                    _locked.Add(pair.Key);
+                    new EventCommunicator(uri).Lock(lockDto).Wait();
+                    _locked.Add(uri);
                 }
                 //TODO: Brug Parrallel i stedet for
                 //Parallel.ForEach(_list, async pair =>
@@ -58,6 +57,7 @@ namespace Event.Models
         private void UnlockSome()
         {
             EventAddressDto eventAddress = new EventAddressDto() {Id = _logic.EventId, Uri = _logic.OwnUri};
+
             var parallelTasks = Parallel.ForEach(_locked, pair =>
             {
                 try
@@ -70,10 +70,12 @@ namespace Event.Models
                 }
                 
             });
+
             while (!parallelTasks.IsCompleted)
             {
             }
             _locked = null;
+            _logic.LockDto = null;
         }
 
         public async Task<bool> UnlockAll()
@@ -81,17 +83,17 @@ namespace Event.Models
 
             if (_list == null)
             {
-                _list = await _taskList;
+                throw new InvalidOperationException("_list must not be null");
             }
             bool b = true;
 
             var eventAddress = new EventAddressDto() { Id = _logic.EventId, Uri = _logic.OwnUri };
 
-            var parallelTasks = Parallel.ForEach(_list, pair =>
+            var parallelTasks = Parallel.ForEach(_list, uri =>
             {
                 try
                 {
-                    new EventCommunicator(pair.Key).Unlock(eventAddress).Wait();
+                    new EventCommunicator(uri).Unlock(eventAddress).Wait();
                 }
                 catch (Exception)
                 {
