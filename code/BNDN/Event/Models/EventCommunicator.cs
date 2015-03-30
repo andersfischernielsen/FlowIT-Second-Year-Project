@@ -85,6 +85,7 @@ namespace Event.Models
             await _httpClient.Delete(String.Format("event/rules/{0}", ownId));
         }
 
+        //TODO: Dont use this.
         public async Task SendNotify(IEnumerable<NotifyDto> dtos)
         {
             await _httpClient.Update("event/notify", dtos);
