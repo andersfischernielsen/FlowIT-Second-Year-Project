@@ -72,7 +72,7 @@ namespace Client.ViewModels
             WorkflowList.Clear();
             try
             {
-                var connection = ServerConnection.GetStorage(new Uri("http://localhost:13768/")); // todo get the real server address here
+                var connection = new ServerConnection(new Uri("http://localhost:13768/")); // todo get the real server address here
 
                 var test = await connection.GetWorkflows();
                 WorkflowList = new ObservableCollection<WorkflowViewModel>(test.Select(workflowDto => new WorkflowViewModel(workflowDto)));

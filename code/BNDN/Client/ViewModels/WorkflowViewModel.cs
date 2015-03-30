@@ -56,7 +56,7 @@ namespace Client.ViewModels
             
             try
             {
-                var connection = ServerConnection.GetStorage(new Uri("http://localhost:13768/")); // todo get the real server address here
+                var connection = new ServerConnection(new Uri("http://localhost:13768/")); // todo get the real server address here
 
                 var test = await connection.GetEventsFromWorkflow(_workflowDto);
                 EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto)));
