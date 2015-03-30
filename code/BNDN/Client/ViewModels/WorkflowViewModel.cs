@@ -8,15 +8,17 @@ namespace Client.ViewModels
     public class WorkflowViewModel : ViewModelBase
     {
         private readonly WorkflowDto _workflowDto;
+        private readonly WorkflowListViewModel _parent;
         public WorkflowViewModel()
         {
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = new WorkflowDto();
         }
 
-        public WorkflowViewModel(WorkflowDto workflowDto)
+        public WorkflowViewModel(WorkflowDto workflowDto, WorkflowListViewModel listViewModel)
         {
             EventList = new ObservableCollection<EventViewModel>();
+            _parent = listViewModel;
             _workflowDto = workflowDto;
         }
 
@@ -58,7 +60,7 @@ namespace Client.ViewModels
             var connection = new ServerConnection(new Uri(@"http://localhost:13768/"));
 
             var test = await connection.GetEventsFromWorkflow(_workflowDto);
-            EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto)));
+            EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto, this)));
             SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
             
             NotifyPropertyChanged("");

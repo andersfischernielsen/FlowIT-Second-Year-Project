@@ -7,15 +7,18 @@ namespace Client.ViewModels
     {
         private readonly EventAddressDto _eventAddressDto;
         private EventStateDto _eventStateDto;
+        private WorkflowViewModel _parent;
+
         public EventViewModel()
         {
             _eventAddressDto = new EventAddressDto();
             _eventStateDto = new EventStateDto(){Executable = true};
             GetState();
         }
-        public EventViewModel(EventAddressDto eventAddressDto)
+        public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
         {
             _eventAddressDto = eventAddressDto;
+            _parent = workflow;
             _eventStateDto = new EventStateDto() { Executable = true };
             GetState();
         }
@@ -94,6 +97,7 @@ namespace Client.ViewModels
         {
             var eventConnection = new EventConnection(_eventAddressDto);
             await eventConnection.Execute(true);
+            _parent.GetEvents();
         }
         #endregion
 
