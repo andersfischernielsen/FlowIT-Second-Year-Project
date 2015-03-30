@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
@@ -135,7 +136,7 @@ namespace Event.Models
         {
             await Task.Run(() =>
             {
-                var uri = Storage.EventUris[id];
+                var uri = Storage.EventUris.SingleOrDefault(x => x.Key == id).Value;
                 if (uri == null)
                 {
                     throw new ArgumentException("Nonexistent id", id);
@@ -207,6 +208,8 @@ namespace Event.Models
             {
                 return Task.Run(async () => new EventStateDto
                 {
+                    Id = EventId,
+                    Name = Name,
                     Executed = Executed,
                     Included = Included,
                     Pending = Pending,
@@ -239,7 +242,7 @@ namespace Event.Models
         #region URI Registration
         public Task RegisterIdWithUri(string id, Uri endPoint)
         {
-            return Task.Run(() => RegisterIdWithUri(id, endPoint));
+            return Task.Run(() => Storage.StoreIdAndUri(id, endPoint));
         }
 
         public Task<bool> KnowsId(string id)
@@ -320,14 +323,14 @@ namespace Event.Models
             {
                 throw new NullReferenceException("Provided EventDto was null");
             }
-            if (EventId != null)
+            if (EventId == null)
             {
                 throw new NullReferenceException("EventId was null");
             }
 
             if (EventId != eventDto.EventId || WorkflowId != eventDto.WorkflowId)
             {
-                //Todo remove from server and add again.
+                //TODO: Remove from server and add again. Maybe remove.
             }
 
             EventId = eventDto.EventId;
