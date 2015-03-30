@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using Common;
 
 namespace Client.ViewModels
@@ -89,15 +90,30 @@ namespace Client.ViewModels
         public async void GetState()
         {
             var eventConnection = new EventConnection(_eventAddressDto);
-            _eventStateDto = await eventConnection.GetState();
-            NotifyPropertyChanged("");
+            try
+            {
+                _eventStateDto = await eventConnection.GetState();
+                NotifyPropertyChanged("");
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + Environment.NewLine + e.GetType());
+            }
         }
 
         public async void Execute()
         {
-            var eventConnection = new EventConnection(_eventAddressDto);
-            await eventConnection.Execute(true, _parent.WorkflowId);
-            _parent.GetEvents();
+            try
+            {
+                var eventConnection = new EventConnection(_eventAddressDto);
+                await eventConnection.Execute(true, _parent.WorkflowId);
+                _parent.GetEvents();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + Environment.NewLine + e.GetType());
+            }
+
         }
         #endregion
 
