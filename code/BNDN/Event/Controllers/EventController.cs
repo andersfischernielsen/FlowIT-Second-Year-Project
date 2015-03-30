@@ -113,8 +113,6 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
             }
-            // TODO: Discuss - should we return Ok(true)?
-            Ok(true);
         }
 
 
