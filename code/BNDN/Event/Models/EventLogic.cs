@@ -91,9 +91,6 @@ namespace Event.Models
         //Singleton instance.
         private static EventLogic _eventLogic;
 
-        // ServerCommunicator
-        private IServerFromEvent ServerCommunicator { get; set; }
-
         public static EventLogic GetState()
         {
             return _eventLogic ?? (_eventLogic = new EventLogic());
@@ -103,7 +100,7 @@ namespace Event.Models
         {
             // TODO: Server address
             Storage = new InMemoryStorage();
-            ServerCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
+            
 
         }
         #endregion
@@ -280,12 +277,12 @@ namespace Event.Models
         {
             if (eventDto == null)
             {
-                throw new NullReferenceException("Provided EventDto was null");
+                throw new ArgumentNullException("eventDto", "Provided EventDto was null");
             }
-            if (EventId != null)
-            {
-                throw new NullReferenceException("EventId was not null");
-            }
+            // if (EventId != null)
+            // {
+            //     throw new NullReferenceException("EventId was not null");
+            // }
 
             EventId = eventDto.EventId;
             WorkflowId = eventDto.WorkflowId;
@@ -293,11 +290,10 @@ namespace Event.Models
             Included = eventDto.Included;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
-            // TODO: Review if the awaiting done here is legal / intended or not, blame Morten!
-            Inclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            Exclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            Conditions = await Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            Responses = await Task.Run(() => new HashSet<Uri>(eventDto.Responses));
+            Inclusions = new HashSet<Uri>(eventDto.Inclusions);
+            Exclusions = new HashSet<Uri>(eventDto.Exclusions);
+            Conditions = new HashSet<Uri>(eventDto.Conditions);
+            Responses = new HashSet<Uri>(eventDto.Responses);
             OwnUri = ownUri;
 
             var dto = new EventAddressDto
@@ -306,14 +302,15 @@ namespace Event.Models
                 Uri = OwnUri
             };
 
-           var otherEvents = await ServerCommunicator.PostEventToServer(dto);
+           var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
 
-            /*
+           var otherEvents = await serverCommunicator.PostEventToServer(dto);
+
             foreach (var otherEvent in otherEvents)
             {
                 // Todo register self with other Events.
-                await Logic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            }*/
+                await _eventLogic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+            }
         }
 
         public async Task UpdateEvent(EventDto eventDto, Uri ownUri)
@@ -355,7 +352,9 @@ namespace Event.Models
                 Uri = OwnUri
             };
 
-            var otherEvents = await ServerCommunicator.PostEventToServer(dto);
+            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
+
+            var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
 
             // Todo clear old registered events!
@@ -371,8 +370,8 @@ namespace Event.Models
             {
                 throw new NullReferenceException();
             }
-
-            await ServerCommunicator.DeleteEventFromServer();
+            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
+            await serverCommunicator.DeleteEventFromServer();
             await ResetState();
         }
 
