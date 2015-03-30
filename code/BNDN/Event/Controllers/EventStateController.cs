@@ -120,23 +120,24 @@ namespace Event.Controllers
 
         // TODO: We need to decide on a consistent way of updating these values; a) the (bool) value in body or b) the bool value in the url...
         #region PUT-requests
+
         /// <summary>
         /// Executes this event. Only Clients should invoke this.
         /// todo: Should be able to return something to the caller.
         /// </summary>
         /// <param name="execute">Must be set to true; will result in BadRequest otherwise.</param>
+        /// <param name="executeDto">An executeDto with the roles of the given user wishing to execute.</param>
         /// <returns></returns>
         [Route("event/executed")]
         [HttpPut]
-        public async Task Execute([FromBody] bool execute)
+        public async Task Execute([FromBody] ExecuteDto executeDto)
         {
-            // Check that caller knows what it is doing
-            if (!execute)
+            if (!executeDto.Roles.Contains(Logic.Role))
             {
                 throw new HttpResponseException(
                     Request.CreateErrorResponse(
-                    HttpStatusCode.BadRequest,
-                    "Execute cannot be undone by supplying (bool) execute with a value of false"));
+                        HttpStatusCode.BadRequest,
+                        "You do not have the correct role for executing this event."));
             }
 
             // Check if Event is currently locked

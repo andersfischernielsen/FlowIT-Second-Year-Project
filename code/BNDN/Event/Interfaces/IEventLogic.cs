@@ -15,6 +15,7 @@ namespace Event.Interfaces
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
+        string Role { get; set; }
         #endregion
 
         #region Rules
