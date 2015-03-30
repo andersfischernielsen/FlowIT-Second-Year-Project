@@ -175,7 +175,6 @@ namespace Server.Tests
             Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
         }
 
-
         #endregion
 
         #region DELETE Workflow

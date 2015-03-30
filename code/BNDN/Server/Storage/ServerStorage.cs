@@ -16,6 +16,16 @@ namespace Server.Storage
             _db = new StorageContext();
         }
 
+        public ServerUserModel GetUser(string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<ServerRolesModel> Login(ServerUserModel userModel)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
         {
             IQueryable<ServerEventModel> events = from e in _db.Events
