@@ -152,15 +152,20 @@ namespace Event.Controllers
                 var notifyDtos = await Logic.GetNotifyDtos();
 
                 //TODO: Det her er dårlig stil åbenbart: http://stackoverflow.com/questions/23137393/parallel-foreach-and-async-await-issue. Ved ikke hvad løsningen er dog
-                Parallel.ForEach(notifyDtos, async pair =>
+                var parallelTasks = Parallel.ForEach(notifyDtos, pair =>
                 {
-                    await new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray());
+                    new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray()).Wait();
                 });
+
+                while (!parallelTasks.IsCompleted)
+                {
+                }
 
                 Logic.Executed = true;
 
                 if (!await ll.UnlockAll())
                 {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at unlocking all the locked events."));
                     //Kunne ikke unlocke alt, hvad skal der ske?
                 }
                 Ok(true);
@@ -245,12 +250,13 @@ namespace Event.Controllers
         /// Unlock will (attempt to) unlock this Event. May fail if Event is already locked
         /// </summary>
         /// <param name="eventAddressDto">Should represent caller</param>
-        [Route("Event/lock")]
+        [Route("Event/lock/{id}")]
         [HttpDelete]
-        public void Unlock([FromBody] EventAddressDto eventAddressDto)
+        public void Unlock(string id)
         {
             // Check is made to see if caller is the same as the one, who locked the Event initially
-            if(!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            // the CallerIsAllowedToOperate works on Id not Uri.
+            if(!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
                     "Lock could be unlocked. Event was locked by someone else."));
