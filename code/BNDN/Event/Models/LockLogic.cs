@@ -15,12 +15,12 @@ namespace Event.Models
         private readonly EventLogic _logic;
         private IEnumerable<KeyValuePair<Uri, List<NotifyDto>>> _list;
         private Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> _taskList;
-        private ConcurrentDictionary<Uri, byte> _locked; 
+        private HashSet<Uri> _locked; 
         public LockLogic()
         {
             _logic = EventLogic.GetState();
             _taskList = _logic.GetNotifyDtos(); // ER DET HER DEN RIGTIGE LISTE?
-            _locked = new ConcurrentDictionary<Uri, byte>();
+            _locked = new HashSet<Uri>();
         }
 
         public async Task<bool> LockAll()
@@ -33,19 +33,18 @@ namespace Event.Models
             {
                 LockDto lockDto = new LockDto() {LockOwner = _logic.EventId};
                 _logic.LockDto = lockDto;
-                
-                //Cancelation stuff
-                CancellationTokenSource cts = new CancellationTokenSource();
-                ParallelOptions po = new ParallelOptions();
-                po.CancellationToken = cts.Token;
-                po.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
-                
-                //TODO: Få cancelationtoken helt på plads
-                Parallel.ForEach(_list, async pair =>
+
+                foreach (var pair in _list)
                 {
                     await new EventCommunicator(pair.Key).Lock(lockDto);
-                    _locked.TryAdd(pair.Key, 0);
-                });
+                    _locked.Add(pair.Key);
+                }
+                //TODO: Brug Parrallel i stedet for
+                //Parallel.ForEach(_list, async pair =>
+                //{
+                //    await new EventCommunicator(pair.Key).Lock(lockDto);
+                //    _locked.TryAdd(pair.Key, 0);
+                //});
 
                 return true;
             }
@@ -59,10 +58,21 @@ namespace Event.Models
         private void UnlockSome()
         {
             EventAddressDto eventAddress = new EventAddressDto() {Id = _logic.EventId, Uri = _logic.OwnUri};
-            Parallel.ForEach(_locked, async pair =>
+            var parallelTasks = Parallel.ForEach(_locked, async pair =>
             {
-                await new EventCommunicator(pair.Key).Unlock(eventAddress);
+                try
+                {
+                    await new EventCommunicator(pair).Unlock(eventAddress);
+                }
+                catch (Exception)
+                {
+                    // TODO: Find out what to do if you cant even unlock. Even.
+                }
+                
             });
+            while (!parallelTasks.IsCompleted)
+            {
+            }
             _locked = null;
         }
 
@@ -73,22 +83,29 @@ namespace Event.Models
             {
                 _list = await _taskList;
             }
+            bool b = true;
 
             var eventAddress = new EventAddressDto() { Id = _logic.EventId, Uri = _logic.OwnUri };
-            try
+
+            var parallelTasks = Parallel.ForEach(_list, async pair =>
             {
-                Parallel.ForEach(_list, async pair =>
+                try
                 {
                     await new EventCommunicator(pair.Key).Unlock(eventAddress);
-                });
-            }
-            catch (Exception)
+                }
+                catch (Exception)
+                {
+                     // TODO: Find out what to do if you cant even unlock. Even.
+                    b = false;
+                }
+                
+            });
+            while (!parallelTasks.IsCompleted)
             {
-                return false;
             }
 
             _logic.LockDto = null;
-            return true;
+            return b;
         }
     }
 }
