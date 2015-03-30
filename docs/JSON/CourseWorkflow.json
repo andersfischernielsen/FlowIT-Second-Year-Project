@@ -1,0 +1,60 @@
+// Register event
+{
+    "EventId": "register",
+    "WorkflowId": "course",
+    "Name": "Register",
+    "Pending": false,
+    "Executed": false,
+    "Included": true,
+    "Conditions": [],
+    "Exclusions": [
+        "http://localhost:13752"
+    ],
+    "Responses": [
+        "http://localhost:13753"
+    ],
+    "Inclusions": [
+        "http://localhost:13753",
+        "http://localhost:13754"
+    ]
+}
+
+// Pass event
+{
+    "EventId": "pass",
+    "WorkflowId" : "course",
+    "Name" : "Pass",
+    "Pending" : false,
+    "Executed" : false,
+    "Included" : false,
+    "Conditions" : [
+        "http://localhost:13752"
+    ],
+    "Exclusions" : [
+        "http://localhost:13753",
+        "http://localhost:13754"
+
+    ],
+    "Responses" : [],
+    "Inclusions" : []
+}
+
+
+// Fail event
+{
+    "EventId": "fail",
+    "WorkflowId" : "course",
+    "Name" : "Fail",
+    "Pending" : false,
+    "Executed" : false,
+    "Included" : false,
+    "Conditions" :  [
+        "http://localhost:13752"],
+    "Exclusions" : [
+        "http://localhost:13753",
+        "http://localhost:13754"
+
+    ],
+    "Responses" : [],
+    "Inclusions" : []
+}
