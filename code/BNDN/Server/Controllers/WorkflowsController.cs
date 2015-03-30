@@ -67,7 +67,7 @@ namespace Server.Controllers
         /// PostNewWorkFlow adds a new workflow with the specified workflowid. 
         /// </summary>
         /// <param name="workflowId"></param>
-        /// <param name="eventToAddDto"></param>
+        /// <param name="dto"></param>
         [Route("Workflows/{workflowId}")]
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
