@@ -51,6 +51,10 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
+            if (eventDto == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
             // Dismiss request if Event is currently locked
             if (Logic.IsLocked())
             {
@@ -65,16 +69,10 @@ namespace Event.Controllers
 
             // Prepare for method-call
             var ownUri = new Uri(Request.RequestUri.Authority);
-            
+
             // Method call
-            try
-            {
-                await Logic.InitializeEvent(eventDto, ownUri);
-            }
-            catch (NullReferenceException exception)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
-            }
+            await Logic.InitializeEvent(eventDto, ownUri);
+
 
             Ok(true);
         }
