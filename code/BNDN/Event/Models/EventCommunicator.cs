@@ -87,9 +87,19 @@ namespace Event.Models
             await _httpClient.Delete(String.Format("event/rules/{0}", ownId));
         }
 
+        //TODO: Dont use this.
         public async Task SendNotify(IEnumerable<NotifyDto> dtos)
         {
             await _httpClient.Update("event/notify", dtos);
+        }
+
+        public async Task SendPending(bool newPendingValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/pending/{0}", newPendingValue), lockDto);
+        }
+        public async Task SendIncluded(bool newIncludedValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/included/{0}", newIncludedValue), lockDto);
         }
 
         /// <summary>

@@ -375,6 +375,26 @@ namespace Event.Models
             await ResetState();
         }
 
+        public async Task Execute()
+        {
+            var addressDto = new EventAddressDto() {Id = EventId, Uri = OwnUri};
+            await Task.Run(async () =>
+            {
+                foreach (var pending in Responses)
+                {
+                    await new EventCommunicator(pending).SendPending(true, addressDto);
+                }
+                foreach (var inclusion in Inclusions)
+                {
+                    await new EventCommunicator(inclusion).SendPending(true, addressDto);
+                }
+                foreach (var exclusion in Exclusions)
+                {
+                    await new EventCommunicator(exclusion).SendPending(true, addressDto);
+                }
+            });
+        }
+
         public bool IsLocked()
         {
             return LockDto != null;
