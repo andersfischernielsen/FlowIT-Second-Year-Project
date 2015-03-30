@@ -36,7 +36,7 @@ namespace Event.Models
 
                 foreach (var pair in _list)
                 {
-                    await new EventCommunicator(pair.Key).Lock(lockDto);
+                    new EventCommunicator(pair.Key).Lock(lockDto).Wait();
                     _locked.Add(pair.Key);
                 }
                 //TODO: Brug Parrallel i stedet for
@@ -62,7 +62,7 @@ namespace Event.Models
             {
                 try
                 {
-                    await new EventCommunicator(pair).Unlock(eventAddress);
+                    new EventCommunicator(pair).Unlock(eventAddress).Wait();
                 }
                 catch (Exception)
                 {
@@ -91,7 +91,7 @@ namespace Event.Models
             {
                 try
                 {
-                    await new EventCommunicator(pair.Key).Unlock(eventAddress);
+                    new EventCommunicator(pair.Key).Unlock(eventAddress).Wait();
                 }
                 catch (Exception)
                 {

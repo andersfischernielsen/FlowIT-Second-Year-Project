@@ -107,7 +107,7 @@ namespace Event.Models
         /// <returns></returns>
         public async Task Unlock(EventAddressDto unlockDto)
         {
-            await _httpClient.Delete("event/lock/"+unlockDto.Id);
+            await _httpClient.Delete(String.Format("event/lock/{0}",unlockDto.Id));
         }
     }
 }
