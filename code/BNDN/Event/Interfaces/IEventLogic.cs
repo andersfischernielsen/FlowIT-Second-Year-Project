@@ -46,7 +46,7 @@ namespace Event.Interfaces
         Task UpdateEvent(EventDto eventDto, Uri ownUri);
         Task DeleteEvent();
 
-
+        Task Execute();
 
     }
 }

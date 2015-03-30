@@ -90,6 +90,15 @@ namespace Event.Models
             await _httpClient.Update("event/notify", dtos);
         }
 
+        public async Task SendPending(bool newPendingValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/pending/{0}", newPendingValue), lockDto);
+        }
+        public async Task SendIncluded(bool newIncludedValue, EventAddressDto lockDto)
+        {
+            await _httpClient.Update(String.Format("event/included/{0}", newIncludedValue), lockDto);
+        }
+
         /// <summary>
         /// Tries to lock the event
         /// </summary>

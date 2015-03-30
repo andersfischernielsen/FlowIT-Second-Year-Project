@@ -149,26 +149,33 @@ namespace Event.Controllers
             LockLogic ll = new LockLogic();
             if (await ll.LockAll())
             {
-                var notifyDtos = await Logic.GetNotifyDtos();
-
-                //TODO: Det her er dårlig stil åbenbart: http://stackoverflow.com/questions/23137393/parallel-foreach-and-async-await-issue. Ved ikke hvad løsningen er dog
-                var parallelTasks = Parallel.ForEach(notifyDtos, pair =>
+                var AllOk = true;
+                try
                 {
-                    new EventCommunicator(pair.Key).SendNotify(pair.Value.ToArray()).Wait();
-                });
+                    await Logic.Execute();
 
-                while (!parallelTasks.IsCompleted)
-                {
+                    Logic.Executed = true;
                 }
-
-                Logic.Executed = true;
+                catch (Exception)
+                {
+                    AllOk = false;
+                }
+                
 
                 if (!await ll.UnlockAll())
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at unlocking all the locked events."));
                     //Kunne ikke unlocke alt, hvad skal der ske?
                 }
-                Ok(true);
+
+                if (AllOk)
+                {
+                    Ok(true);
+                }
+                else
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at updating other events."));
+                }
             }
             throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Another transaction is going on, try again later"));
         }
