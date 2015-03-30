@@ -16,7 +16,7 @@ namespace Server.Storage
         {
             _cache = new HashSet<ServerWorkflowModel>()
             {
-                new ServerWorkflowModel(){ Name="TestWorkFlow", WorkflowId = "Test1"}
+                new ServerWorkflowModel(){ Name="TestWorkFlow", WorkflowId = "Test1", ServerRolesModels = new List<ServerRolesModel>(), ServerEventModels = new List<ServerEventModel>()}
             };
             _userCache = new HashSet<ServerUserModel>()
             {
