@@ -7,7 +7,7 @@ using Common;
 
 namespace Server
 {
-    public interface IServerLogic
+    public interface IServerLogic 
     {
         /// <summary>
         /// Tries to log in / returns all the roles the user has on all workflows
