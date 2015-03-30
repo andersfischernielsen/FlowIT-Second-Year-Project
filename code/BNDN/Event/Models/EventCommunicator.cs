@@ -13,13 +13,23 @@ namespace Event.Models
     {
         private readonly HttpClientToolbox _httpClient;
 
+
         /// <summary>
-        /// 
+        /// Create a new EventCommunicator using the provided Uri.
         /// </summary>
-        /// <param name="eventUri">The base-address of the Event whose rules are to be deleted</param>
+        /// <param name="eventUri">The base-address of the Event whose rules are to be deleted.</param>
         public EventCommunicator(Uri eventUri)
         {
             _httpClient = new HttpClientToolbox(eventUri);
+        }
+
+        /// <summary>
+        /// For testing purposes (inject a mocked HttpClientToolbox).
+        /// </summary>
+        /// <param name="toolbox"> The HttpClientToolbox to use for testing purposes.</param>
+        public EventCommunicator(HttpClientToolbox toolbox)
+        {
+            _httpClient = toolbox;
         }
 
         public async Task<bool> IsExecuted()
