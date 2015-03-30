@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -85,12 +86,12 @@ namespace Common
         {
             try
             {
-                var response = await HttpClient.PostAsJsonAsync(uri, objectToCreate);
+                var response = HttpClient.PostAsJsonAsync(uri, objectToCreate).Result;
                 response.EnsureSuccessStatusCode();
-                //return await response.Content.ReadAsAsync<T>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Debug.WriteLine(ex.StackTrace);
                 throw;
             }
         }
