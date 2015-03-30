@@ -14,7 +14,7 @@ namespace Client.ViewModels
         public EventViewModel()
         {
             __eventAddressDto = new EventAddressDto();
-            _eventStateDto = new EventStateDto(){Executable = true};
+            _eventStateDto = new EventStateDto() { Executable = true };
             GetState();
         }
         public EventViewModel(EventAddressDto _eventAddressDto)
@@ -104,21 +104,10 @@ namespace Client.ViewModels
                 }
             });
         }
-        public void Execute()
+        public async void Execute()
         {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    var eventConnection = new EventConnection(__eventAddressDto);
-                    await eventConnection.Execute(true);
-                }
-                catch (Exception)
-                {
-                    
-                    throw;
-                }
-            });
+            var eventConnection = new EventConnection(__eventAddressDto);
+            await eventConnection.Execute(true);
         }
         #endregion
 
