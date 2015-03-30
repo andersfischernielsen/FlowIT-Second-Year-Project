@@ -5,19 +5,14 @@ using System.Web;
 
 namespace Server.Models
 {
-    public class ServerWorkflowModel
+    public class ServerUserModel
     {
-        public ServerWorkflowModel()
+        public ServerUserModel()
         {
             ServerRolesModels = new List<ServerRolesModel>();
-            ServerEventModels = new List<ServerEventModel>();
         }
-
-        public string WorkflowId { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
-
-        public virtual IList<ServerEventModel> ServerEventModels { get; set; }
-
         public virtual IList<ServerRolesModel> ServerRolesModels { get; set; }
     }
 }

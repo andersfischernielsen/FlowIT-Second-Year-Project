@@ -45,12 +45,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExecuteDto.cs" />
     <Compile Include="HttpClientToolbox.cs" />
     <Compile Include="EventAddressDto.cs" />
     <Compile Include="EventDto.cs" />
     <Compile Include="EventRuleDto.cs" />
     <Compile Include="EventStateDto.cs" />
+    <Compile Include="LoginDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RolesOnWorkflowsDto.cs" />
     <Compile Include="WorkflowDto.cs" />
   </ItemGroup>
   <ItemGroup>

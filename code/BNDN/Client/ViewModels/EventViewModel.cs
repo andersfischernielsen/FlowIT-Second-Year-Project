@@ -96,7 +96,7 @@ namespace Client.ViewModels
         public async void Execute()
         {
             var eventConnection = new EventConnection(_eventAddressDto);
-            await eventConnection.Execute(true);
+            await eventConnection.Execute(true, _parent.WorkflowId);
             _parent.GetEvents();
         }
         #endregion

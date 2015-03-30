@@ -62,12 +62,33 @@ namespace Server.Controllers
             
         }
 
+        // GET: /Login
+        /// <summary>
+        /// Given an workflowId, this method returns all events within that workflow
+        /// </summary>
+        /// <param name="workflowId">Id of the requested workflow</param>
+        /// <returns>IEnumerable of EventAddressDto</returns>
+        [Route("login")]
+        [HttpGet]
+        public RolesOnWorkflowsDto Login([FromBody] LoginDto loginDto)
+        {
+            try
+            {
+                return ServerLogic.Login(loginDto);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
+            }
+
+        }
+
 
         /// <summary>
         /// PostNewWorkFlow adds a new workflow with the specified workflowid. 
         /// </summary>
         /// <param name="workflowId"></param>
-        /// <param name="eventToAddDto"></param>
+        /// <param name="dto"></param>
         [Route("Workflows/{workflowId}")]
         [HttpPost]
         // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
