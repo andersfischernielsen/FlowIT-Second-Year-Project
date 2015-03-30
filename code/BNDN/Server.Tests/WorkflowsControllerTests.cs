@@ -90,7 +90,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            controller.PostWorkFlow(workflow.Id, workflow);
+            controller.PostWorkFlow(workflow);
 
             // Assert
             Assert.AreEqual(workflow, list.First());
@@ -109,7 +109,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Assert
-            Assert.Throws<Exception>(()=>controller.PostWorkFlow("id", workflow));
+            Assert.Throws<Exception>(()=>controller.PostWorkFlow(workflow));
         }
 
         [Test]
@@ -125,7 +125,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            controller.PostWorkFlow(workflowId, dto);
+            controller.PostWorkFlow(dto);
 
             // Assert
             Assert.DoesNotThrow(() => _mock.Verify(logic => logic.AddNewWorkflow(dto), Times.Once()));
@@ -145,7 +145,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(workflowId, dto));
+            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(dto));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -166,7 +166,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(workflowId, null));
+            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(null));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -182,7 +182,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            var testDelegate = new TestDelegate(() => controller.PostWorkFlow("nonexistentId", new WorkflowDto()));
+            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(new WorkflowDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -278,7 +278,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            controller.PostEventToWorkFlow("workflow", "id", eventAddressDto);
+            controller.PostEventToWorkFlow("workflow", eventAddressDto);
 
             // Assert
             Assert.AreEqual(eventAddressDto, list.First());
