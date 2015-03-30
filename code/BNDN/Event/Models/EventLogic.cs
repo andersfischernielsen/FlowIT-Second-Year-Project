@@ -81,6 +81,14 @@ namespace Event.Models
             set { Storage.Inclusions = value; }
             get { return Storage.Inclusions; }
         }
+
+        //The role that a given user has to have for execution.
+        public string Role
+        {
+            get { return Storage.Role; }
+            set { Storage.Role = value; }
+        }
+
         #endregion
 
         #region Init
