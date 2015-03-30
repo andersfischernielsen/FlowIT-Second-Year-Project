@@ -9,10 +9,11 @@ namespace Client
     {
         private readonly HttpClientToolbox _http;
 
-        
-        public ServerConnection(Uri uri) : this(new HttpClientToolbox(uri))
+
+        public ServerConnection(Uri uri)
+            : this(new HttpClientToolbox(uri))
         {
-            
+
         }
 
         /// <summary>
@@ -28,7 +29,7 @@ namespace Client
         {
             return await _http.Read<RolesOnWorkflowsDto>(string.Format("login/{0}",username));
         }
-        
+
         public async Task<IList<WorkflowDto>> GetWorkflows()
         {
             return await _http.ReadList<WorkflowDto>("workflows");
