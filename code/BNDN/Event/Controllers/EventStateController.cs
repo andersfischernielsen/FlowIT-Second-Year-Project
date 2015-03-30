@@ -168,7 +168,7 @@ namespace Event.Controllers
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at unlocking all the locked events."));
                     //Kunne ikke unlocke alt, hvad skal der ske?
                 }
-                Ok(true);
+                throw new HttpResponseException(HttpStatusCode.OK);
             }
             throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Another transaction is going on, try again later"));
         }

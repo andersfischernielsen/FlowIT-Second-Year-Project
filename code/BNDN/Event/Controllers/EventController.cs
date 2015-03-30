@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -68,8 +69,9 @@ namespace Event.Controllers
             }
 
             // Prepare for method-call
-            var ownUri = new Uri(Request.RequestUri.Authority);
-
+            var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
+            var ownUri = new Uri(s);
+            
             // Method call
             await Logic.InitializeEvent(eventDto, ownUri);
 
@@ -101,7 +103,8 @@ namespace Event.Controllers
             }
 
             // Prepare for method-call
-            var ownUri = new Uri(Request.RequestUri.Authority);
+            var ownUri = new Uri(string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
+
             try
             {
                 await Logic.UpdateEvent(eventDto, ownUri);
