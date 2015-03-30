@@ -8,6 +8,6 @@ namespace Common
 {
     public class ExecuteDto
     {
-        public List<string> Roles { get; set; }
+        public IList<string> Roles { get; set; }
     }
 }
