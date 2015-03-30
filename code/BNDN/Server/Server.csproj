@@ -85,6 +85,8 @@
     </Compile>
     <Compile Include="IServerLogic.cs" />
     <Compile Include="Models\ServerEventModel.cs" />
+    <Compile Include="Models\ServerRolesModel.cs" />
+    <Compile Include="Models\ServerUserModel.cs" />
     <Compile Include="Models\ServerWorkflowModel.cs" />
     <Compile Include="Storage\CacheStorage.cs" />
     <Compile Include="Storage\IServerStorage.cs" />
