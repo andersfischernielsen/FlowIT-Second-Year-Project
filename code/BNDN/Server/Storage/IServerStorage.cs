@@ -6,7 +6,10 @@ namespace Server.Storage
 {
     public interface IServerStorage
     {
-        
+        ServerUserModel GetUser(string username);
+
+        IList<ServerRolesModel> Login(ServerUserModel userModel);
+
         /// <summary>
         /// Get all events from a workflow
         /// </summary>

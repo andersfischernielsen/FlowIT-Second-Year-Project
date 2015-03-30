@@ -10,10 +10,20 @@ namespace Server.Storage
     {
         private static CacheStorage _instance;
         private readonly HashSet<ServerWorkflowModel> _cache;
+        private readonly HashSet<ServerUserModel> _userCache;
 
         private CacheStorage()
         {
-            _cache = new HashSet<ServerWorkflowModel>();
+            _cache = new HashSet<ServerWorkflowModel>()
+            {
+                new ServerWorkflowModel(){ Name="TestWorkFlow", WorkflowId = "Test1"}
+            };
+            _userCache = new HashSet<ServerUserModel>()
+            {
+                new ServerUserModel(){Id = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Teacher",UserId = 1, WorklowId = "Test1"}}},
+                new ServerUserModel(){Id = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Student",UserId = 1, WorklowId = "Test1"}}},
+                new ServerUserModel(){Id = 2, Name="Fischer",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){Role="Teacher",UserId = 2, WorklowId = "Test1"}}}
+            };
         }
 
         public static CacheStorage GetStorage
@@ -36,6 +46,19 @@ namespace Server.Storage
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
             return _cache.First(model => model.WorkflowId == workflowId);
+        }
+
+        public ServerUserModel GetUser(string username)
+        {
+            return _userCache.SingleOrDefault(model => model.Name == username);
+        }
+
+        public IList<ServerRolesModel> Login(ServerUserModel userModel)
+        {
+            var singleOrDefault = _userCache.SingleOrDefault(model => model.Id == userModel.Id);
+            if (singleOrDefault != null)
+                return singleOrDefault.ServerRolesModels;
+            return new List<ServerRolesModel>();
         }
 
         public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
