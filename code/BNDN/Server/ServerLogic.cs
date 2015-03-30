@@ -45,7 +45,7 @@ namespace Server
             return _storage.GetEventsOnWorkflow(workflow).Select(model => new EventAddressDto()
             {
                 Id = model.EventId,
-                Uri = model.Uri
+                Uri = new Uri(model.Uri)
             });
         }
 
@@ -55,7 +55,7 @@ namespace Server
             _storage.AddEventToWorkflow(workflow, new ServerEventModel()
             {
                 EventId = eventToBeAddedDto.Id,
-                Uri = eventToBeAddedDto.Uri,
+                Uri = eventToBeAddedDto.Uri.ToString(),
                 ServerWorkflowModelId = workflowToAttachToId,
                 ServerWorkflowModel = workflow
             });
@@ -67,7 +67,7 @@ namespace Server
             _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel()
             {
                 EventId = eventToBeAddedDto.Id,
-                Uri = eventToBeAddedDto.Uri,
+                Uri = eventToBeAddedDto.Uri.ToString(),
                 ServerWorkflowModelId = workflowToAttachToId,
                 ServerWorkflowModel = workflow
             });

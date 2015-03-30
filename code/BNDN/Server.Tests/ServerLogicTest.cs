@@ -94,7 +94,7 @@ namespace Server.Tests
         private void SetUpList()
         {
             var w1 = new ServerWorkflowModel {Name = "w1", WorkflowId = "1"};
-            w1.ServerEventModels.Add(new ServerEventModel {EventId = "1", Uri = new Uri("http://2.2.2.2/")});
+            w1.ServerEventModels.Add(new ServerEventModel {EventId = "1", Uri = "http://2.2.2.2/"});
             var w2 = new ServerWorkflowModel {Name = "w2", WorkflowId = "2"};
             _list = new List<ServerWorkflowModel> {w1, w2};
         }
@@ -111,7 +111,7 @@ namespace Server.Tests
             var expectedEvent = workflow.ServerEventModels.First(x => x.EventId == "3");
 
             Assert.AreEqual(expectedEvent.EventId, "3");
-            Assert.AreEqual(expectedEvent.Uri.AbsoluteUri, "http://1.1.1.1/");
+            Assert.AreEqual(expectedEvent.Uri, "http://1.1.1.1/");
         }
 
         [Test]
@@ -203,13 +203,13 @@ namespace Server.Tests
             var workflow = _list.Find(x => x.WorkflowId == "1");
             var existing = workflow.ServerEventModels.First(x => x.EventId == "1");
             Assert.IsNotNull(existing);
-            Assert.AreEqual(existing.Uri.AbsoluteUri, "http://2.2.2.2/");
+            Assert.AreEqual(existing.Uri, "http://2.2.2.2/");
 
             _toTest.UpdateEventOnWorkflow("1", new EventAddressDto { Id = "1", Uri = new Uri("http://3.3.3.3") });
 
             var updated = workflow.ServerEventModels.First(x => x.EventId == "1");
             Assert.IsNotNull(updated);
-            Assert.AreEqual(updated.Uri.AbsoluteUri, "http://3.3.3.3/");
+            Assert.AreEqual(updated.Uri, "http://3.3.3.3/");
         }
 
         [Test]

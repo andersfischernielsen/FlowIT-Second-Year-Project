@@ -19,19 +19,19 @@ namespace Server.Storage
             {
                 case "computer":
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventA = new ServerEventModel { EventId = "Apple", Uri = new Uri("http://www.apple.com") };
-                    var eventB = new ServerEventModel { EventId = "IBM", Uri = new Uri("http://www.ibm.com") };
-                    var eventC = new ServerEventModel { EventId = "Sam", Uri = new Uri("http://www.samsung.com") };
+                   // var eventA = new ServerEventModel { EventId = "Apple", Uri = new Uri("http://www.apple.com") };
+                    //var eventB = new ServerEventModel { EventId = "IBM", Uri = new Uri("http://www.ibm.com") };
+                    //var eventC = new ServerEventModel { EventId = "Sam", Uri = new Uri("http://www.samsung.com") };
 
-                    return new List<ServerEventModel> { eventA, eventB, eventC };
+                    //return new List<ServerEventModel> { eventA, eventB, eventC };
 
                 case "car":
                     // Dummy data (before deleting: it may be used for testing...?) 
-                    var eventD = new ServerEventModel { EventId = "Opel", Uri = new Uri("http://www.opel.dk") };
-                    var eventE = new ServerEventModel { EventId = "Ford", Uri = new Uri("http://www.ford.dk") };
-                    var eventF = new ServerEventModel { EventId = "Nis", Uri = new Uri("http://www.nissan.dk") };
+                    //var eventD = new ServerEventModel { EventId = "Opel", Uri = new Uri("http://www.opel.dk") };
+                    //var eventE = new ServerEventModel { EventId = "Ford", Uri = new Uri("http://www.ford.dk") };
+                    //var eventF = new ServerEventModel { EventId = "Nis", Uri = new Uri("http://www.nissan.dk") };
 
-                    return new List<ServerEventModel> { eventD, eventE, eventF };
+                   // return new List<ServerEventModel> { eventD, eventE, eventF };
 
                 default:
                     return new List<ServerEventModel>();
