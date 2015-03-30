@@ -23,6 +23,11 @@ namespace Client
         {
             _http = toolbox;
         }
+
+        public async Task<RolesOnWorkflowsDto> Login(string username)
+        {
+            return await _http.Read<RolesOnWorkflowsDto>("login");
+        }
         
         public async Task<IList<WorkflowDto>> GetWorkflows()
         {
