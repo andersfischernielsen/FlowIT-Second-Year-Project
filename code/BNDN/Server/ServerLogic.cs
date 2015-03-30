@@ -39,6 +39,9 @@ namespace Server
         public IEnumerable<EventAddressDto> GetEventsOnWorkflow(string workflowId)
         {
             var workflow = _storage.GetWorkflow(workflowId);
+
+            //TODO: Throw exception if result is null. See tests for this class.
+            //TODO: If the workflow exists, return an empty list, otherwise throw NotFoundException.
             return _storage.GetEventsOnWorkflow(workflow).Select(model => new EventAddressDto()
             {
                 Id = model.EventId,
