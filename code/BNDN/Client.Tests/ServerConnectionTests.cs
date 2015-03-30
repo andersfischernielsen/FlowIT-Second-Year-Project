@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Microsoft.QualityTools.Testing.Fakes;
 using Moq;
 using NUnit.Framework;
 
 namespace Client.Tests
 {
     [TestFixture]
-    public class ServerConnectionTest
+    public class ServerConnectionTests
     {
         private Mock<HttpClientToolbox> _mock;
+        
 
         [SetUp]
         public void SetUp()
