@@ -28,6 +28,7 @@ namespace Event.Interfaces
         HashSet<Uri> Exclusions { get; set; }
         HashSet<Uri> Inclusions { get; set; }
         Dictionary<string, Uri> EventUris { get; }
+        string Role { get; set; }
 
         #endregion
 

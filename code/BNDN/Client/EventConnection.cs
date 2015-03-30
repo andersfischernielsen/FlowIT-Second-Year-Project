@@ -11,6 +11,7 @@ namespace Client
     {
         private readonly HttpClientToolbox _http;
         private readonly EventAddressDto _eventDto;
+        private static Dictionary<string, List<string>> _roleForWorkflow;
 
         public EventConnection(EventAddressDto eventDto)
         {
@@ -24,9 +25,12 @@ namespace Client
         }
         
 
-        public async Task Execute(bool b)
+        public async Task Execute(bool b, string workflowId)
         {
-            await _http.Update("event/executed", b);
+            List<string> roles;
+            _roleForWorkflow.TryGetValue(workflowId, out roles);
+
+            await _http.Update("event/executed", new ExecuteDto { Roles = roles });
         }
     }
 }
