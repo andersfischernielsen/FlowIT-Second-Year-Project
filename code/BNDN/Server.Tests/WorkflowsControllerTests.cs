@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -110,6 +109,25 @@ namespace Server.Tests
 
             // Todo: Separate test case (?)
             Assert.AreEqual(numberOfEvents, result.Count());
+        }
+
+        [Test]
+        public void GetWorkflow_right_list_when_multiple_workflows_exists()
+        {
+            // Arrange
+            _mock.Setup(logic => logic.GetEventsOnWorkflow("id1")).Returns(new List<EventAddressDto> { new EventAddressDto { Id = "id1", Uri = null }});
+            _mock.Setup(logic => logic.GetEventsOnWorkflow("id2")).Returns(new List<EventAddressDto>
+            {
+                new EventAddressDto { Id = "id1", Uri = null },
+                new EventAddressDto { Id = "id2", Uri = null }
+            });
+            var controller = new WorkflowsController(_mock.Object);
+
+            // Act
+            var result = controller.Get("id1");
+
+            // Assert
+            Assert.AreEqual(1, result.Count());
         }
 
         [Test]
