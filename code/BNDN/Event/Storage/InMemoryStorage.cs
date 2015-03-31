@@ -4,9 +4,9 @@ using Event.Interfaces;
 
 namespace Event.Models
 {
-    public class InMemoryStorage : IEventStorage
+    public class InMemoryStorage2 : IEventStorage
     {
-        public InMemoryStorage()
+        public InMemoryStorage2()
         {
             EventUris = new Dictionary<string, Uri>();
             EventIds = new Dictionary<Uri, string>();
@@ -32,6 +32,13 @@ namespace Event.Models
         public HashSet<Uri> Responses { get; set; }
         public HashSet<Uri> Exclusions { get; set; }
         public HashSet<Uri> Inclusions { get; set; }
+
+        public ICollection<EventUriIdMapping> EventUriIdMappings
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
         #endregion
 
         #region Methods For Removing/Storing Data

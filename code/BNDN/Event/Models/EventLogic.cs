@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
+using Event.Storage;
 
 namespace Event.Models
 {
@@ -107,7 +108,7 @@ namespace Event.Models
         private EventLogic()
         {
             // TODO: Server address
-            Storage = new InMemoryStorage();
+            Storage = new EventStorage();
             
 
         }
@@ -141,7 +142,7 @@ namespace Event.Models
         {
             await Task.Run(() =>
             {
-                var uri = Storage.EventUris.SingleOrDefault(x => x.Key == id).Value;
+                var uri = Storage.EventUriIdMappings.SingleOrDefault(x => x.Id == id).Uri;
                 if (uri == null)
                 {
                     throw new ArgumentException("Nonexistent id", id);

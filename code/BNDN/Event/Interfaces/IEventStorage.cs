@@ -13,6 +13,7 @@ namespace Event.Interfaces
         string WorkflowId { get; set; }
         string EventId { get; set; }
         string Name { get; set; }
+        string Role { get; set; }
         #endregion
 
         #region State
@@ -27,8 +28,8 @@ namespace Event.Interfaces
         HashSet<Uri> Responses { get; set; }
         HashSet<Uri> Exclusions { get; set; }
         HashSet<Uri> Inclusions { get; set; }
-        Dictionary<string, Uri> EventUris { get; }
-        string Role { get; set; }
+        ICollection<EventUriIdMapping> EventUriIdMappings { get; set; }
+
 
         #endregion
 

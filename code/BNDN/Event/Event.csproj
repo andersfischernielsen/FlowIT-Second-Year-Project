@@ -39,6 +39,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -81,6 +88,14 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EventController.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\EventUriIdMapping.cs" />
+    <Compile Include="Models\UriClasses\ConditionUri.cs" />
+    <Compile Include="Models\UriClasses\ExclusionUri.cs" />
+    <Compile Include="Models\UriClasses\InclusionUri.cs" />
+    <Compile Include="Models\UriClasses\ResponseUri.cs" />
+    <Compile Include="Models\UriClasses\UriRepresentation.cs" />
+    <Compile Include="Storage\EventContext.cs" />
     <Compile Include="Interfaces\IEventLogic.cs" />
     <Compile Include="Controllers\EventRulesController.cs" />
     <Compile Include="Controllers\EventStateController.cs" />
@@ -92,8 +107,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\IEventStorage.cs" />
+    <Compile Include="Models\EventIdentificationModel.cs" />
     <Compile Include="Models\EventLogic.cs" />
-    <Compile Include="Models\InMemoryStorage.cs" />
+    <Compile Include="Models\EventStateModel.cs" />
+    <Compile Include="Storage\EventStorage.cs" />
+    <Compile Include="Storage\InMemoryStorage.cs" />
     <Compile Include="Models\LockLogic.cs" />
     <Compile Include="Models\NotifyDtos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
