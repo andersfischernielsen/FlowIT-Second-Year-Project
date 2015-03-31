@@ -1,4 +1,4 @@
-﻿<Window
+﻿<Window FocusManager.FocusedElement="{Binding ElementName=Username}"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ViewModels="clr-namespace:Client.ViewModels" xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions" x:Class="Client.Views.LoginView"
@@ -16,7 +16,7 @@
             <ColumnDefinition Width="96*"/>
             <ColumnDefinition Width="25*"/>
         </Grid.ColumnDefinitions>
-        <TextBox Style="{StaticResource FillTextBoxStyle}" Margin="10,50,10,89" TextWrapping="Wrap" Text="{Binding Username}" Grid.Column="1"/>
+        <TextBox Name="Username" Style="{StaticResource FillTextBoxStyle}" Margin="10,50,10,89" TextWrapping="Wrap" Text="{Binding Username}" Grid.Column="1"/>
         <Label Style="{StaticResource HeaderLabelStyle}" FontStyle="Italic" FontSize="18" Content="{Binding Status}" Margin="10,129,10,60" Grid.Column="1"/>
         <!--<TextBox Style="{StaticResource FillTextBoxStyle}" Margin="10,100,10,38" TextWrapping="Wrap" Text="{Binding Password}" Grid.Column="1"/>
         -->

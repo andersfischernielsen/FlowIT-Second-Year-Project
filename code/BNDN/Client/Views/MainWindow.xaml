@@ -43,25 +43,36 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50"/>
-                                <RowDefinition Height="50"/>
-                            </Grid.RowDefinitions>
                             <Border BorderBrush="DarkKhaki" BorderThickness="1" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
-                            <Label Content="{Binding}" HorizontalAlignment="Left" />
-                            <Button IsEnabled="{Binding Executable}" Grid.Column="1" HorizontalAlignment="Right" Content="Execute" VerticalAlignment="Center" Width="110" Height="34" Margin="0,25,10,25" Grid.RowSpan="2">
+                            <Label Content="{Binding Name}" HorizontalAlignment="Left" FontWeight="Bold" />
+                            <Button IsEnabled="{Binding Executable, Mode=OneWay}" Grid.Column="1" HorizontalAlignment="Right" Content="Execute" VerticalAlignment="Center" Width="110" Height="34" >
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <ei:CallMethodAction TargetObject="{Binding}" MethodName="Execute"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Button>
-                            <Label Content="Pending:" FontWeight="SemiBold" Grid.Row="1" HorizontalAlignment="Left" />
-                            <Label Content="{Binding Pending}" Grid.Row="1" HorizontalAlignment="Left" Margin="80,0,0,0" MinWidth="70" />
-                            <Label Content="Included:" FontWeight="SemiBold"   Grid.Row="1" HorizontalAlignment="Left" Margin="150,0,0,0" />
-                            <Label Content="{Binding Included}" Grid.Row="1" HorizontalAlignment="Left" Margin="230,0,0,0" MinWidth="70" />
-                            <Label Content="Executed:" FontWeight="SemiBold"   Grid.Row="1" HorizontalAlignment="Left" Margin="300,0,0,0" />
-                            <Label Content="{Binding Executed}" Grid.Row="1" HorizontalAlignment="Left" Margin="390,0,0,0" MinWidth="70" />
+                            <Rectangle Height="20" Width="20" Fill="{Binding PendingColor, Mode=OneWay}" Stroke="Black" Grid.RowSpan="2" Margin="0,0,0,0">
+                                <Rectangle.ToolTip>
+                                    <ToolTip  Visibility="{Binding Executed}">
+                                        Pending
+                                    </ToolTip>
+                                </Rectangle.ToolTip>
+                            </Rectangle>
+                            <Rectangle Height="20" Width="20" Fill="{Binding IncludedColor, Mode=OneWay}" Stroke="Black" Grid.RowSpan="2" Margin="150,0,0,0">
+                                <Rectangle.ToolTip>
+                                    <ToolTip  Visibility="{Binding Executed}">
+                                        Included
+                                    </ToolTip>
+                                </Rectangle.ToolTip>
+                            </Rectangle>
+                            <Rectangle Height="20" Width="20" Fill="{Binding ExecutedColor, Mode=OneWay}" Stroke="Black" Grid.RowSpan="2" Margin="300,0,0,0">
+                                <Rectangle.ToolTip>
+                                    <ToolTip  Visibility="{Binding Executed}">
+                                        Executed
+                                    </ToolTip>
+                                </Rectangle.ToolTip>
+                            </Rectangle>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
