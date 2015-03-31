@@ -23,7 +23,7 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
+        public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
             switch (workflow.ID)
             {
@@ -48,7 +48,7 @@ namespace Server.Storage
             }
         }
 
-        public void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto)
+        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             throw new NotImplementedException();
         }
@@ -63,7 +63,7 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ServerWorkflowModel> GetAllWorkflows()
+        public ICollection<ServerWorkflowModel> GetAllWorkflows()
         {
             // Dummy workflows for now (before deleting: consider if it can be used for testing)
             var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", ID = "computer" };

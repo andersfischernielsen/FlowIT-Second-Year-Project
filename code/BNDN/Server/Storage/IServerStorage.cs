@@ -15,13 +15,13 @@ namespace Server.Storage
         /// </summary>
         /// <param name="workflow"></param>
         /// <returns></returns>
-        IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow);
+        IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow);
         /// <summary>
         /// Add event to a workflow
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto);
+        void AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
         
         /// <summary>
         /// Updates an event.
@@ -45,7 +45,7 @@ namespace Server.Storage
         /// Get all workflows
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ServerWorkflowModel> GetAllWorkflows();
+        ICollection<ServerWorkflowModel> GetAllWorkflows();
         ServerWorkflowModel GetWorkflow(string workflowId);
         void AddNewWorkflow(ServerWorkflowModel workflow);
         void UpdateWorkflow(ServerWorkflowModel workflow);

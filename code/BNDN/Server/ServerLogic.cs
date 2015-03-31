@@ -63,7 +63,7 @@ namespace Server
 
             //TODO: Throw exception if result is null. See tests for this class.
             //TODO: If the workflow exists, return an empty list, otherwise throw NotFoundException.
-            return _storage.GetEventsOnWorkflow(workflow).Select(model => new EventAddressDto()
+            return _storage.GetEventsFromWorkflow(workflow).Select(model => new EventAddressDto()
             {
                 Id = model.ID,
                 Uri = new Uri(model.Uri)
@@ -73,7 +73,7 @@ namespace Server
         public void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
-            _storage.AddEventToWorkflow(workflow, new ServerEventModel()
+            _storage.AddEventToWorkflow(new ServerEventModel()
             {
                 ID = eventToBeAddedDto.Id,
                 Uri = eventToBeAddedDto.Uri.ToString(),

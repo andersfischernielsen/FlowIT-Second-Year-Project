@@ -39,7 +39,7 @@ namespace Server.Tests
                 .Returns(_list);
 
             //Set up method for getting all events in a workflow. Gets the list of events on the given workflow.
-            toSetup.Setup(m => m.GetEventsOnWorkflow(It.IsAny<ServerWorkflowModel>()))
+            toSetup.Setup(m => m.GetEventsFromWorkflow(It.IsAny<ServerWorkflowModel>()))
                 .Returns((ServerWorkflowModel toGet) => toGet.ServerEventModels);
 
             //Set up method for getting a specific workflow. Finds the given workflow in the list.
