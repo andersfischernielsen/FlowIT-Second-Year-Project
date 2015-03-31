@@ -123,6 +123,11 @@ namespace Server.Storage
                 where w.ID == workflow.ID
                 select w;
 
+            if (workflow.ServerEventModels.Count > 0)
+            {
+                throw new IOException("The workflow contains events");
+            }
+
             _db.Workflows.Remove(workflows.Single());
             _db.SaveChangesAsync();
         }
