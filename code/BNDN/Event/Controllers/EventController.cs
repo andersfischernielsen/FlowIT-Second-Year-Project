@@ -68,15 +68,12 @@ namespace Event.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
 
-            // Prepare for method-call
+            // Prepare for method-call: Gets own URI (i.e. http://address)
             var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
             var ownUri = new Uri(s);
             
             // Method call
             await Logic.InitializeEvent(eventDto, ownUri);
-
-
-            Ok(true);
         }
 
 

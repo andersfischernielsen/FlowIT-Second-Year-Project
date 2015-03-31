@@ -20,7 +20,8 @@ PASTE THIS INTO "raw" and set type to "JSON (application/json)":
     "Conditions": [],
     "Exclusions": [],
     "Responses": [],
-    "Inclusions": []
+    "Inclusions": [],
+    "Role" :
 }
 
 

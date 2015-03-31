@@ -15,5 +15,7 @@ namespace Server.Storage
         }
         public DbSet<ServerEventModel> Events { get; set; }
         public DbSet<ServerWorkflowModel> Workflows { get; set; }
+        public DbSet<ServerUserModel> Users { get; set; }
+        public DbSet<ServerRolesModel> Roles { get; set; }
     }
 }

@@ -37,7 +37,7 @@ namespace Server.Storage
             }
         }
 
-        public IEnumerable<ServerWorkflowModel> GetAllWorkflows()
+        public ICollection<ServerWorkflowModel> GetAllWorkflows()
         {
             return _cache;
         }
@@ -49,7 +49,7 @@ namespace Server.Storage
 
         public ServerUserModel GetUser(string username)
         {
-            return _userCache.SingleOrDefault(model => model.Name.ToLower() == username.ToLower());
+            return _userCache.SingleOrDefault(model => String.Equals(model.Name, username, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
@@ -60,7 +60,7 @@ namespace Server.Storage
             return new List<ServerRolesModel>();
         }
 
-        public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
+        public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
             var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (serverWorkflowModel != null)
@@ -68,9 +68,9 @@ namespace Server.Storage
             return new List<ServerEventModel>();
         }
 
-        public void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto)
+        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
-            var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
+            var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == eventToBeAddedDto.ServerWorkflowModelID);
             if (serverWorkflowModel != null && !serverWorkflowModel.ServerEventModels.Contains(eventToBeAddedDto))
             {
                 serverWorkflowModel.ServerEventModels.Add(eventToBeAddedDto);

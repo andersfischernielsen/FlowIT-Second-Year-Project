@@ -7,9 +7,9 @@ using Server.Models;
 
 namespace Server.Storage
 {
-    public class ServerStorage : IServerStorage
+    public class ServerStorage : IServerStorage,IDisposable
     {
-        private StorageContext _db;
+        private readonly StorageContext _db;
 
         public ServerStorage()
         {
@@ -18,27 +18,33 @@ namespace Server.Storage
 
         public ServerUserModel GetUser(string username)
         {
-            throw new NotImplementedException();
+            var user = from u in _db.Users
+                where u.Name == username
+                select u;
+            if (user.Count() != 0)
+            {
+                throw new IOException("Count was != 0");
+            }
+            return user.Single();
         }
 
         public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("WUT IS DIS?");
         }
 
-        public IEnumerable<ServerEventModel> GetEventsOnWorkflow(ServerWorkflowModel workflow)
+        public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
-            IQueryable<ServerEventModel> events = from e in _db.Events
+            var events = from e in _db.Events
                 where workflow.ID == e.ServerWorkflowModelID
                 select e;
-
             return events.ToList();
         }
 
         // TODO: ServerWorkflowModel is unused.
-        public void AddEventToWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeAddedDto)
+        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
-            IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows
+            var workflows = from w in _db.Workflows
                 where eventToBeAddedDto.ServerWorkflowModelID == w.ID
                 select w;
 
@@ -53,11 +59,11 @@ namespace Server.Storage
 
         public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
-            IQueryable<ServerEventModel> events = from e in _db.Events
+            var events = from e in _db.Events
                 where e.ID == eventToBeUpdated.ID
                 select e;
 
-            var tempEvent = events.First();
+            var tempEvent = events.Single();
             // TODO: Is it possible to change workflow? 
             tempEvent.ServerWorkflowModel = eventToBeUpdated.ServerWorkflowModel;
             tempEvent.ServerWorkflowModelID = eventToBeUpdated.ServerWorkflowModelID;
@@ -68,15 +74,15 @@ namespace Server.Storage
 
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
-            IQueryable<ServerEventModel> events = from e in _db.Events
+            var events = from e in _db.Events
                 where e.ID == eventId
                 select e;
 
-            _db.Events.Remove(events.First());
+            _db.Events.Remove(events.Single());
             _db.SaveChangesAsync();
         }
 
-        public IEnumerable<ServerWorkflowModel> GetAllWorkflows()
+        public ICollection<ServerWorkflowModel> GetAllWorkflows()
         {
             IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows select w;
 
@@ -85,11 +91,11 @@ namespace Server.Storage
 
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
-            IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows
+            var workflows = from w in _db.Workflows
                 where w.ID == workflowId
                 select w;
 
-            return workflows.First();
+            return workflows.Single();
         }
 
         public void AddNewWorkflow(ServerWorkflowModel workflow)
@@ -100,11 +106,11 @@ namespace Server.Storage
 
         public void UpdateWorkflow(ServerWorkflowModel workflow)
         {
-            IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows
-                                                  where w.ID == workflow.ID
-                                                  select w;
+            var workflows = from w in _db.Workflows
+                where w.ID == workflow.ID
+                select w;
 
-            var tempWorkflow = workflows.First();
+            var tempWorkflow = workflows.Single();
             tempWorkflow.Name = workflow.Name;
 
             _db.SaveChangesAsync();
@@ -117,8 +123,18 @@ namespace Server.Storage
                 where w.ID == workflow.ID
                 select w;
 
-            _db.Workflows.Remove(workflows.First());
+            if (workflow.ServerEventModels.Count > 0)
+            {
+                throw new IOException("The workflow contains events");
+            }
+
+            _db.Workflows.Remove(workflows.Single());
             _db.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
+            _db.Dispose();
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Server.Tests
             var toSetup = new Mock<IServerStorage>();
 
             //Set up method for adding events to workflows. The callback adds the input parameters to the list.
-            toSetup.Setup(m => m.AddEventToWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<ServerEventModel>()))
+            toSetup.Setup(m => m.AddEventToWorkflow(It.IsAny<ServerEventModel>()))
                 .Callback((ServerWorkflowModel workFlowToAddTo, ServerEventModel eventToAdd) => _list.Find(e => e.Name == workFlowToAddTo.Name).ServerEventModels.Add(eventToAdd));
 
             //Set up method for adding a new workflow. The callback adds the input parameter to the list.
@@ -39,7 +39,7 @@ namespace Server.Tests
                 .Returns(_list);
 
             //Set up method for getting all events in a workflow. Gets the list of events on the given workflow.
-            toSetup.Setup(m => m.GetEventsOnWorkflow(It.IsAny<ServerWorkflowModel>()))
+            toSetup.Setup(m => m.GetEventsFromWorkflow(It.IsAny<ServerWorkflowModel>()))
                 .Returns((ServerWorkflowModel toGet) => toGet.ServerEventModels);
 
             //Set up method for getting a specific workflow. Finds the given workflow in the list.
