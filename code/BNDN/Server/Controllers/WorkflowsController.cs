@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Common;
-using Server.Models;
 using Server.Storage;
 
 namespace Server.Controllers
@@ -73,11 +71,12 @@ namespace Server.Controllers
         {
             try
             {
-                return ServerLogic.Login(username); 
+                var result = ServerLogic.Login(username);
+                return result;
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
 
         }

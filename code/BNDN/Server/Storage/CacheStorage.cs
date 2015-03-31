@@ -49,7 +49,7 @@ namespace Server.Storage
 
         public ServerUserModel GetUser(string username)
         {
-            return _userCache.SingleOrDefault(model => model.Name.ToLower() == username.ToLower());
+            return _userCache.SingleOrDefault(model => String.Equals(model.Name, username, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public ICollection<ServerRolesModel> Login(ServerUserModel userModel)

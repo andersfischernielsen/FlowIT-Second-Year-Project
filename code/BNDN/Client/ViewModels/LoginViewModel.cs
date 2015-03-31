@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Client.Views;
-using Common;
 
 namespace Client.ViewModels
 {
@@ -56,6 +51,7 @@ namespace Client.ViewModels
         public async void Login()
         {
             // PUT LOGIN LOGIC HERE
+            Status = "";
             var connection = new ServerConnection(new Uri("http://localhost:13768/"));
             try
             {

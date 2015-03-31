@@ -39,6 +39,10 @@ namespace Server
         public RolesOnWorkflowsDto Login(string username)
         {
             var user = _storage.GetUser(username);
+            if (user == null)
+            {
+                throw new Exception();
+            }
             var rolesModels = _storage.Login(user);
             var rolesOnWorkflows = new Dictionary<string, IList<string>>();
             foreach (var roleModel in rolesModels)
@@ -54,7 +58,7 @@ namespace Server
                     rolesOnWorkflows.Add(roleModel.ServerWorklowModelID, new List<string>{roleModel.ID});
                 }
             }
-            return new RolesOnWorkflowsDto() { RolesOnWorkflows = rolesOnWorkflows };
+            return new RolesOnWorkflowsDto { RolesOnWorkflows = rolesOnWorkflows };
         }
 
         public IEnumerable<EventAddressDto> GetEventsOnWorkflow(string workflowId)

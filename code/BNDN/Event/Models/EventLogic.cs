@@ -293,11 +293,11 @@ namespace Event.Models
             // #1. Make sure that server will accept our entry
             var dto = new EventAddressDto
             {
-                Id = EventId,
-                Uri = OwnUri
+                Id = eventDto.EventId,
+                Uri = ownUri
             };
 
-            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
+            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
 
