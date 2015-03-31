@@ -289,16 +289,25 @@ namespace Event.Models
             {
                 throw new ArgumentNullException("eventDto", "Provided EventDto was null");
             }
-            // if (EventId != null)
-            // {
-            //     throw new NullReferenceException("EventId was not null");
-            // }
 
+            // #1. Make sure that server will accept our entry
+            var dto = new EventAddressDto
+            {
+                Id = EventId,
+                Uri = OwnUri
+            };
+
+            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
+            var otherEvents = await serverCommunicator.PostEventToServer(dto);
+
+
+            // #2. Then set our own fields accordingly
             EventId = eventDto.EventId;
             WorkflowId = eventDto.WorkflowId;
             Name = eventDto.Name;
             Role = eventDto.Role;
             Included = eventDto.Included;
+            Role = eventDto.Role;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
             Inclusions = new HashSet<Uri>(eventDto.Inclusions);
@@ -307,16 +316,7 @@ namespace Event.Models
             Responses = new HashSet<Uri>(eventDto.Responses);
             OwnUri = ownUri;
 
-            var dto = new EventAddressDto
-            {
-                Id = EventId,
-                Uri = OwnUri
-            };
-
-           var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
-
-           var otherEvents = await serverCommunicator.PostEventToServer(dto);
-
+            // #3: Register events that are related to us. 
             foreach (var otherEvent in otherEvents)
             {
                 // Todo register self with other Events.
