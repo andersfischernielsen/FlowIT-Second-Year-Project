@@ -142,7 +142,10 @@ namespace Event.Models
         {
             await Task.Run(() =>
             {
-                var uri = Storage.EventUriIdMappings.SingleOrDefault(x => x.Id == id).Uri;
+                // TODO: Not cool - let Storage do it's thing!
+                //var uri = Storage.EventUriIdMappings.SingleOrDefault(x => x.Id == id).Uri;
+
+                var uri = Storage.GetUriFromId(id);
                 if (uri == null)
                 {
                     throw new ArgumentException("Nonexistent id", id);

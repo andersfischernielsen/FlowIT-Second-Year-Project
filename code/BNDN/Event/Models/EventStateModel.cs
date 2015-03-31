@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Event.Models
 {
@@ -13,7 +9,5 @@ namespace Event.Models
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public bool Pending { get; set; }
-
-        public LockDto LockDto { get; set; }
     }
 }

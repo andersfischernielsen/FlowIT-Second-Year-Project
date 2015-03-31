@@ -34,6 +34,7 @@ namespace Event.Controllers
         public async Task<EventDto> GetEvent()
         {
             // Dismiss request if Event is currently locked
+            
             if (Logic.IsLocked())
             {
                 // Event is currently locked)

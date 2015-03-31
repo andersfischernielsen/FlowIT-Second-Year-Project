@@ -1,3 +1,6 @@
+using Event.Models;
+using Event.Models.UriClasses;
+
 namespace Event.Migrations
 {
     using System;
@@ -10,10 +13,63 @@ namespace Event.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
+            AutomaticMigrationDataLossAllowed = true;
         }
 
         protected override void Seed(Event.EventContext context)
         {
+            context.EventIdentification.Add(new EventIdentificationModel()
+            {
+                EventId = null,
+                Id = 0,
+                Name = null,
+                OwnUri = null,
+                Role = null,
+                WorkflowId = null
+            });
+
+            context.EventState.Add(new EventStateModel()
+            {
+                Executed = false,
+                Id = 0,
+                Included = false,
+                Pending = false,
+            });
+
+            /*
+            context.EventUriIdMappings.Add(new EventUriIdMapping()
+            {
+                Id = null,
+                Uri = null
+            });
+
+            
+            context.Exclusions.Add(new ExclusionUri()
+            {
+                Id = 0,
+                UriString = null
+            });
+
+            context.Inclusions.Add(new InclusionUri()
+            {
+                Id = 0,
+                UriString = null
+            });
+
+            context.Conditions.Add(new ConditionUri()
+            {
+                Id = 0,
+                UriString = null
+            });
+
+            context.Responses.Add(new ResponseUri()
+            {
+                Id = 0,
+                UriString = null
+            });*/
+
+
+
             //  This method will be called after migrating to the latest version.
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
