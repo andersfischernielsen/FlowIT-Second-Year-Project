@@ -75,7 +75,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
 
                     var eventIdentificationPackage = context.EventIdentification.FirstOrDefault();
                     if (eventIdentificationPackage == null)
@@ -90,7 +90,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
 
                     context.EventIdentification.Single().WorkflowId = value;
                     context.SaveChangesAsync();                    
@@ -104,7 +104,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
 
                     var eventIdentificationPackage = context.EventIdentification.FirstOrDefault();
                     if (eventIdentificationPackage == null)
@@ -118,7 +118,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
 
                     context.EventIdentification.Single().EventId = value;
                     context.SaveChangesAsync();                    
@@ -132,7 +132,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
                     return context.EventIdentification.Single().Name;    
                 }
             }
@@ -140,7 +140,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
 
                     context.EventIdentification.Single().Name = value;
                     context.SaveChangesAsync();    
@@ -154,7 +154,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
 
                     return context.EventIdentification.Single().Role;    
                 }
@@ -163,7 +163,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventIdentificationIsInALegalState();
+                    EventIdentificationIsInALegalState(context);
 
                     context.EventIdentification.Single().Role = value;
                     context.SaveChangesAsync();    
@@ -177,7 +177,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventStateIsInALegalState();
+                    EventStateIsInALegalState(context);
              
                     return context.EventState.Single().Executed;    
                 }
@@ -186,7 +186,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventStateIsInALegalState();
+                    EventStateIsInALegalState(context);
 
                     context.EventState.Single().Executed = value;
                     context.SaveChangesAsync();    
@@ -200,7 +200,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventStateIsInALegalState();
+                    EventStateIsInALegalState(context);
 
                     return context.EventState.Single().Included;    
                 }
@@ -209,7 +209,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventStateIsInALegalState();
+                    EventStateIsInALegalState(context);
 
                     context.EventState.Single().Included = value;
                     context.SaveChangesAsync();    
@@ -223,7 +223,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventStateIsInALegalState();
+                    EventStateIsInALegalState(context);
 
                     return context.EventState.Single().Pending;    
                 }
@@ -232,7 +232,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    EventStateIsInALegalState();
+                    EventStateIsInALegalState(context);
 
                     context.EventState.Single().Pending = value;
                     context.SaveChangesAsync();    
@@ -261,17 +261,17 @@ namespace Event.Storage
                     {
                         throw new ApplicationException("More than a single element in LockDto");
                     }
-                    if (context.LockDto.Count() == 0)
-                    {
-                        throw new ApplicationException("LockDto was not initialized in Event");
-                    }
 
+                    // Remove current LockDto
                     foreach (var element in context.LockDto)
                     {
                         context.LockDto.Remove(element);
                     }
 
 
+                    // TODO: Discuss: As of now, we cannot tell whether the caller intended to clear the LockDto (i.e. unlock this Event)
+                    // TODO: or if he accidentally wanted to set the lock, but provided a null-LockDto. Suggestion: Provide a ClearLock() method instead. 
+                    // TODO: Recap: This setter serves two purposes; setting the lock and clearing it! More elegant with a ClearLock() method (according to me, Morten)
                     context.LockDto.Add(value);
                     context.SaveChangesAsync();    
                 }
@@ -528,40 +528,34 @@ namespace Event.Storage
 
         #region Private Methods
 
-        private void EventIdentificationIsInALegalState()
+        private void EventIdentificationIsInALegalState(EventContext context)
         {
-            using (var context = new EventContext())
+            // Check that there's currently only a single element in database
+            if (context.EventIdentification.Count() > 1)
             {
-                // Check that there's currently only a single element in database
-                if (context.EventIdentification.Count() > 1)
-                {
-                    throw new ApplicationException(
-                        "More than a single EventIdentification element in database-set in Event");
-                }
-
-                if (context.EventIdentification.Count() == 0)
-                {
-                    throw new ApplicationException("EventIdentification was not initialized in Event." +
-                                                   "Count was zero");
-                }                
+                throw new ApplicationException(
+                    "More than a single EventIdentification element in database-set in Event");
             }
+
+            if (context.EventIdentification.Count() == 0)
+            {
+                throw new ApplicationException("EventIdentification was not initialized in Event." +
+                                               "Count was zero");
+            }                
+
         }
 
-        private void EventStateIsInALegalState()
+        private void EventStateIsInALegalState(EventContext context)
         {
-            using (var context = new EventContext())
+            // Check that there is no more than a single element in EventState
+            if (context.EventState.Count() > 1)
             {
-                // Check that there is no more than a single element in EventState
-                if (context.EventState.Count() > 1)
-                {
-                    throw new ApplicationException("More than a single element in EventState set");
-                }
-                if (context.EventState.Count() == 0)
-                {
-                    throw new ApplicationException("EventState was not initialized in Event");
-                }                
+                throw new ApplicationException("More than a single element in EventState set");
             }
-
+            if (context.EventState.Count() == 0)
+            {
+                throw new ApplicationException("EventState was not initialized in Event");
+            }                
         }
         #endregion
     }
