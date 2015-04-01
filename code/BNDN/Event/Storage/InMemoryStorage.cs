@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Event.Interfaces;
+using Event.Models;
 
-namespace Event.Models
+namespace Event.Storage
 {
+    // TODO: Delete this class if remains unused
     public class InMemoryStorage2 : IEventStorage
     {
         public InMemoryStorage2()

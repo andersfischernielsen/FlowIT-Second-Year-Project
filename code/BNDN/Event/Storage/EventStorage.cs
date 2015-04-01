@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.UI;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
 
 namespace Event.Storage
 {
+    /// <summary>
+    /// EventStorage is the application-layer that rests on top of the actual storage-facility (a database)
+    /// EventStorage implements IEventStorage-interface.
+    /// </summary>
     public class EventStorage : IEventStorage
     {
 
+        // TODO: Discuss: Do we need to (dependency)-inject the (db)context for testing purposes, instead?
+        // TODO: If not, if constructor is parameterless, could / should we make EventStorage static then?
         public EventStorage()
         {
 
         }
 
+
+        #region Properties
         public Uri OwnUri
         {
             get
@@ -71,11 +75,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is not more than a single element in EventIdentification
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
+                    EventIdentificationIsInALegalState();
 
                     var eventIdentificationPackage = context.EventIdentification.FirstOrDefault();
                     if (eventIdentificationPackage == null)
@@ -90,15 +90,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventIdentification
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
+                    EventIdentificationIsInALegalState();
 
                     context.EventIdentification.Single().WorkflowId = value;
                     context.SaveChangesAsync();                    
@@ -112,15 +104,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventIdentification
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
+                    EventIdentificationIsInALegalState();
 
                     var eventIdentificationPackage = context.EventIdentification.FirstOrDefault();
                     if (eventIdentificationPackage == null)
@@ -134,15 +118,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
-                    
+                    EventIdentificationIsInALegalState();
 
                     context.EventIdentification.Single().EventId = value;
                     context.SaveChangesAsync();                    
@@ -156,15 +132,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventIdentification
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
+                    EventIdentificationIsInALegalState();
                     return context.EventIdentification.Single().Name;    
                 }
             }
@@ -172,15 +140,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventIdentification
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
+                    EventIdentificationIsInALegalState();
 
                     context.EventIdentification.Single().Name = value;
                     context.SaveChangesAsync();    
@@ -194,15 +154,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventIdentification
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
+                    EventIdentificationIsInALegalState();
 
                     return context.EventIdentification.Single().Role;    
                 }
@@ -211,15 +163,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventIdentification
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventIdentification");
-                    }
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
+                    EventIdentificationIsInALegalState();
 
                     context.EventIdentification.Single().Role = value;
                     context.SaveChangesAsync();    
@@ -233,16 +177,8 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventState
-                    if (context.EventState.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventState");
-                    }
-                    if (context.EventState.Count() == 0)
-                    {
-                        throw new ApplicationException("EventState was not initialized in Event");
-                    }
-
+                    EventStateIsInALegalState();
+             
                     return context.EventState.Single().Executed;    
                 }
             }
@@ -250,15 +186,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventState
-                    if (context.EventState.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventState");
-                    }
-                    if (context.EventState.Count() == 0)
-                    {
-                        throw new ApplicationException("EventStae was not initialized in Event");
-                    }
+                    EventStateIsInALegalState();
 
                     context.EventState.Single().Executed = value;
                     context.SaveChangesAsync();    
@@ -272,15 +200,8 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventState
-                    if (context.EventState.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventState");
-                    }
-                    if (context.EventState.Count() == 0)
-                    {
-                        throw new ApplicationException("EventState was not initialized in Event");
-                    }
+                    EventStateIsInALegalState();
+
                     return context.EventState.Single().Included;    
                 }
             }
@@ -288,15 +209,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventState
-                    if (context.EventState.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventState");
-                    }
-                    if (context.EventState.Count() == 0)
-                    {
-                        throw new ApplicationException("EventState was not initialized in Event");
-                    }
+                    EventStateIsInALegalState();
 
                     context.EventState.Single().Included = value;
                     context.SaveChangesAsync();    
@@ -310,15 +223,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventState
-                    if (context.EventState.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventState");
-                    }
-                    if (context.EventState.Count() == 0)
-                    {
-                        throw new ApplicationException("EventState was not initialized in Event");
-                    }
+                    EventStateIsInALegalState();
 
                     return context.EventState.Single().Pending;    
                 }
@@ -327,15 +232,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventState
-                    if (context.EventState.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in EventState");
-                    }
-                    if (context.EventState.Count() == 0)
-                    {
-                        throw new ApplicationException("EventState was not initialized in Event");
-                    }
+                    EventStateIsInALegalState();
 
                     context.EventState.Single().Pending = value;
                     context.SaveChangesAsync();    
@@ -349,16 +246,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in LockDto
-                    if (context.EventState.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in LockDto");
-                    }
-                    if (context.EventState.Count() == 0)
-                    {
-                        throw new ApplicationException("LockDto was not initialized in Event");
-                    }
-
+                    // Intended there is no checks here, as LockDto is not part of / held in EventState or EventIdentification
                     var result = context.LockDto.SingleOrDefault();
                     
                     return result;
@@ -368,7 +256,7 @@ namespace Event.Storage
             {
                 using (var context = new EventContext())
                 {
-                    // Check that there is no more than a single element in EventState
+                    // Check that there is no more than a single element in LockDto set
                     if (context.LockDto.Count() > 1)
                     {
                         throw new ApplicationException("More than a single element in LockDto");
@@ -573,10 +461,9 @@ namespace Event.Storage
                 }
             }
         }
-                
-            
-        
+        #endregion
 
+        #region Public methods
         public Uri GetUriFromId(string id)
         {
             using (var context = new EventContext())
@@ -636,5 +523,46 @@ namespace Event.Storage
                 return result != null;        
             }
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private void EventIdentificationIsInALegalState()
+        {
+            using (var context = new EventContext())
+            {
+                // Check that there's currently only a single element in database
+                if (context.EventIdentification.Count() > 1)
+                {
+                    throw new ApplicationException(
+                        "More than a single EventIdentification element in database-set in Event");
+                }
+
+                if (context.EventIdentification.Count() == 0)
+                {
+                    throw new ApplicationException("EventIdentification was not initialized in Event." +
+                                                   "Count was zero");
+                }                
+            }
+        }
+
+        private void EventStateIsInALegalState()
+        {
+            using (var context = new EventContext())
+            {
+                // Check that there is no more than a single element in EventState
+                if (context.EventState.Count() > 1)
+                {
+                    throw new ApplicationException("More than a single element in EventState set");
+                }
+                if (context.EventState.Count() == 0)
+                {
+                    throw new ApplicationException("EventState was not initialized in Event");
+                }                
+            }
+
+        }
+        #endregion
     }
 }
