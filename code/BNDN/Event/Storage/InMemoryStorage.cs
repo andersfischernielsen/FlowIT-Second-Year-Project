@@ -30,6 +30,11 @@ namespace Event.Storage
         public Dictionary<string, Uri> EventUris { get; set; }
         public string Role { get; set; }
         public Dictionary<Uri, string> EventIds { get; set; }
+        public void ClearLock()
+        {
+            throw new NotImplementedException();
+        }
+
         public HashSet<Uri> Conditions { get; set; }
         public HashSet<Uri> Responses { get; set; }
         public HashSet<Uri> Exclusions { get; set; }

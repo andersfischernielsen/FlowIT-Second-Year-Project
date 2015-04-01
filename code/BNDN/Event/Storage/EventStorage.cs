@@ -240,16 +240,24 @@ namespace Event.Storage
             }
         }
 
+        /// <summary>
+        /// The setter for this property should not be used to unlock the Event. If setter is provided with a null-value
+        /// an ArgumentNullException will be raised. Instead, use ClearLock()-method to remove any Lock on this Event.  
+        /// </summary>
         public LockDto LockDto
         {
             get
             {
                 using (var context = new EventContext())
                 {
-                    // Intended there is no checks here, as LockDto is not part of / held in EventState or EventIdentification
-                    var result = context.LockDto.SingleOrDefault();
-                    
-                    return result;
+                    // Check to ensure there's only a single LockDto held in database
+                    if (context.LockDto.Count() > 1)
+                    {
+                        throw new ApplicationException("Illegal state in Event: More than a " +
+                                                       "single LockDto was held in database");
+                    }
+                    // SingleOrDeafult will return either null or the actual single element in set. 
+                    return context.LockDto.SingleOrDefault();
                 }
             }
             set
@@ -262,18 +270,44 @@ namespace Event.Storage
                         throw new ApplicationException("More than a single element in LockDto");
                     }
 
-                    // Remove current LockDto
+                    // Remove current LockDto (should be either only a single element or no element at all
                     foreach (var element in context.LockDto)
                     {
                         context.LockDto.Remove(element);
                     }
 
-
-                    // TODO: Discuss: As of now, we cannot tell whether the caller intended to clear the LockDto (i.e. unlock this Event)
-                    // TODO: or if he accidentally wanted to set the lock, but provided a null-LockDto. Suggestion: Provide a ClearLock() method instead. 
-                    // TODO: Recap: This setter serves two purposes; setting the lock and clearing it! More elegant with a ClearLock() method (according to me, Morten)
+                    if (value == null)
+                    {
+                        throw new ArgumentNullException("value","The provided LockDto was null. To unlock Event, " +
+                                                                "see documentation");
+                    }
+                    
                     context.LockDto.Add(value);
                     context.SaveChangesAsync();    
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// This method should be used for unlocking an Event as opposed to using the setter for LockDto
+        /// (Setter for LockDto will raise an ArgumentNullException if provided a null-value)
+        /// The method simply removes all (should be either 1 or 0) LockDto element(s) held in database. 
+        /// </summary>
+        public void ClearLock()
+        {
+            using (var context = new EventContext())
+            {
+                // Check that LockDto set is in a legal state
+                if (context.LockDto.Count() > 1)
+                {
+                    throw new ApplicationException("Illegal state in Event: LockDto set contains more than a single element");
+                }
+
+                // Clear the single LockDto-element 
+                foreach (var lockDto in context.LockDto)
+                {
+                    context.LockDto.Remove(lockDto);
                 }
             }
         }

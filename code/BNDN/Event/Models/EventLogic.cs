@@ -115,6 +115,12 @@ namespace Event.Models
         #endregion
 
         #region Rule Handling
+
+        public void UnlockEvent()
+        {
+            Storage.ClearLock();
+        }
+
         public async Task<bool> IsExecutable()
         {
             //If this event is excluded, return false.

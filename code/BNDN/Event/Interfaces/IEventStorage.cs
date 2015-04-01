@@ -20,7 +20,11 @@ namespace Event.Interfaces
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
+        #endregion
+
+        #region Locking
         LockDto LockDto { get; set; }
+        void ClearLock();
         #endregion
 
         #region Rules

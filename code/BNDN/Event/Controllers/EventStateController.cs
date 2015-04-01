@@ -157,8 +157,10 @@ namespace Event.Controllers
                         "Event is not currently executable."));
             }
 
-            LockLogic ll = new LockLogic();
-            if (await ll.LockAll())
+            // Lock all dependent Events (including one-self)
+            // TODO: Check: Does the following include locking on this Event itself...?
+            LockLogic lockLogic = new LockLogic();
+            if (await lockLogic.LockAll())
             {
                 var allOk = true;
                 try
@@ -171,13 +173,15 @@ namespace Event.Controllers
                 }
 
 
-                if (!await ll.UnlockAll())
+                if (!await lockLogic.UnlockAll())
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at unlocking all the locked events."));
                     //Kunne ikke unlocke alt, hvad skal der ske?
                 }
                 if (allOk)
                 {
+                    // TODO: Discuss is this really the way (i.e. through an Exception) to signal that Event was executed?
+                    // TODO: Is there no other (nicer) alternative to raising an exception? 
                     throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.OK, true));
                 }
                 else
@@ -205,6 +209,9 @@ namespace Event.Controllers
                     "This event is already locked by someone else."));
             }
             Logic.Included = boolValueForIncluded;
+
+            // TODO: Research what the right response to a PUT call is (I believe it is the updates value of the property) 
+            // TODO: (and implement it here and on the other PUT-calls)
         }
 
         /// <summary>
@@ -229,7 +236,9 @@ namespace Event.Controllers
 
         #region Lock-related
         /// <summary>
-        /// Will lock this Event if it is not already locked. 
+        /// Will lock this Event if it is not already locked.
+        /// This POST call should be received either a) from the Event itself (when it is about to execute) or when
+        /// b) another Event (that has this Event in it's dependencies) asks it to lock.
         /// </summary>
         /// <param name="lockDto">Contents should represent caller</param>
         [Route("Event/lock")]
@@ -240,7 +249,8 @@ namespace Event.Controllers
             {
                 // Caller provided a null LockDto
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Lock could not be set. An empty (null) lock was provided."));
+                    "Lock could not be set. An empty (null) lock was provided. If your intent" +
+                    " is to unlock the Event issue a DELETE request on  event/lock instead."));
             }
 
             if (Logic.IsLocked())
@@ -278,10 +288,12 @@ namespace Event.Controllers
             if (!Logic.CallerIsAllowedToOperate(new EventAddressDto() { Id = id }))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Lock could be unlocked. Event was locked by someone else."));
+                    "Lock could not be unlocked. Event was locked by someone else."));
             }
 
-            Logic.LockDto = null;
+            // TODO: Consider having a "ClearLock"-"Unlock" method that sets LockDto to null <- done! 
+            //Logic.LockDto = null;
+            Logic.UnlockEvent();
         }
         #endregion
     }

@@ -10,12 +10,16 @@ namespace Event.Interfaces
 {
     interface IEventLogic
     {
-        #region State
-        LockDto LockDto { get; set; }  
+        #region State 
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
         string Role { get; set; }
+        #endregion
+
+        #region Locking
+        LockDto LockDto { get; set; }
+        void UnlockEvent();
         #endregion
 
         #region Rules
