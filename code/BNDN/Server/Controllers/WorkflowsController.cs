@@ -38,6 +38,7 @@ namespace Server.Controllers
         }
 
 
+        #region GET requests
         // GET: /Workflows/5
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
@@ -80,19 +81,24 @@ namespace Server.Controllers
             }
 
         }
+        #endregion 
 
-
+        #region POST requests
         /// <summary>
         /// PostNewWorkFlow adds a new workflow.
         /// </summary>
         /// <param name="workflowDto"></param>
         [Route("Workflows")]
         [HttpPost]
-        // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
-        // TODO: How does an Event know that an eventId is not already taken?
         public void PostWorkFlow([FromBody] WorkflowDto workflowDto)
         {
-            // Todo see that workflowId matches the dto.
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Provided input could not be mapped onto an instance of WorkflowDto"));
+            }
+
+            // TODO: see that workflowId matches the dto.
             try
             {
                 // Add this Event to the specified workflow
@@ -104,20 +110,52 @@ namespace Server.Controllers
             }
         }
 
+        [Route("Workflows/{workflowId}")]
+        [HttpPost]
+        public IEnumerable<EventAddressDto> PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                                "Provided input could not be mapped onto workflowDto"));
+            }
+
+            try
+            {
+                // Add this Event to the specified workflow
+                ServerLogic.AddEventToWorkflow(workflowId, eventToAddDto);
+
+                // To caller, return a list of the other (excluding itself) Events on the workflow
+                return ServerLogic.GetEventsOnWorkflow(workflowId).Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+            }
+        }
+        #endregion
+
+
+        #region PUT requests
         /// <summary>
-        /// PostEventToWorkFlow adds an Event to a workflow with the specified workflowid. 
+        /// UpdateEventToWorkFlow updates an Event in a workflow with the specified workflowid. 
         /// </summary>
         /// <param name="workflowId"></param>
         /// <param name="eventToBeUpdated"></param>
         [Route("Workflows/{workflowId}")]
         [HttpPut]
-        // TODO: Clarify what information should Event provide to Server, when submitting itself to Server?
-        // TODO: How does an Event know that an eventId is not already taken?
         public void UpdateEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToBeUpdated)
         {
+            // Check if provided input can be mapped onto an EventAddressDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                                "Provided input could not be mapped onto an EventAddressDto"));
+            }
+
             try
             {
-            // Add this Event to the specified workflow
+                // Add this Event to the specified workflow
                 ServerLogic.UpdateEventOnWorkflow(workflowId, eventToBeUpdated);
             }
             catch (Exception ex)
@@ -126,24 +164,9 @@ namespace Server.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
             }
         }
+        #endregion
 
-        [Route("Workflows/{workflowId}")]
-        [HttpPost]
-        // TODO: How does an Event know that an eventId is not already taken?
-        public IEnumerable<EventAddressDto> PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
-        {
-            try
-            {
-                // Add this Event to the specified workflow
-                ServerLogic.AddEventToWorkflow(workflowId, eventToAddDto);
-                return ServerLogic.GetEventsOnWorkflow(workflowId).Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
-            }
-            catch (Exception ex)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-            }
-        }
-
+        #region DELETE requests
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         public void DeleteEventFromWorkflow(string workflowId, string eventId)
@@ -158,5 +181,6 @@ namespace Server.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
             }
         }
+        #endregion
     }
 }
