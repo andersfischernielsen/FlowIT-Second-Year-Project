@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
@@ -38,12 +39,15 @@ namespace Event.Controllers
                 StatusCode(HttpStatusCode.MethodNotAllowed);
             }
 
+            // Check that provided input can be mapped onto a legal instance of EventRuleDto
             if (!ModelState.IsValid)
             {
-                BadRequest(ModelState);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                             "Provided input could not be mapped onto an instance of EventRuleDto"));
             }
             if (ruleDto == null)
             {
+                // TODO: Discuss: This check should be obsolete by now, eith above !ModelState.IsValid check
                 BadRequest("Request requires data");
             }
 
@@ -64,8 +68,7 @@ namespace Event.Controllers
         /// Updates the rules between this Event and the caller.
         /// </summary>
         /// <param name="id">The id of the calling Event.</param>
-        /// <param name="ruleDto">The complete set of updated rules. 
-        /// If existing rules are not in the dto they will be removed.</param>
+        /// <param name="ruleDto">The set of rules, that should exist between caller and receiver.</param>
         /// <returns>A task resulting in a Http Result.</returns>
         [Route("event/rules/{id}")]
         [HttpPut]
@@ -80,10 +83,12 @@ namespace Event.Controllers
 
             if (!ModelState.IsValid)
             {
-                BadRequest(ModelState);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                             "Provided input could not be mapped onto an instance of EvemtRuleDto"));
             }
             if (ruleDto == null)
             {
+                // TODO: Discuss: This check should be obsolete by now, eith above !ModelState.IsValid check. Consider deleting
                 BadRequest("Request requires data");
             }
 

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Event.Interfaces;
+using Event.Models;
 
-namespace Event.Models
+namespace Event.Storage
 {
+    // TODO: Delete this class if remains unused
     public class InMemoryStorage2 : IEventStorage
     {
         public InMemoryStorage2()
@@ -28,6 +30,11 @@ namespace Event.Models
         public Dictionary<string, Uri> EventUris { get; set; }
         public string Role { get; set; }
         public Dictionary<Uri, string> EventIds { get; set; }
+        public void ClearLock()
+        {
+            throw new NotImplementedException();
+        }
+
         public HashSet<Uri> Conditions { get; set; }
         public HashSet<Uri> Responses { get; set; }
         public HashSet<Uri> Exclusions { get; set; }

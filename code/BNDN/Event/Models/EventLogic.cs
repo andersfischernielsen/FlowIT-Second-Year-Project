@@ -107,6 +107,12 @@ namespace Event.Models
         #endregion
 
         #region Rule Handling
+
+        public void UnlockEvent()
+        {
+            Storage.ClearLock();
+        }
+
         public async Task<bool> IsExecutable()
         {
             //If this event is excluded, return false.
@@ -137,6 +143,7 @@ namespace Event.Models
                 // TODO: Not cool - let Storage do it's thing!
                 //var uri = Storage.EventUriIdMappings.SingleOrDefault(x => x.Id == id).Uri;
 
+                // Retrieve URI associated with Id
                 var uri = Storage.GetUriFromId(id);
                 if (uri == null)
                 {
@@ -144,7 +151,7 @@ namespace Event.Models
                 }
                 if (rules == null)
                 {
-                    throw new ArgumentNullException("rules");
+                    throw new ArgumentNullException("rules","Provided rules was null");
                 }
 
                 UpdateRule(rules.Condition, uri, Conditions);

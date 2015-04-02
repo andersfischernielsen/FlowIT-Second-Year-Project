@@ -125,13 +125,21 @@ namespace Event.Controllers
         /// Executes this event. Only Clients should invoke this.
         /// todo: Should be able to return something to the caller.
         /// </summary>
-        /// <param name="execute">Must be set to true; will result in BadRequest otherwise.</param>
         /// <param name="executeDto">An executeDto with the roles of the given user wishing to execute.</param>
         /// <returns></returns>
         [Route("event/executed")]
         [HttpPut]
         public async Task Execute([FromBody] ExecuteDto executeDto)
         {
+            // Check that provided input can be mapped onto an instance of ExecuteDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                                "Provided input could not be mapped onto an instance of ExecuteDto; " +
+                                                "No roles was provided"));
+            }
+
+            // Check that caller claims the right role for executing this Event
             if (!executeDto.Roles.Contains(Logic.Role))
             {
                 throw new HttpResponseException(
@@ -157,8 +165,10 @@ namespace Event.Controllers
                         "Event is not currently executable."));
             }
 
-            LockLogic ll = new LockLogic();
-            if (await ll.LockAll())
+            // Lock all dependent Events (including one-self)
+            // TODO: Check: Does the following include locking on this Event itself...?
+            LockLogic lockLogic = new LockLogic();
+            if (await lockLogic.LockAll())
             {
                 var allOk = true;
                 try
@@ -171,13 +181,15 @@ namespace Event.Controllers
                 }
 
 
-                if (!await ll.UnlockAll())
+                if (!await lockLogic.UnlockAll())
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at unlocking all the locked events."));
                     //Kunne ikke unlocke alt, hvad skal der ske?
                 }
                 if (allOk)
                 {
+                    // TODO: Discuss is this really the way (i.e. through an Exception) to signal that Event was executed?
+                    // TODO: Is there no other (nicer) alternative to raising an exception? 
                     throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.OK, true));
                 }
                 else
@@ -198,6 +210,13 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdateIncluded([FromBody] EventAddressDto eventAddressDto, bool boolValueForIncluded)
         {
+            // Check if provided input can be mapped onto an instance of EventAddressDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of EventAddressDto"));
+            }
+
             // Check to see if caller is currently allowed to execute this method
             if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
             {
@@ -205,6 +224,9 @@ namespace Event.Controllers
                     "This event is already locked by someone else."));
             }
             Logic.Included = boolValueForIncluded;
+
+            // TODO: Research what the right response to a PUT call is (I believe it is the updates value of the property) 
+            // TODO: (and implement it here and on the other PUT-calls)
         }
 
         /// <summary>
@@ -216,6 +238,13 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdatePending([FromBody] EventAddressDto eventAddressDto, bool boolValueForPending)
         {
+            // Check to see whether caller provided a legal instance of an EventAddressDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of EventAddressDto"));
+            }
+
             // Check if caller is allowed to execute this method at the moment
             if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
             {
@@ -229,18 +258,28 @@ namespace Event.Controllers
 
         #region Lock-related
         /// <summary>
-        /// Will lock this Event if it is not already locked. 
+        /// Will lock this Event if it is not already locked.
+        /// This POST call should be received either a) from the Event itself (when it is about to execute) or when
+        /// b) another Event (that has this Event in it's dependencies) asks it to lock.
         /// </summary>
         /// <param name="lockDto">Contents should represent caller</param>
         [Route("Event/lock")]
         [HttpPost]
         public void Lock([FromBody] LockDto lockDto)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of LockDto"));
+            }
+
             if (lockDto == null)
             {
+                // TODO: Discuss: With the above !ModelState.IsValid check this check should not necessary. Can we remove? 
                 // Caller provided a null LockDto
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Lock could not be set. An empty (null) lock was provided."));
+                    "Lock could not be set. An empty (null) lock was provided. If your intent" +
+                    " is to unlock the Event issue a DELETE request on  event/lock instead."));
             }
 
             if (Logic.IsLocked())
@@ -268,7 +307,7 @@ namespace Event.Controllers
         /// <summary>
         /// Unlock will (attempt to) unlock this Event. May fail if Event is already locked
         /// </summary>
-        /// <param name="eventAddressDto">Should represent caller</param>
+        /// <param name="id">Should represent caller</param>
         [Route("Event/lock/{id}")]
         [HttpDelete]
         public void Unlock(string id)
@@ -278,10 +317,12 @@ namespace Event.Controllers
             if (!Logic.CallerIsAllowedToOperate(new EventAddressDto() { Id = id }))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Lock could be unlocked. Event was locked by someone else."));
+                    "Lock could not be unlocked. Event was locked by someone else."));
             }
 
-            Logic.LockDto = null;
+            // TODO: Consider having a "ClearLock"-"Unlock" method that sets LockDto to null <- done! 
+            //Logic.LockDto = null;
+            Logic.UnlockEvent();
         }
         #endregion
     }

@@ -17,6 +17,11 @@ namespace Event.Models
             _locked = new HashSet<Uri>();
         }
 
+        // TODO: Will this method include locking this Event itself?
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> LockAll()
         {
             if (_list == null)

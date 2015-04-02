@@ -48,6 +48,13 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
+            // Check that provided input can be mapped onto an instance of EventDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                                "Provided input could not be mapped onto an instance of EventDto"));
+            }
+
             if (eventDto == null)
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
@@ -59,11 +66,6 @@ namespace Event.Controllers
                 {
                     // Event is currently locked)
                     StatusCode(HttpStatusCode.MethodNotAllowed);
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
                 }
 
                 // Prepare for method-call: Gets own URI (i.e. http://address)
@@ -86,6 +88,12 @@ namespace Event.Controllers
         [HttpPut]
         public async Task PutEvent([FromBody] EventDto eventDto)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of EventDto"));
+            }
+
             using (IEventLogic logic = new EventLogic())
             {
                 // Dismiss request if Event is currently locked
@@ -93,11 +101,6 @@ namespace Event.Controllers
                 {
                     // Event is currently locked)
                     StatusCode(HttpStatusCode.MethodNotAllowed);
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
                 }
 
                 // Prepare for method-call
