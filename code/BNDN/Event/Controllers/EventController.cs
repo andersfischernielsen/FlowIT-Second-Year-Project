@@ -53,6 +53,13 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
+            // Check that provided input can be mapped onto an instance of EventDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                                "Provided input could not be mapped onto an instance of EventDto"));
+            }
+
             if (eventDto == null)
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
@@ -62,11 +69,6 @@ namespace Event.Controllers
             {
                 // Event is currently locked)
                 StatusCode(HttpStatusCode.MethodNotAllowed);
-            }
-
-            if (!ModelState.IsValid)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
 
             // Prepare for method-call: Gets own URI (i.e. http://address)
@@ -97,7 +99,8 @@ namespace Event.Controllers
 
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of EventDto"));
             }
 
             // Prepare for method-call

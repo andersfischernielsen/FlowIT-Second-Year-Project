@@ -125,13 +125,21 @@ namespace Event.Controllers
         /// Executes this event. Only Clients should invoke this.
         /// todo: Should be able to return something to the caller.
         /// </summary>
-        /// <param name="execute">Must be set to true; will result in BadRequest otherwise.</param>
         /// <param name="executeDto">An executeDto with the roles of the given user wishing to execute.</param>
         /// <returns></returns>
         [Route("event/executed")]
         [HttpPut]
         public async Task Execute([FromBody] ExecuteDto executeDto)
         {
+            // Check that provided input can be mapped onto an instance of ExecuteDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                                "Provided input could not be mapped onto an instance of ExecuteDto; " +
+                                                "No roles was provided"));
+            }
+
+            // Check that caller claims the right role for executing this Event
             if (!executeDto.Roles.Contains(Logic.Role))
             {
                 throw new HttpResponseException(
@@ -202,6 +210,13 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdateIncluded([FromBody] EventAddressDto eventAddressDto, bool boolValueForIncluded)
         {
+            // Check if provided input can be mapped onto an instance of EventAddressDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of EventAddressDto"));
+            }
+
             // Check to see if caller is currently allowed to execute this method
             if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
             {
@@ -223,6 +238,13 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdatePending([FromBody] EventAddressDto eventAddressDto, bool boolValueForPending)
         {
+            // Check to see whether caller provided a legal instance of an EventAddressDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of EventAddressDto"));
+            }
+
             // Check if caller is allowed to execute this method at the moment
             if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
             {
@@ -245,8 +267,15 @@ namespace Event.Controllers
         [HttpPost]
         public void Lock([FromBody] LockDto lockDto)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Provided input could not be mapped onto an instance of LockDto"));
+            }
+
             if (lockDto == null)
             {
+                // TODO: Discuss: With the above !ModelState.IsValid check this check should not necessary. Can we remove? 
                 // Caller provided a null LockDto
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Lock could not be set. An empty (null) lock was provided. If your intent" +
@@ -278,7 +307,7 @@ namespace Event.Controllers
         /// <summary>
         /// Unlock will (attempt to) unlock this Event. May fail if Event is already locked
         /// </summary>
-        /// <param name="eventAddressDto">Should represent caller</param>
+        /// <param name="id">Should represent caller</param>
         [Route("Event/lock/{id}")]
         [HttpDelete]
         public void Unlock(string id)

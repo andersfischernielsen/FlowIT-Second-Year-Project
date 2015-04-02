@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Common
 {
+    // TODO: Discuss: Currently only 2 fields are [Required] - is that sufficient?
     public class EventDto
     {
+        [Required]
         public string EventId { get; set; }
+        [Required]
         public string WorkflowId { get; set; }
         public string Name { get; set; }
         public bool Pending { get; set; }
