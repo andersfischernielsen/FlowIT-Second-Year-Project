@@ -20,7 +20,7 @@ namespace Event.Controllers
         public EventStateController()
         {
             // Fetches Singleton Logic-layer
-            Logic = EventLogic.GetState();
+            Logic = new EventLogic();
         }
 
         #region GET-requests

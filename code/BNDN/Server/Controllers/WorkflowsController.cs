@@ -16,7 +16,8 @@ namespace Server.Controllers
 
         public WorkflowsController() 
         {
-            ServerLogic = new ServerLogic(CacheStorage.GetStorage);
+            ServerLogic = new ServerLogic(new ServerStorage());
+            //ServerLogic = new ServerLogic(CacheStorage.GetStorage);
             //ServerLogic = new ServerLogic(new WorkflowStorage());
         }
 
@@ -156,6 +157,20 @@ namespace Server.Controllers
             catch (Exception ex)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
+            }
+        }
+
+        [Route("Workflows/{workflowId}")]
+        [HttpDelete]
+        public void DeleteWorkflow(string workflowId)
+        {
+            try
+            {
+                ServerLogic.RemoveWorkflow(ServerLogic.GetWorkflow(workflowId));
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
         }
     }

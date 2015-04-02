@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
@@ -18,7 +17,7 @@ namespace Event.Controllers
         public EventRulesController()
         {
             // Fetches Singleton Logic layer. 
-            Logic = EventLogic.GetState();
+            Logic = new EventLogic();
         }
 
 

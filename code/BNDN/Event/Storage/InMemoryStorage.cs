@@ -65,5 +65,10 @@ namespace Event.Models
             EventIds.Add(endPoint, id);
         }
         #endregion
+
+        public void Dispose()
+        {
+            // Don't do anything.
+        }
     }
 }

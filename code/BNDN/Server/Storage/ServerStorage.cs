@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
+using System.Threading.Tasks;
 using Server.Models;
 
 namespace Server.Storage
 {
-    public class ServerStorage : IServerStorage,IDisposable
+    public class ServerStorage : IServerStorage, IDisposable
     {
         private readonly StorageContext _db;
 
@@ -18,35 +18,32 @@ namespace Server.Storage
 
         public ServerUserModel GetUser(string username)
         {
-            var user = from u in _db.Users
-                where u.Name == username
-                select u;
-            if (user.Count() != 0)
-            {
-                throw new IOException("Count was != 0");
-            }
-            return user.Single();
+            return _db.Users.SingleOrDefault(user => string.Equals(user.Name, username));
         }
 
         public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
         {
-            throw new NotImplementedException("WUT IS DIS?");
+            if (userModel.ServerRolesModels == null)
+            {
+                var user = _db.Users.Find(userModel.ID);
+                return user != null ? user.ServerRolesModels : null;
+            }
+            return userModel.ServerRolesModels;
         }
 
         public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
             var events = from e in _db.Events
-                where workflow.ID == e.ServerWorkflowModelID
-                select e;
+                         where workflow.ID == e.ServerWorkflowModelID
+                         select e;
             return events.ToList();
         }
 
-        // TODO: ServerWorkflowModel is unused.
         public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             var workflows = from w in _db.Workflows
-                where eventToBeAddedDto.ServerWorkflowModelID == w.ID
-                select w;
+                            where eventToBeAddedDto.ServerWorkflowModelID == w.ID
+                            select w;
 
             if (workflows.Count() != 1)
             {
@@ -54,14 +51,14 @@ namespace Server.Storage
             }
 
             _db.Events.Add(eventToBeAddedDto);
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             var events = from e in _db.Events
-                where e.ID == eventToBeUpdated.ID
-                select e;
+                         where e.ID == eventToBeUpdated.ID
+                         select e;
 
             var tempEvent = events.Single();
             // TODO: Is it possible to change workflow? 
@@ -69,22 +66,22 @@ namespace Server.Storage
             tempEvent.ServerWorkflowModelID = eventToBeUpdated.ServerWorkflowModelID;
             tempEvent.Uri = eventToBeUpdated.Uri;
 
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
             var events = from e in _db.Events
-                where e.ID == eventId
-                select e;
+                         where e.ID == eventId
+                         select e;
 
             _db.Events.Remove(events.Single());
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public ICollection<ServerWorkflowModel> GetAllWorkflows()
         {
-            IQueryable<ServerWorkflowModel> workflows = from w in _db.Workflows select w;
+            var workflows = from w in _db.Workflows select w;
 
             return workflows.ToList();
         }
@@ -92,33 +89,33 @@ namespace Server.Storage
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
             var workflows = from w in _db.Workflows
-                where w.ID == workflowId
-                select w;
+                            where w.ID == workflowId
+                            select w;
 
             return workflows.Single();
         }
 
-        public void AddNewWorkflow(ServerWorkflowModel workflow)
+        public async Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
             _db.Workflows.Add(workflow);
-            _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
         }
 
-        public void UpdateWorkflow(ServerWorkflowModel workflow)
+        public async Task UpdateWorkflow(ServerWorkflowModel workflow)
         {
             var workflows = from w in _db.Workflows
-                where w.ID == workflow.ID
-                select w;
+                            where w.ID == workflow.ID
+                            select w;
 
             var tempWorkflow = workflows.Single();
             tempWorkflow.Name = workflow.Name;
 
-            _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
         }
 
-        public void RemoveWorkflow(ServerWorkflowModel workflow)
+        public async Task RemoveWorkflow(ServerWorkflowModel workflow)
         {
-            var workflows = 
+            var workflows =
                 from w in _db.Workflows
                 where w.ID == workflow.ID
                 select w;
@@ -129,7 +126,7 @@ namespace Server.Storage
             }
 
             _db.Workflows.Remove(workflows.Single());
-            _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
         }
 
         public void Dispose()

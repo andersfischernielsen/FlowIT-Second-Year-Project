@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Common;
 
 namespace Event.Models
@@ -13,11 +8,11 @@ namespace Event.Models
     public class LockLogic
     {
         private readonly EventLogic _logic;
-        private IEnumerable<Uri> _list;
+        private readonly IEnumerable<Uri> _list;
         private HashSet<Uri> _locked; 
         public LockLogic()
         {
-            _logic = EventLogic.GetState();
+            _logic = new EventLogic();
             _list = _logic.GetNotifyDtos().Result; // ER DET HER DEN RIGTIGE LISTE?
             _locked = new HashSet<Uri>();
         }
@@ -35,7 +30,7 @@ namespace Event.Models
 
                 foreach (var uri in _list)
                 {
-                    new EventCommunicator(uri).Lock(lockDto).Wait();
+                    await new EventCommunicator(uri).Lock(lockDto);
                     _locked.Add(uri);
                 }
                 //TODO: Brug Parrallel i stedet for
@@ -89,11 +84,11 @@ namespace Event.Models
 
             var eventAddress = new EventAddressDto() { Id = _logic.EventId, Uri = _logic.OwnUri };
 
-            var parallelTasks = Parallel.ForEach(_list, uri =>
+            var parallelTasks = Parallel.ForEach(_list, async uri =>
             {
                 try
                 {
-                    new EventCommunicator(uri).Unlock(eventAddress).Wait();
+                    await new EventCommunicator(uri).Unlock(eventAddress);
                 }
                 catch (Exception)
                 {

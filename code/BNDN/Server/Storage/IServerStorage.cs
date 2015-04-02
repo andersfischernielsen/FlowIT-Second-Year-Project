@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Common;
 using Server.Models;
 
@@ -47,8 +48,8 @@ namespace Server.Storage
         /// <returns></returns>
         ICollection<ServerWorkflowModel> GetAllWorkflows();
         ServerWorkflowModel GetWorkflow(string workflowId);
-        void AddNewWorkflow(ServerWorkflowModel workflow);
-        void UpdateWorkflow(ServerWorkflowModel workflow);
-        void RemoveWorkflow(ServerWorkflowModel workflow);
+        Task AddNewWorkflow(ServerWorkflowModel workflow);
+        Task UpdateWorkflow(ServerWorkflowModel workflow);
+        Task RemoveWorkflow(ServerWorkflowModel workflow);
     }
 }

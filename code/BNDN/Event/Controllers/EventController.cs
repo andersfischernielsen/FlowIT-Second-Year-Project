@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -17,12 +15,6 @@ namespace Event.Controllers
     /// </summary>
     public class EventController : ApiController
     {
-        private IEventLogic Logic { get; set; }
-        public EventController()
-        {
-            // Fetches Singleton Logic-layer
-            Logic = EventLogic.GetState();
-        }
 
         #region EventDto
         /// <summary>
@@ -33,15 +25,18 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent()
         {
-            // Dismiss request if Event is currently locked
-            
-            if (Logic.IsLocked())
+            using (IEventLogic logic = new EventLogic())
             {
-                // Event is currently locked)
-                StatusCode(HttpStatusCode.MethodNotAllowed);
-            }
+                // Dismiss request if Event is currently locked
 
-            return await Logic.EventDto;
+                if (logic.IsLocked())
+                {
+                    // Event is currently locked)
+                    StatusCode(HttpStatusCode.MethodNotAllowed);
+                }
+
+                return await logic.EventDto;
+            }
         }
 
         /// <summary>
@@ -57,24 +52,27 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
-            // Dismiss request if Event is currently locked
-            if (Logic.IsLocked())
+            using (IEventLogic logic = new EventLogic())
             {
-                // Event is currently locked)
-                StatusCode(HttpStatusCode.MethodNotAllowed);
-            }
+                // Dismiss request if Event is currently locked
+                if (logic.IsLocked())
+                {
+                    // Event is currently locked)
+                    StatusCode(HttpStatusCode.MethodNotAllowed);
+                }
 
-            if (!ModelState.IsValid)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
-            }
+                if (!ModelState.IsValid)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
+                }
 
-            // Prepare for method-call: Gets own URI (i.e. http://address)
-            var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
-            var ownUri = new Uri(s);
-            
-            // Method call
-            await Logic.InitializeEvent(eventDto, ownUri);
+                // Prepare for method-call: Gets own URI (i.e. http://address)
+                var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
+                var ownUri = new Uri(s);
+
+                // Method call
+                await logic.InitializeEvent(eventDto, ownUri);
+            }
         }
 
 
@@ -88,28 +86,32 @@ namespace Event.Controllers
         [HttpPut]
         public async Task PutEvent([FromBody] EventDto eventDto)
         {
-            // Dismiss request if Event is currently locked
-            if (Logic.IsLocked())
+            using (IEventLogic logic = new EventLogic())
             {
-                // Event is currently locked)
-                StatusCode(HttpStatusCode.MethodNotAllowed);
-            }
+                // Dismiss request if Event is currently locked
+                if (logic.IsLocked())
+                {
+                    // Event is currently locked)
+                    StatusCode(HttpStatusCode.MethodNotAllowed);
+                }
 
-            if (!ModelState.IsValid)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
-            }
+                if (!ModelState.IsValid)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
+                }
 
-            // Prepare for method-call
-            var ownUri = new Uri(string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
+                // Prepare for method-call
+                var ownUri = new Uri(string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
 
-            try
-            {
-                await Logic.UpdateEvent(eventDto, ownUri);
-            }
-            catch (NullReferenceException)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ModelState));
+                try
+                {
+                    await logic.UpdateEvent(eventDto, ownUri);
+                }
+                catch (NullReferenceException)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                        ModelState));
+                }
             }
         }
 
@@ -118,23 +120,27 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteEvent()
         {
-            // Dismiss request if Event is currently locked
-            if (Logic.IsLocked())
+            using (IEventLogic logic = new EventLogic())
             {
-                // Event is currently locked)
-                StatusCode(HttpStatusCode.MethodNotAllowed);
-            }
+                // Dismiss request if Event is currently locked
+                if (logic.IsLocked())
+                {
+                    // Event is currently locked)
+                    StatusCode(HttpStatusCode.MethodNotAllowed);
+                }
 
-            try
-            {
-                await Logic.DeleteEvent();
-            }
-            catch (NullReferenceException)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                "Event is not initialized!"));
+                try
+                {
+                    await logic.DeleteEvent();
+                }
+                catch (NullReferenceException)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Event is not initialized!"));
+                }
             }
         }
+
         #endregion
     }
 }

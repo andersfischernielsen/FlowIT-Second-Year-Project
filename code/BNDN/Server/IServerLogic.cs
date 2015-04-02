@@ -57,18 +57,18 @@ namespace Server
         /// If a worksflot with the same ID exists, it will throw an exception
         /// </summary>
         /// <param name="workflow"></param>
-        void AddNewWorkflow(WorkflowDto workflow);
+        Task AddNewWorkflow(WorkflowDto workflow);
         /// <summary>
         /// Adds a new workflow
         /// If a worksflot with the same ID exists, it will throw an exception
         /// </summary>
         /// <param name="workflow"></param>
-        void UpdateWorkflow(WorkflowDto workflow);
+        Task UpdateWorkflow(WorkflowDto workflow);
         /// <summary>
         /// Adds a new workflow
         /// If a worksflot with the same ID exists, it will throw an exception
         /// </summary>
         /// <param name="workflow"></param>
-        void RemoveWorkflow(WorkflowDto workflow);
+        Task RemoveWorkflow(WorkflowDto workflow);
     }
 }
