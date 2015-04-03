@@ -179,7 +179,8 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Server: Failed to remove Event from workflow", ex));
             }
         }
 
@@ -193,7 +194,8 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Server: Failed to remove workflow", ex));
             }
         }
         #endregion

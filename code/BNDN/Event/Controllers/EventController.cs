@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
@@ -51,8 +52,18 @@ namespace Event.Controllers
             // Check that provided input can be mapped onto an instance of EventDto
             if (!ModelState.IsValid)
             {
+                // For nicer debugging, a list of the conflicting mappings is provided
+                var conflictElements = new StringBuilder();
+                foreach (var key in ModelState.Keys)
+                {
+                    if (!ModelState.IsValidField(key))
+                    {
+                        conflictElements.Append(key + ", ");
+                    }
+                }
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                                                "Provided input could not be mapped onto an instance of EventDto"));
+                                                "Provided input could not be mapped onto an instance of EventDto " +
+                                                conflictElements));
             }
 
             if (eventDto == null)
@@ -129,7 +140,9 @@ namespace Event.Controllers
                 if (logic.IsLocked())
                 {
                     // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
+                    // Event is currently locked)
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed,
+                        "Event is currently locked"));
                 }
 
                 try
