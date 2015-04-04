@@ -41,9 +41,9 @@ namespace Server.Storage
             return events.ToList();
         }
 
-        // TODO: ServerWorkflowModel is unused.
         public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
+            //TODO: Skal 2 events kunne have samme ID?
             var workflows = from w in _db.Workflows
                 where eventToBeAddedDto.ServerWorkflowModelID == w.ID
                 select w;
@@ -54,7 +54,7 @@ namespace Server.Storage
             }
 
             _db.Events.Add(eventToBeAddedDto);
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
@@ -69,7 +69,7 @@ namespace Server.Storage
             tempEvent.ServerWorkflowModelID = eventToBeUpdated.ServerWorkflowModelID;
             tempEvent.Uri = eventToBeUpdated.Uri;
 
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
@@ -79,7 +79,7 @@ namespace Server.Storage
                 select e;
 
             _db.Events.Remove(events.Single());
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public ICollection<ServerWorkflowModel> GetAllWorkflows()
@@ -100,8 +100,9 @@ namespace Server.Storage
 
         public void AddNewWorkflow(ServerWorkflowModel workflow)
         {
+            //TODO: Skal der tjekkes for om der eksisterer et workflow med samme ID, eller er det okay?
             _db.Workflows.Add(workflow);
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public void UpdateWorkflow(ServerWorkflowModel workflow)
@@ -113,7 +114,7 @@ namespace Server.Storage
             var tempWorkflow = workflows.Single();
             tempWorkflow.Name = workflow.Name;
 
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public void RemoveWorkflow(ServerWorkflowModel workflow)
@@ -129,7 +130,7 @@ namespace Server.Storage
             }
 
             _db.Workflows.Remove(workflows.Single());
-            _db.SaveChangesAsync();
+            _db.SaveChanges();
         }
 
         public void Dispose()

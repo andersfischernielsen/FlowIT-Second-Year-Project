@@ -12,19 +12,59 @@ namespace Server.Tests
     [TestFixture]
     class Temp
     {
-        private ServerStorage s;
+        private ServerStorage _s;
 
         [Test]
         public void Test1()
         {
-            s = new ServerStorage();
+            _s = new ServerStorage();
             var wm = new ServerWorkflowModel
             {
-                Name = "Test",
-                ID = "2",
-                ServerEventModels = new List<ServerEventModel>()
+                Name = "Test2",
+                ID = "1",
+                ServerEventModels = new List<ServerEventModel>(),
+                ServerRolesModels = new List<ServerRolesModel>()
             };
-            s.AddNewWorkflow(wm);
+            _s.AddNewWorkflow(wm);
+        }
+
+        [Test]
+        public void Test2()
+        {
+            _s = new ServerStorage();
+            var v = _s.GetWorkflow("1");
+            _s.RemoveWorkflow(v);
+        }
+
+        [Test]
+        public void Test3()
+        {
+            _s = new ServerStorage();
+            var wm = new ServerWorkflowModel
+            {
+                Name = "Test2",
+                ID = "1",
+                ServerEventModels = new List<ServerEventModel>(),
+                ServerRolesModels = new List<ServerRolesModel>()
+            };
+            _s.AddNewWorkflow(wm);
+
+            var e = new ServerEventModel()
+            {
+                ID = "Adam",
+                ServerWorkflowModelID = "1",
+                Uri = "http://www.google.dk",
+                ServerWorkflowModel = _s.GetWorkflow("1")
+            };
+
+            _s.AddEventToWorkflow(e);
+        }
+
+        [Test]
+        public void Test4()
+        {
+            _s = new ServerStorage();
+            _s.RemoveEventFromWorkflow(_s.GetWorkflow("1"), "Adam");
         }
     }
 }

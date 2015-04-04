@@ -13,7 +13,7 @@ namespace Server.Models
             ServerRolesModels = new List<ServerRolesModel>();
             ServerEventModels = new List<ServerEventModel>();
         }
-
+        [Required]
         public string ID { get; set; }
         public string Name { get; set; }
 
