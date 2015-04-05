@@ -22,7 +22,7 @@ namespace Event.tests
         public void Setup()
         {
             _eventStateController = new EventStateController();
-            _eventLogic = EventLogic.GetState();
+            _eventLogic = new EventLogic();
             _eventAddressDto = new EventAddressDto(){Id = "Lock"};
 
             _eventLogic.EventId = "1";

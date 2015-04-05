@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Common;
 using Server.Models;
 
@@ -78,17 +79,17 @@ namespace Server.Storage
             return new List<ServerWorkflowModel>() { dummy1, dummy2 }.First(model => model.ID == workflowId);
         }
 
-        public void AddNewWorkflow(ServerWorkflowModel workflow)
+        public async Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateWorkflow(ServerWorkflowModel workflow)
+        public async Task UpdateWorkflow(ServerWorkflowModel workflow)
         {
             throw new NotImplementedException();
         }
 
-        public void RemoveWorkflow(ServerWorkflowModel workflow)
+        public async Task RemoveWorkflow(ServerWorkflowModel workflow)
         {
             throw new NotImplementedException();
         }

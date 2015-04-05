@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Common;
 
 namespace Event.Models
@@ -13,11 +8,11 @@ namespace Event.Models
     public class LockLogic
     {
         private readonly EventLogic _logic;
-        private IEnumerable<Uri> _list;
+        private readonly IEnumerable<Uri> _list;
         private HashSet<Uri> _locked; 
-        public LockLogic()
+        public LockLogic(EventLogic logic)
         {
-            _logic = EventLogic.GetState();
+            _logic = logic;
             _list = _logic.GetNotifyDtos().Result; // ER DET HER DEN RIGTIGE LISTE?
             _locked = new HashSet<Uri>();
         }
@@ -35,12 +30,12 @@ namespace Event.Models
             }
             try
             {
-                LockDto lockDto = new LockDto() {LockOwner = _logic.EventId};
+                LockDto lockDto = new LockDto {LockOwner = _logic.EventId};
                 _logic.LockDto = lockDto;
 
                 foreach (var uri in _list)
                 {
-                    new EventCommunicator(uri).Lock(lockDto).Wait();
+                    await new EventCommunicator(uri).Lock(lockDto);
                     _locked.Add(uri);
                 }
                 //TODO: Brug Parrallel i stedet for
@@ -94,24 +89,20 @@ namespace Event.Models
 
             var eventAddress = new EventAddressDto() { Id = _logic.EventId, Uri = _logic.OwnUri };
 
-            var parallelTasks = Parallel.ForEach(_list, uri =>
+            foreach (var uri in _list)
             {
                 try
                 {
-                    new EventCommunicator(uri).Unlock(eventAddress).Wait();
+                    await new EventCommunicator(uri).Unlock(eventAddress);
                 }
                 catch (Exception)
                 {
-                     // TODO: Find out what to do if you cant even unlock. Even.
+                    // TODO: Find out what to do if you cant even unlock. Even.
                     b = false;
                 }
-                
-            });
-            while (!parallelTasks.IsCompleted)
-            {
             }
 
-            _logic.LockDto = null;
+            _logic.UnlockEvent();
             return b;
         }
     }

@@ -14,12 +14,13 @@ namespace Event.Storage
     /// </summary>
     public class EventStorage : IEventStorage
     {
+        private EventContext _context;
 
         // TODO: Discuss: Do we need to (dependency)-inject the (db)context for testing purposes, instead?
         // TODO: If not, if constructor is parameterless, could / should we make EventStorage static then?
         public EventStorage()
         {
-
+            _context = new EventContext();
         }
 
 
@@ -28,73 +29,64 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
+                // We should only have one of these objects in the database
+                if (_context.EventIdentification.Count() > 1)
                 {
-                    // We should only have one of these objects in the database
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException("More than one EventIdentification object in database");
-                    }
-
-                    var eventIdPackage = context.EventIdentification.SingleOrDefault();
-                    if (eventIdPackage == null)
-                    {
-                        return null;
-                    }
-
-                    return new Uri(eventIdPackage.OwnUri);                    
+                    throw new ApplicationException("More than one EventIdentification object in database");
                 }
+
+                var eventIdPackage = _context.EventIdentification.SingleOrDefault();
+                if (eventIdPackage == null)
+                {
+                    return null;
+                }
+
+                return new Uri(eventIdPackage.OwnUri);
             }
             set
             {
-                using (var context = new EventContext())
+                // Check that there's currently only a single element in database
+                if (_context.EventIdentification.Count() > 1)
                 {
-                    // Check that there's currently only a single element in database
-                    if (context.EventIdentification.Count() > 1)
-                    {
-                        throw new ApplicationException(
-                            "More than a single EventIdentification element in database in Event");
-                    }
-
-                    if (context.EventIdentification.Count() == 0)
-                    {
-                        throw new ApplicationException("EventIdentification was not initialized in Event");
-                    }
-
-                    // Add replacing value
-                    context.EventIdentification.Single().OwnUri = value.AbsoluteUri;
-                    context.SaveChangesAsync();             
+                    throw new ApplicationException(
+                        "More than a single EventIdentification element in database in Event");
                 }
+
+                if (!_context.EventIdentification.Any())
+                {
+                    throw new ApplicationException("EventIdentification was not initialized in Event");
+                }
+
+                // Add replacing value
+                _context.EventIdentification.Single().OwnUri = value.AbsoluteUri;
+                _context.SaveChanges();
 
             }
         }
-        
+
         public string WorkflowId
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
+                EventIdentificationIsInALegalState();
 
-                    var eventIdentificationPackage = context.EventIdentification.FirstOrDefault();
-                    if (eventIdentificationPackage == null)
-                    {
-                        return null;
-                    }
-                    return eventIdentificationPackage.WorkflowId;
+                var eventIdentificationPackage = _context.EventIdentification.FirstOrDefault();
+                if (eventIdentificationPackage == null)
+                {
+                    return null;
                 }
+                return eventIdentificationPackage.WorkflowId;
 
             }
             set
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
+                EventIdentificationIsInALegalState();
 
-                    context.EventIdentification.Single().WorkflowId = value;
-                    context.SaveChangesAsync();                    
-                }
+                _context.EventIdentification.Single().WorkflowId = value;
+                _context.SaveChanges();
+
+                _context.EventIdentification.Single().WorkflowId = value;
+                _context.SaveChanges();
             }
         }
 
@@ -102,27 +94,25 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
+                EventIdentificationIsInALegalState();
 
-                    var eventIdentificationPackage = context.EventIdentification.FirstOrDefault();
-                    if (eventIdentificationPackage == null)
-                    {
-                        return null;
-                    }
-                    return eventIdentificationPackage.EventId;
+                var eventIdentificationPackage = _context.EventIdentification.FirstOrDefault();
+                if (eventIdentificationPackage == null)
+                {
+                    return null;
                 }
+                return eventIdentificationPackage.EventId;
             }
             set
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
+                EventIdentificationIsInALegalState();
 
-                    context.EventIdentification.Single().EventId = value;
-                    context.SaveChangesAsync();                    
-                }
+                _context.EventIdentification.Single().EventId = value;
+                _context.SaveChanges();
+
+
+                _context.EventIdentification.Single().EventId = value;
+                _context.SaveChanges();
             }
         }
 
@@ -130,21 +120,15 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
-                    return context.EventIdentification.Single().Name;    
-                }
+                EventIdentificationIsInALegalState();
+                return _context.EventIdentification.Single().Name;
             }
             set
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
+                EventIdentificationIsInALegalState();
 
-                    context.EventIdentification.Single().Name = value;
-                    context.SaveChangesAsync();    
-                }
+                _context.EventIdentification.Single().Name = value;
+                _context.SaveChanges();
             }
         }
 
@@ -152,22 +136,16 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
+                EventIdentificationIsInALegalState();
 
-                    return context.EventIdentification.Single().Role;    
-                }
+                return _context.EventIdentification.Single().Role;
             }
             set
             {
-                using (var context = new EventContext())
-                {
-                    EventIdentificationIsInALegalState(context);
+                EventIdentificationIsInALegalState();
 
-                    context.EventIdentification.Single().Role = value;
-                    context.SaveChangesAsync();    
-                }
+                _context.EventIdentification.Single().Role = value;
+                _context.SaveChanges();
             }
         }
 
@@ -175,22 +153,16 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    EventStateIsInALegalState(context);
-             
-                    return context.EventState.Single().Executed;    
-                }
+                EventStateIsInALegalState();
+
+                return _context.EventState.Single().Executed;
             }
             set
             {
-                using (var context = new EventContext())
-                {
-                    EventStateIsInALegalState(context);
+                EventStateIsInALegalState();
 
-                    context.EventState.Single().Executed = value;
-                    context.SaveChangesAsync();    
-                }
+                _context.EventState.Single().Executed = value;
+                _context.SaveChanges();
             }
         }
 
@@ -198,22 +170,16 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    EventStateIsInALegalState(context);
+                EventStateIsInALegalState();
 
-                    return context.EventState.Single().Included;    
-                }
+                return _context.EventState.Single().Included;
             }
             set
             {
-                using (var context = new EventContext())
-                {
-                    EventStateIsInALegalState(context);
+                EventStateIsInALegalState();
 
-                    context.EventState.Single().Included = value;
-                    context.SaveChangesAsync();    
-                }
+                _context.EventState.Single().Included = value;
+                _context.SaveChanges();
             }
         }
 
@@ -221,22 +187,16 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    EventStateIsInALegalState(context);
+                EventStateIsInALegalState();
 
-                    return context.EventState.Single().Pending;    
-                }
+                return _context.EventState.Single().Pending;
             }
             set
             {
-                using (var context = new EventContext())
-                {
-                    EventStateIsInALegalState(context);
+                EventStateIsInALegalState();
 
-                    context.EventState.Single().Pending = value;
-                    context.SaveChangesAsync();    
-                }
+                _context.EventState.Single().Pending = value;
+                _context.SaveChanges();
             }
         }
 
@@ -248,43 +208,37 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
+                // Check to ensure there's only a single LockDto held in database
+                if (_context.LockDto.Count() > 1)
                 {
-                    // Check to ensure there's only a single LockDto held in database
-                    if (context.LockDto.Count() > 1)
-                    {
-                        throw new ApplicationException("Illegal state in Event: More than a " +
-                                                       "single LockDto was held in database");
-                    }
-                    // SingleOrDeafult will return either null or the actual single element in set. 
-                    return context.LockDto.SingleOrDefault();
+                    throw new ApplicationException("Illegal state in Event: More than a " +
+                                                   "single LockDto was held in database");
                 }
+                // SingleOrDeafult will return either null or the actual single element in set. 
+                return _context.LockDto.SingleOrDefault();
             }
             set
             {
-                using (var context = new EventContext())
+                // Check that there is no more than a single element in LockDto set
+                if (_context.LockDto.Count() > 1)
                 {
-                    // Check that there is no more than a single element in LockDto set
-                    if (context.LockDto.Count() > 1)
-                    {
-                        throw new ApplicationException("More than a single element in LockDto");
-                    }
-
-                    // Remove current LockDto (should be either only a single element or no element at all
-                    foreach (var element in context.LockDto)
-                    {
-                        context.LockDto.Remove(element);
-                    }
-
-                    if (value == null)
-                    {
-                        throw new ArgumentNullException("value","The provided LockDto was null. To unlock Event, " +
-                                                                "see documentation");
-                    }
-                    
-                    context.LockDto.Add(value);
-                    context.SaveChangesAsync();    
+                    throw new ApplicationException("More than a single element in LockDto");
                 }
+
+                // Remove current LockDto (should be either only a single element or no element at all
+                foreach (var element in _context.LockDto)
+                {
+                    _context.LockDto.Remove(element);
+                }
+
+                if (value == null)
+                {
+                    throw new ArgumentNullException("value", "The provided LockDto was null. To unlock Event, " +
+                                                            "see documentation");
+                }
+
+                _context.LockDto.Add(value);
+                _context.SaveChanges();
             }
         }
 
@@ -296,60 +250,51 @@ namespace Event.Storage
         /// </summary>
         public void ClearLock()
         {
-            using (var context = new EventContext())
+            // Check that LockDto set is in a legal state
+            if (_context.LockDto.Count() > 1)
             {
-                // Check that LockDto set is in a legal state
-                if (context.LockDto.Count() > 1)
-                {
-                    throw new ApplicationException("Illegal state in Event: LockDto set contains more than a single element");
-                }
-
-                // Clear the single LockDto-element 
-                foreach (var lockDto in context.LockDto)
-                {
-                    context.LockDto.Remove(lockDto);
-                }
+                throw new ApplicationException("Illegal state in Event: LockDto set contains more than a single element");
             }
+
+            // Clear the single LockDto-element 
+            foreach (var lockDto in _context.LockDto)
+            {
+                _context.LockDto.Remove(lockDto);
+            }
+            _context.SaveChanges();
         }
 
         public HashSet<Uri> Conditions
         {
             get
-            {   
-                using (var context = new EventContext())
-                {
-                    // No need to do zero or ">1" count check here; that is perfectly legal
-                    var dbset = context.Conditions;
-                    var hashSet = new HashSet<Uri>();
-                    
-                    foreach (var element in dbset)
-                    {
-                        hashSet.Add(new Uri(element.UriString));
-                    }
+            {
+                // No need to do zero or ">1" count check here; that is perfectly legal
+                var dbset = _context.Conditions;
+                var hashSet = new HashSet<Uri>();
 
-                    return hashSet;    
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new Uri(element.UriString));
                 }
+
+                return hashSet;
             }
             set
             {
-                using (var context = new EventContext())
+                // Reset current list
+                foreach (var uri in _context.Conditions)
                 {
-                    // Reset current list
-                    foreach (var uri in context.Conditions)
-                    {
-                        context.Conditions.Remove(uri);
-                    }
-
-                    // Add replacing values
-                    foreach (var element in value)
-                    {
-                        var uriToAdd = new ConditionUri() { UriString = element.AbsoluteUri };
-                        context.Conditions.Add(uriToAdd);
-                    }
-
-                    context.SaveChangesAsync();    
+                    _context.Conditions.Remove(uri);
                 }
-                
+
+                // Add replacing values
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ConditionUri() { UriString = element.AbsoluteUri };
+                    _context.Conditions.Add(uriToAdd);
+                }
+
+                _context.SaveChanges();
             }
         }
 
@@ -357,38 +302,32 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    var dbset = context.Responses;
-                    var hashSet = new HashSet<Uri>();
-                 
-                    foreach (var element in dbset)
-                    {
-                        hashSet.Add(new Uri(element.UriString));
-                    }
+                var dbset = _context.Responses;
+                var hashSet = new HashSet<Uri>();
 
-                    return hashSet;   
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new Uri(element.UriString));
                 }
+
+                return hashSet;
             }
             set
             {
-                using (var context = new EventContext())
+                // Remove current content 
+                foreach (var uri in _context.Responses)
                 {
-                    // Remove current content 
-                    foreach (var uri in context.Responses)
-                    {
-                        context.Responses.Remove(uri);
-                    }
-
-                    // Add replacing content
-                    foreach (var element in value)
-                    {
-                        var uriToAdd = new ResponseUri() { UriString = element.AbsoluteUri };
-                        context.Responses.Add(uriToAdd);
-                    }
-
-                    context.SaveChangesAsync();
+                    _context.Responses.Remove(uri);
                 }
+
+                // Add replacing content
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ResponseUri() { UriString = element.AbsoluteUri };
+                    _context.Responses.Add(uriToAdd);
+                }
+
+                _context.SaveChanges();
             }
         }
 
@@ -396,38 +335,32 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    var dbset = context.Exclusions;
-                    var hashSet = new HashSet<Uri>();
-                 
-                    foreach (var element in dbset)
-                    {
-                        hashSet.Add(new Uri(element.UriString));
-                    }
+                var dbset = _context.Exclusions;
+                var hashSet = new HashSet<Uri>();
 
-                    return hashSet;
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new Uri(element.UriString));
                 }
+
+                return hashSet;
             }
             set
             {
-                using (var context = new EventContext())
+                // Remove current content
+                foreach (var uri in _context.Exclusions)
                 {
-                    // Remove current content
-                    foreach (var uri in context.Exclusions)
-                    {
-                        context.Exclusions.Remove(uri);
-                    }
-
-                    // Add replacing values
-                    foreach (var element in value)
-                    {
-                        var uriToAdd = new ExclusionUri() { UriString = element.AbsoluteUri };
-                        context.Exclusions.Add(uriToAdd);
-                    }
-
-                    context.SaveChangesAsync();
+                    _context.Exclusions.Remove(uri);
                 }
+
+                // Add replacing values
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ExclusionUri() { UriString = element.AbsoluteUri };
+                    _context.Exclusions.Add(uriToAdd);
+                }
+
+                _context.SaveChanges();
             }
         }
 
@@ -435,35 +368,29 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
+                var dbset = _context.Inclusions;
+                var hashSet = new HashSet<Uri>();
+
+                foreach (var element in dbset)
                 {
-                    var dbset = context.Inclusions;
-                    var hashSet = new HashSet<Uri>();
-
-                    foreach (var element in dbset)
-                    {
-                        hashSet.Add(new Uri(element.UriString));
-                    }
-
-                    return hashSet;   
+                    hashSet.Add(new Uri(element.UriString));
                 }
+
+                return hashSet;
             }
             set
             {
-                using (var context = new EventContext())
+                foreach (var uri in _context.Inclusions)
                 {
-                    foreach (var uri in context.Inclusions)
-                    {
-                        context.Inclusions.Remove(uri);
-                    }
-
-                    foreach (var element in value)
-                    {
-                        var uriToAdd = new InclusionUri() { UriString = element.AbsoluteUri };
-                        context.Inclusions.Add(uriToAdd);
-                    }
-                    context.SaveChangesAsync();
+                    _context.Inclusions.Remove(uri);
                 }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new InclusionUri() { UriString = element.AbsoluteUri };
+                    _context.Inclusions.Add(uriToAdd);
+                }
+                _context.SaveChanges();
             }
         }
 
@@ -471,28 +398,22 @@ namespace Event.Storage
         {
             get
             {
-                using (var context = new EventContext())
-                {
-                    return context.EventUriIdMappings.ToList();                    
-                }
+                return _context.EventUriIdMappings.ToList();
             }
             set
             {
-                using (var context = new EventContext())
+                // Remove current entries
+                foreach (var element in _context.EventUriIdMappings)
                 {
-                    // Remove current entries
-                    foreach (var element in context.EventUriIdMappings)
-                    {
-                        context.EventUriIdMappings.Remove(element);
-                    }
-
-                    // Add replacing entries
-                    foreach (var element in value)
-                    {
-                        context.EventUriIdMappings.Add(element);
-                    }
-                    context.SaveChangesAsync();   
+                    _context.EventUriIdMappings.Remove(element);
                 }
+
+                // Add replacing entries
+                foreach (var element in value)
+                {
+                    _context.EventUriIdMappings.Add(element);
+                }
+                _context.SaveChanges();
             }
         }
         #endregion
@@ -500,13 +421,10 @@ namespace Event.Storage
         #region Public methods
         public Uri GetUriFromId(string id)
         {
-            using (var context = new EventContext())
-            {
-                // TODO: Discuss: Use Task instead and await here?: Update IEventStorage to reflect
-                var uri = context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
-                if (uri == null) return null;
-                return new Uri(uri.Uri);        
-            }
+            // TODO: Discuss: Use Task instead and await here?: Update IEventStorage to reflect
+            var uri = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
+            if (uri == null) return null;
+            return new Uri(uri.Uri);
         }
 
         /// <summary>
@@ -516,80 +434,75 @@ namespace Event.Storage
         /// <returns></returns>
         public string GetIdFromUri(Uri endPoint)
         {
-            using (var context = new EventContext())
-            {
-                var result = context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Uri.Equals(endPoint.AbsoluteUri)).Result;
-                if (result == null) return null;
-                return result.Id;                    
-            }
+            var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Uri.Equals(endPoint.AbsoluteUri)).Result;
+            if (result == null) return null;
+            return result.Id;
         }
 
         public void RemoveIdAndUri(string id)
         {
-            using (var context = new EventContext())
-             {
-                var toRemove = context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
-                if (toRemove == null) return;
-                context.EventUriIdMappings.Remove(toRemove);
-                context.SaveChangesAsync();
-             }
+            var toRemove = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
+            if (toRemove == null) return;
+            _context.EventUriIdMappings.Remove(toRemove);
+            _context.SaveChanges();
         }
 
         // TODO: Discuss: Is this method also intended to be used for updating an existing entry? In that
         // TODO: case the current implementation is faulty...
         public void StoreIdAndUri(string id, Uri endPoint)
         {
-            using (var context = new EventContext())
-            {
-                var eventUriIdMapping = new EventUriIdMapping() { Id = id, Uri = endPoint.AbsolutePath };
-                context.EventUriIdMappings.Add(eventUriIdMapping);
+            var eventUriIdMapping = new EventUriIdMapping() { Id = id, Uri = endPoint.AbsolutePath };
+            _context.EventUriIdMappings.Add(eventUriIdMapping);
 
-                context.SaveChangesAsync();   
-            }
-           
+            _context.SaveChanges();
+
         }
 
         public bool IdExists(string id)
         {
-            using (var context = new EventContext())
-            {
-                var result = context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
-                return result != null;        
-            }
+            var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
+            return result != null;
+
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
+            _context = null;
         }
 
         #endregion
 
         #region Private Methods
 
-        private void EventIdentificationIsInALegalState(EventContext context)
+        private void EventIdentificationIsInALegalState()
         {
             // Check that there's currently only a single element in database
-            if (context.EventIdentification.Count() > 1)
+            if (_context.EventIdentification.Count() > 1)
             {
                 throw new ApplicationException(
                     "More than a single EventIdentification element in database-set in Event");
             }
 
-            if (context.EventIdentification.Count() == 0)
+            if (!_context.EventIdentification.Any())
             {
                 throw new ApplicationException("EventIdentification was not initialized in Event." +
                                                "Count was zero");
-            }                
+            }
 
         }
 
-        private void EventStateIsInALegalState(EventContext context)
+        private void EventStateIsInALegalState()
         {
             // Check that there is no more than a single element in EventState
-            if (context.EventState.Count() > 1)
+            if (_context.EventState.Count() > 1)
             {
                 throw new ApplicationException("More than a single element in EventState set");
             }
-            if (context.EventState.Count() == 0)
+            if (!_context.EventState.Any())
             {
                 throw new ApplicationException("EventState was not initialized in Event");
-            }                
+            }
         }
         #endregion
     }

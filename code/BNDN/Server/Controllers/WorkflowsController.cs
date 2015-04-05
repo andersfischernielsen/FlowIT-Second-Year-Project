@@ -9,14 +9,15 @@ using Server.Storage;
 
 namespace Server.Controllers
 {
-    
+
     public class WorkflowsController : ApiController
     {
         private IServerLogic ServerLogic { get; set; }
 
-        public WorkflowsController() 
+        public WorkflowsController()
         {
-            ServerLogic = new ServerLogic(CacheStorage.GetStorage);
+            ServerLogic = new ServerLogic(new ServerStorage());
+            //ServerLogic = new ServerLogic(CacheStorage.GetStorage);
             //ServerLogic = new ServerLogic(new WorkflowStorage());
         }
 
@@ -57,7 +58,7 @@ namespace Server.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
             }
-            
+
         }
 
         // GET: /Login
@@ -81,7 +82,7 @@ namespace Server.Controllers
             }
 
         }
-        #endregion 
+        #endregion
 
         #region POST requests
         /// <summary>
@@ -106,7 +107,7 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
         }
 
@@ -160,8 +161,8 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,ex.Message));
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
             }
         }
         #endregion
@@ -174,12 +175,28 @@ namespace Server.Controllers
             try
             {
                 // Delete the given event id from the list of workflow-events.
-                ServerLogic.RemoveEventFromWorkflow(workflowId,eventId);
+                ServerLogic.RemoveEventFromWorkflow(workflowId, eventId);
             }
             catch (Exception ex)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Server: Failed to remove Event from workflow",ex));}
+                    "Server: Failed to remove Event from workflow", ex));
+            }
+        }
+
+        [Route("Workflows/{workflowId}")]
+        [HttpDelete]
+        public void DeleteWorkflow(string workflowId)
+        {
+            try
+            {
+                ServerLogic.RemoveWorkflow(ServerLogic.GetWorkflow(workflowId));
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Server: Failed to remove workflow", ex));
+            }
         }
         #endregion
     }

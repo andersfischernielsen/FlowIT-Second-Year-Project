@@ -72,5 +72,10 @@ namespace Event.Storage
             EventIds.Add(endPoint, id);
         }
         #endregion
+
+        public void Dispose()
+        {
+            // Don't do anything.
+        }
     }
 }

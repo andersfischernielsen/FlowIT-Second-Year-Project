@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Common;
+using System.Threading.Tasks;
 using Server.Models;
 
 namespace Server.Storage
@@ -20,8 +20,8 @@ namespace Server.Storage
             };
             _userCache = new HashSet<ServerUserModel>()
             {
-                new ServerUserModel(){ID = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher",ServerUserModelID = 1, ServerWorklowModelID = "Test1"},new ServerRolesModel(){ID="Student",ServerUserModelID = 1, ServerWorklowModelID= "Test1"}}},
-                new ServerUserModel(){ID = 2, Name="Fischer",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher",ServerUserModelID = 2, ServerWorklowModelID = "Test1"}}}
+                new ServerUserModel{ID = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher", ServerWorklowModelID = "Test1"},new ServerRolesModel(){ID="Student",ServerWorklowModelID= "Test1"}}},
+                new ServerUserModel{ID = 2, Name="Fischer",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher", ServerWorklowModelID = "Test1"}}}
             };
         }
 
@@ -101,7 +101,7 @@ namespace Server.Storage
             else throw new Exception("Workflow could not be found");
         }
 
-        public void AddNewWorkflow(ServerWorkflowModel workflow)
+        public async Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
             var check = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (check == null)
@@ -111,7 +111,7 @@ namespace Server.Storage
             else throw new Exception("Workflow Already Exists");
         }
 
-        public void UpdateWorkflow(ServerWorkflowModel workflow)
+        public async Task UpdateWorkflow(ServerWorkflowModel workflow)
         {
             var element = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (element != null)
@@ -121,7 +121,7 @@ namespace Server.Storage
             else throw new Exception("Workflow not found");
         }
 
-        public void RemoveWorkflow(ServerWorkflowModel workflow)
+        public async Task RemoveWorkflow(ServerWorkflowModel workflow)
         {
             _cache.Remove(workflow);
         }

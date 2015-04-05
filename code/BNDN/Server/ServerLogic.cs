@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using Common;
 using Server.Models;
@@ -104,27 +105,27 @@ namespace Server
             _storage.RemoveEventFromWorkflow(workflow, eventId);
         }
 
-        public void AddNewWorkflow(WorkflowDto workflow)
+        public async Task AddNewWorkflow(WorkflowDto workflow)
         {
-            _storage.AddNewWorkflow(new ServerWorkflowModel()
+            await _storage.AddNewWorkflow(new ServerWorkflowModel()
             {
                 ID = workflow.Id,
                 Name = workflow.Name,
             });
         }
 
-        public void UpdateWorkflow(WorkflowDto workflow)
+        public async Task UpdateWorkflow(WorkflowDto workflow)
         {
-            _storage.UpdateWorkflow(new ServerWorkflowModel()
+            await _storage.UpdateWorkflow(new ServerWorkflowModel()
             {
                 ID = workflow.Id,
                 Name = workflow.Name,
             });
         }
 
-        public void RemoveWorkflow(WorkflowDto workflow)
+        public async Task RemoveWorkflow(WorkflowDto workflow)
         {
-            _storage.RemoveWorkflow(new ServerWorkflowModel()
+            await _storage.RemoveWorkflow(new ServerWorkflowModel()
             {
                 ID = workflow.Id,
                 Name = workflow.Name,

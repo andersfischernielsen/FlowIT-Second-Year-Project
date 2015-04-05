@@ -97,15 +97,7 @@ namespace Event.Models
         //TODO: This is a hack! The Storage shouldn't be accessible from outside of the logic.
         public readonly IEventStorage Storage;
 
-        //Singleton instance.
-        private static EventLogic _eventLogic;
-
-        public static EventLogic GetState()
-        {
-            return _eventLogic ?? (_eventLogic = new EventLogic());
-        }
-
-        private EventLogic()
+        public EventLogic()
         {
             // TODO: Server address
             Storage = new EventStorage();
@@ -331,7 +323,7 @@ namespace Event.Models
             foreach (var otherEvent in otherEvents)
             {
                 // Todo register self with other Events.
-                await _eventLogic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+                await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
             }
         }
 
@@ -422,6 +414,11 @@ namespace Event.Models
         public bool IsLocked()
         {
             return LockDto != null;
+        }
+
+        public void Dispose()
+        {
+            Storage.Dispose();
         }
     }
 }

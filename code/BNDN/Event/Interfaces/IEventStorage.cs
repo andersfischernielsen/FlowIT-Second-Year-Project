@@ -6,7 +6,7 @@ using Event.Models;
 
 namespace Event.Interfaces
 {
-    public interface IEventStorage
+    public interface IEventStorage : IDisposable
     {
         #region Ids
         Uri OwnUri { get; set; } //For notifying server about this event. Is fetched when receiving EventDto on creation!

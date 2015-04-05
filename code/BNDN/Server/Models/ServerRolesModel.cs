@@ -14,7 +14,6 @@ namespace Server.Models
         public string ID { get; set; }
         public string ServerWorklowModelID { get; set; }
         public virtual ServerWorkflowModel ServerWorkflowModel { get; set; }
-        public int ServerUserModelID { get; set; }
-        public virtual ServerUserModel ServerUserModel { get; set; }
+        public virtual ICollection<ServerUserModel> ServerUserModels { get; set; }
     }
 }
