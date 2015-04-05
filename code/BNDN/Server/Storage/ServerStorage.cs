@@ -41,6 +41,7 @@ namespace Server.Storage
 
         public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
+            //TODO: Skal 2 events kunne have samme ID?
             var workflows = from w in _db.Workflows
                             where eventToBeAddedDto.ServerWorkflowModelID == w.ID
                             select w;
@@ -97,6 +98,7 @@ namespace Server.Storage
 
         public async Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
+            //TODO: Skal der tjekkes for om der eksisterer et workflow med samme ID, eller er det okay?
             _db.Workflows.Add(workflow);
             await _db.SaveChangesAsync();
         }
