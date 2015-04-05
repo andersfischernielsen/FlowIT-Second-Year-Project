@@ -250,20 +250,18 @@ namespace Event.Storage
         /// </summary>
         public void ClearLock()
         {
-            using (var context = new EventContext())
+            // Check that LockDto set is in a legal state
+            if (_context.LockDto.Count() > 1)
             {
-                // Check that LockDto set is in a legal state
-                if (context.LockDto.Count() > 1)
-                {
-                    throw new ApplicationException("Illegal state in Event: LockDto set contains more than a single element");
-                }
-
-                // Clear the single LockDto-element 
-                foreach (var lockDto in context.LockDto)
-                {
-                    context.LockDto.Remove(lockDto);
-                }
+                throw new ApplicationException("Illegal state in Event: LockDto set contains more than a single element");
             }
+
+            // Clear the single LockDto-element 
+            foreach (var lockDto in _context.LockDto)
+            {
+                _context.LockDto.Remove(lockDto);
+            }
+            _context.SaveChanges();
         }
 
         public HashSet<Uri> Conditions

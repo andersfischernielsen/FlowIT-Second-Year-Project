@@ -8,7 +8,7 @@ using Event.Models;
 
 namespace Event.Interfaces
 {
-    interface IEventLogic : IDisposable
+    public interface IEventLogic : IDisposable
     {
         #region State 
         bool Executed { get; set; }

@@ -10,9 +10,9 @@ namespace Event.Models
         private readonly EventLogic _logic;
         private readonly IEnumerable<Uri> _list;
         private HashSet<Uri> _locked; 
-        public LockLogic()
+        public LockLogic(EventLogic logic)
         {
-            _logic = new EventLogic();
+            _logic = logic;
             _list = _logic.GetNotifyDtos().Result; // ER DET HER DEN RIGTIGE LISTE?
             _locked = new HashSet<Uri>();
         }
@@ -30,7 +30,7 @@ namespace Event.Models
             }
             try
             {
-                LockDto lockDto = new LockDto() {LockOwner = _logic.EventId};
+                LockDto lockDto = new LockDto {LockOwner = _logic.EventId};
                 _logic.LockDto = lockDto;
 
                 foreach (var uri in _list)
@@ -89,7 +89,7 @@ namespace Event.Models
 
             var eventAddress = new EventAddressDto() { Id = _logic.EventId, Uri = _logic.OwnUri };
 
-            var parallelTasks = Parallel.ForEach(_list, async uri =>
+            foreach (var uri in _list)
             {
                 try
                 {
@@ -97,16 +97,12 @@ namespace Event.Models
                 }
                 catch (Exception)
                 {
-                     // TODO: Find out what to do if you cant even unlock. Even.
+                    // TODO: Find out what to do if you cant even unlock. Even.
                     b = false;
                 }
-                
-            });
-            while (!parallelTasks.IsCompleted)
-            {
             }
 
-            _logic.LockDto = null;
+            _logic.UnlockEvent();
             return b;
         }
     }

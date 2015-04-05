@@ -16,25 +16,31 @@ namespace Event.Migrations
             AutomaticMigrationDataLossAllowed = true;
         }
 
-        protected override void Seed(Event.EventContext context)
+        protected override void Seed(EventContext context)
         {
-            context.EventIdentification.Add(new EventIdentificationModel()
-            {
-                EventId = null,
-                Id = 0,
-                Name = null,
-                OwnUri = null,
-                Role = null,
-                WorkflowId = null
-            });
+            // Remove all the old stuff:
+            context.EventIdentification.RemoveRange(context.EventIdentification.ToList());
+            context.EventState.RemoveRange(context.EventState.ToList());
 
-            context.EventState.Add(new EventStateModel()
-            {
-                Executed = false,
-                Id = 0,
-                Included = false,
-                Pending = false,
-            });
+            context.EventIdentification.AddOrUpdate(ei => ei.EventId,
+                new EventIdentificationModel
+                {
+                    EventId = null,
+                    Id = 0,
+                    Name = null,
+                    OwnUri = null,
+                    Role = null,
+                    WorkflowId = null
+                });
+
+            context.EventState.AddOrUpdate(es => es.Id,
+                new EventStateModel
+                {
+                    Executed = false,
+                    Id = 0,
+                    Included = false,
+                    Pending = false
+                });
 
             /*
             context.EventUriIdMappings.Add(new EventUriIdMapping()
