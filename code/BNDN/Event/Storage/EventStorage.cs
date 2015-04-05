@@ -16,8 +16,7 @@ namespace Event.Storage
     {
         private EventContext _context;
 
-        // TODO: Discuss: Do we need to (dependency)-inject the (db)context for testing purposes, instead?
-        // TODO: If not, if constructor is parameterless, could / should we make EventStorage static then?
+        // TODO: Discuss: Do we need to dependency-inject the context in here, for unit-testing purposes?
         public EventStorage()
         {
             _context = new EventContext();
@@ -434,13 +433,28 @@ namespace Event.Storage
         /// <returns></returns>
         public string GetIdFromUri(Uri endPoint)
         {
+            if (endPoint == null)
+            {
+                throw new ArgumentNullException("endPoint","Supplied argument was null");
+            }
+
             var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Uri.Equals(endPoint.AbsoluteUri)).Result;
             if (result == null) return null;
             return result.Id;
         }
 
+        /// <summary>
+        /// RemoveIdAndUri will delete the entry (that represents an Event by an Id and a Uri),
+        /// that is held in the database.
+        /// </summary>
+        /// <param name="id">Id of the Event, whose entry is to be removed in the databse</param>
         public void RemoveIdAndUri(string id)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException("id","Supplied argument was null");
+            }
+
             var toRemove = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
             if (toRemove == null) return;
             _context.EventUriIdMappings.Remove(toRemove);
@@ -448,9 +462,23 @@ namespace Event.Storage
         }
 
         // TODO: Discuss: Is this method also intended to be used for updating an existing entry? In that
-        // TODO: case the current implementation is faulty...
+        // TODO: case the current implementation is faulty...because it currently **adds** a new entry
+        /// <summary>
+        /// StoreIdAndUri adds an entry to the database. The entry represents an Event (by the Event's Id and Uri)
+        /// </summary>
+        /// <param name="id">The id of the Event, that an entry is to be added for in the database</param>
+        /// <param name="endPoint"></param>
         public void StoreIdAndUri(string id, Uri endPoint)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException("id", "id was null in StoreIdAndUri");
+            }
+            if (endPoint == null)
+            {
+                throw new ArgumentNullException("endPoint","endPoint was null in StoreIdAndUri");
+            }
+
             var eventUriIdMapping = new EventUriIdMapping() { Id = id, Uri = endPoint.AbsolutePath };
             _context.EventUriIdMappings.Add(eventUriIdMapping);
 
@@ -458,6 +486,11 @@ namespace Event.Storage
 
         }
 
+        /// <summary>
+        /// IdExists checks whether the database currently holds an entry matching the supplied id. 
+        /// </summary>
+        /// <param name="id">Id of the Event to check for existence</param>
+        /// <returns></returns>
         public bool IdExists(string id)
         {
             var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
@@ -465,6 +498,10 @@ namespace Event.Storage
 
         }
 
+        /// <summary>
+        /// Disposes this context. (New Controllers are created for each HTTP-request, and hence, also disposed of
+        /// when the HTTP-request is executed, and hence, this EventStorage is also disposed of)
+        /// </summary>
         public void Dispose()
         {
             _context.Dispose();
@@ -475,6 +512,10 @@ namespace Event.Storage
 
         #region Private Methods
 
+        /// <summary>
+        /// EventIdentificationIsInALegalState makes two checks on EventIdentification-set,
+        /// that when combined ensures that EventIdentification only has a single element. 
+        /// </summary>
         private void EventIdentificationIsInALegalState()
         {
             // Check that there's currently only a single element in database
@@ -492,6 +533,10 @@ namespace Event.Storage
 
         }
 
+        /// <summary>
+        /// EventStateIsInALegalState makes two checks on EventState-set,
+        /// that when combined ensures that EventState only has a single element. 
+        /// </summary>
         private void EventStateIsInALegalState()
         {
             // Check that there is no more than a single element in EventState
