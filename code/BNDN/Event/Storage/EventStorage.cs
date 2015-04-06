@@ -207,7 +207,8 @@ namespace Event.Storage
             _context.SaveChanges();
         }
 
-        public HashSet<Uri> Conditions
+        [Obsolete]
+        public HashSet<Uri> OldConditions
         {
             get
             {
@@ -241,7 +242,8 @@ namespace Event.Storage
             }
         }
 
-        public HashSet<Uri> Responses
+        [Obsolete]
+        public HashSet<Uri> OldResponses
         {
             get
             {
@@ -274,7 +276,8 @@ namespace Event.Storage
             }
         }
 
-        public HashSet<Uri> Exclusions
+        [Obsolete]
+        public HashSet<Uri> OldExclusions
         {
             get
             {
@@ -307,7 +310,8 @@ namespace Event.Storage
             }
         }
 
-        public HashSet<Uri> Inclusions
+        [Obsolete]
+        public HashSet<Uri> OldInclusions
         {
             get
             {
@@ -330,7 +334,164 @@ namespace Event.Storage
 
                 foreach (var element in value)
                 {
-                    var uriToAdd = new InclusionUri() { UriString = element.AbsoluteUri };
+                    var uriToAdd = new InclusionUri()
+                    {
+                        UriString = element.AbsoluteUri,
+                        EventId = _eventId
+                    };
+                    _context.Inclusions.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+
+        public HashSet<RelationToOtherEventModel> Conditions
+        {
+            get
+            {
+                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Conditions.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ConditionUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri,
+                        EventId = element.EventID,
+                        EventIdentificationModelId = _eventId
+                    };
+                    _context.Conditions.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+        public HashSet<RelationToOtherEventModel> Responses 
+        {
+            get
+            {
+                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Responses.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ResponseUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri,
+                        EventId = element.EventID,
+                        EventIdentificationModelId = _eventId
+                    };
+                    _context.Responses.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+        public HashSet<RelationToOtherEventModel> Exclusions
+        {
+            get
+            {
+                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Exclusions.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ExclusionUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri,
+                        EventId = element.EventID,
+                        EventIdentificationModelId = _eventId
+                    };
+                    _context.Exclusions.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+        public HashSet<RelationToOtherEventModel> Inclusions
+        {
+            get
+            {
+                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Inclusions.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new InclusionUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri, 
+                        EventId = element.EventID, 
+                        EventIdentificationModelId = _eventId
+                    };
                     _context.Inclusions.Add(uriToAdd);
                 }
                 _context.SaveChanges();
