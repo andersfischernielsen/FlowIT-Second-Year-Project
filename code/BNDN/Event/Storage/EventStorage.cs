@@ -16,11 +16,12 @@ namespace Event.Storage
     {
 
         private EventContext _context;
+        private string _eventId { get; set; }
 
         // TODO: Discuss: Do we need to dependency-inject the context in here, for unit-testing purposes?
         public EventStorage(string eventId)
         {
-
+            _eventId = eventId;
             _context = new EventContext();
         }
 
@@ -30,13 +31,14 @@ namespace Event.Storage
         {
             get
             {
+                var eventIdentification = _context.EventIdentification.Where(model => model.Id == _eventId);
                 // We should only have one of these objects in the database
-                if (_context.EventIdentification.Count() > 1)
+                if (eventIdentification.Count() > 1)
                 {
-                    throw new ApplicationException("More than one EventIdentification object in database");
+                    throw new ApplicationException("More than one EventIdentification object in database with eventId =" + _eventId);
                 }
 
-                var eventIdPackage = _context.EventIdentification.SingleOrDefault();
+                var eventIdPackage = eventIdentification.SingleOrDefault();
                 if (eventIdPackage == null)
                 {
                     return null;

@@ -17,7 +17,6 @@ namespace Event
         public DbSet<ResponseUri> Responses { get; set; }
         public DbSet<InclusionUri> Inclusions { get; set; }
         public DbSet<ExclusionUri> Exclusions { get; set; }
-        public DbSet<EventUriIdMapping> EventUriIdMappings { get; set; }
         // LockDto has been extracted out of EventState as it would become a class within a class (and as such would need workaround)
         public DbSet<LockDto> LockDto { get; set; }
     }
