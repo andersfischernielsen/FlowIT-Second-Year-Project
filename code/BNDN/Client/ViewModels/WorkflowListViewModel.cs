@@ -1,14 +1,31 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Client.ViewModels
 {
     public class WorkflowListViewModel : ViewModelBase
     {
+        private readonly Uri _serverAddress;
+
         public WorkflowListViewModel()
         {
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
+
+            if (File.Exists("settings.json"))
+            {
+                var settingsjson = File.ReadAllText("settings.json");
+                var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
+
+                _serverAddress = new Uri(settings.ServerAddress ?? "http://localhost:13768/");
+            }
+            else
+            {
+                _serverAddress = new Uri("http://localhost:13768/");
+            }
+
             GetWorkflows();
         }
 
@@ -38,7 +55,7 @@ namespace Client.ViewModels
             WorkflowList.Clear();
 
             //TODO: Implement exception handling.
-            var connection = new ServerConnection(new Uri("http://localhost:13768/")); // todo get the real server address here
+            var connection = new ServerConnection(_serverAddress);
 
             var workflows = await connection.GetWorkflows();
 
