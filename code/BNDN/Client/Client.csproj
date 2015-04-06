@@ -75,6 +75,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ClientExceptions.cs" />
     <Compile Include="EventConnection.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ServerConnection.cs" />
