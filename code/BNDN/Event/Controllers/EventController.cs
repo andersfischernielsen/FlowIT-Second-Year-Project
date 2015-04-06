@@ -22,9 +22,9 @@ namespace Event.Controllers
         /// Get the entire Event, (namely rules and state for this Event)
         /// </summary>
         /// <returns>A task containing a single EventDto which represents the Events current state.</returns>
-        [Route("event")]
+        [Route("{eventId}/event")]
         [HttpGet]
-        public async Task<EventDto> GetEvent()
+        public async Task<EventDto> GetEvent(string eventId)
         {
             using (IEventLogic logic = new EventLogic())
             {

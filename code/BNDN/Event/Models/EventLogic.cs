@@ -97,10 +97,14 @@ namespace Event.Models
         //TODO: This is a hack! The Storage shouldn't be accessible from outside of the logic.
         public readonly IEventStorage Storage;
 
-        public EventLogic()
+        /// <summary>
+        /// Constructor for EventLogic
+        /// </summary>
+        /// <param name="eventId">The id of the event, that this EventLogic instance should represent</param>
+        public EventLogic(string eventId)
         {
             // TODO: Server address
-            Storage = new EventStorage();
+            Storage = new EventStorage(eventId);
             
 
         }
