@@ -16,9 +16,12 @@ First handin of the course *Second Year Project: Software Development in Large T
 ## Code
 See attached Visual Studio Project.
 
-## Architechture and testing
+## Architechture
+
+## Testing
 
 ## Instructions
 Mikael?
 
 ## Feedback from Brazil 
+???
