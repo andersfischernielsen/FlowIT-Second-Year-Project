@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
@@ -87,7 +88,10 @@ namespace Event.Storage
         {
             get
             {
-                return new List<RelationToOtherEventModel>(Responses.Concat(Inclusions.Concat(Exclusions)));
+                var resp = new HashSet<RelationToOtherEventModel>(Responses);
+                var incl = new HashSet<RelationToOtherEventModel>(Inclusions);
+                var excl = new HashSet<RelationToOtherEventModel>(Exclusions);
+                return new List<RelationToOtherEventModel>(resp.Concat(incl.Concat(excl)));
             }
         }
 
@@ -148,10 +152,8 @@ namespace Event.Storage
         {
             await Task.Run(() =>
             {
-                // TODO: Not cool - let Storage do it's thing!
-                //var uri = Storage.EventUriIdMappings.SingleOrDefault(x => x.Id == id).Uri;
+                //Todo : Persist this stuff.
 
-                // Retrieve URI associated with Id
                 if (rules == null)
                 {
                     throw new ArgumentNullException("rules","Provided rules was null");
@@ -220,8 +222,12 @@ namespace Event.Storage
                 Storage.EventId = null;
                 Storage.WorkflowId = null;
                 Storage.OwnUri = null;
+                Storage.Executed = false;
+                Storage.Included = false;
+                Storage.Pending = false;
             });
         }
+
 
         public bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto)
         {
@@ -263,13 +269,6 @@ namespace Event.Storage
             Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
             Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
             OwnUri = ownUri;
-
-            // #3: Register events that are related to us. 
-            //foreach (var otherEvent in otherEvents)
-            //{
-            //    // Todo register self with other Events.
-            //    await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            //}
         }
 
         public async Task UpdateEvent(EventDto eventDto, Uri ownUri)
@@ -332,6 +331,10 @@ namespace Event.Storage
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
             await serverCommunicator.DeleteEventFromServer();
             await ResetState();
+            Storage.Conditions = new HashSet<RelationToOtherEventModel>();
+            Storage.Responses = new HashSet<RelationToOtherEventModel>();
+            Storage.Inclusions = new HashSet<RelationToOtherEventModel>();
+            Storage.Exclusions = new HashSet<RelationToOtherEventModel>();
         }
 
         public async Task Execute()

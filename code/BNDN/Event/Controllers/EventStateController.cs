@@ -342,6 +342,7 @@ namespace Event.Controllers
                     throw new HttpResponseException(HttpStatusCode.BadRequest);
                 }
 
+                lockDto.Id = eventId;
                 logic.LockDto = lockDto;
             }
         }
@@ -365,8 +366,6 @@ namespace Event.Controllers
                         "Lock could not be unlocked. Event was locked by someone else."));
                 }
 
-                // TODO: Consider having a "ClearLock"-"Unlock" method that sets LockDto to null <- done! 
-                //logic.LockDto = null;
                 logic.UnlockEvent();
             }
         }

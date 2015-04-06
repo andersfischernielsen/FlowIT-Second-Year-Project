@@ -175,8 +175,11 @@ namespace Event.Storage
                 {
                     _context.LockDto.Remove(element);
                 }
+                //Todo: Maybe this should not be done here - but this is the safest way.
+                var theLock = value;
+                theLock.Id = EventId;
 
-                _context.LockDto.Add(value);
+                _context.LockDto.Add(theLock);
                 _context.SaveChanges();
             }
         }
@@ -197,144 +200,6 @@ namespace Event.Storage
                 _context.LockDto.Remove(lockDto);
             }
             _context.SaveChanges();
-        }
-
-        [Obsolete]
-        public HashSet<Uri> OldConditions
-        {
-            get
-            {
-                // No need to do zero or ">1" count check here; that is perfectly legal
-                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<Uri>();
-
-                foreach (var element in dbset)
-                {
-                    hashSet.Add(new Uri(element.UriString));
-                }
-
-                return hashSet;
-            }
-            set
-            {
-                // Reset current list
-                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == EventId))
-                {
-                    _context.Conditions.Remove(uri);
-                }
-
-                // Add replacing values
-                foreach (var element in value)
-                {
-                    var uriToAdd = new ConditionUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = EventId};
-                    _context.Conditions.Add(uriToAdd);
-                }
-
-                _context.SaveChanges();
-            }
-        }
-
-        [Obsolete]
-        public HashSet<Uri> OldResponses
-        {
-            get
-            {
-                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<Uri>();
-
-                foreach (var element in dbset)
-                {
-                    hashSet.Add(new Uri(element.UriString));
-                }
-
-                return hashSet;
-            }
-            set
-            {
-                // Remove current content 
-                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == EventId))
-                {
-                    _context.Responses.Remove(uri);
-                }
-
-                // Add replacing content
-                foreach (var element in value)
-                {
-                    var uriToAdd = new ResponseUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = EventId};
-                    _context.Responses.Add(uriToAdd);
-                }
-
-                _context.SaveChanges();
-            }
-        }
-
-        [Obsolete]
-        public HashSet<Uri> OldExclusions
-        {
-            get
-            {
-                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<Uri>();
-
-                foreach (var element in dbset)
-                {
-                    hashSet.Add(new Uri(element.UriString));
-                }
-
-                return hashSet;
-            }
-            set
-            {
-                // Remove current content
-                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId))
-                {
-                    _context.Exclusions.Remove(uri);
-                }
-
-                // Add replacing values
-                foreach (var element in value)
-                {
-                    var uriToAdd = new ExclusionUri() { UriString = element.AbsoluteUri };
-                    _context.Exclusions.Add(uriToAdd);
-                }
-
-                _context.SaveChanges();
-            }
-        }
-
-        [Obsolete]
-        public HashSet<Uri> OldInclusions
-        {
-            get
-            {
-                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<Uri>();
-
-                foreach (var element in dbset)
-                {
-                    hashSet.Add(new Uri(element.UriString));
-                }
-
-                return hashSet;
-            }
-            set
-            {
-                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId))
-                {
-                    _context.Inclusions.Remove(uri);
-                }
-
-                foreach (var element in value)
-                {
-                    var uriToAdd = new InclusionUri()
-                    {
-                        UriString = element.AbsoluteUri,
-                        EventId = EventId
-                    };
-                    _context.Inclusions.Add(uriToAdd);
-                }
-                _context.SaveChanges();
-            }
         }
 
         public HashSet<RelationToOtherEventModel> Conditions

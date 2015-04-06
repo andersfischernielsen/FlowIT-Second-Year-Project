@@ -133,6 +133,7 @@ namespace Event.Controllers
                     // Todo: Read above
                     new EventRuleDto
                     {
+                        Id = senderId,
                         Condition = false,
                         Exclusion = false,
                         Inclusion = false,

@@ -28,11 +28,6 @@ namespace Event.Interfaces
         #endregion
 
         #region Rules
-        HashSet<Uri> OldConditions { get; set; }
-        HashSet<Uri> OldResponses { get; set; }
-        HashSet<Uri> OldExclusions { get; set; }
-        HashSet<Uri> OldInclusions { get; set; }
-
         HashSet<RelationToOtherEventModel> Conditions { get; set; }
         HashSet<RelationToOtherEventModel> Responses { get; set; }
         HashSet<RelationToOtherEventModel> Exclusions { get; set; }

@@ -44,7 +44,7 @@ namespace Event.Storage
             {
                 // Initiate the lockDto that is to be passed to the other Events
                 // identifing this Event as the lockowner
-                LockDto lockDto = new LockDto {LockOwner = _logic.EventId};
+                var lockDto = new LockDto {LockOwner = _logic.EventId, Id = _logic.EventId};
                 
                 // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
                 _logic.LockDto = lockDto;
