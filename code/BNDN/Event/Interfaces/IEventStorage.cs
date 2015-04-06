@@ -32,7 +32,6 @@ namespace Event.Interfaces
         HashSet<Uri> Responses { get; set; }
         HashSet<Uri> Exclusions { get; set; }
         HashSet<Uri> Inclusions { get; set; }
-        ICollection<EventUriIdMapping> EventUriIdMappings { get; set; }
 
 
         #endregion

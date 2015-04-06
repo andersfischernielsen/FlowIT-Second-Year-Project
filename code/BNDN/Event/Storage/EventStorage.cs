@@ -29,37 +29,19 @@ namespace Event.Storage
         {
             get
             {
-                var eventIdentification = _context.EventIdentification.Where(model => model.Id == _eventId);
-                // We should only have one of these objects in the database
-                if (eventIdentification.Count() > 1)
-                {
-                    throw new ApplicationException("More than one EventIdentification object in database with eventId =" + _eventId);
-                }
+                EventIdentificationIsInALegalState();
 
-                var eventIdPackage = eventIdentification.SingleOrDefault();
-                if (eventIdPackage == null)
-                {
-                    return null;
-                }
+                var eventIdentification = _context.EventIdentification.Single(model => model.Id == _eventId);
 
-                return new Uri(eventIdPackage.OwnUri);
+                return new Uri(eventIdentification.OwnUri);
             }
             set
             {
-                // Check that there's currently only a single element in database
-                if (_context.EventIdentification.Count() > 1)
-                {
-                    throw new ApplicationException(
-                        "More than a single EventIdentification element in database in Event");
-                }
-
-                if (!_context.EventIdentification.Any())
-                {
-                    throw new ApplicationException("EventIdentification was not initialized in Event");
-                }
+                EventIdentificationIsInALegalState();
+                var eventIdentification = _context.EventIdentification.Single(model => model.Id == _eventId);
 
                 // Add replacing value
-                _context.EventIdentification.Single().OwnUri = value.AbsoluteUri;
+                eventIdentification.OwnUri = value.AbsoluteUri;
                 _context.SaveChanges();
 
             }
@@ -71,11 +53,7 @@ namespace Event.Storage
             {
                 EventIdentificationIsInALegalState();
 
-                var eventIdentificationPackage = _context.EventIdentification.FirstOrDefault();
-                if (eventIdentificationPackage == null)
-                {
-                    return null;
-                }
+                var eventIdentificationPackage = _context.EventIdentification.Single(model => model.Id == _eventId);
                 return eventIdentificationPackage.WorkflowId;
 
             }
@@ -83,10 +61,7 @@ namespace Event.Storage
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single().WorkflowId = value;
-                _context.SaveChanges();
-
-                _context.EventIdentification.Single().WorkflowId = value;
+                _context.EventIdentification.Single(model => model.Id == _eventId).WorkflowId = value;
                 _context.SaveChanges();
             }
         }
@@ -98,13 +73,13 @@ namespace Event.Storage
             get
             {
                 EventIdentificationIsInALegalState();
-                return _context.EventIdentification.Single().Name;
+                return _context.EventIdentification.Single(model => model.Id == _eventId).Name;
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single().Name = value;
+                _context.EventIdentification.Single(model => model.Id == _eventId).Name = value;
                 _context.SaveChanges();
             }
         }
@@ -115,13 +90,13 @@ namespace Event.Storage
             {
                 EventIdentificationIsInALegalState();
 
-                return _context.EventIdentification.Single().Role;
+                return _context.EventIdentification.Single(model => model.Id == _eventId).Role;
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single().Role = value;
+                _context.EventIdentification.Single(model => model.Id == _eventId).Role = value;
                 _context.SaveChanges();
             }
         }
@@ -132,13 +107,13 @@ namespace Event.Storage
             {
                 EventStateIsInALegalState();
 
-                return _context.EventState.Single().Executed;
+                return _context.EventState.Single(model => model.Id == _eventId).Executed;
             }
             set
             {
                 EventStateIsInALegalState();
 
-                _context.EventState.Single().Executed = value;
+                _context.EventState.Single(model => model.Id == _eventId).Executed = value;
                 _context.SaveChanges();
             }
         }
@@ -149,13 +124,13 @@ namespace Event.Storage
             {
                 EventStateIsInALegalState();
 
-                return _context.EventState.Single().Included;
+                return _context.EventState.Single(model => model.Id == _eventId).Included;
             }
             set
             {
                 EventStateIsInALegalState();
 
-                _context.EventState.Single().Included = value;
+                _context.EventState.Single(model => model.Id == _eventId).Included = value;
                 _context.SaveChanges();
             }
         }
@@ -166,13 +141,13 @@ namespace Event.Storage
             {
                 EventStateIsInALegalState();
 
-                return _context.EventState.Single().Pending;
+                return _context.EventState.Single(model => model.Id == _eventId).Pending;
             }
             set
             {
                 EventStateIsInALegalState();
 
-                _context.EventState.Single().Pending = value;
+                _context.EventState.Single(model => model.Id == _eventId).Pending = value;
                 _context.SaveChanges();
             }
         }
@@ -185,33 +160,28 @@ namespace Event.Storage
         {
             get
             {
-                // Check to ensure there's only a single LockDto held in database
-                if (_context.LockDto.Count() > 1)
-                {
-                    throw new ApplicationException("Illegal state in Event: More than a " +
-                                                   "single LockDto was held in database");
-                }
+                EventLockIsInALegalState();
                 // SingleOrDeafult will return either null or the actual single element in set. 
-                return _context.LockDto.SingleOrDefault();
+                return _context.LockDto.SingleOrDefault(model => model.Id == _eventId);
             }
             set
             {
-                // Check that there is no more than a single element in LockDto set
-                if (_context.LockDto.Count() > 1)
+                EventLockIsInALegalState();
+                if (_context.LockDto.Any(model => model.Id == _eventId))
                 {
-                    throw new ApplicationException("More than a single element in LockDto");
+                    throw new ApplicationException("There already exists a lock on this event");
                 }
-
-                // Remove current LockDto (should be either only a single element or no element at all
-                foreach (var element in _context.LockDto)
-                {
-                    _context.LockDto.Remove(element);
-                }
-
                 if (value == null)
                 {
                     throw new ArgumentNullException("value", "The provided LockDto was null. To unlock Event, " +
                                                             "see documentation");
+                }
+
+                // Remove current LockDto (should be either only a single element or no element at all
+                // Should not be neccesary.
+                foreach (var element in _context.LockDto.Where(model => model.Id == _eventId))
+                {
+                    _context.LockDto.Remove(element);
                 }
 
                 _context.LockDto.Add(value);
@@ -227,14 +197,10 @@ namespace Event.Storage
         /// </summary>
         public void ClearLock()
         {
-            // Check that LockDto set is in a legal state
-            if (_context.LockDto.Count() > 1)
-            {
-                throw new ApplicationException("Illegal state in Event: LockDto set contains more than a single element");
-            }
+            EventLockIsInALegalState();
 
             // Clear the single LockDto-element 
-            foreach (var lockDto in _context.LockDto)
+            foreach (var lockDto in _context.LockDto.Where(model => model.Id == _eventId))
             {
                 _context.LockDto.Remove(lockDto);
             }
@@ -246,7 +212,7 @@ namespace Event.Storage
             get
             {
                 // No need to do zero or ">1" count check here; that is perfectly legal
-                var dbset = _context.Conditions;
+                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -259,7 +225,7 @@ namespace Event.Storage
             set
             {
                 // Reset current list
-                foreach (var uri in _context.Conditions)
+                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId))
                 {
                     _context.Conditions.Remove(uri);
                 }
@@ -267,7 +233,7 @@ namespace Event.Storage
                 // Add replacing values
                 foreach (var element in value)
                 {
-                    var uriToAdd = new ConditionUri() { UriString = element.AbsoluteUri };
+                    var uriToAdd = new ConditionUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = _eventId};
                     _context.Conditions.Add(uriToAdd);
                 }
 
@@ -279,7 +245,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Responses;
+                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == _eventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -292,7 +258,7 @@ namespace Event.Storage
             set
             {
                 // Remove current content 
-                foreach (var uri in _context.Responses)
+                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == _eventId))
                 {
                     _context.Responses.Remove(uri);
                 }
@@ -300,7 +266,7 @@ namespace Event.Storage
                 // Add replacing content
                 foreach (var element in value)
                 {
-                    var uriToAdd = new ResponseUri() { UriString = element.AbsoluteUri };
+                    var uriToAdd = new ResponseUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = _eventId};
                     _context.Responses.Add(uriToAdd);
                 }
 
@@ -312,7 +278,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Exclusions;
+                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -325,7 +291,7 @@ namespace Event.Storage
             set
             {
                 // Remove current content
-                foreach (var uri in _context.Exclusions)
+                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId))
                 {
                     _context.Exclusions.Remove(uri);
                 }
@@ -345,7 +311,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Inclusions;
+                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -357,7 +323,7 @@ namespace Event.Storage
             }
             set
             {
-                foreach (var uri in _context.Inclusions)
+                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId))
                 {
                     _context.Inclusions.Remove(uri);
                 }
@@ -371,28 +337,6 @@ namespace Event.Storage
             }
         }
 
-        public ICollection<EventUriIdMapping> EventUriIdMappings
-        {
-            get
-            {
-                return _context.EventUriIdMappings.ToList();
-            }
-            set
-            {
-                // Remove current entries
-                foreach (var element in _context.EventUriIdMappings)
-                {
-                    _context.EventUriIdMappings.Remove(element);
-                }
-
-                // Add replacing entries
-                foreach (var element in value)
-                {
-                    _context.EventUriIdMappings.Add(element);
-                }
-                _context.SaveChanges();
-            }
-        }
         #endregion
 
         #region Public methods
@@ -496,19 +440,34 @@ namespace Event.Storage
         /// </summary>
         private void EventIdentificationIsInALegalState()
         {
+            var eventIdentification = _context.EventIdentification.Where(model => model.Id == _eventId);
             // Check that there's currently only a single element in database
-            if (_context.EventIdentification.Count() > 1)
+            if (eventIdentification.Count() > 1)
             {
                 throw new ApplicationException(
                     "More than a single EventIdentification element in database-set in Event");
             }
 
-            if (!_context.EventIdentification.Any())
+            if (!_context.EventIdentification.Any(model => model.Id == _eventId))
             {
                 throw new ApplicationException("EventIdentification was not initialized in Event." +
                                                "Count was zero");
             }
+        }
 
+        /// <summary>
+        /// EventLockIsInALegalState makes two checks on LockDto-set,
+        /// that when combined ensures that LockDto only has a single element. 
+        /// </summary>
+        private void EventLockIsInALegalState()
+        {
+            var lockDto = _context.LockDto.Where(model => model.Id == _eventId);
+            // Check that there's currently only a single element in database
+            if (lockDto.Count() > 1)
+            {
+                throw new ApplicationException(
+                    "More than a single Lock element in database-set in Event");
+            }
         }
 
         /// <summary>

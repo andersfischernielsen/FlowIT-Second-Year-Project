@@ -12,7 +12,7 @@ namespace Event
     public class LockDto
     {
         [Key, ForeignKey("EventIdentificationModel")]
-        // Used for database purposes
+        // Used for database purposes refers to the specific event which is locked
         public string Id { get; set; }
         public virtual EventIdentificationModel EventIdentificationModel { get; set; }
 
