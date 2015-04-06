@@ -26,6 +26,7 @@ namespace Event.Models
 
         [Required]
         public virtual EventStateModel EventStateModel { get; set; }
+        public virtual LockDto LockDto { get; set; }
 
         public ICollection<ResponseUri> ResponseUris { get; set; }
         public ICollection<InclusionUri> InclusionUris { get; set; }

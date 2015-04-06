@@ -16,8 +16,6 @@ namespace Event.Models.UriClasses
         public string EventId { get; set; }
 
 
-
-        
         public string EventIdentificationModelId { get; set; }
         public virtual EventIdentificationModel EventIdentificationModel { get; set; }
     }
