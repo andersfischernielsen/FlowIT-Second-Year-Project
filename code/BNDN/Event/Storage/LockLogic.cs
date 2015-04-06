@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Event.Models;
 
 namespace Event.Storage
 {
@@ -15,14 +16,14 @@ namespace Event.Storage
         /// Because lock-logic is created for each request at a Controller, this _eventsToBelocked should not become outdated
         /// TODO: Discuss: I am right about above, right?
         /// </summary>
-        private readonly IEnumerable<Uri> _eventsToBelocked;
-        private HashSet<Uri> _lockedEvents; 
+        private readonly IEnumerable<RelationToOtherEventModel> _eventsToBelocked;
+        private HashSet<RelationToOtherEventModel> _lockedEvents; 
         // TODO: MEGA-ÜBER non-chilled Morten: would an IEventLogic not be preferable / "more ideal" in constructor?
         public LockLogic(EventLogic logic)
         {
             _logic = logic;
-            _eventsToBelocked = _logic.GetNotifyDtos().Result; // ER DET HER DEN RIGTIGE LISTE?
-            _lockedEvents = new HashSet<Uri>();
+            _eventsToBelocked = _logic.RelationsToLock; // ER DET HER DEN RIGTIGE LISTE?
+            _lockedEvents = new HashSet<RelationToOtherEventModel>();
         }
 
         // TODO: Will this method include locking this Event itself? Or should caller take care of this it-self? 
@@ -49,13 +50,13 @@ namespace Event.Storage
                 _logic.LockDto = lockDto;
 
                 // For every related, dependent Event, attempt to lock it
-                foreach (var uri in _eventsToBelocked)
+                foreach (var relation in _eventsToBelocked)
                 {
-                    await new EventCommunicator(uri).Lock(lockDto);
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Lock(lockDto);
                     // Discuss: Aren't we too naive here, just assuming that the Event *actually* DID lock itself? 
                     // What if it failed to do so? We shouldn't add it to the _lockedEvents list then...
                     // TODO: Read above! 
-                    _lockedEvents.Add(uri);
+                    _lockedEvents.Add(relation);
                 }
 
                 //TODO: Brug Parrallel i stedet for:
@@ -82,7 +83,7 @@ namespace Event.Storage
             {
                 try
                 {
-                    new EventCommunicator(pair).Unlock(eventAddress).Wait();
+                    new EventCommunicator(pair.Uri, pair.EventID, _logic.EventId).Unlock(eventAddress).Wait();
                 }
                 catch (Exception)
                 {
@@ -114,11 +115,11 @@ namespace Event.Storage
 
             // Unlock the other Events. 
             // TODO: Do sazzy Parallel.ForEach here, too...?
-            foreach (var uri in _eventsToBelocked)
+            foreach (var relation in _eventsToBelocked)
             {
                 try
                 {
-                    await new EventCommunicator(uri).Unlock(eventAddress);
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock(eventAddress);
                 }
                 catch (Exception)
                 {

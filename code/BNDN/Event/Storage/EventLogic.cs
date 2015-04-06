@@ -83,6 +83,14 @@ namespace Event.Storage
             get { return Storage.Inclusions; }
         }
 
+        public IEnumerable<RelationToOtherEventModel> RelationsToLock
+        {
+            get
+            {
+                return new List<RelationToOtherEventModel>(Responses.Concat(Inclusions.Concat(Exclusions)));
+            }
+        }
+
         //The role that a given user has to have for execution.
         public string Role
         {
@@ -166,47 +174,6 @@ namespace Event.Storage
         #endregion
 
         #region DTO Creation
-        public async Task<IEnumerable<Uri>> GetNotifyDtos()
-        {
-            // Todo: rename method
-
-            var set = new HashSet<Uri>();
-
-            foreach (var response in Responses)
-            {
-                set.Add(response.Uri);
-            }
-
-            foreach (var exclusion in Exclusions)
-            {
-                set.Add(exclusion.Uri);
-            }
-
-            foreach (var inclusion in Inclusions)
-            {
-                set.Add(inclusion.Uri);
-            }
-
-            return set;
-        }
-
-        public async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
-            where T : NotifyDto
-        {
-            //await Task.Run(() =>
-            //{
-            //    var dto = creator.Invoke(Storage.GetIdFromUri(uri));
-
-            //    if (dictionary.ContainsKey(uri))
-            //    {
-            //        dictionary[uri].Add(dto);
-            //    }
-            //    else
-            //    {
-            //        dictionary.Add(uri, new List<NotifyDto> {dto});
-            //    }
-            //});
-        }
 
         public Task<EventStateDto> EventStateDto
         {
