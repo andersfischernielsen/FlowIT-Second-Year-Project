@@ -29,7 +29,7 @@ namespace Event.Controllers
             using (IEventLogic logic = new EventLogic())
             {
                 // Dismiss request if Event is currently locked
-
+                // This gon' be awesome
                 if (logic.IsLocked())
                 {
                     // Event is currently locked)
