@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Web.Http;
 using Common;
 using Moq;
@@ -74,12 +75,110 @@ namespace Server.Tests
         #endregion
 
         #region POST Workflow
-        #endregion
+        //TODO: Mayby a test to test that no two workflows can have the same ID?
 
-        #region PUT Workflow
+        [Test]
+        public void PostWorkflowAddsANewWorkflow()
+        {
+            var list = new List<WorkflowDto>();
+            // Arrange
+            _mock.Setup(logic => logic.AddNewWorkflow(It.IsAny<WorkflowDto>()))
+                .Callback(((WorkflowDto workflowDto) => list.Add(workflowDto)));
+
+            var workflow = new WorkflowDto() {Id = "id", Name = "name"};
+
+            var controller = new WorkflowsController(_mock.Object);
+
+            // Act
+            controller.PostWorkFlow(workflow);
+
+            // Assert
+            Assert.AreEqual(workflow, list.First());
+        }
+        [Test]
+        public void PostWorkflowWithNullReturnsXX()
+        {
+            
+            // Arrange
+            var list = new List<WorkflowDto>();
+            _mock.Setup(logic => logic.AddNewWorkflow(It.IsAny<WorkflowDto>()))
+                .Callback(((WorkflowDto workflowDto) => list.Add(workflowDto)));
+
+            WorkflowDto workflow = null;
+
+            var controller = new WorkflowsController(_mock.Object);
+
+            // Assert
+            Assert.Throws<Exception>(()=>controller.PostWorkFlow(workflow));
+        }
+
+        [Test]
+        [TestCase("testWorkflow1")]
+        [TestCase("IdMedSværeBogstaverÅØOgTegn$")]
+        public void PostWorkflow_id_that_does_not_exist(string workflowId)
+        {
+            // Arrange
+            var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
+
+            _mock.Setup(logic => logic.AddNewWorkflow(dto)).Verifiable();
+
+            var controller = new WorkflowsController(_mock.Object);
+
+            // Act
+            controller.PostWorkFlow(dto);
+
+            // Assert
+            Assert.DoesNotThrow(() => _mock.Verify(logic => logic.AddNewWorkflow(dto), Times.Once()));
+        }
+
+        [Test]
+        [TestCase("NonexistentWorkflowId")]
+        [TestCase("EtAndetWorkflowSomIkkeEksisterer")]
+        [TestCase(null)]
+        public void PostWorkflow_id_already_exists(string workflowId)
+        {
+            // Arrange
+            var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
+
+            _mock.Setup(logic => logic.AddNewWorkflow(dto)).Throws<Exception>();
+
+            var controller = new WorkflowsController(_mock.Object);
+
+            // Act
+            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(dto));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+
+            // Todo: Discuss whether this HttpStatusCode should be used in this case.
+            // Todo: Double Assert.
+            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+        }
+
+        [Test]
+        [TestCase("AWorkflowId")]
+        [TestCase(null)]
+        public void PostWorkflow_with_id_and_null_workflow(string workflowId)
+        {
+            // Arrange
+            _mock.Setup(logic => logic.AddNewWorkflow(null)).Throws<ArgumentNullException>();
+
+            var controller = new WorkflowsController(_mock.Object);
+
+            // Act
+            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(null));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+
+            // Todo: Double Assert.
+            Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+        }
+
         #endregion
 
         #region DELETE Workflow
+
         #endregion
 
         #region GET Workflow/Get Events
@@ -148,9 +247,30 @@ namespace Server.Tests
         #endregion
 
         #region POST Event
+        [Test]
+        public void PostEventToWorkflowAddsEventToWorkflow()
+        {
+            var list = new List<EventAddressDto>();
+            // Arrange
+            _mock.Setup(logic => logic.AddEventToWorkflow(It.IsAny<string>(), It.IsAny<EventAddressDto>()))
+                .Callback(((string s, EventAddressDto eventDto) => list.Add(eventDto)));
+            _mock.Setup(logic => logic.GetEventsOnWorkflow(It.IsAny<string>())).Returns(list);
+
+            var eventAddressDto = new EventAddressDto() { Id = "id", Uri = new Uri("http://www.contoso.com/") };
+
+            var controller = new WorkflowsController(_mock.Object);
+
+            // Act
+            controller.PostEventToWorkFlow("workflow", eventAddressDto);
+
+            // Assert
+            Assert.AreEqual(eventAddressDto, list.First());
+        }
+
         #endregion
 
         #region PUT Event
+
         #endregion
 
         #region DELETE Event

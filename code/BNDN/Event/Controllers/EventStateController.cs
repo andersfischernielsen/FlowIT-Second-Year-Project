@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Net.Http;
 using System.Net;
 using Common;
-using Event.Interfaces;
 using Event.Models;
 
 namespace Event.Controllers
@@ -15,91 +15,96 @@ namespace Event.Controllers
     public class EventStateController : ApiController
     {
 
-        private IEventLogic Logic { get; set; }
-
-        public EventStateController()
-        {
-            // Fetches Singleton Logic-layer
-            Logic = EventLogic.GetState();
-        }
-
         #region GET-requests
         /// <summary>
         /// GetPending returns the (bool) value of Event's pending state. Callers of this method must identify themselves
         /// through an EventAddressDto
         /// </summary>
-        /// <param name="eventAddressDto">Used as a representation for caller of this method</param>
+        /// <param name="id">Used as a representation for caller of this method</param>
         /// <returns>Event's pending (bool) value</returns>
         [Route("event/pending/{id}")]
         [HttpGet]
         public bool GetPending(string id)
         {
-            // Check is made to see if the caller is allowed to execute this method at the moment
-            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
+            using (var logic = new EventLogic())
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Cannot access this property. The event is locked."));
+                // Check is made to see if the caller is allowed to execute this method at the moment
+                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Cannot access this property. The event is locked."));
+                }
+                return logic.Pending;
             }
-            return Logic.Pending;
         }
 
         /// <summary>
         /// GetExecuted returns the Event's current (bool) Executed value. 
         /// </summary>
-        /// <param name="eventAddressDto">Content should represent the caller of this method</param>
+        /// <param name="id">Content should represent the caller of this method</param>
         /// <returns>Event's current Executed value</returns>
         [Route("event/executed/{id}")]
         [HttpGet]
         public bool GetExecuted(string id)
         {
-            // Check is made to see if caller is allowed to execute this method at the moment. 
-            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
+            using (var logic = new EventLogic())
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Cannot access this property. The event is locked."));
+                // Check is made to see if caller is allowed to execute this method at the moment. 
+                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Cannot access this property. The event is locked."));
+                }
+                return logic.Executed;
             }
-            return Logic.Executed;
         }
 
         /// <summary>
         /// GetIncluded returns Event's current value for Included (bool). 
         /// </summary>
-        /// <param name="eventAddressDto">Content should represent caller of the method.</param>
+        /// <param name="id">Content should represent caller of the method.</param>
         /// <returns>Current value of Event's (bool) Included value</returns>
         [Route("event/included/{id}")]
         [HttpGet]
         public bool GetIncluded(string id)
         {
-            // Check is made to see if caller is allowed to execute this method
-            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
+            using (var logic = new EventLogic())
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Cannot access this property. The event is locked."));
+                // Check is made to see if caller is allowed to execute this method
+                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Cannot access this property. The event is locked."));
+                }
+                return logic.Included;
             }
-            return Logic.Included;
         }
 
         /// <summary>
         /// Returns Event's current value of Executable.
         /// </summary>
-        /// <param name="eventAddressDto">Content should represent caller</param>
+        /// <param name="id">Content should represent caller</param>
         /// <returns>Current value of Event's Executable</returns>
         [Route("event/executable/{id}")]
         [HttpGet]
         public async Task<bool> GetExecutable(string id)
         {
-            // Check is made to see if caller is allowed to execute this method (at the moment)
-            if (!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
+            using (var logic = new EventLogic())
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Cannot access this property. The event is locked."));
+                // Check is made to see if caller is allowed to execute this method (at the moment)
+                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Cannot access this property. The event is locked."));
+                }
+                return await logic.IsExecutable();
             }
-            return await Logic.IsExecutable();
         }
 
         /// <summary>
         /// Returns the current state of the events.
         /// </summary>
-        /// <param name="eventAddressDto">Content of this should represent caller</param>
+        /// <param name="id">Content of this should represent caller</param>
         /// <returns>A Task resulting in an EventStateDto which contains 3 
         /// booleans with the current state of the Event, plus a 4th boolean 
         /// which states whether the Event is currently executable</returns>
@@ -107,77 +112,112 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventStateDto> GetState(string id)
         {
-            //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
-            // Check is made to see whether caller is allowed to execute this method at the moment
-            if (!id.Equals("-1") && !Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id=id}))
+            using (var logic = new EventLogic())
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Cannot access this property. The event is locked."));
+                //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
+                // Check is made to see whether caller is allowed to execute this method at the moment
+                if (!id.Equals("-1") && !logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Cannot access this property. The event is locked."));
+                }
+                return await logic.EventStateDto;
             }
-            return await Logic.EventStateDto;
         }
         #endregion
 
         // TODO: We need to decide on a consistent way of updating these values; a) the (bool) value in body or b) the bool value in the url...
         #region PUT-requests
+
         /// <summary>
         /// Executes this event. Only Clients should invoke this.
         /// todo: Should be able to return something to the caller.
         /// </summary>
-        /// <param name="execute">Must be set to true; will result in BadRequest otherwise.</param>
+        /// <param name="executeDto">An executeDto with the roles of the given user wishing to execute.</param>
         /// <returns></returns>
         [Route("event/executed")]
         [HttpPut]
-        public async Task Execute([FromBody] bool execute)
+        public async Task Execute([FromBody] ExecuteDto executeDto)
         {
-            // Check that caller knows what it is doing
-            if (!execute)
+            using (var logic = new EventLogic())
             {
-                BadRequest("Execute cannot be undone by supplying (bool) execute with a value of false");
-            }
+                // Check that provided input can be mapped onto an instance of ExecuteDto
+                if (!ModelState.IsValid)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Provided input could not be mapped onto an instance of ExecuteDto; " +
+                        "No roles was provided"));
+                }
 
-            // Check if Event is currently locked
-            if (Logic.IsLocked())
-            {
-                BadRequest("Event is currently locked");
-            }
-            // Check whether Event can be executed at the moment
-            if (!(await Logic.IsExecutable()))
-            {
-                BadRequest("Event is not currently executable.");
-            }
+                // Check that caller claims the right role for executing this Event
+                if (!executeDto.Roles.Contains(logic.Role))
+                {
+                    throw new HttpResponseException(
+                        Request.CreateErrorResponse(
+                            HttpStatusCode.BadRequest,
+                            "You do not have the correct role for executing this event."));
+                }
 
-            LockLogic ll = new LockLogic();
-            if (await ll.LockAll())
-            {
-                var allOk = true;
-                try
+                // Check if Event is currently locked
+                if (logic.IsLocked())
                 {
-                    await Logic.Execute();
+                    throw new HttpResponseException(
+                        Request.CreateErrorResponse(
+                            HttpStatusCode.BadRequest,
+                            "Event is currently locked"));
+                }
+                // Check whether Event can be executed at the moment
+                if (!(await logic.IsExecutable()))
+                {
+                    throw new HttpResponseException(
+                        Request.CreateErrorResponse(
+                            HttpStatusCode.BadRequest,
+                            "Event is not currently executable."));
+                }
 
-                    Logic.Executed = true;
-                }
-                catch (Exception)
+                // Lock all dependent Events (including one-self)
+                // TODO: Check: Does the following include locking on this Event itself...?
+                LockLogic lockLogic = new LockLogic(logic);
+                if (await lockLogic.LockAll())
                 {
-                    allOk = false;
-                }
-                
+                    var allOk = true;
+                    try
+                    {
+                        await logic.Execute();
+                    }
+                    catch (Exception)
+                    {
+                        allOk = false;
+                    }
 
-                if (!await ll.UnlockAll())
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at unlocking all the locked events."));
-                    //Kunne ikke unlocke alt, hvad skal der ske?
+                    try
+                    {
+                        if (!await lockLogic.UnlockAll())
+                        {
+                            throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                "Failed at unlocking all the locked events."));
+                            //Kunne ikke unlocke alt, hvad skal der ske?
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.StackTrace);
+                    }
+                    if (allOk)
+                    {
+                        // TODO: Discuss is this really the way (i.e. through an Exception) to signal that Event was executed?
+                        // TODO: Is there no other (nicer) alternative to raising an exception? 
+                        throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.OK, true));
+                    }
+                    else
+                    {
+                        throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                            "Failed at updating other events."));
+                    }
                 }
-                if (allOk)
-                {
-                    throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.OK, true));
-                }
-                else
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Failed at updating other events."));
-                }
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Another transaction is going on, try again later"));
             }
-            throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Another transaction is going on, try again later"));
         }
 
 
@@ -190,13 +230,26 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdateIncluded([FromBody] EventAddressDto eventAddressDto, bool boolValueForIncluded)
         {
-            // Check to see if caller is currently allowed to execute this method
-            if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            using (var logic = new EventLogic())
             {
-               throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                   "This event is already locked by someone else."));
+                // Check if provided input can be mapped onto an instance of EventAddressDto
+                if (!ModelState.IsValid)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Provided input could not be mapped onto an instance of EventAddressDto"));
+                }
+
+                // Check to see if caller is currently allowed to execute this method
+                if (!logic.CallerIsAllowedToOperate(eventAddressDto))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "This event is already locked by someone else."));
+                }
+                logic.Included = boolValueForIncluded;
+
+                // TODO: Research what the right response to a PUT call is (I believe it is the updates value of the property) 
+                // TODO: (and implement it here and on the other PUT-calls)
             }
-            Logic.Included = boolValueForIncluded;
         }
 
         /// <summary>
@@ -208,68 +261,100 @@ namespace Event.Controllers
         [HttpPut]
         public void UpdatePending([FromBody] EventAddressDto eventAddressDto, bool boolValueForPending)
         {
-            // Check if caller is allowed to execute this method at the moment
-            if (!Logic.CallerIsAllowedToOperate(eventAddressDto))
+            using (var logic = new EventLogic())
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "This event is already locked by someone else."));
+                // Check to see whether caller provided a legal instance of an EventAddressDto
+                if (!ModelState.IsValid)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Provided input could not be mapped onto an instance of EventAddressDto"));
+                }
+
+                // Check if caller is allowed to execute this method at the moment
+                if (!logic.CallerIsAllowedToOperate(eventAddressDto))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "This event is already locked by someone else."));
+                }
+                logic.Pending = boolValueForPending;
             }
-            Logic.Pending = boolValueForPending;
         }
 
         #endregion
 
         #region Lock-related
         /// <summary>
-        /// Will lock this Event if it is not already locked. 
+        /// Will lock this Event if it is not already locked.
+        /// This POST call should be received either a) from the Event itself (when it is about to execute) or when
+        /// b) another Event (that has this Event in it's dependencies) asks it to lock.
         /// </summary>
         /// <param name="lockDto">Contents should represent caller</param>
         [Route("Event/lock")]
         [HttpPost]
         public void Lock([FromBody] LockDto lockDto)
         {
-            if (Logic.IsLocked())
+            using (var logic = new EventLogic())
             {
-                // There cannot be set a new lock, since a lock is already set.
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Lock could not be acquired. Event is already locked."));
-            }
-            if (lockDto == null)
-            {
-                // Caller provided a null LockDto
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Lock could not be set. An empty (null) lock was provided."));
-            }
-            
-            // Checks that the provided lockDto actually has sensible values for its fields.
-            // TODO: Consider refactoring this logic into other (logic-handling class) class
-            if (String.IsNullOrEmpty(lockDto.LockOwner) || String.IsNullOrWhiteSpace(lockDto.LockOwner))
-            {
-                // Reject request on setting the lockDto
-                ResponseMessage(new HttpResponseMessage(HttpStatusCode.BadRequest));
-            }
+                if (!ModelState.IsValid)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Provided input could not be mapped onto an instance of LockDto"));
+                }
 
+                if (lockDto == null)
+                {
+                    // TODO: Discuss: With the above !ModelState.IsValid check this check should not necessary. Can we remove? 
+                    // Caller provided a null LockDto
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Lock could not be set. An empty (null) lock was provided. If your intent" +
+                        " is to unlock the Event issue a DELETE request on  event/lock instead."));
+                }
 
-            Logic.LockDto = lockDto;
+                if (logic.IsLocked())
+                {
+                    // Todo: Consider fixing this "hack"
+                    if (!logic.CallerIsAllowedToOperate(new EventAddressDto {Id = lockDto.LockOwner}))
+                    {
+                        // There cannot be set a new lock, since a lock is already set.
+                        throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                            "Lock could not be acquired. Event is already locked."));
+                    }
+                }
+
+                // Checks that the provided lockDto actually has sensible values for its fields.
+                // TODO: Consider refactoring this logic into other (logic-handling class) class
+                if (String.IsNullOrEmpty(lockDto.LockOwner) || String.IsNullOrWhiteSpace(lockDto.LockOwner))
+                {
+                    // Reject request on setting the lockDto
+                    throw new HttpResponseException(HttpStatusCode.BadRequest);
+                }
+
+                logic.LockDto = lockDto;
+            }
         }
 
         /// <summary>
         /// Unlock will (attempt to) unlock this Event. May fail if Event is already locked
         /// </summary>
-        /// <param name="eventAddressDto">Should represent caller</param>
+        /// <param name="id">Should represent caller</param>
         [Route("Event/lock/{id}")]
         [HttpDelete]
         public void Unlock(string id)
         {
-            // Check is made to see if caller is the same as the one, who locked the Event initially
-            // the CallerIsAllowedToOperate works on Id not Uri.
-            if(!Logic.CallerIsAllowedToOperate(new EventAddressDto(){Id = id}))
+            using (var logic = new EventLogic())
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, 
-                    "Lock could be unlocked. Event was locked by someone else."));
-            }
+                // Check is made to see if caller is the same as the one, who locked the Event initially
+                // the CallerIsAllowedToOperate works on Id not Uri.
+                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = id}))
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Lock could not be unlocked. Event was locked by someone else."));
+                }
 
-            Logic.LockDto = null;
+                // TODO: Consider having a "ClearLock"-"Unlock" method that sets LockDto to null <- done! 
+                //logic.LockDto = null;
+                logic.UnlockEvent();
+            }
         }
         #endregion
     }

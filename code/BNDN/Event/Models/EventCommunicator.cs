@@ -22,7 +22,7 @@ namespace Event.Models
         public EventCommunicator(Uri eventUri)
         {
             _httpClient = new HttpClientToolbox(eventUri);
-            _logic = EventLogic.GetState();
+            _logic = new EventLogic();
         }
 
         /// <summary>

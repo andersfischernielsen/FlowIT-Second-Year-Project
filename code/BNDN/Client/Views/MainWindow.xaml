@@ -1,23 +1,26 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions" xmlns:ViewModels="clr-namespace:Client.ViewModels" x:Class="Client.Views.MainWindow"
-        Title="MainWindow" Height="700" Width="885" WindowStartupLocation="CenterScreen">
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions" 
+        xmlns:viewModels="clr-namespace:Client.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="Client.Views.MainWindow"
+        Title="Flow" Height="700" Width="885" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="191"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.DataContext>
-            <ViewModels:WorkflowListViewModel/>
+            <viewModels:WorkflowListViewModel/>
         </Grid.DataContext>
         <Grid x:Name="WorkFlowGrid" Margin="0" Width="190" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="45"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Label Content="Workflows" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Margin="10,0">
-            </Label>
+            <Label Content="Workflows" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Margin="10,0"/>
             <ListBox Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding WorkflowList}" SelectedItem="{Binding SelectedWorkflowViewModel}" Margin="10,10,10,60">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
@@ -39,30 +42,36 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Content="Events" Margin="10,0" VerticalAlignment="Top" FontSize="24" HorizontalAlignment="Left"/>
-            <ListBox x:Name="listBox" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}" Margin="10">
+            <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50"/>
-                                <RowDefinition Height="50"/>
-                            </Grid.RowDefinitions>
-                            <Border BorderBrush="DarkKhaki" BorderThickness="1" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
-                            <Label Content="{Binding}" HorizontalAlignment="Left" />
-                            <Button IsEnabled="{Binding Executable}" Grid.Column="1" HorizontalAlignment="Right" Content="Execute" VerticalAlignment="Center" Width="110" Height="34" Margin="0,25,10,25" Grid.RowSpan="2">
+                        <UniformGrid Rows="1" Columns="3">
+                            <Label Content="{Binding Name}" HorizontalAlignment="Left" FontWeight="Bold" />
+                            <UniformGrid Rows="1" Columns="3">
+                                <Rectangle Height="20" Width="20" Fill="{Binding PendingColor, Mode=OneWay}" Stroke="Black">
+                                    <Rectangle.ToolTip>
+                                        <ToolTip  Visibility="{Binding Pending}" Content="Pending"/>
+                                    </Rectangle.ToolTip>
+                                </Rectangle>
+                                <Rectangle Height="20" Width="20" Fill="{Binding IncludedColor, Mode=OneWay}" Stroke="Black">
+                                    <Rectangle.ToolTip>
+                                        <ToolTip  Visibility="{Binding Included}" Content="Included"/>
+                                    </Rectangle.ToolTip>
+                                </Rectangle>
+                                <Rectangle Height="20" Width="20" Fill="{Binding ExecutedColor, Mode=OneWay}" Stroke="Black">
+                                    <Rectangle.ToolTip>
+                                        <ToolTip  Visibility="{Binding Executed}" Content="Executed"/>
+                                    </Rectangle.ToolTip>
+                                </Rectangle>
+                            </UniformGrid>
+                            <Button IsEnabled="{Binding Executable, Mode=OneWay}" HorizontalAlignment="Right" Content="Execute" VerticalAlignment="Center" Width="110" Height="34" >
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <ei:CallMethodAction TargetObject="{Binding}" MethodName="Execute"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Button>
-                            <Label Content="Pending:" FontWeight="SemiBold" Grid.Row="1" HorizontalAlignment="Left" />
-                            <Label Content="{Binding Pending}" Grid.Row="1" HorizontalAlignment="Left" Margin="80,0,0,0" MinWidth="70" />
-                            <Label Content="Included:" FontWeight="SemiBold"   Grid.Row="1" HorizontalAlignment="Left" Margin="150,0,0,0" />
-                            <Label Content="{Binding Included}" Grid.Row="1" HorizontalAlignment="Left" Margin="230,0,0,0" MinWidth="70" />
-                            <Label Content="Executed:" FontWeight="SemiBold"   Grid.Row="1" HorizontalAlignment="Left" Margin="300,0,0,0" />
-                            <Label Content="{Binding Executed}" Grid.Row="1" HorizontalAlignment="Left" Margin="390,0,0,0" MinWidth="70" />
-                        </Grid>
+                        </UniformGrid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

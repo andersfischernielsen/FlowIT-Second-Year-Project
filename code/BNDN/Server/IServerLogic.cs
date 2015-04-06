@@ -7,8 +7,14 @@ using Common;
 
 namespace Server
 {
-    public interface IServerLogic
+    public interface IServerLogic 
     {
+        /// <summary>
+        /// Tries to log in / returns all the roles the user has on all workflows
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
+        RolesOnWorkflowsDto Login(string username);
         
         /// <summary>
         /// Get all events from a workflow
@@ -51,18 +57,18 @@ namespace Server
         /// If a worksflot with the same ID exists, it will throw an exception
         /// </summary>
         /// <param name="workflow"></param>
-        void AddNewWorkflow(WorkflowDto workflow);
+        Task AddNewWorkflow(WorkflowDto workflow);
         /// <summary>
         /// Adds a new workflow
         /// If a worksflot with the same ID exists, it will throw an exception
         /// </summary>
         /// <param name="workflow"></param>
-        void UpdateWorkflow(WorkflowDto workflow);
+        Task UpdateWorkflow(WorkflowDto workflow);
         /// <summary>
         /// Adds a new workflow
         /// If a worksflot with the same ID exists, it will throw an exception
         /// </summary>
         /// <param name="workflow"></param>
-        void RemoveWorkflow(WorkflowDto workflow);
+        Task RemoveWorkflow(WorkflowDto workflow);
     }
 }

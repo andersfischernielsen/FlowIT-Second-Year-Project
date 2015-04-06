@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using Common;
 using Server.Models;
@@ -21,7 +22,7 @@ namespace Server
             var workflows = _storage.GetAllWorkflows();
             return workflows.Select(model => new WorkflowDto()
             {
-                Id = model.WorkflowId, 
+                Id = model.ID, 
                 Name = model.Name
             });
         }
@@ -31,9 +32,34 @@ namespace Server
             var workflow = _storage.GetWorkflow(workflowId);
             return new WorkflowDto()
             {
-                Id = workflow.WorkflowId, 
+                Id = workflow.ID, 
                 Name = workflow.Name
             };
+        }
+
+        public RolesOnWorkflowsDto Login(string username)
+        {
+            var user = _storage.GetUser(username);
+            if (user == null)
+            {
+                throw new Exception();
+            }
+            var rolesModels = _storage.Login(user);
+            var rolesOnWorkflows = new Dictionary<string, IList<string>>();
+            foreach (var roleModel in rolesModels)
+            {
+                IList<string> list;
+
+                if (rolesOnWorkflows.TryGetValue(roleModel.ServerWorklowModelID, out list))
+                {
+                    list.Add(roleModel.ID);
+                }
+                else
+                {
+                    rolesOnWorkflows.Add(roleModel.ServerWorklowModelID, new List<string>{roleModel.ID});
+                }
+            }
+            return new RolesOnWorkflowsDto { RolesOnWorkflows = rolesOnWorkflows };
         }
 
         public IEnumerable<EventAddressDto> GetEventsOnWorkflow(string workflowId)
@@ -42,21 +68,21 @@ namespace Server
 
             //TODO: Throw exception if result is null. See tests for this class.
             //TODO: If the workflow exists, return an empty list, otherwise throw NotFoundException.
-            return _storage.GetEventsOnWorkflow(workflow).Select(model => new EventAddressDto()
+            return _storage.GetEventsFromWorkflow(workflow).Select(model => new EventAddressDto()
             {
-                Id = model.EventId,
-                Uri = model.Uri
+                Id = model.ID,
+                Uri = new Uri(model.Uri)
             });
         }
 
         public void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
-            _storage.AddEventToWorkflow(workflow, new ServerEventModel()
+            _storage.AddEventToWorkflow(new ServerEventModel()
             {
-                EventId = eventToBeAddedDto.Id,
-                Uri = eventToBeAddedDto.Uri,
-                ServerWorkflowModelId = workflowToAttachToId,
+                ID = eventToBeAddedDto.Id,
+                Uri = eventToBeAddedDto.Uri.ToString(),
+                ServerWorkflowModelID = workflowToAttachToId,
                 ServerWorkflowModel = workflow
             });
         }
@@ -66,9 +92,9 @@ namespace Server
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
             _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel()
             {
-                EventId = eventToBeAddedDto.Id,
-                Uri = eventToBeAddedDto.Uri,
-                ServerWorkflowModelId = workflowToAttachToId,
+                ID = eventToBeAddedDto.Id,
+                Uri = eventToBeAddedDto.Uri.ToString(),
+                ServerWorkflowModelID = workflowToAttachToId,
                 ServerWorkflowModel = workflow
             });
         }
@@ -79,29 +105,29 @@ namespace Server
             _storage.RemoveEventFromWorkflow(workflow, eventId);
         }
 
-        public void AddNewWorkflow(WorkflowDto workflow)
+        public async Task AddNewWorkflow(WorkflowDto workflow)
         {
-            _storage.AddNewWorkflow(new ServerWorkflowModel()
+            await _storage.AddNewWorkflow(new ServerWorkflowModel()
             {
-                WorkflowId = workflow.Id,
+                ID = workflow.Id,
                 Name = workflow.Name,
             });
         }
 
-        public void UpdateWorkflow(WorkflowDto workflow)
+        public async Task UpdateWorkflow(WorkflowDto workflow)
         {
-            _storage.UpdateWorkflow(new ServerWorkflowModel()
+            await _storage.UpdateWorkflow(new ServerWorkflowModel()
             {
-                WorkflowId = workflow.Id,
+                ID = workflow.Id,
                 Name = workflow.Name,
             });
         }
 
-        public void RemoveWorkflow(WorkflowDto workflow)
+        public async Task RemoveWorkflow(WorkflowDto workflow)
         {
-            _storage.RemoveWorkflow(new ServerWorkflowModel()
+            await _storage.RemoveWorkflow(new ServerWorkflowModel()
             {
-                WorkflowId = workflow.Id,
+                ID = workflow.Id,
                 Name = workflow.Name,
             });
         }

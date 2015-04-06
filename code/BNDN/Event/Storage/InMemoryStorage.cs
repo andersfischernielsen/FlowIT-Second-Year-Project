@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Event.Interfaces;
+using Event.Models;
 
-namespace Event.Models
+namespace Event.Storage
 {
-    public class InMemoryStorage : IEventStorage
+    // TODO: Delete this class if remains unused
+    public class InMemoryStorage2 : IEventStorage
     {
-        public InMemoryStorage()
+        public InMemoryStorage2()
         {
             EventUris = new Dictionary<string, Uri>();
             EventIds = new Dictionary<Uri, string>();
@@ -26,11 +28,24 @@ namespace Event.Models
         public bool Included { get; set; }
         public bool Pending { get; set; }
         public Dictionary<string, Uri> EventUris { get; set; }
+        public string Role { get; set; }
         public Dictionary<Uri, string> EventIds { get; set; }
+        public void ClearLock()
+        {
+            throw new NotImplementedException();
+        }
+
         public HashSet<Uri> Conditions { get; set; }
         public HashSet<Uri> Responses { get; set; }
         public HashSet<Uri> Exclusions { get; set; }
         public HashSet<Uri> Inclusions { get; set; }
+
+        public ICollection<EventUriIdMapping> EventUriIdMappings
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
         #endregion
 
         #region Methods For Removing/Storing Data
@@ -57,5 +72,10 @@ namespace Event.Models
             EventIds.Add(endPoint, id);
         }
         #endregion
+
+        public void Dispose()
+        {
+            // Don't do anything.
+        }
     }
 }

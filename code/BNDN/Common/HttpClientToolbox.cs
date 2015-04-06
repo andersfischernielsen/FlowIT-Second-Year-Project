@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -81,21 +82,21 @@ namespace Common
         /// <param name="uri">The uri of the api where T objects are stored</param>
         /// <param name="objectToCreate"> the object to create at the APi</param>
         /// <returns>The object which was created at the API</returns>
-        public async Task Create<T>(string uri, T objectToCreate)
+        public virtual async Task Create<T>(string uri, T objectToCreate)
         {
             try
             {
-                var response = await HttpClient.PostAsJsonAsync(uri, objectToCreate);
+                var response = HttpClient.PostAsJsonAsync(uri, objectToCreate).Result;
                 response.EnsureSuccessStatusCode();
-                //return await response.Content.ReadAsAsync<T>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Debug.WriteLine(ex.StackTrace);
                 throw;
             }
         }
 
-        public async Task<TResult> Create<TArgument, TResult>(string uri, TArgument objectToPost)
+        public virtual async Task<TResult> Create<TArgument, TResult>(string uri, TArgument objectToPost)
         {
             var response = await HttpClient.PostAsJsonAsync(uri, objectToPost);
             response.EnsureSuccessStatusCode();
@@ -110,7 +111,7 @@ namespace Common
         /// <typeparam name="T"> An object matching the expected object in the API at url (BaseAddress+Uri)</typeparam>
         /// <param name="uri">The uri of the api where T objects are stored</param>
         /// <returns>All T objects in the API using the URI</returns>
-        public async Task<IList<T>> ReadList<T>(string uri)
+        public virtual async Task<IList<T>> ReadList<T>(string uri)
         {
             T[] objects;
             try
@@ -132,7 +133,7 @@ namespace Common
         /// <typeparam name="T"> An object matching the expected object in the API at url (BaseAddress+Uri)</typeparam>
         /// <param name="uri">The uri of the api where a single T object is stored</param>
         /// <returns>An T object in the API using the URI</returns>
-        public async Task<T> Read<T>(string uri)
+        public virtual async Task<T> Read<T>(string uri)
         {
             try
             {
@@ -155,7 +156,7 @@ namespace Common
         /// <param name="uri">The uri of the api where T objects are stored</param>
         /// <param name="objectToUpdate"> the object to update at the APi with an ID</param>
         /// <returns>A Task to await</returns>
-        public async Task Update<T>(string uri, T objectToUpdate)
+        public virtual async Task Update<T>(string uri, T objectToUpdate)
         {
             try
             {
@@ -173,7 +174,7 @@ namespace Common
         /// </summary>
         /// <param name="uri">The uri of the API indicating a single object</param>
         /// <returns>A Task to await</returns>
-        public async Task Delete(string uri)
+        public virtual async Task Delete(string uri)
         {
             try
             {

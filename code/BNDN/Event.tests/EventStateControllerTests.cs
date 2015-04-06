@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using Common;
 using Event.Controllers;
 using Event.Models;
@@ -23,7 +22,7 @@ namespace Event.tests
         public void Setup()
         {
             _eventStateController = new EventStateController();
-            _eventLogic = EventLogic.GetState();
+            _eventLogic = new EventLogic();
             _eventAddressDto = new EventAddressDto(){Id = "Lock"};
 
             _eventLogic.EventId = "1";
@@ -31,6 +30,7 @@ namespace Event.tests
             _eventLogic.Pending = true;
             _eventLogic.Executed = true;
             _eventLogic.Included = false;
+            _eventLogic.Role = "TEACHER";
             _eventLogic.LockDto = new LockDto(){LockOwner = "Lock"};
             //_eventLogic.IsExecutable();
             //_eventLogic.EventStateDto = ?
@@ -41,7 +41,7 @@ namespace Event.tests
         public void TestGetPendingReturnsTrue()
         {
             //Act
-            var result = _eventStateController.GetPending(_eventAddressDto);
+            var result = _eventStateController.GetPending(_eventAddressDto.Id);
 
             //Assert
             Assert.AreEqual(true, result);
@@ -51,7 +51,7 @@ namespace Event.tests
         public void TestGetExecutedReturnsTrue()
         {
             //Act
-            var result = _eventStateController.GetExecuted(_eventAddressDto);
+            var result = _eventStateController.GetExecuted(_eventAddressDto.Id);
 
             //Assert
             Assert.AreEqual(true, result);
@@ -61,7 +61,7 @@ namespace Event.tests
         public void TestGetIncludedReturnsFalse()
         {
             //Act
-            var result = _eventStateController.GetIncluded((_eventAddressDto));
+            var result = _eventStateController.GetIncluded((_eventAddressDto.Id));
 
             //Assert
             Assert.AreEqual(false, result);
@@ -69,6 +69,17 @@ namespace Event.tests
         #endregion
 
         #region PUT-tests
+
+        [Test]
+        public async void TestExecute()
+        {
+            //Test execution of event with a given role.
+            await _eventStateController.Execute(new ExecuteDto {Roles = new List<string> {"TEACHER"}});
+            Assert.IsTrue(_eventLogic.Executed);
+
+            //TODO: Test the rest of Execute()...
+        }
+
         [Test]
         public void TestPutPendingReturnsFalse()
         {
@@ -115,7 +126,7 @@ namespace Event.tests
         public void TestUnlocking()
         {
             //Act
-            _eventStateController.Unlock(_eventAddressDto);
+            _eventStateController.Unlock(_eventAddressDto.Id);
 
             //Assert
             Assert.AreEqual(null, _eventLogic.LockDto);

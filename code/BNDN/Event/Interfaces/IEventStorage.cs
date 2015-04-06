@@ -6,20 +6,25 @@ using Event.Models;
 
 namespace Event.Interfaces
 {
-    public interface IEventStorage
+    public interface IEventStorage : IDisposable
     {
         #region Ids
         Uri OwnUri { get; set; } //For notifying server about this event. Is fetched when receiving EventDto on creation!
         string WorkflowId { get; set; }
         string EventId { get; set; }
         string Name { get; set; }
+        string Role { get; set; }
         #endregion
 
         #region State
         bool Executed { get; set; }
         bool Included { get; set; }
         bool Pending { get; set; }
+        #endregion
+
+        #region Locking
         LockDto LockDto { get; set; }
+        void ClearLock();
         #endregion
 
         #region Rules
@@ -27,7 +32,8 @@ namespace Event.Interfaces
         HashSet<Uri> Responses { get; set; }
         HashSet<Uri> Exclusions { get; set; }
         HashSet<Uri> Inclusions { get; set; }
-        Dictionary<string, Uri> EventUris { get; }
+        ICollection<EventUriIdMapping> EventUriIdMappings { get; set; }
+
 
         #endregion
 

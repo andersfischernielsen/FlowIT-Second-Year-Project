@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Common;
 
 namespace Client.ViewModels
@@ -7,12 +11,12 @@ namespace Client.ViewModels
     {
         private readonly EventAddressDto _eventAddressDto;
         private EventStateDto _eventStateDto;
-        private WorkflowViewModel _parent;
+        private readonly WorkflowViewModel _parent;
 
         public EventViewModel()
         {
             _eventAddressDto = new EventAddressDto();
-            _eventStateDto = new EventStateDto(){Executable = true};
+            _eventStateDto = new EventStateDto() { Executable = true };
             GetState();
         }
         public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
@@ -34,6 +38,20 @@ namespace Client.ViewModels
                 NotifyPropertyChanged("Id");
             }
         }
+
+        public string Name
+        {
+            get
+            {
+                return _eventStateDto.Name;
+            }
+            set
+            {
+                _eventStateDto.Name = value;
+                NotifyPropertyChanged("Name");
+            }
+        }
+
         public Uri Uri
         {
             get { return _eventAddressDto.Uri; }
@@ -51,8 +69,27 @@ namespace Client.ViewModels
             {
                 _eventStateDto.Pending = value;
                 NotifyPropertyChanged("Pending");
+                NotifyPropertyChanged("PendingColor");
             }
         }
+
+        public Brush PendingColor
+        {
+            get
+            {
+                if (Pending)
+                {
+                    var path = Path.Combine(Environment.CurrentDirectory, "Assets", "Pending.png");
+                    var uri = new Uri(path);
+                    return new ImageBrush(new BitmapImage(uri));
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         public bool Executed
         {
             get { return _eventStateDto.Executed; }
@@ -60,6 +97,24 @@ namespace Client.ViewModels
             {
                 _eventStateDto.Executed = value;
                 NotifyPropertyChanged("Executed");
+                NotifyPropertyChanged("ExecutedColor");
+            }
+        }
+
+        public Brush ExecutedColor
+        {
+            get
+            {
+                if (Executed)
+                {
+                    var path = Path.Combine(Environment.CurrentDirectory, "Assets", "Executed.png");
+                    var uri = new Uri(path);
+                    return new ImageBrush(new BitmapImage(uri));
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
         public bool Included
@@ -69,7 +124,13 @@ namespace Client.ViewModels
             {
                 _eventStateDto.Included = value;
                 NotifyPropertyChanged("Included");
+                NotifyPropertyChanged("IncludedColor");
             }
+        }
+
+        public Brush IncludedColor
+        {
+            get { return new SolidColorBrush(Colors.DeepSkyBlue);}
         }
 
         public bool Executable
@@ -89,21 +150,31 @@ namespace Client.ViewModels
         public async void GetState()
         {
             var eventConnection = new EventConnection(_eventAddressDto);
-            _eventStateDto = await eventConnection.GetState();
-            NotifyPropertyChanged("");
+            try
+            {
+                _eventStateDto = await eventConnection.GetState();
+                NotifyPropertyChanged("");
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + Environment.NewLine + e.GetType());
+            }
         }
 
         public async void Execute()
         {
-            var eventConnection = new EventConnection(_eventAddressDto);
-            await eventConnection.Execute(true);
-            _parent.GetEvents();
+            try
+            {
+                var eventConnection = new EventConnection(_eventAddressDto);
+                await eventConnection.Execute(true, _parent.WorkflowId);
+                _parent.GetEvents();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + Environment.NewLine + e.GetType());
+            }
+
         }
         #endregion
-
-        public override string ToString()
-        {
-            return string.Format("Id: {0} - URI: {1}", Id, Uri.ToString());
-        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
+using Event.Storage;
 
 namespace Event.Models
 {
@@ -81,6 +82,14 @@ namespace Event.Models
             set { Storage.Inclusions = value; }
             get { return Storage.Inclusions; }
         }
+
+        //The role that a given user has to have for execution.
+        public string Role
+        {
+            get { return Storage.Role; }
+            set { Storage.Role = value; }
+        }
+
         #endregion
 
         #region Init
@@ -88,24 +97,22 @@ namespace Event.Models
         //TODO: This is a hack! The Storage shouldn't be accessible from outside of the logic.
         public readonly IEventStorage Storage;
 
-        //Singleton instance.
-        private static EventLogic _eventLogic;
-
-        public static EventLogic GetState()
-        {
-            return _eventLogic ?? (_eventLogic = new EventLogic());
-        }
-
-        private EventLogic()
+        public EventLogic()
         {
             // TODO: Server address
-            Storage = new InMemoryStorage();
+            Storage = new EventStorage();
             
 
         }
         #endregion
 
         #region Rule Handling
+
+        public void UnlockEvent()
+        {
+            Storage.ClearLock();
+        }
+
         public async Task<bool> IsExecutable()
         {
             //If this event is excluded, return false.
@@ -133,14 +140,18 @@ namespace Event.Models
         {
             await Task.Run(() =>
             {
-                var uri = Storage.EventUris.SingleOrDefault(x => x.Key == id).Value;
+                // TODO: Not cool - let Storage do it's thing!
+                //var uri = Storage.EventUriIdMappings.SingleOrDefault(x => x.Id == id).Uri;
+
+                // Retrieve URI associated with Id
+                var uri = Storage.GetUriFromId(id);
                 if (uri == null)
                 {
                     throw new ArgumentException("Nonexistent id", id);
                 }
                 if (rules == null)
                 {
-                    throw new ArgumentNullException("rules");
+                    throw new ArgumentNullException("rules","Provided rules was null");
                 }
 
                 UpdateRule(rules.Condition, uri, Conditions);
@@ -159,26 +170,28 @@ namespace Event.Models
         #endregion
 
         #region DTO Creation
-        public async Task<IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>> GetNotifyDtos()
+        public async Task<IEnumerable<Uri>> GetNotifyDtos()
         {
-            var result = new Dictionary<Uri, List<NotifyDto>>();
+            // Todo: rename method
+
+            var set = new HashSet<Uri>();
 
             foreach (var response in Responses)
             {
-                await AddNotifyDto(result, response, s => new PendingDto { Id = s });
+                set.Add(response);
             }
 
             foreach (var exclusion in Exclusions)
             {
-                await AddNotifyDto(result, exclusion, s => new ExcludeDto { Id = s });
+                set.Add(exclusion);
             }
 
             foreach (var inclusion in Inclusions)
             {
-                await AddNotifyDto(result, inclusion, s => new IncludeDto { Id = s });
+                set.Add(inclusion);
             }
 
-            return (IEnumerable<KeyValuePair<Uri, List<NotifyDto>>>)result;
+            return set;
         }
 
         public async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
@@ -279,15 +292,25 @@ namespace Event.Models
             {
                 throw new ArgumentNullException("eventDto", "Provided EventDto was null");
             }
-            // if (EventId != null)
-            // {
-            //     throw new NullReferenceException("EventId was not null");
-            // }
 
+            // #1. Make sure that server will accept our entry
+            var dto = new EventAddressDto
+            {
+                Id = eventDto.EventId,
+                Uri = ownUri
+            };
+
+            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
+            var otherEvents = await serverCommunicator.PostEventToServer(dto);
+
+
+            // #2. Then set our own fields accordingly
             EventId = eventDto.EventId;
             WorkflowId = eventDto.WorkflowId;
             Name = eventDto.Name;
+            Role = eventDto.Role;
             Included = eventDto.Included;
+            Role = eventDto.Role;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
             Inclusions = new HashSet<Uri>(eventDto.Inclusions);
@@ -296,20 +319,11 @@ namespace Event.Models
             Responses = new HashSet<Uri>(eventDto.Responses);
             OwnUri = ownUri;
 
-            var dto = new EventAddressDto
-            {
-                Id = EventId,
-                Uri = OwnUri
-            };
-
-           var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
-
-           var otherEvents = await serverCommunicator.PostEventToServer(dto);
-
+            // #3: Register events that are related to us. 
             foreach (var otherEvent in otherEvents)
             {
                 // Todo register self with other Events.
-                await _eventLogic.RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+                await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
             }
         }
 
@@ -377,7 +391,9 @@ namespace Event.Models
 
         public async Task Execute()
         {
-            var addressDto = new EventAddressDto() {Id = EventId, Uri = OwnUri};
+            Executed = true;
+            Pending = false;
+            var addressDto = new EventAddressDto {Id = EventId, Uri = OwnUri};
             await Task.Run(async () =>
             {
                 foreach (var pending in Responses)
@@ -386,11 +402,11 @@ namespace Event.Models
                 }
                 foreach (var inclusion in Inclusions)
                 {
-                    await new EventCommunicator(inclusion).SendPending(true, addressDto);
+                    await new EventCommunicator(inclusion).SendIncluded(true, addressDto);
                 }
                 foreach (var exclusion in Exclusions)
                 {
-                    await new EventCommunicator(exclusion).SendPending(true, addressDto);
+                    await new EventCommunicator(exclusion).SendIncluded(false, addressDto);
                 }
             });
         }
@@ -398,6 +414,11 @@ namespace Event.Models
         public bool IsLocked()
         {
             return LockDto != null;
+        }
+
+        public void Dispose()
+        {
+            Storage.Dispose();
         }
     }
 }

@@ -1,23 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using Client.Views;
-using Common;
+using Newtonsoft.Json;
 
 namespace Client.ViewModels
 {
     public class LoginViewModel : ViewModelBase
     {
         public Action CloseAction { get; set; }
+        private bool _loginStarted;
+        private string _password;
+        private string _status;
+        private string _username;
+        private readonly Uri _serverAddress;
         public LoginViewModel()
         {
-            
+            if (File.Exists("settings.json"))
+            {
+                var settingsjson = File.ReadAllText("settings.json");
+                var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
+
+                _username = settings.Username ?? "Username";
+                _serverAddress = new Uri(settings.ServerAddress ?? "http://localhost:13768/");
+            }
+            else
+            {
+                _username = "Username";
+                _serverAddress = new Uri("http://localhost:13768/");
+            }
+            _status = "";
+            _password = "Password";
         }
 
         #region Databindings
-        private string _username = "Username";
+
         public string Username
         {
             get { return _username; }
@@ -28,7 +44,17 @@ namespace Client.ViewModels
             }
         }
 
-        private string _password = "Password";
+
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                NotifyPropertyChanged("Status");
+            }
+        }
+
         public string Password
         {
             get { return _password; }
@@ -42,13 +68,47 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public void Login()
+        public async void Login()
         {
-            // PUT LOGIN LOGIC HERE
+            if (_loginStarted) return;
+            _loginStarted = true;
 
-            var window = new MainWindow();
-            window.Show();
-            CloseAction.Invoke();
+            // PUT LOGIN LOGIC HERE
+            Status = "";
+            var connection = new ServerConnection(_serverAddress);
+            try
+            {
+                var roles = await connection.Login(Username);
+                Status = "Login successful";
+                EventConnection.RoleForWorkflow = roles.RolesOnWorkflows;
+
+
+                // Save settings
+                var settings = new Settings
+                {
+                    ServerAddress = _serverAddress.AbsoluteUri,
+                    Username = _username
+                };
+                File.WriteAllText("settings.json", JsonConvert.SerializeObject(settings, Formatting.Indented));
+                // Save settings end.
+
+                var window = new MainWindow();
+                window.Show();
+                CloseAction.Invoke();
+            }
+            catch (Exception ex)
+            {
+                if (ex is LoginFailedException || ex is ServerNotFoundException)
+                {
+                    _loginStarted = false;
+                    Status = ex.Message;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            
         }
 
         #endregion
