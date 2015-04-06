@@ -23,14 +23,13 @@ namespace Event.Controllers
         /// Get the entire Event, (namely rules and state for this Event)
         /// </summary>
         /// <returns>A task containing a single EventDto which represents the Events current state.</returns>
-        [Route("{eventId}/event")]
+        [Route("events/{eventId}")]
         [HttpGet]
         public async Task<EventDto> GetEvent(string eventId)
         {
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventId))
             {
                 // Dismiss request if Event is currently locked
-                // This gon' be awesome
                 if (logic.IsLocked())
                 {
                     // Event is currently locked)
@@ -45,10 +44,11 @@ namespace Event.Controllers
         /// Sets up this Event, namely its rules and state
         /// </summary>
         /// <param name="eventDto">The data (ruleset and initial state), this Event should be set to</param>
+        /// <param name="eventId">The id of the Event that is posted</param>
         /// <returns></returns>
-        [Route("event")]
+        [Route("events")]
         [HttpPost]
-        public async Task PostEvent([FromBody] EventDto eventDto)
+        public async Task PostEvent([FromBody] EventDto eventDto, string eventId)
         {
             // Check that provided input can be mapped onto an instance of EventDto
             if (!ModelState.IsValid)
@@ -69,10 +69,12 @@ namespace Event.Controllers
 
             if (eventDto == null)
             {
+                // TODO: Provide nicer description / error message
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventId))
             {
+                // TODO: An Event that has just been posted, should not be able to be locked already...Delete! 
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
@@ -95,10 +97,11 @@ namespace Event.Controllers
         /// the provided EventDto-argument passed to the method call
         /// </summary>
         /// <param name="eventDto">Holds the data that should override the current data held in this Event</param>
+        /// <param name="eventId">Id of the Event that is to be updated</param>
         /// <returns></returns>
-        [Route("event")]
+        [Route("events/{eventId}")]
         [HttpPut]
-        public async Task PutEvent([FromBody] EventDto eventDto)
+        public async Task PutEvent([FromBody] EventDto eventDto, string eventId)
         {
             if (!ModelState.IsValid)
             {
@@ -106,7 +109,7 @@ namespace Event.Controllers
                                 "Provided input could not be mapped onto an instance of EventDto"));
             }
 
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventId))
             {
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
@@ -130,12 +133,16 @@ namespace Event.Controllers
             }
         }
 
-
-        [Route("event")]
+        /// <summary>
+        /// DeleteEvent will delete an Event
+        /// </summary>
+        /// <param name="eventId">The id of the Event to be deleted</param>
+        /// <returns></returns>
+        [Route("events/{eventId}")]
         [HttpDelete]
-        public async Task DeleteEvent()
+        public async Task DeleteEvent(string eventId)
         {
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventId))
             {
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
