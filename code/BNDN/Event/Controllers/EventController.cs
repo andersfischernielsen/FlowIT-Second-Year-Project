@@ -7,6 +7,7 @@ using System.Web.Http;
 using Common;
 using Event.Interfaces;
 using Event.Models;
+using Event.Storage;
 
 namespace Event.Controllers
 {

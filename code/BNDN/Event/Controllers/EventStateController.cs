@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net;
 using Common;
 using Event.Models;
+using Event.Storage;
 
 namespace Event.Controllers
 {
