@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 
@@ -27,17 +28,47 @@ namespace Client
 
         public async Task<RolesOnWorkflowsDto> Login(string username)
         {
-            return await _http.Read<RolesOnWorkflowsDto>(string.Format("login/{0}",username));
+            try
+            {
+                return await _http.Read<RolesOnWorkflowsDto>(string.Format("login/{0}", username));
+            }
+            catch (HttpRequestException ex)
+            {
+                if (ex.Message.Contains("400 (Bad Request)"))
+                {
+                    throw new LoginFailedException(ex);
+                }
+                throw new ServerNotFoundException(ex);
+            }
         }
 
         public async Task<IList<WorkflowDto>> GetWorkflows()
         {
-            return await _http.ReadList<WorkflowDto>("workflows");
+            try
+            {
+                return await _http.ReadList<WorkflowDto>("workflows");
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerNotFoundException(ex);
+            }
+            
         }
 
         public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)
         {
-            return _http.ReadList<EventAddressDto>(string.Format("workflows/{0}", workflow.Id));
+            try
+            {
+                return _http.ReadList<EventAddressDto>(string.Format("workflows/{0}", workflow.Id));
+            }
+            catch (HttpRequestException ex)
+            {
+                if (ex.Message.Contains("400 (Bad Request)"))
+                {
+                    throw new InvalidWorkflowIdException(ex);
+                }
+                throw new ServerNotFoundException(ex);
+            }
         }
     }
 }
