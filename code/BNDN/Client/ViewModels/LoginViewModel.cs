@@ -96,10 +96,17 @@ namespace Client.ViewModels
                 window.Show();
                 CloseAction.Invoke();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _loginStarted = false;
-                Status = "Login failed";
+                if (ex is LoginFailedException || ex is ServerNotFoundException)
+                {
+                    _loginStarted = false;
+                    Status = ex.Message;
+                }
+                else
+                {
+                    throw;
+                }
             }
             
         }
