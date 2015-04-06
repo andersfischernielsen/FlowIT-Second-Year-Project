@@ -86,7 +86,7 @@ namespace Common
         {
             try
             {
-                var response = HttpClient.PostAsJsonAsync(uri, objectToCreate).Result;
+                var response = await HttpClient.PostAsJsonAsync(uri, objectToCreate);
                 response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
