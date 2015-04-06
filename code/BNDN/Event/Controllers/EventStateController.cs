@@ -122,8 +122,9 @@ namespace Event.Controllers
             {
                 //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
                 // Check is made to see whether caller is allowed to execute this method at the moment
-                if (!id.Equals("-1") && !logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
+                if (!senderId.Equals("-1") && !logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
                 {
+                    // TODO: Review !senderId.Equals("-1") <- What is this...?
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Cannot access this property. The event is locked."));
                 }

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity;
-using System.Linq;
-using System.Web;
+﻿using System.Data.Entity;
+using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
 
-namespace Event
+namespace Event.Storage
 {
-    public class EventContext : DbContext
+    public class EventContext : DbContext, IEventContext
     {   
         public DbSet<EventIdentificationModel> EventIdentification { get; set; }
         public DbSet<EventStateModel> EventState { get; set; }

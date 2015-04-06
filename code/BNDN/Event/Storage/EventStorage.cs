@@ -14,14 +14,13 @@ namespace Event.Storage
     /// </summary>
     public class EventStorage : IEventStorage
     {
-        private EventContext _context;
+        private IEventContext _context;
         private string _eventId { get; set; }
 
-        // TODO: Discuss: Do we need to dependency-inject the context in here, for unit-testing purposes?
-        public EventStorage(string eventId)
+        public EventStorage(string eventId, IEventContext context)
         {
             _eventId = eventId;
-            _context = new EventContext();
+            _context = context;
         }
 
 

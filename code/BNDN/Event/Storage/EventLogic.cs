@@ -93,8 +93,7 @@ namespace Event.Storage
 
         #region Init
         //Storage instance for getting and setting data.
-        //TODO: This is a hack! The Storage shouldn't be accessible from outside of the logic.
-        public readonly IEventStorage Storage;
+        private readonly IEventStorage Storage;
 
         /// <summary>
         /// Constructor for EventLogic
@@ -102,10 +101,7 @@ namespace Event.Storage
         /// <param name="eventId">The id of the event, that this EventLogic instance should represent</param>
         public EventLogic(string eventId)
         {
-            // TODO: Server address
-            Storage = new EventStorage(eventId);
-            
-
+            Storage = new EventStorage(eventId, new EventContext());
         }
         #endregion
 
