@@ -11,7 +11,9 @@ using Event.Storage;
 namespace Event.Controllers
 {
     /// <summary>
-    /// EventStateController handles manipulations on Event't State, including locks on Event
+    /// EventStateController handles manipulations on Event't State, including locks on Event.
+    /// The reason why we're not using the same EventAddressDtos at GET-requests as on PUT-requests
+    /// is a GET-request should not contain something; only get something.
     /// </summary>
     public class EventStateController : ApiController
     {
@@ -124,7 +126,6 @@ namespace Event.Controllers
                 // Check is made to see whether caller is allowed to execute this method at the moment
                 if (!senderId.Equals("-1") && !logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
                 {
-                    // TODO: Review !senderId.Equals("-1") <- What is this...?
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Cannot access this property. The event is locked."));
                 }

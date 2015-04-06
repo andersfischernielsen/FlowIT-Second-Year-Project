@@ -13,6 +13,7 @@ namespace Client
         /// </summary>
         /// <returns></returns>
         Task<EventStateDto> GetState();
+        
         /// <summary>
         /// Execute a task
         /// </summary>
