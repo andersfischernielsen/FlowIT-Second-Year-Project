@@ -39,6 +39,10 @@ namespace Event.Storage
         public HashSet<Uri> OldResponses { get; set; }
         public HashSet<Uri> OldExclusions { get; set; }
         public HashSet<Uri> OldInclusions { get; set; }
+        public HashSet<RelationToOtherEventModel> Conditions { get; set; }
+        public HashSet<RelationToOtherEventModel> Responses { get; set; }
+        public HashSet<RelationToOtherEventModel> Exclusions { get; set; }
+        public HashSet<RelationToOtherEventModel> Inclusions { get; set; }
 
         public ICollection<EventUriIdMapping> EventUriIdMappings
         {

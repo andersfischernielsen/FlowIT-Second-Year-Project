@@ -36,12 +36,6 @@ namespace Event.Interfaces
             where T : NotifyDto;
         #endregion
 
-        #region URI Handling
-        Task RegisterIdWithUri(string id, Uri endPoint);
-        Task<bool> KnowsId(string id);
-        Task RemoveIdAndUri(string id);
-        #endregion
-
         Task ResetState();
         bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto);
         bool IsLocked();

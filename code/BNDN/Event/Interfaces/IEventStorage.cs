@@ -40,13 +40,5 @@ namespace Event.Interfaces
 
 
         #endregion
-
-        #region Id and Uri Handling
-        Uri GetUriFromId(string id);
-        string GetIdFromUri(Uri endPoint);
-        void RemoveIdAndUri(string id);
-        void StoreIdAndUri(string id, Uri endPoint);
-        bool IdExists(string id);
-        #endregion
     }
 }
