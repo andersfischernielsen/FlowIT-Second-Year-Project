@@ -22,6 +22,7 @@ namespace Event.Controllers
         /// <summary>
         /// Get the entire Event, (namely rules and state for this Event)
         /// </summary>
+        /// <param name="eventId">The id of the Event, that you wish to get an EventDto representation of</param>
         /// <returns>A task containing a single EventDto which represents the Events current state.</returns>
         [Route("events/{eventId}")]
         [HttpGet]
@@ -41,14 +42,13 @@ namespace Event.Controllers
         }
 
         /// <summary>
-        /// Sets up this Event, namely its rules and state
+        /// Sets up an Event at this WebAPI
         /// </summary>
         /// <param name="eventDto">The data (ruleset and initial state), this Event should be set to</param>
-        /// <param name="eventId">The id of the Event that is posted</param>
         /// <returns></returns>
         [Route("events")]
         [HttpPost]
-        public async Task PostEvent([FromBody] EventDto eventDto, string eventId)
+        public async Task PostEvent([FromBody] EventDto eventDto)
         {
             // Check that provided input can be mapped onto an instance of EventDto
             if (!ModelState.IsValid)
@@ -72,7 +72,7 @@ namespace Event.Controllers
                 // TODO: Provide nicer description / error message
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
-            using (IEventLogic logic = new EventLogic(eventId))
+            using (IEventLogic logic = new EventLogic(eventDto.EventId))
             {
                 // TODO: An Event that has just been posted, should not be able to be locked already...Delete! 
                 // Dismiss request if Event is currently locked
