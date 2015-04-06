@@ -155,7 +155,7 @@ namespace Event.tests
         public void GetEventStateDtoWhenIncludedIsFalseTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.Included = false;
             eventLogic.Executed = true;
             eventLogic.Pending = true;
@@ -177,7 +177,7 @@ namespace Event.tests
         public void GetEventStateDtoWhenIncludedIsTrueTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.Included = true;
             eventLogic.Executed = false;
             eventLogic.Pending = false;
