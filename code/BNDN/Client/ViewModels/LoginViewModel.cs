@@ -33,7 +33,7 @@ namespace Client.ViewModels
         }
 
         #region Databindings
-        
+
         public string Username
         {
             get { return _username; }
@@ -44,7 +44,7 @@ namespace Client.ViewModels
             }
         }
 
-        
+
         public string Status
         {
             get { return _status; }
@@ -98,6 +98,7 @@ namespace Client.ViewModels
             }
             catch (Exception)
             {
+                _loginStarted = false;
                 Status = "Login failed";
             }
             
