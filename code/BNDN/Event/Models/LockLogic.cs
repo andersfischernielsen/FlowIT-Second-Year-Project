@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
-using Event.Interfaces;
 
 namespace Event.Models
 {
@@ -70,33 +69,31 @@ namespace Event.Models
             }
             catch (Exception)
             {
-                UnlockSome();
+                UnlockSome().Wait();
                 return false;
             }
         }
 
-        private void UnlockSome()
+        private async Task UnlockSome()
         {
-            EventAddressDto eventAddress = new EventAddressDto() {Id = _logic.EventId, Uri = _logic.OwnUri};
+            EventAddressDto eventAddress = new EventAddressDto {Id = _logic.EventId, Uri = _logic.OwnUri};
 
-            var parallelTasks = Parallel.ForEach(_lockedEvents, pair =>
+            // Unlock the other Events. 
+            // TODO: Do sazzy Parallel.ForEach here, too...?
+            foreach (var uri in _lockedEvents)
             {
                 try
                 {
-                    new EventCommunicator(pair).Unlock(eventAddress).Wait();
+                    await new EventCommunicator(uri).Unlock(eventAddress);
                 }
                 catch (Exception)
                 {
                     // TODO: Find out what to do if you cant even unlock. Even.
                 }
-                
-            });
-
-            while (!parallelTasks.IsCompleted)
-            {
             }
+
             _lockedEvents = null;
-            _logic.LockDto = null;
+            _logic.UnlockEvent();
         }
 
         public async Task<bool> UnlockAll()
