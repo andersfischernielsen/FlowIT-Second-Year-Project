@@ -15,11 +15,10 @@ namespace Event.Storage
     public class EventStorage : IEventStorage
     {
         private IEventContext _context;
-        private string _eventId { get; set; }
 
         public EventStorage(string eventId, IEventContext context)
         {
-            _eventId = eventId;
+            EventId = eventId;
             _context = context;
         }
 
@@ -30,14 +29,14 @@ namespace Event.Storage
             get
             {
                 EventIdentificationIsInALegalState();
-                return new Uri(_context.EventIdentification.Single(model => model.Id == _eventId).OwnUri);
+                return new Uri(_context.EventIdentification.Single(model => model.Id == EventId).OwnUri);
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
                 // Add replacing value
-                _context.EventIdentification.Single(model => model.Id == _eventId).OwnUri = value.AbsoluteUri;
+                _context.EventIdentification.Single(model => model.Id == EventId).OwnUri = value.AbsoluteUri;
                 _context.SaveChanges();
 
             }
@@ -48,13 +47,13 @@ namespace Event.Storage
             get
             {
                 EventIdentificationIsInALegalState();
-                return _context.EventIdentification.Single(model => model.Id == _eventId).WorkflowId;
+                return _context.EventIdentification.Single(model => model.Id == EventId).WorkflowId;
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single(model => model.Id == _eventId).WorkflowId = value;
+                _context.EventIdentification.Single(model => model.Id == EventId).WorkflowId = value;
                 _context.SaveChanges();
             }
         }
@@ -66,13 +65,13 @@ namespace Event.Storage
             get
             {
                 EventIdentificationIsInALegalState();
-                return _context.EventIdentification.Single(model => model.Id == _eventId).Name;
+                return _context.EventIdentification.Single(model => model.Id == EventId).Name;
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single(model => model.Id == _eventId).Name = value;
+                _context.EventIdentification.Single(model => model.Id == EventId).Name = value;
                 _context.SaveChanges();
             }
         }
@@ -83,13 +82,13 @@ namespace Event.Storage
             {
                 EventIdentificationIsInALegalState();
 
-                return _context.EventIdentification.Single(model => model.Id == _eventId).Role;
+                return _context.EventIdentification.Single(model => model.Id == EventId).Role;
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single(model => model.Id == _eventId).Role = value;
+                _context.EventIdentification.Single(model => model.Id == EventId).Role = value;
                 _context.SaveChanges();
             }
         }
@@ -100,13 +99,13 @@ namespace Event.Storage
             {
                 EventStateIsInALegalState();
 
-                return _context.EventState.Single(model => model.Id == _eventId).Executed;
+                return _context.EventState.Single(model => model.Id == EventId).Executed;
             }
             set
             {
                 EventStateIsInALegalState();
 
-                _context.EventState.Single(model => model.Id == _eventId).Executed = value;
+                _context.EventState.Single(model => model.Id == EventId).Executed = value;
                 _context.SaveChanges();
             }
         }
@@ -117,13 +116,13 @@ namespace Event.Storage
             {
                 EventStateIsInALegalState();
 
-                return _context.EventState.Single(model => model.Id == _eventId).Included;
+                return _context.EventState.Single(model => model.Id == EventId).Included;
             }
             set
             {
                 EventStateIsInALegalState();
 
-                _context.EventState.Single(model => model.Id == _eventId).Included = value;
+                _context.EventState.Single(model => model.Id == EventId).Included = value;
                 _context.SaveChanges();
             }
         }
@@ -134,13 +133,13 @@ namespace Event.Storage
             {
                 EventStateIsInALegalState();
 
-                return _context.EventState.Single(model => model.Id == _eventId).Pending;
+                return _context.EventState.Single(model => model.Id == EventId).Pending;
             }
             set
             {
                 EventStateIsInALegalState();
 
-                _context.EventState.Single(model => model.Id == _eventId).Pending = value;
+                _context.EventState.Single(model => model.Id == EventId).Pending = value;
                 _context.SaveChanges();
             }
         }
@@ -155,12 +154,12 @@ namespace Event.Storage
             {
                 EventLockIsInALegalState();
                 // SingleOrDeafult will return either null or the actual single element in set. 
-                return _context.LockDto.SingleOrDefault(model => model.Id == _eventId);
+                return _context.LockDto.SingleOrDefault(model => model.Id == EventId);
             }
             set
             {
                 EventLockIsInALegalState();
-                if (_context.LockDto.Any(model => model.Id == _eventId))
+                if (_context.LockDto.Any(model => model.Id == EventId))
                 {
                     throw new ApplicationException("There already exists a lock on this event");
                 }
@@ -172,7 +171,7 @@ namespace Event.Storage
 
                 // Remove current LockDto (should be either only a single element or no element at all
                 // Should not be neccesary.
-                foreach (var element in _context.LockDto.Where(model => model.Id == _eventId))
+                foreach (var element in _context.LockDto.Where(model => model.Id == EventId))
                 {
                     _context.LockDto.Remove(element);
                 }
@@ -193,7 +192,7 @@ namespace Event.Storage
             EventLockIsInALegalState();
 
             // Clear the single LockDto-element 
-            foreach (var lockDto in _context.LockDto.Where(model => model.Id == _eventId))
+            foreach (var lockDto in _context.LockDto.Where(model => model.Id == EventId))
             {
                 _context.LockDto.Remove(lockDto);
             }
@@ -206,7 +205,7 @@ namespace Event.Storage
             get
             {
                 // No need to do zero or ">1" count check here; that is perfectly legal
-                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -219,7 +218,7 @@ namespace Event.Storage
             set
             {
                 // Reset current list
-                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Conditions.Remove(uri);
                 }
@@ -227,7 +226,7 @@ namespace Event.Storage
                 // Add replacing values
                 foreach (var element in value)
                 {
-                    var uriToAdd = new ConditionUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = _eventId};
+                    var uriToAdd = new ConditionUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = EventId};
                     _context.Conditions.Add(uriToAdd);
                 }
 
@@ -240,7 +239,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -253,7 +252,7 @@ namespace Event.Storage
             set
             {
                 // Remove current content 
-                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Responses.Remove(uri);
                 }
@@ -261,7 +260,7 @@ namespace Event.Storage
                 // Add replacing content
                 foreach (var element in value)
                 {
-                    var uriToAdd = new ResponseUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = _eventId};
+                    var uriToAdd = new ResponseUri() { UriString = element.AbsoluteUri, EventIdentificationModelId = EventId};
                     _context.Responses.Add(uriToAdd);
                 }
 
@@ -274,7 +273,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -287,7 +286,7 @@ namespace Event.Storage
             set
             {
                 // Remove current content
-                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Exclusions.Remove(uri);
                 }
@@ -308,7 +307,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<Uri>();
 
                 foreach (var element in dbset)
@@ -320,7 +319,7 @@ namespace Event.Storage
             }
             set
             {
-                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Inclusions.Remove(uri);
                 }
@@ -330,7 +329,7 @@ namespace Event.Storage
                     var uriToAdd = new InclusionUri()
                     {
                         UriString = element.AbsoluteUri,
-                        EventId = _eventId
+                        EventId = EventId
                     };
                     _context.Inclusions.Add(uriToAdd);
                 }
@@ -342,7 +341,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
                 foreach (var element in dbset)
@@ -358,7 +357,7 @@ namespace Event.Storage
             }
             set
             {
-                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Conditions.Remove(uri);
                 }
@@ -369,7 +368,7 @@ namespace Event.Storage
                     {
                         UriString = element.Uri.AbsoluteUri,
                         EventId = element.EventID,
-                        EventIdentificationModelId = _eventId
+                        EventIdentificationModelId = EventId
                     };
                     _context.Conditions.Add(uriToAdd);
                 }
@@ -380,7 +379,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
                 foreach (var element in dbset)
@@ -396,7 +395,7 @@ namespace Event.Storage
             }
             set
             {
-                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Responses.Remove(uri);
                 }
@@ -407,7 +406,7 @@ namespace Event.Storage
                     {
                         UriString = element.Uri.AbsoluteUri,
                         EventId = element.EventID,
-                        EventIdentificationModelId = _eventId
+                        EventIdentificationModelId = EventId
                     };
                     _context.Responses.Add(uriToAdd);
                 }
@@ -418,7 +417,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
                 foreach (var element in dbset)
@@ -434,7 +433,7 @@ namespace Event.Storage
             }
             set
             {
-                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Exclusions.Remove(uri);
                 }
@@ -445,7 +444,7 @@ namespace Event.Storage
                     {
                         UriString = element.Uri.AbsoluteUri,
                         EventId = element.EventID,
-                        EventIdentificationModelId = _eventId
+                        EventIdentificationModelId = EventId
                     };
                     _context.Exclusions.Add(uriToAdd);
                 }
@@ -456,7 +455,7 @@ namespace Event.Storage
         {
             get
             {
-                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
                 foreach (var element in dbset)
@@ -472,7 +471,7 @@ namespace Event.Storage
             }
             set
             {
-                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Inclusions.Remove(uri);
                 }
@@ -483,7 +482,7 @@ namespace Event.Storage
                     {
                         UriString = element.Uri.AbsoluteUri, 
                         EventId = element.EventID, 
-                        EventIdentificationModelId = _eventId
+                        EventIdentificationModelId = EventId
                     };
                     _context.Inclusions.Add(uriToAdd);
                 }
@@ -594,7 +593,7 @@ namespace Event.Storage
         /// </summary>
         private void EventIdentificationIsInALegalState()
         {
-            var eventIdentification = _context.EventIdentification.Where(model => model.Id == _eventId);
+            var eventIdentification = _context.EventIdentification.Where(model => model.Id == EventId);
             // Check that there's currently only a single element in database
             if (eventIdentification.Count() > 1)
             {
@@ -602,7 +601,7 @@ namespace Event.Storage
                     "More than a single EventIdentification element in database-set in Event");
             }
 
-            if (!_context.EventIdentification.Any(model => model.Id == _eventId))
+            if (!_context.EventIdentification.Any(model => model.Id == EventId))
             {
                 throw new ApplicationException("EventIdentification was not initialized in Event." +
                                                "Count was zero");
@@ -615,7 +614,7 @@ namespace Event.Storage
         /// </summary>
         private void EventLockIsInALegalState()
         {
-            var lockDto = _context.LockDto.Where(model => model.Id == _eventId);
+            var lockDto = _context.LockDto.Where(model => model.Id == EventId);
             // Check that there's currently only a single element in database
             if (lockDto.Count() > 1)
             {

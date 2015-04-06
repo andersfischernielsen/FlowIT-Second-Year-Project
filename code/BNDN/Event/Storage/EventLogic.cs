@@ -123,7 +123,7 @@ namespace Event.Storage
 
             foreach (var condition in Conditions)
             {
-                IEventFromEvent eventCommunicator = new EventCommunicator(condition);
+                IEventFromEvent eventCommunicator = new EventCommunicator(condition.Uri, condition.EventID, EventId);
                 var executed = await eventCommunicator.IsExecuted();
                 var included = await eventCommunicator.IsIncluded();
                 // If the condition-event is not executed and currently included.
@@ -156,11 +156,11 @@ namespace Event.Storage
             });
         }
 
-        private static void UpdateRule(bool shouldAdd, RelationToOtherEventModel value, ISet<Uri> collection)
+        private static void UpdateRule(bool shouldAdd, RelationToOtherEventModel value, ISet<RelationToOtherEventModel> collection)
         {
             //Todo : Persist this stuff.
-            if (shouldAdd) collection.Add(value.Uri);
-            else collection.Remove(value.Uri);
+            if (shouldAdd) collection.Add(value);
+            else collection.Remove(value);
         }
 
         #endregion
@@ -174,17 +174,17 @@ namespace Event.Storage
 
             foreach (var response in Responses)
             {
-                set.Add(response);
+                set.Add(response.Uri);
             }
 
             foreach (var exclusion in Exclusions)
             {
-                set.Add(exclusion);
+                set.Add(exclusion.Uri);
             }
 
             foreach (var inclusion in Inclusions)
             {
-                set.Add(inclusion);
+                set.Add(inclusion.Uri);
             }
 
             return set;
@@ -236,10 +236,10 @@ namespace Event.Storage
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,
-                    Conditions = Conditions,
-                    Exclusions = Exclusions,
-                    Responses = Responses,
-                    Inclusions = Inclusions
+                    Conditions = Conditions.Select(model => new EventAddressDto{Id = model.EventID,Uri = model.Uri}),
+                    Exclusions = Exclusions.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
+                    Responses = Responses.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
+                    Inclusions = Inclusions.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri })
                 });
             }
         }
@@ -376,15 +376,15 @@ namespace Event.Storage
             {
                 foreach (var pending in Responses)
                 {
-                    await new EventCommunicator(pending).SendPending(true, addressDto);
+                    await new EventCommunicator(pending.Uri,pending.EventID,EventId).SendPending(true, addressDto);
                 }
                 foreach (var inclusion in Inclusions)
                 {
-                    await new EventCommunicator(inclusion).SendIncluded(true, addressDto);
+                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, EventId).SendIncluded(true, addressDto);
                 }
                 foreach (var exclusion in Exclusions)
                 {
-                    await new EventCommunicator(exclusion).SendIncluded(false, addressDto);
+                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, EventId).SendIncluded(false, addressDto);
                 }
             });
         }
