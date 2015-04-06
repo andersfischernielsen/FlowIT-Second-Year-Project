@@ -12,10 +12,10 @@ namespace Event.Storage
         {
             EventUris = new Dictionary<string, Uri>();
             EventIds = new Dictionary<Uri, string>();
-            Conditions = new HashSet<Uri>();
-            Responses = new HashSet<Uri>();
-            Exclusions = new HashSet<Uri>();
-            Inclusions = new HashSet<Uri>();
+            OldConditions = new HashSet<Uri>();
+            OldResponses = new HashSet<Uri>();
+            OldExclusions = new HashSet<Uri>();
+            OldInclusions = new HashSet<Uri>();
         }
 
         #region Properties
@@ -35,10 +35,10 @@ namespace Event.Storage
             throw new NotImplementedException();
         }
 
-        public HashSet<Uri> Conditions { get; set; }
-        public HashSet<Uri> Responses { get; set; }
-        public HashSet<Uri> Exclusions { get; set; }
-        public HashSet<Uri> Inclusions { get; set; }
+        public HashSet<Uri> OldConditions { get; set; }
+        public HashSet<Uri> OldResponses { get; set; }
+        public HashSet<Uri> OldExclusions { get; set; }
+        public HashSet<Uri> OldInclusions { get; set; }
 
         public ICollection<EventUriIdMapping> EventUriIdMappings
         {

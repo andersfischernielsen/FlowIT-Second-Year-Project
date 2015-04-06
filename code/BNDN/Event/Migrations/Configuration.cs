@@ -50,25 +50,25 @@ namespace Event.Migrations
             });
 
             
-            context.Exclusions.Add(new ExclusionUri()
+            context.OldExclusions.Add(new ExclusionUri()
             {
                 Id = 0,
                 UriString = null
             });
 
-            context.Inclusions.Add(new InclusionUri()
+            context.OldInclusions.Add(new InclusionUri()
             {
                 Id = 0,
                 UriString = null
             });
 
-            context.Conditions.Add(new ConditionUri()
+            context.OldConditions.Add(new ConditionUri()
             {
                 Id = 0,
                 UriString = null
             });
 
-            context.Responses.Add(new ResponseUri()
+            context.OldResponses.Add(new ResponseUri()
             {
                 Id = 0,
                 UriString = null

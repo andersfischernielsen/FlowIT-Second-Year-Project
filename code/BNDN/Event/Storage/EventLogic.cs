@@ -60,26 +60,26 @@ namespace Event.Storage
 
         public HashSet<Uri> Conditions
         {
-            set { Storage.Conditions = value; }
-            get { return Storage.Conditions; }
+            set { Storage.OldConditions = value; }
+            get { return Storage.OldConditions; }
         }
 
         public HashSet<Uri> Responses
         {
-            set { Storage.Responses = value; }
-            get { return Storage.Responses; }
+            set { Storage.OldResponses = value; }
+            get { return Storage.OldResponses; }
         }
 
         public HashSet<Uri> Exclusions
         {
-            set { Storage.Exclusions = value; }
-            get { return Storage.Exclusions; }
+            set { Storage.OldExclusions = value; }
+            get { return Storage.OldExclusions; }
         }
 
         public HashSet<Uri> Inclusions
         {
-            set { Storage.Inclusions = value; }
-            get { return Storage.Inclusions; }
+            set { Storage.OldInclusions = value; }
+            get { return Storage.OldInclusions; }
         }
 
         //The role that a given user has to have for execution.
