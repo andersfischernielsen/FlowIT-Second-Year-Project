@@ -399,11 +399,11 @@ namespace Event.Storage
             }
 
 
-            //if (!_context.EventIdentification.Any(model => model.Id == EventId))
-            //{
-            //    throw new ApplicationException("EventIdentification was not initialized in Event." +
-            //                                   "Count was zero");
-            //}
+            if (!eventIdentification.Any(model => model.Id == EventId))
+            {
+                throw new ApplicationException("EventIdentification was not initialized in Event." +
+                                               "Count was zero");
+            }
         }
 
         /// <summary>
