@@ -30,10 +30,6 @@ namespace Event.Interfaces
         #region DTO Creation
         Task<EventStateDto> EventStateDto { get; }
         Task<EventDto> EventDto { get; }
-        Task<IEnumerable<Uri>> GetNotifyDtos();
-
-        Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
-            where T : NotifyDto;
         #endregion
 
         Task ResetState();
