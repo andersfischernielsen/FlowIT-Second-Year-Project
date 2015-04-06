@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
-using Event.Interfaces;
 
-namespace Event.Models
+namespace Event.Storage
 {
     /// <summary>
     /// LockLogic is the class that handles the operations regarding locking this Event and other related, dependent Events. 

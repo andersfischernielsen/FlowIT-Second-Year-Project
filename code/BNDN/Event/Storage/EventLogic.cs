@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
-using Event.Storage;
+using Event.Models;
 
-namespace Event.Models
+namespace Event.Storage
 {
     public class EventLogic : IEventLogic
     {

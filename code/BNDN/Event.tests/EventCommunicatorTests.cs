@@ -7,6 +7,7 @@ using System.Web.Http;
 using Common;
 using Event.Controllers;
 using Event.Models;
+using Event.Storage;
 using NUnit.Framework;
 
 namespace Event.tests

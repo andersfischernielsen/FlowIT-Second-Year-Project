@@ -84,12 +84,12 @@
     <Compile Include="Models\UriClasses\InclusionUri.cs" />
     <Compile Include="Models\UriClasses\ResponseUri.cs" />
     <Compile Include="Models\UriClasses\UriRepresentation.cs" />
+    <Compile Include="Storage\EventCommunicator.cs" />
     <Compile Include="Storage\EventContext.cs" />
     <Compile Include="Interfaces\IEventLogic.cs" />
     <Compile Include="Controllers\EventRulesController.cs" />
     <Compile Include="Controllers\EventStateController.cs" />
     <Compile Include="LockDto.cs" />
-    <Compile Include="Models\EventCommunicator.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />
     <Compile Include="Interfaces\IServerFromEvent.cs" />
     <Compile Include="Global.asax.cs">
@@ -97,15 +97,15 @@
     </Compile>
     <Compile Include="Interfaces\IEventStorage.cs" />
     <Compile Include="Models\EventIdentificationModel.cs" />
-    <Compile Include="Models\EventLogic.cs" />
     <Compile Include="Models\EventStateModel.cs" />
+    <Compile Include="Storage\EventLogic.cs" />
     <Compile Include="Storage\EventStorage.cs" />
     <Compile Include="Storage\InMemoryStorage.cs" />
-    <Compile Include="Models\LockLogic.cs" />
     <Compile Include="Models\NotifyDtos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HeartBeatDto.cs" />
     <Compile Include="ServerCommunicator.cs" />
+    <Compile Include="Storage\LockLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
