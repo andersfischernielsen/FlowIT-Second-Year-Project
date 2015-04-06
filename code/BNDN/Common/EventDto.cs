@@ -16,9 +16,9 @@ namespace Common
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public string Role { get; set; }
-        public IEnumerable<Uri> Conditions { get; set; }
-        public IEnumerable<Uri> Exclusions { get; set; }
-        public IEnumerable<Uri> Responses { get; set; }
-        public IEnumerable<Uri> Inclusions { get; set; }
+        public IEnumerable<EventAddressDto> Conditions { get; set; }
+        public IEnumerable<EventAddressDto> Exclusions { get; set; }
+        public IEnumerable<EventAddressDto> Responses { get; set; }
+        public IEnumerable<EventAddressDto> Inclusions { get; set; }
     }
 }

@@ -30,18 +30,14 @@ namespace Event.Storage
             get
             {
                 EventIdentificationIsInALegalState();
-
-                var eventIdentification = _context.EventIdentification.Single(model => model.Id == _eventId);
-
-                return new Uri(eventIdentification.OwnUri);
+                return new Uri(_context.EventIdentification.Single(model => model.Id == _eventId).OwnUri);
             }
             set
             {
                 EventIdentificationIsInALegalState();
-                var eventIdentification = _context.EventIdentification.Single(model => model.Id == _eventId);
 
                 // Add replacing value
-                eventIdentification.OwnUri = value.AbsoluteUri;
+                _context.EventIdentification.Single(model => model.Id == _eventId).OwnUri = value.AbsoluteUri;
                 _context.SaveChanges();
 
             }
@@ -52,10 +48,7 @@ namespace Event.Storage
             get
             {
                 EventIdentificationIsInALegalState();
-
-                var eventIdentificationPackage = _context.EventIdentification.Single(model => model.Id == _eventId);
-                return eventIdentificationPackage.WorkflowId;
-
+                return _context.EventIdentification.Single(model => model.Id == _eventId).WorkflowId;
             }
             set
             {
@@ -207,7 +200,8 @@ namespace Event.Storage
             _context.SaveChanges();
         }
 
-        public HashSet<Uri> Conditions
+        [Obsolete]
+        public HashSet<Uri> OldConditions
         {
             get
             {
@@ -241,7 +235,8 @@ namespace Event.Storage
             }
         }
 
-        public HashSet<Uri> Responses
+        [Obsolete]
+        public HashSet<Uri> OldResponses
         {
             get
             {
@@ -274,7 +269,8 @@ namespace Event.Storage
             }
         }
 
-        public HashSet<Uri> Exclusions
+        [Obsolete]
+        public HashSet<Uri> OldExclusions
         {
             get
             {
@@ -307,7 +303,8 @@ namespace Event.Storage
             }
         }
 
-        public HashSet<Uri> Inclusions
+        [Obsolete]
+        public HashSet<Uri> OldInclusions
         {
             get
             {
@@ -330,7 +327,164 @@ namespace Event.Storage
 
                 foreach (var element in value)
                 {
-                    var uriToAdd = new InclusionUri() { UriString = element.AbsoluteUri };
+                    var uriToAdd = new InclusionUri()
+                    {
+                        UriString = element.AbsoluteUri,
+                        EventId = _eventId
+                    };
+                    _context.Inclusions.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+
+        public HashSet<RelationToOtherEventModel> Conditions
+        {
+            get
+            {
+                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Conditions.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ConditionUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri,
+                        EventId = element.EventID,
+                        EventIdentificationModelId = _eventId
+                    };
+                    _context.Conditions.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+        public HashSet<RelationToOtherEventModel> Responses 
+        {
+            get
+            {
+                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Responses.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ResponseUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri,
+                        EventId = element.EventID,
+                        EventIdentificationModelId = _eventId
+                    };
+                    _context.Responses.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+        public HashSet<RelationToOtherEventModel> Exclusions
+        {
+            get
+            {
+                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Exclusions.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new ExclusionUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri,
+                        EventId = element.EventID,
+                        EventIdentificationModelId = _eventId
+                    };
+                    _context.Exclusions.Add(uriToAdd);
+                }
+                _context.SaveChanges();
+            }
+        }
+        public HashSet<RelationToOtherEventModel> Inclusions
+        {
+            get
+            {
+                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId);
+                var hashSet = new HashSet<RelationToOtherEventModel>();
+
+                foreach (var element in dbset)
+                {
+                    hashSet.Add(new RelationToOtherEventModel
+                    {
+                        Uri = new Uri(element.UriString),
+                        EventID = element.EventId
+                    });
+                }
+
+                return hashSet;
+            }
+            set
+            {
+                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == _eventId))
+                {
+                    _context.Inclusions.Remove(uri);
+                }
+
+                foreach (var element in value)
+                {
+                    var uriToAdd = new InclusionUri()
+                    {
+                        UriString = element.Uri.AbsoluteUri, 
+                        EventId = element.EventID, 
+                        EventIdentificationModelId = _eventId
+                    };
                     _context.Inclusions.Add(uriToAdd);
                 }
                 _context.SaveChanges();
@@ -340,85 +494,85 @@ namespace Event.Storage
         #endregion
 
         #region Public methods
-        public Uri GetUriFromId(string id)
-        {
-            // TODO: Discuss: Use Task instead and await here?: Update IEventStorage to reflect
-            var uri = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
-            if (uri == null) return null;
-            return new Uri(uri.Uri);
-        }
+        //public Uri GetUriFromId(string id)
+        //{
+        //    // TODO: Discuss: Use Task instead and await here?: Update IEventStorage to reflect
+        //    var uri = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
+        //    if (uri == null) return null;
+        //    return new Uri(uri.Uri);
+        //}
 
-        /// <summary>
-        /// Given an URI-object (representing another Event's URI) this method returns the related id.
-        /// </summary>
-        /// <param name="endPoint"></param>
-        /// <returns></returns>
-        public string GetIdFromUri(Uri endPoint)
-        {
-            if (endPoint == null)
-            {
-                throw new ArgumentNullException("endPoint","Supplied argument was null");
-            }
+        ///// <summary>
+        ///// Given an URI-object (representing another Event's URI) this method returns the related id.
+        ///// </summary>
+        ///// <param name="endPoint"></param>
+        ///// <returns></returns>
+        //public string GetIdFromUri(Uri endPoint)
+        //{
+        //    if (endPoint == null)
+        //    {
+        //        throw new ArgumentNullException("endPoint","Supplied argument was null");
+        //    }
 
-            var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Uri.Equals(endPoint.AbsoluteUri)).Result;
-            if (result == null) return null;
-            return result.Id;
-        }
+        //    var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Uri.Equals(endPoint.AbsoluteUri)).Result;
+        //    if (result == null) return null;
+        //    return result.Id;
+        //}
 
-        /// <summary>
-        /// RemoveIdAndUri will delete the entry (that represents an Event by an Id and a Uri),
-        /// that is held in the database.
-        /// </summary>
-        /// <param name="id">Id of the Event, whose entry is to be removed in the databse</param>
-        public void RemoveIdAndUri(string id)
-        {
-            if (id == null)
-            {
-                throw new ArgumentNullException("id","Supplied argument was null");
-            }
+        ///// <summary>
+        ///// RemoveIdAndUri will delete the entry (that represents an Event by an Id and a Uri),
+        ///// that is held in the database.
+        ///// </summary>
+        ///// <param name="id">Id of the Event, whose entry is to be removed in the databse</param>
+        //public void RemoveIdAndUri(string id)
+        //{
+        //    if (id == null)
+        //    {
+        //        throw new ArgumentNullException("id","Supplied argument was null");
+        //    }
 
-            var toRemove = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
-            if (toRemove == null) return;
-            _context.EventUriIdMappings.Remove(toRemove);
-            _context.SaveChanges();
-        }
+        //    var toRemove = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
+        //    if (toRemove == null) return;
+        //    _context.EventUriIdMappings.Remove(toRemove);
+        //    _context.SaveChanges();
+        //}
 
-        // TODO: Discuss: Is this method also intended to be used for updating an existing entry? In that
-        // TODO: case the current implementation is faulty...because it currently **adds** a new entry
-        /// <summary>
-        /// StoreIdAndUri adds an entry to the database. The entry represents an Event (by the Event's Id and Uri)
-        /// </summary>
-        /// <param name="id">The id of the Event, that an entry is to be added for in the database</param>
-        /// <param name="endPoint"></param>
-        public void StoreIdAndUri(string id, Uri endPoint)
-        {
-            if (id == null)
-            {
-                throw new ArgumentNullException("id", "id was null in StoreIdAndUri");
-            }
-            if (endPoint == null)
-            {
-                throw new ArgumentNullException("endPoint","endPoint was null in StoreIdAndUri");
-            }
+        //// TODO: Discuss: Is this method also intended to be used for updating an existing entry? In that
+        //// TODO: case the current implementation is faulty...because it currently **adds** a new entry
+        ///// <summary>
+        ///// StoreIdAndUri adds an entry to the database. The entry represents an Event (by the Event's Id and Uri)
+        ///// </summary>
+        ///// <param name="id">The id of the Event, that an entry is to be added for in the database</param>
+        ///// <param name="endPoint"></param>
+        //public void StoreIdAndUri(string id, Uri endPoint)
+        //{
+        //    if (id == null)
+        //    {
+        //        throw new ArgumentNullException("id", "id was null in StoreIdAndUri");
+        //    }
+        //    if (endPoint == null)
+        //    {
+        //        throw new ArgumentNullException("endPoint","endPoint was null in StoreIdAndUri");
+        //    }
 
-            var eventUriIdMapping = new EventUriIdMapping() { Id = id, Uri = endPoint.AbsolutePath };
-            _context.EventUriIdMappings.Add(eventUriIdMapping);
+        //    var eventUriIdMapping = new EventUriIdMapping() { Id = id, Uri = endPoint.AbsolutePath };
+        //    _context.EventUriIdMappings.Add(eventUriIdMapping);
 
-            _context.SaveChanges();
+        //    _context.SaveChanges();
 
-        }
+        //}
 
-        /// <summary>
-        /// IdExists checks whether the database currently holds an entry matching the supplied id. 
-        /// </summary>
-        /// <param name="id">Id of the Event to check for existence</param>
-        /// <returns></returns>
-        public bool IdExists(string id)
-        {
-            var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
-            return result != null;
+        ///// <summary>
+        ///// IdExists checks whether the database currently holds an entry matching the supplied id. 
+        ///// </summary>
+        ///// <param name="id">Id of the Event to check for existence</param>
+        ///// <returns></returns>
+        //public bool IdExists(string id)
+        //{
+        //    var result = _context.EventUriIdMappings.FirstOrDefaultAsync(x => x.Id == id).Result;
+        //    return result != null;
 
-        }
+        //}
 
         /// <summary>
         /// Disposes this context. (New Controllers are created for each HTTP-request, and hence, also disposed of

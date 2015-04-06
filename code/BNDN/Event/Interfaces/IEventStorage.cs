@@ -28,20 +28,17 @@ namespace Event.Interfaces
         #endregion
 
         #region Rules
-        HashSet<Uri> Conditions { get; set; }
-        HashSet<Uri> Responses { get; set; }
-        HashSet<Uri> Exclusions { get; set; }
-        HashSet<Uri> Inclusions { get; set; }
+        HashSet<Uri> OldConditions { get; set; }
+        HashSet<Uri> OldResponses { get; set; }
+        HashSet<Uri> OldExclusions { get; set; }
+        HashSet<Uri> OldInclusions { get; set; }
+
+        HashSet<RelationToOtherEventModel> Conditions { get; set; }
+        HashSet<RelationToOtherEventModel> Responses { get; set; }
+        HashSet<RelationToOtherEventModel> Exclusions { get; set; }
+        HashSet<RelationToOtherEventModel> Inclusions { get; set; }
 
 
-        #endregion
-
-        #region Id and Uri Handling
-        Uri GetUriFromId(string id);
-        string GetIdFromUri(Uri endPoint);
-        void RemoveIdAndUri(string id);
-        void StoreIdAndUri(string id, Uri endPoint);
-        bool IdExists(string id);
         #endregion
     }
 }

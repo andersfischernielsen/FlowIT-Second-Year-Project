@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
@@ -58,25 +59,25 @@ namespace Event.Storage
             get { return Storage.Pending; }
         }
 
-        public HashSet<Uri> Conditions
+        public HashSet<RelationToOtherEventModel> Conditions
         {
             set { Storage.Conditions = value; }
             get { return Storage.Conditions; }
         }
 
-        public HashSet<Uri> Responses
+        public HashSet<RelationToOtherEventModel> Responses
         {
             set { Storage.Responses = value; }
             get { return Storage.Responses; }
         }
 
-        public HashSet<Uri> Exclusions
+        public HashSet<RelationToOtherEventModel> Exclusions
         {
             set { Storage.Exclusions = value; }
             get { return Storage.Exclusions; }
         }
 
-        public HashSet<Uri> Inclusions
+        public HashSet<RelationToOtherEventModel> Inclusions
         {
             set { Storage.Inclusions = value; }
             get { return Storage.Inclusions; }
@@ -143,27 +144,23 @@ namespace Event.Storage
                 //var uri = Storage.EventUriIdMappings.SingleOrDefault(x => x.Id == id).Uri;
 
                 // Retrieve URI associated with Id
-                var uri = Storage.GetUriFromId(id);
-                if (uri == null)
-                {
-                    throw new ArgumentException("Nonexistent id", id);
-                }
                 if (rules == null)
                 {
                     throw new ArgumentNullException("rules","Provided rules was null");
                 }
-
-                UpdateRule(rules.Condition, uri, Conditions);
-                UpdateRule(rules.Exclusion, uri, Exclusions);
-                UpdateRule(rules.Inclusion, uri, Inclusions);
-                UpdateRule(rules.Response, uri, Responses);
+                var relation = new RelationToOtherEventModel {EventID = rules.Id, Uri = rules.Uri};
+                UpdateRule(rules.Condition, relation, Conditions);
+                UpdateRule(rules.Exclusion, relation, Exclusions);
+                UpdateRule(rules.Inclusion, relation, Inclusions);
+                UpdateRule(rules.Response, relation, Responses);
             });
         }
 
-        private static void UpdateRule(bool shouldAdd, Uri value, ISet<Uri> collection)
+        private static void UpdateRule(bool shouldAdd, RelationToOtherEventModel value, ISet<Uri> collection)
         {
-            if (shouldAdd) collection.Add(value);
-            else collection.Remove(value);
+            //Todo : Persist this stuff.
+            if (shouldAdd) collection.Add(value.Uri);
+            else collection.Remove(value.Uri);
         }
 
         #endregion
@@ -196,19 +193,19 @@ namespace Event.Storage
         public async Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
             where T : NotifyDto
         {
-            await Task.Run(() =>
-            {
-                var dto = creator.Invoke(Storage.GetIdFromUri(uri));
+            //await Task.Run(() =>
+            //{
+            //    var dto = creator.Invoke(Storage.GetIdFromUri(uri));
 
-                if (dictionary.ContainsKey(uri))
-                {
-                    dictionary[uri].Add(dto);
-                }
-                else
-                {
-                    dictionary.Add(uri, new List<NotifyDto> {dto});
-                }
-            });
+            //    if (dictionary.ContainsKey(uri))
+            //    {
+            //        dictionary[uri].Add(dto);
+            //    }
+            //    else
+            //    {
+            //        dictionary.Add(uri, new List<NotifyDto> {dto});
+            //    }
+            //});
         }
 
         public Task<EventStateDto> EventStateDto
@@ -247,24 +244,6 @@ namespace Event.Storage
             }
         }
         #endregion
-
-        #region URI Registration
-        public Task RegisterIdWithUri(string id, Uri endPoint)
-        {
-            return Task.Run(() => Storage.StoreIdAndUri(id, endPoint));
-        }
-
-        public Task<bool> KnowsId(string id)
-        {
-            return Task.Run(() => Storage.IdExists(id));
-        }
-
-        public Task RemoveIdAndUri(string id)
-        {
-            return Task.Run(() => Storage.RemoveIdAndUri(id));
-        }
-        #endregion
-
 
         public async Task ResetState()
         {
@@ -312,18 +291,18 @@ namespace Event.Storage
             Role = eventDto.Role;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
-            Inclusions = new HashSet<Uri>(eventDto.Inclusions);
-            Exclusions = new HashSet<Uri>(eventDto.Exclusions);
-            Conditions = new HashSet<Uri>(eventDto.Conditions);
-            Responses = new HashSet<Uri>(eventDto.Responses);
+            Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel{EventID = addressDto.Id,Uri = addressDto.Uri}));
+            Exclusions = new HashSet<RelationToOtherEventModel>(eventDto.Exclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+            Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+            Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
             OwnUri = ownUri;
 
             // #3: Register events that are related to us. 
-            foreach (var otherEvent in otherEvents)
-            {
-                // Todo register self with other Events.
-                await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            }
+            //foreach (var otherEvent in otherEvents)
+            //{
+            //    // Todo register self with other Events.
+            //    await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+            //}
         }
 
         public async Task UpdateEvent(EventDto eventDto, Uri ownUri)
@@ -349,10 +328,10 @@ namespace Event.Storage
             Included = eventDto.Included;
             Pending = eventDto.Pending;
             Executed = eventDto.Executed;
-            Inclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Inclusions));
-            Exclusions = await Task.Run(() => new HashSet<Uri>(eventDto.Exclusions));
-            Conditions = await Task.Run(() => new HashSet<Uri>(eventDto.Conditions));
-            Responses = await Task.Run(() => new HashSet<Uri>(eventDto.Responses));
+            Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+            Exclusions = new HashSet<RelationToOtherEventModel>(eventDto.Exclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+            Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+            Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
 
            
 
@@ -371,10 +350,10 @@ namespace Event.Storage
 
 
             // Todo clear old registered events!
-            foreach (var otherEvent in otherEvents)
-            {
-                await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            }
+            //foreach (var otherEvent in otherEvents)
+            //{
+            //    await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
+            //}
         }
 
         public async Task DeleteEvent()

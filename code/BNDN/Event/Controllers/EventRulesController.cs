@@ -48,10 +48,10 @@ namespace Event.Controllers
 
                 // TODO: Discuss: Are we sure about the following logic? Seems fishy
                 // if new entry, add Event to the endPoints-table.
-                if (await logic.KnowsId(senderId))
-                {
-                    BadRequest(string.Format("{0} already exists!", senderId));
-                }
+                //if (await logic.KnowsId(senderId))
+                //{
+                //    BadRequest(string.Format("{0} already exists!", senderId));
+                //}
 
                 await logic.UpdateRules(senderId, ruleDto);
             }
@@ -91,10 +91,10 @@ namespace Event.Controllers
                 }
 
                 // If the id is not known to this event, the PUT-call shall fail!
-                if (!await logic.KnowsId(senderId))
-                {
-                    BadRequest(string.Format("{0} does not exist!", senderId));
-                }
+                //if (!await logic.KnowsId(senderId))
+                //{
+                //    BadRequest(string.Format("{0} does not exist!", senderId));
+                //}
 
                 await logic.UpdateRules(senderId, ruleDto);
             }
@@ -120,10 +120,10 @@ namespace Event.Controllers
                     StatusCode(HttpStatusCode.MethodNotAllowed);
                 }
 
-                if (!await logic.KnowsId(senderId))
-                {
-                    BadRequest(string.Format("{0} does not exist!", senderId));
-                }
+                //if (!await logic.KnowsId(senderId))
+                //{
+                //    BadRequest(string.Format("{0} does not exist!", senderId));
+                //}
 
                 // TODO: Consider: Is this way of deleting still legit?
                 await logic.UpdateRules(senderId,
@@ -139,7 +139,7 @@ namespace Event.Controllers
                         Response = false
                     });
                 // Remove the id because it is no longer associated with any rules.
-                await logic.RemoveIdAndUri(senderId);
+                //await logic.RemoveIdAndUri(senderId);
             }
         }
 

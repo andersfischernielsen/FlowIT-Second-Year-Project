@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Common
 {
@@ -18,6 +19,10 @@ namespace Common
         /// Should identify sender
         /// </summary>
         public string Id { get; set; }
+        /// <summary>
+        /// The URI of the sender
+        /// </summary>
+        public Uri Uri { get; set; }
 
         /// <summary>
         /// If true, sender wishes to be a Condition for receiver (and receiver should include him in its Conditions-list)
