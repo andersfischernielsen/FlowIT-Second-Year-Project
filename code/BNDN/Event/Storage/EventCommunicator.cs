@@ -24,7 +24,7 @@ namespace Event.Storage
         /// <param name="ownEventId">The id of this Event</param>
         public EventCommunicator(Uri targetEventUri, string targetEventId, string ownEventId)
         {
-            _httpClient = new HttpClientToolbox(eventUri);
+            _httpClient = new HttpClientToolbox(targetEventUri);
             TargetEventId = targetEventId;
             OwnEventId = ownEventId;
         }
@@ -104,7 +104,7 @@ namespace Event.Storage
         }
 
         /// <summary>
-        /// Tries to lock the event
+        /// Tries to lock target event
         /// </summary>
         /// <param name="lockDto"></param>
         /// <returns></returns>
@@ -114,13 +114,13 @@ namespace Event.Storage
         }
 
         /// <summary>
-        /// TODO: BIG TODO.. You cant send json with delete call at this moment with the httptoolbox!!
+        /// Attempts on unlocking the target Event
         /// </summary>
-        /// <param name="unlockDto"></param>
         /// <returns></returns>
-        public async Task Unlock(EventAddressDto unlockDto)
+        public async Task Unlock()
         {
-            await _httpClient.Delete(String.Format("events/{0}/lock/{1}",unlockDto.Id));
+            var unlockId = OwnEventId;
+            await _httpClient.Delete(String.Format("events/{0}/lock/{1}",TargetEventId,unlockId));
         }
     }
 }
