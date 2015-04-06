@@ -17,7 +17,7 @@ namespace Client
         }
 
         /// <summary>
-        /// For testing purposes (dependency injection of mocked Toolbox.
+        /// For testing purposes (dependency injection of mocked Toolbox).
         /// </summary>
         /// <param name="toolbox"></param>
         public ServerConnection(HttpClientToolbox toolbox)
@@ -37,7 +37,7 @@ namespace Client
 
         public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)
         {
-            return _http.ReadList<EventAddressDto>("workflows/" + workflow.Id);
+            return _http.ReadList<EventAddressDto>(string.Format("workflows/{0}", workflow.Id));
         }
     }
 }
