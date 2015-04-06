@@ -83,7 +83,7 @@ namespace Event.Storage
             {
                 try
                 {
-                    new EventCommunicator(pair.Uri, pair.EventID, _logic.EventId).Unlock(eventAddress).Wait();
+                    new EventCommunicator(pair.Uri, pair.EventID, _logic.EventId).Unlock().Wait();
                 }
                 catch (Exception)
                 {
@@ -119,7 +119,7 @@ namespace Event.Storage
             {
                 try
                 {
-                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock(eventAddress);
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock();
                 }
                 catch (Exception)
                 {
