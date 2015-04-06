@@ -1,5 +1,6 @@
 using Event.Models;
 using Event.Models.UriClasses;
+using Event.Storage;
 
 namespace Event.Migrations
 {
@@ -8,7 +9,7 @@ namespace Event.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<Event.EventContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<EventContext>
     {
         public Configuration()
         {
@@ -22,11 +23,10 @@ namespace Event.Migrations
             context.EventIdentification.RemoveRange(context.EventIdentification.ToList());
             context.EventState.RemoveRange(context.EventState.ToList());
 
-            context.EventIdentification.AddOrUpdate(ei => ei.EventId,
+            context.EventIdentification.AddOrUpdate(ei => ei.Id,
                 new EventIdentificationModel
                 {
-                    EventId = null,
-                    Id = 0,
+                    Id = "",
                     Name = null,
                     OwnUri = null,
                     Role = null,
@@ -37,7 +37,7 @@ namespace Event.Migrations
                 new EventStateModel
                 {
                     Executed = false,
-                    Id = 0,
+                    Id = "",
                     Included = false,
                     Pending = false
                 });
