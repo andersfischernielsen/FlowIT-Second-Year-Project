@@ -20,23 +20,12 @@ namespace Event.tests
         public void SetupLogicIsNotNullTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
 
             //Act
 
             //Assert
             Assert.IsNotNull(eventLogic);
-        }
-
-        [Test]
-        public void SetupLogicStorageIsNotNullTest()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-
-            //Act
-            //Assert
-            Assert.IsNotNull(eventLogic.Storage);
         }
 
 
@@ -45,7 +34,7 @@ namespace Event.tests
         public void IsExecutable_ShouldReturnTrueWhenNoConditionsExist_Test()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.Included = true;
 
             //Act
@@ -58,7 +47,7 @@ namespace Event.tests
         public void IsExecutable_ShouldReturnFalseWhenNoConditionsExist_Test()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.Included = false;
 
             //Act
@@ -73,7 +62,7 @@ namespace Event.tests
         public void UpdateRulesFailDueToRulesBeingNullTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             // TODO: Redesign test to reflect changes in IEventStorage 
             // eventLogic.Storage.Events.Add("Test", new Uri("http://test/"));
 
@@ -96,7 +85,7 @@ namespace Event.tests
         public void UpdateRulesFailDueToIdNotExistingTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
 
             //Act
             try
@@ -115,7 +104,7 @@ namespace Event.tests
         public void UpdateRulesRunsTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             // TODO: Redesign test to reflect changes in IEventStorage
             //eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
 
@@ -126,9 +115,9 @@ namespace Event.tests
         public void UpdateRuleAddsValueToCollectionTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Conditions = new HashSet<Uri>();
-            var uri = new Uri("http://test/");
+            var eventLogic = new EventLogic(new InMemoryStorage2());
+            eventLogic.Conditions = new HashSet<RelationToOtherEventModel>();
+            var uri = new RelationToOtherEventModel {Uri = new Uri("http://test/")};
             // TODO: Redesign test to reflect changes in IEventStorage
             //eventLogic.Storage.EventUris.Add("Test", uri);
 
@@ -144,9 +133,9 @@ namespace Event.tests
         public void UpdateRuleRemovesValueFromCollectionTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Conditions = new HashSet<Uri>();
-            Uri uri = new Uri("http://test/");
+            var eventLogic = new EventLogic(new InMemoryStorage2());
+            eventLogic.Conditions = new HashSet<RelationToOtherEventModel>();
+            var uri = new RelationToOtherEventModel { Uri = new Uri("http://test/") };
             // TODO: Redesign test to reflect changes in IEventStorage
             //eventLogic.Storage.EventUris.Add("Test", uri);
             eventLogic.Conditions.Add(uri);
@@ -212,7 +201,7 @@ namespace Event.tests
         public void GetEventDtoPropertyTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.Name = "TestName";
             eventLogic.EventId = "TestId";
             eventLogic.WorkflowId = "TestWId";
@@ -236,73 +225,10 @@ namespace Event.tests
         #region URI registration
 
         [Test]
-        public void IdExistsTest()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-            // TODO: Redesign test to reflect changes in IEventStorage
-            // eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
-
-            //Act
-            var result = eventLogic.KnowsId("Test").Result;
-
-            //Assert
-            Assert.AreEqual(true, result);
-
-        }
-
-        [Test]
-        public void IdDoesNotExist()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-
-            //Act
-            var result = eventLogic.KnowsId("Test").Result;
-
-            //Assert
-            Assert.AreEqual(false, result);
-        }
-
-        [Test]
-        public void RemoveIdInUriAlreadyExisting()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-            // TODO: Redesign test to reflect changes in IEventStorage
-            // eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
-
-            //Act
-            eventLogic.RemoveIdAndUri("Test").Wait();
-            // var result = eventLogic.Storage.EventUris.Contains(new KeyValuePair<string, Uri>("Test",new Uri("http://test/")));
-
-            //Assert
-            // Assert.AreEqual(false,result);
-        }
-
-        [Test]
-        [ExpectedException(typeof(KeyNotFoundException))]
-        public void RemoveIdInUriNotExisting()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-            
-            //Act
-            try
-            {
-                eventLogic.RemoveIdAndUri("Test").Wait();
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException;
-            }
-        }
-
-        [Test]
         public void ResetStateTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.Name = "TestName";
             eventLogic.EventId = "TestId";
             eventLogic.WorkflowId = "TestWId";
@@ -323,7 +249,7 @@ namespace Event.tests
         public void InitializeEventRuns()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             var eventDto = new EventDto()
             {
                 EventId = "TestId",
@@ -332,10 +258,10 @@ namespace Event.tests
                 Included = true,
                 Pending = true,
                 Executed = true,
-                Inclusions = new HashSet<Uri>(),
-                Exclusions = new HashSet<Uri>(),
-                Conditions = new HashSet<Uri>(),
-                Responses = new HashSet<Uri>(),
+                Inclusions = new HashSet<EventAddressDto>(),
+                Exclusions = new HashSet<EventAddressDto>(),
+                Conditions = new HashSet<EventAddressDto>(),
+                Responses = new HashSet<EventAddressDto>(),
             };
 
             //Act
@@ -367,7 +293,7 @@ namespace Event.tests
         public void InitializeEventEventDtoIsNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
 
             //Act
             try
@@ -387,7 +313,7 @@ namespace Event.tests
         public void InitializeEventEventIdIsNotNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.EventId = "Test";
 
             //Act
@@ -408,7 +334,7 @@ namespace Event.tests
         public void UpdateEventRuns()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             var eventDto = new EventDto()
             {
                 EventId = "TestId",
@@ -417,10 +343,10 @@ namespace Event.tests
                 Included = true,
                 Pending = true,
                 Executed = true,
-                Inclusions = new HashSet<Uri>(),
-                Exclusions = new HashSet<Uri>(),
-                Conditions = new HashSet<Uri>(),
-                Responses = new HashSet<Uri>(),
+                Inclusions = new HashSet<EventAddressDto>(),
+                Exclusions = new HashSet<EventAddressDto>(),
+                Conditions = new HashSet<EventAddressDto>(),
+                Responses = new HashSet<EventAddressDto>(),
             };
 
             //Act
@@ -452,7 +378,7 @@ namespace Event.tests
         public void UpdateEventEventDtoIsNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
 
             //Act
             try
@@ -472,7 +398,7 @@ namespace Event.tests
         public void UpdateEventEventIdIsNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.EventId = null;
 
             //Act

@@ -116,6 +116,10 @@ namespace Event.Storage
         {
             Storage = new EventStorage(eventId, new EventContext());
         }
+        public EventLogic(IEventStorage storage)
+        {
+            Storage = storage;
+        }
         #endregion
 
         #region Rule Handling
