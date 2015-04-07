@@ -22,7 +22,7 @@ namespace Event.Storage
             _context = context;
 
 
-
+            
             if (!_context.EventIdentification.Any(model => model.Id == eventId))
             {
                 _context.EventIdentification.Add(new EventIdentificationModel() { Id = EventId });
@@ -31,6 +31,7 @@ namespace Event.Storage
             {
                 _context.EventState.Add(new EventStateModel() { Id = EventId });
             }
+            _context.SaveChanges();
         }
 
 
