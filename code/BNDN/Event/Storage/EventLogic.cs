@@ -356,6 +356,24 @@ namespace Event.Storage
             });
         }
 
+        /// <summary>
+        /// Checks whether an Event exists in the Storage
+        /// </summary>
+        /// <returns>Bool value whether or not the Event exists</returns>
+        public bool EventIdExists()
+        {
+            try
+            {
+                return Storage.Name != null;
+            }
+            catch (ApplicationException e)
+            {
+                return false;
+            }
+        }
+
+
+
         public bool IsLocked()
         {
             return LockDto != null;

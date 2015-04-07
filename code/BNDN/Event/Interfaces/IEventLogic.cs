@@ -43,5 +43,7 @@ namespace Event.Interfaces
 
         Task Execute();
 
+        bool EventIdExists();
+
     }
 }
