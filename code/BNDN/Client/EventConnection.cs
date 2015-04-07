@@ -30,7 +30,7 @@ namespace Client
             RoleForWorkflow.TryGetValue(workflowId, out roles);
 
             var eventId = _eventDto.Id;
-            await _httpClient.Update(String.Format("events/{0}/executed/{1}",eventId,b),new ExecuteDto{Roles = roles});
+            await _httpClient.Update(String.Format("events/{0}/executed/",eventId),new ExecuteDto{Roles = roles});
         }
     }
 }
