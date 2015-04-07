@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Text;
-using System.Web.Http.Controllers;
+using System.Web.Http;
 using Common;
 using Event.Interfaces;
 using Event.Models;
+using Event.Storage;
+using Moq;
 using NUnit.Framework;
 
 namespace Event.tests
@@ -19,23 +17,12 @@ namespace Event.tests
         public void SetupLogicIsNotNullTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(Mock.Of<IEventStorage>());//new InMemoryStorage2());
 
             //Act
 
             //Assert
             Assert.IsNotNull(eventLogic);
-        }
-
-        [Test]
-        public void SetupLogicStorageIsNotNullTest()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-
-            //Act
-            //Assert
-            Assert.IsNotNull(eventLogic.Storage);
         }
 
 
@@ -44,8 +31,11 @@ namespace Event.tests
         public void IsExecutable_ShouldReturnTrueWhenNoConditionsExist_Test()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Included = true;
+            var mock = new Mock<IEventStorage>();
+            mock.Setup(storage => storage.Included).Returns(true);
+            mock.Setup(storage => storage.Conditions).Returns(new HashSet<RelationToOtherEventModel>());
+
+            var eventLogic = new EventLogic(mock.Object);
 
             //Act
             var result = eventLogic.IsExecutable().Result;
@@ -57,8 +47,10 @@ namespace Event.tests
         public void IsExecutable_ShouldReturnFalseWhenNoConditionsExist_Test()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Included = false;
+            var mock = new Mock<IEventStorage>();
+            mock.Setup(storage => storage.Included).Returns(false);
+
+            var eventLogic = new EventLogic(mock.Object);
 
             //Act
             var result = eventLogic.IsExecutable().Result;
@@ -67,12 +59,13 @@ namespace Event.tests
             Assert.AreEqual(false, result);
         }
 
+        /*
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void UpdateRulesFailDueToRulesBeingNullTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             // TODO: Redesign test to reflect changes in IEventStorage 
             // eventLogic.Storage.Events.Add("Test", new Uri("http://test/"));
 
@@ -95,7 +88,7 @@ namespace Event.tests
         public void UpdateRulesFailDueToIdNotExistingTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
 
             //Act
             try
@@ -114,7 +107,7 @@ namespace Event.tests
         public void UpdateRulesRunsTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             // TODO: Redesign test to reflect changes in IEventStorage
             //eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
 
@@ -125,9 +118,9 @@ namespace Event.tests
         public void UpdateRuleAddsValueToCollectionTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Conditions = new HashSet<Uri>();
-            var uri = new Uri("http://test/");
+            var eventLogic = new EventLogic(new InMemoryStorage2());
+            eventLogic.Conditions = new HashSet<RelationToOtherEventModel>();
+            var uri = new RelationToOtherEventModel {Uri = new Uri("http://test/")};
             // TODO: Redesign test to reflect changes in IEventStorage
             //eventLogic.Storage.EventUris.Add("Test", uri);
 
@@ -143,9 +136,9 @@ namespace Event.tests
         public void UpdateRuleRemovesValueFromCollectionTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Conditions = new HashSet<Uri>();
-            Uri uri = new Uri("http://test/");
+            var eventLogic = new EventLogic(new InMemoryStorage2());
+            eventLogic.Conditions = new HashSet<RelationToOtherEventModel>();
+            var uri = new RelationToOtherEventModel { Uri = new Uri("http://test/") };
             // TODO: Redesign test to reflect changes in IEventStorage
             //eventLogic.Storage.EventUris.Add("Test", uri);
             eventLogic.Conditions.Add(uri);
@@ -157,21 +150,24 @@ namespace Event.tests
             //Assert
             Assert.AreEqual(false, result);
         }
+        */
         #endregion
 
         #region DTO Creation
 
         [Test]
-        public void GetEventStateDtoWhenIncludedIsFalseTest()
+        public async void GetEventStateDtoWhenIncludedIsFalseTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Included = false;
-            eventLogic.Executed = true;
-            eventLogic.Pending = true;
+            var mock = new Mock<IEventStorage>();
+            mock.Setup(storage => storage.Included).Returns(false);
+            mock.Setup(storage => storage.Executed).Returns(true);
+            mock.Setup(storage => storage.Pending).Returns(true);
+
+            var eventLogic = new EventLogic(mock.Object);
 
             //Act
-            var result = eventLogic.EventStateDto.Result;
+            var result = await eventLogic.EventStateDto;
 
             //Assert
             Assert.AreEqual(false,result.Included);
@@ -184,16 +180,19 @@ namespace Event.tests
             Assert.AreEqual(null, result.Id);
         }
         [Test]
-        public void GetEventStateDtoWhenIncludedIsTrueTest()
+        public async void GetEventStateDtoWhenIncludedIsTrueTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Included = true;
-            eventLogic.Executed = false;
-            eventLogic.Pending = false;
+            var mock = new Mock<IEventStorage>();
+            mock.Setup(storage => storage.Included).Returns(true);
+            mock.Setup(storage => storage.Executed).Returns(false);
+            mock.Setup(storage => storage.Pending).Returns(false);
+            mock.Setup(storage => storage.Conditions).Returns(new HashSet<RelationToOtherEventModel>());
+
+            var eventLogic = new EventLogic(mock.Object);
           
             //Act
-            var result = eventLogic.EventStateDto.Result;
+            var result = await eventLogic.EventStateDto;
 
             //Assert
             Assert.AreEqual(true, result.Included);
@@ -208,19 +207,27 @@ namespace Event.tests
         #endregion
 
         [Test]
-        public void GetEventDtoPropertyTest()
+        public async void GetEventDtoPropertyTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            eventLogic.Name = "TestName";
-            eventLogic.EventId = "TestId";
-            eventLogic.WorkflowId = "TestWId";
+            var mock = new Mock<IEventStorage>();
+            mock.SetupAllProperties();
+
+            var eventLogic = new EventLogic(mock.Object);
             eventLogic.Included = true;
             eventLogic.Executed = false;
             eventLogic.Pending = false;
+            eventLogic.EventId = "TestId";
+            eventLogic.Name = "TestName";
+            eventLogic.WorkflowId = "TestWId";
+            eventLogic.Conditions = new HashSet<RelationToOtherEventModel>();
+            eventLogic.Inclusions = new HashSet<RelationToOtherEventModel>();
+            eventLogic.Exclusions = new HashSet<RelationToOtherEventModel>();
+            eventLogic.Responses = new HashSet<RelationToOtherEventModel>();
+
 
             //Act
-            var result = eventLogic.EventDto.Result;
+            var result = await eventLogic.EventDto;
 
             //Assert
             Assert.AreEqual(true, result.Included);
@@ -234,74 +241,12 @@ namespace Event.tests
 
         #region URI registration
 
-        [Test]
-        public void IdExistsTest()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-            // TODO: Redesign test to reflect changes in IEventStorage
-            // eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
-
-            //Act
-            var result = eventLogic.KnowsId("Test").Result;
-
-            //Assert
-            Assert.AreEqual(true, result);
-
-        }
-
-        [Test]
-        public void IdDoesNotExist()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-
-            //Act
-            var result = eventLogic.KnowsId("Test").Result;
-
-            //Assert
-            Assert.AreEqual(false, result);
-        }
-
-        [Test]
-        public void RemoveIdInUriAlreadyExisting()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-            // TODO: Redesign test to reflect changes in IEventStorage
-            // eventLogic.Storage.EventUris.Add("Test", new Uri("http://test/"));
-
-            //Act
-            eventLogic.RemoveIdAndUri("Test").Wait();
-            // var result = eventLogic.Storage.EventUris.Contains(new KeyValuePair<string, Uri>("Test",new Uri("http://test/")));
-
-            //Assert
-            // Assert.AreEqual(false,result);
-        }
-
-        [Test]
-        [ExpectedException(typeof(KeyNotFoundException))]
-        public void RemoveIdInUriNotExisting()
-        {
-            //Arrange
-            var eventLogic = new EventLogic();
-            
-            //Act
-            try
-            {
-                eventLogic.RemoveIdAndUri("Test").Wait();
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException;
-            }
-        }
-
+        /* Todo: Redesign this test to use the new way of deleting events.
         [Test]
         public void ResetStateTest()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(new InMemoryStorage2());
             eventLogic.Name = "TestName";
             eventLogic.EventId = "TestId";
             eventLogic.WorkflowId = "TestWId";
@@ -315,15 +260,19 @@ namespace Event.tests
             Assert.IsNull(eventLogic.EventId);
             Assert.IsNull(eventLogic.WorkflowId);
             Assert.IsNull(eventLogic.OwnUri);
-        }
+        }*/
 
         [Test]
         //This test only tests that values are set, and not a connection to the server is established.
-        public void InitializeEventRuns()
+        public async void InitializeEventRuns()
         {
             //Arrange
-            var eventLogic = new EventLogic();
-            var eventDto = new EventDto()
+            var mock = new Mock<IEventStorage>();
+            mock.SetupAllProperties();
+            mock.Setup(storage => storage.EventId).Returns("TestId");
+
+            var eventLogic = new EventLogic(mock.Object);
+            var eventDto = new EventDto
             {
                 EventId = "TestId",
                 WorkflowId = "TestWId",
@@ -331,18 +280,18 @@ namespace Event.tests
                 Included = true,
                 Pending = true,
                 Executed = true,
-                Inclusions = new HashSet<Uri>(),
-                Exclusions = new HashSet<Uri>(),
-                Conditions = new HashSet<Uri>(),
-                Responses = new HashSet<Uri>(),
+                Inclusions = new HashSet<EventAddressDto>(),
+                Exclusions = new HashSet<EventAddressDto>(),
+                Conditions = new HashSet<EventAddressDto>(),
+                Responses = new HashSet<EventAddressDto>(),
             };
 
             //Act
             try
             {
-                eventLogic.InitializeEvent(eventDto, new Uri("http://test/")).Wait();
+                await eventLogic.InitializeEvent(eventDto, new Uri("http://test/"));
             }
-            catch (Exception)
+            catch (HttpResponseException)
             {
                 // ignored
             }
@@ -362,11 +311,11 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(NullReferenceException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void InitializeEventEventDtoIsNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(Mock.Of<IEventStorage>());
 
             //Act
             try
@@ -376,23 +325,26 @@ namespace Event.tests
             catch (Exception ex)
             {
                 //Assert
-                Assert.AreEqual("Provided EventDto was null", ex.InnerException.Message);
+                Assert.AreEqual("Provided EventDto was null\r\nParameternavn: eventDto", ex.InnerException.Message);
                 throw ex.InnerException;
             }
         }
 
         [Test]
         [ExpectedException(typeof(NullReferenceException))]
-        public void InitializeEventEventIdIsNotNull()
+        public async void InitializeEventEventIdIsNotNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var mock = new Mock<IEventStorage>();
+            mock.SetupAllProperties();
+
+            var eventLogic = new EventLogic(mock.Object);
             eventLogic.EventId = "Test";
 
             //Act
             try
             {
-                eventLogic.InitializeEvent(new EventDto(), new Uri("http://test/")).Wait();
+                await eventLogic.InitializeEvent(new EventDto(), new Uri("http://test/"));
             }
             catch (Exception ex)
             {
@@ -404,10 +356,14 @@ namespace Event.tests
 
         [Test]
         //This test only tests that values are set, and not a connection to the server is established.
-        public void UpdateEventRuns()
+        public async void UpdateEventRuns()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var mock = new Mock<IEventStorage>();
+            mock.SetupAllProperties();
+            mock.Setup(storage => storage.EventId).Returns("TestId");
+
+            var eventLogic = new EventLogic(mock.Object);
             var eventDto = new EventDto()
             {
                 EventId = "TestId",
@@ -416,16 +372,16 @@ namespace Event.tests
                 Included = true,
                 Pending = true,
                 Executed = true,
-                Inclusions = new HashSet<Uri>(),
-                Exclusions = new HashSet<Uri>(),
-                Conditions = new HashSet<Uri>(),
-                Responses = new HashSet<Uri>(),
+                Inclusions = new HashSet<EventAddressDto>(),
+                Exclusions = new HashSet<EventAddressDto>(),
+                Conditions = new HashSet<EventAddressDto>(),
+                Responses = new HashSet<EventAddressDto>(),
             };
 
             //Act
             try
             {
-                eventLogic.UpdateEvent(eventDto, new Uri("http://test/")).Wait();
+                await eventLogic.UpdateEvent(eventDto, new Uri("http://test/"));
             }
             catch (Exception)
             {
@@ -448,15 +404,15 @@ namespace Event.tests
 
         [Test]
         [ExpectedException(typeof(NullReferenceException))]
-        public void UpdateEventEventDtoIsNull()
+        public async void UpdateEventEventDtoIsNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var eventLogic = new EventLogic(Mock.Of<IEventStorage>());
 
             //Act
             try
             {
-                eventLogic.UpdateEvent(null, new Uri("http://test/")).Wait();
+                await eventLogic.UpdateEvent(null, new Uri("http://test/"));
             }
             catch (Exception ex)
             {
@@ -468,16 +424,19 @@ namespace Event.tests
 
         [Test]
         [ExpectedException(typeof(NullReferenceException))]
-        public void UpdateEventEventIdIsNull()
+        public async void UpdateEventEventIdIsNull()
         {
             //Arrange
-            var eventLogic = new EventLogic();
+            var mock = new Mock<IEventStorage>();
+            mock.SetupAllProperties();
+
+            var eventLogic = new EventLogic(mock.Object);
             eventLogic.EventId = null;
 
             //Act
             try
             {
-                eventLogic.UpdateEvent(new EventDto(), new Uri("http://test/")).Wait();
+                await eventLogic.UpdateEvent(new EventDto(), new Uri("http://test/"));
             }
             catch (Exception ex)
             {

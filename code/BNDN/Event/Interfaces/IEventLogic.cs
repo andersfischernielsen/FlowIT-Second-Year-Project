@@ -30,20 +30,9 @@ namespace Event.Interfaces
         #region DTO Creation
         Task<EventStateDto> EventStateDto { get; }
         Task<EventDto> EventDto { get; }
-        Task<IEnumerable<Uri>> GetNotifyDtos();
-
-        Task AddNotifyDto<T>(IDictionary<Uri, List<NotifyDto>> dictionary, Uri uri, Func<string, T> creator)
-            where T : NotifyDto;
         #endregion
 
-        #region URI Handling
-        Task RegisterIdWithUri(string id, Uri endPoint);
-        Task<bool> KnowsId(string id);
-        Task RemoveIdAndUri(string id);
-        #endregion
-
-        Task ResetState();
-        bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto);
+        bool CallerIsAllowedToOperate(string lockOwnerId);
         bool IsLocked();
 
         // TODO: I (Morten) may have bloated this interface; should we refactor
@@ -52,6 +41,8 @@ namespace Event.Interfaces
         Task DeleteEvent();
 
         Task Execute();
+
+        bool EventIdExists();
 
     }
 }

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Common;
 using Event.Controllers;
-using Event.Models;
+using Event.Interfaces;
+using Event.Storage;
+using Moq;
 using NUnit.Framework;
 
 namespace Event.tests
@@ -22,7 +19,11 @@ namespace Event.tests
         public void Setup()
         {
             _eventStateController = new EventStateController();
-            _eventLogic = new EventLogic();
+
+            var mock = new Mock<IEventStorage>();
+            mock.SetupAllProperties();
+
+            _eventLogic = new EventLogic(mock.Object);
             _eventAddressDto = new EventAddressDto(){Id = "Lock"};
 
             _eventLogic.EventId = "1";
@@ -41,7 +42,7 @@ namespace Event.tests
         public void TestGetPendingReturnsTrue()
         {
             //Act
-            var result = _eventStateController.GetPending(_eventAddressDto.Id);
+            var result = _eventStateController.GetPending(_eventAddressDto.Id, "EventId");
 
             //Assert
             Assert.AreEqual(true, result);
@@ -51,7 +52,7 @@ namespace Event.tests
         public void TestGetExecutedReturnsTrue()
         {
             //Act
-            var result = _eventStateController.GetExecuted(_eventAddressDto.Id);
+            var result = _eventStateController.GetExecuted(_eventAddressDto.Id, "EventId");
 
             //Assert
             Assert.AreEqual(true, result);
@@ -61,7 +62,7 @@ namespace Event.tests
         public void TestGetIncludedReturnsFalse()
         {
             //Act
-            var result = _eventStateController.GetIncluded((_eventAddressDto.Id));
+            var result = _eventStateController.GetIncluded(_eventAddressDto.Id,"EventId");
 
             //Assert
             Assert.AreEqual(false, result);
@@ -74,7 +75,7 @@ namespace Event.tests
         public async void TestExecute()
         {
             //Test execution of event with a given role.
-            await _eventStateController.Execute(new ExecuteDto {Roles = new List<string> {"TEACHER"}});
+            await _eventStateController.Execute(new ExecuteDto {Roles = new List<string> {"TEACHER"}},"SenderId");
             Assert.IsTrue(_eventLogic.Executed);
 
             //TODO: Test the rest of Execute()...
@@ -84,7 +85,7 @@ namespace Event.tests
         public void TestPutPendingReturnsFalse()
         {
             //Act
-            _eventStateController.UpdatePending(_eventAddressDto, false);
+            _eventStateController.UpdatePending(_eventAddressDto, false, "SenderId");
             var result = _eventLogic.Pending;
 
             //Assert
@@ -95,7 +96,7 @@ namespace Event.tests
         public void TestPutIncludedReturnsTrue()
         {
             //Act
-            _eventStateController.UpdateIncluded(_eventAddressDto, true);
+            _eventStateController.UpdateIncluded(_eventAddressDto, true, "SenderId");
             var result = _eventLogic.Included;
 
             //Assert
@@ -113,7 +114,7 @@ namespace Event.tests
 
             //Act
             _eventLogic.LockDto = null;
-            _eventStateController.Lock(testLock);
+            _eventStateController.Lock(testLock, "eventId");
 
             //Assert
             Assert.AreEqual(testLock, _eventLogic.LockDto);
@@ -126,7 +127,7 @@ namespace Event.tests
         public void TestUnlocking()
         {
             //Act
-            _eventStateController.Unlock(_eventAddressDto.Id);
+            _eventStateController.Unlock(_eventAddressDto.Id, "eventId");
 
             //Assert
             Assert.AreEqual(null, _eventLogic.LockDto);

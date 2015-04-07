@@ -7,6 +7,7 @@ using System.Web.Http;
 using Common;
 using Event.Interfaces;
 using Event.Models;
+using Event.Storage;
 
 namespace Event.Controllers
 {
@@ -21,15 +22,21 @@ namespace Event.Controllers
         /// <summary>
         /// Get the entire Event, (namely rules and state for this Event)
         /// </summary>
+        /// <param name="eventId">The id of the Event, that you wish to get an EventDto representation of</param>
         /// <returns>A task containing a single EventDto which represents the Events current state.</returns>
-        [Route("event")]
+        [Route("events/{eventId}")]
         [HttpGet]
-        public async Task<EventDto> GetEvent()
+        public async Task<EventDto> GetEvent(string eventId)
         {
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventId))
             {
-                // Dismiss request if Event is currently locked
+                // Check if provided eventId exists
+                if (!logic.EventIdExists())
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
+                }
 
+                // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
                     // Event is currently locked)
@@ -41,11 +48,11 @@ namespace Event.Controllers
         }
 
         /// <summary>
-        /// Sets up this Event, namely its rules and state
+        /// Sets up an Event at this WebAPI
         /// </summary>
         /// <param name="eventDto">The data (ruleset and initial state), this Event should be set to</param>
         /// <returns></returns>
-        [Route("event")]
+        [Route("events")]
         [HttpPost]
         public async Task PostEvent([FromBody] EventDto eventDto)
         {
@@ -68,15 +75,24 @@ namespace Event.Controllers
 
             if (eventDto == null)
             {
+                // TODO: Provide nicer description / error message
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventDto.EventId))
             {
+                // Check for non-existing eventId
+                if (logic.EventIdExists())
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, String.Format("{0} event already exists", eventDto.EventId)));
+                }
+
+                // TODO: An Event that has just been posted, should not be able to be locked already...Delete! 
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
                     // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed, "Event is currently locked"));
+
                 }
 
                 // Prepare for method-call: Gets own URI (i.e. http://address)
@@ -94,10 +110,11 @@ namespace Event.Controllers
         /// the provided EventDto-argument passed to the method call
         /// </summary>
         /// <param name="eventDto">Holds the data that should override the current data held in this Event</param>
+        /// <param name="eventId">Id of the Event that is to be updated</param>
         /// <returns></returns>
-        [Route("event")]
+        [Route("events/{eventId}")]
         [HttpPut]
-        public async Task PutEvent([FromBody] EventDto eventDto)
+        public async Task PutEvent([FromBody] EventDto eventDto, string eventId)
         {
             if (!ModelState.IsValid)
             {
@@ -105,8 +122,14 @@ namespace Event.Controllers
                                 "Provided input could not be mapped onto an instance of EventDto"));
             }
 
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventId))
             {
+                // Check if event even exists
+                if (!logic.EventIdExists())
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
+                }
+
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
@@ -129,31 +152,25 @@ namespace Event.Controllers
             }
         }
 
-
-        [Route("event")]
+        /// <summary>
+        /// DeleteEvent will delete an Event
+        /// </summary>
+        /// <param name="eventId">The id of the Event to be deleted</param>
+        /// <returns></returns>
+        [Route("events/{eventId}")]
         [HttpDelete]
-        public async Task DeleteEvent()
+        public async Task DeleteEvent(string eventId)
         {
-            using (IEventLogic logic = new EventLogic())
+            using (IEventLogic logic = new EventLogic(eventId))
             {
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
-                    // Event is currently locked)
-                    // Event is currently locked)
+                    // Event is currently locked
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed,
                         "Event is currently locked"));
                 }
-
-                try
-                {
-                    await logic.DeleteEvent();
-                }
-                catch (NullReferenceException)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        "Event is not initialized!"));
-                }
+                await logic.DeleteEvent();
             }
         }
 

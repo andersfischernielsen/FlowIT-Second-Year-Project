@@ -76,7 +76,14 @@ namespace Server.Storage
                          where e.ID == eventId
                          select e;
 
-            _db.Events.Remove(events.Single());
+            var eventToRemove = events.SingleOrDefault();
+            if (eventToRemove == null)
+            {
+                // Event was already deleted
+                return;
+            }
+
+            _db.Events.Remove(eventToRemove);
             _db.SaveChanges();
         }
 

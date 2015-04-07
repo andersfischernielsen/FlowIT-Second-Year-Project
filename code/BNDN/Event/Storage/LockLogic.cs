@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Common;
+using Event.Models;
 
-namespace Event.Models
+namespace Event.Storage
 {
     /// <summary>
     /// LockLogic is the class that handles the operations regarding locking this Event and other related, dependent Events. 
@@ -15,14 +15,14 @@ namespace Event.Models
         /// Because lock-logic is created for each request at a Controller, this _eventsToBelocked should not become outdated
         /// TODO: Discuss: I am right about above, right?
         /// </summary>
-        private readonly IEnumerable<Uri> _eventsToBelocked;
-        private HashSet<Uri> _lockedEvents; 
+        private readonly IEnumerable<RelationToOtherEventModel> _eventsToBelocked;
+        private HashSet<RelationToOtherEventModel> _lockedEvents; 
         // TODO: MEGA-ÜBER non-chilled Morten: would an IEventLogic not be preferable / "more ideal" in constructor?
         public LockLogic(EventLogic logic)
         {
             _logic = logic;
-            _eventsToBelocked = _logic.GetNotifyDtos().Result; // ER DET HER DEN RIGTIGE LISTE?
-            _lockedEvents = new HashSet<Uri>();
+            _eventsToBelocked = _logic.RelationsToLock; // ER DET HER DEN RIGTIGE LISTE?
+            _lockedEvents = new HashSet<RelationToOtherEventModel>();
         }
 
         // TODO: Will this method include locking this Event itself? Or should caller take care of this it-self? 
@@ -43,19 +43,21 @@ namespace Event.Models
             {
                 // Initiate the lockDto that is to be passed to the other Events
                 // identifing this Event as the lockowner
-                LockDto lockDto = new LockDto {LockOwner = _logic.EventId};
+                var lockDto = new LockDto {LockOwner = _logic.EventId, Id = _logic.EventId};
                 
                 // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
                 _logic.LockDto = lockDto;
 
                 // For every related, dependent Event, attempt to lock it
-                foreach (var uri in _eventsToBelocked)
+                foreach (var relation in _eventsToBelocked)
                 {
-                    await new EventCommunicator(uri).Lock(lockDto);
+                    var toLock = new LockDto { LockOwner = _logic.EventId, Id = relation.EventID };
+
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Lock(toLock);
                     // Discuss: Aren't we too naive here, just assuming that the Event *actually* DID lock itself? 
                     // What if it failed to do so? We shouldn't add it to the _lockedEvents list then...
                     // TODO: Read above! 
-                    _lockedEvents.Add(uri);
+                    _lockedEvents.Add(relation);
                 }
 
                 //TODO: Brug Parrallel i stedet for:
@@ -76,15 +78,13 @@ namespace Event.Models
 
         private async Task UnlockSome()
         {
-            EventAddressDto eventAddress = new EventAddressDto {Id = _logic.EventId, Uri = _logic.OwnUri};
-
             // Unlock the other Events. 
             // TODO: Do sazzy Parallel.ForEach here, too...?
-            foreach (var uri in _lockedEvents)
+            foreach (var relation in _lockedEvents)
             {
                 try
                 {
-                    await new EventCommunicator(uri).Unlock(eventAddress);
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock();
                 }
                 catch (Exception)
                 {
@@ -107,16 +107,13 @@ namespace Event.Models
             // Optimistic approach; assuming every unlocking goes well, everyEventIsUnlocked will go unaffected 
             bool everyEventIsUnlocked = true;
 
-            // Create the same identifier, that was used when locking the Events
-            var eventAddress = new EventAddressDto() { Id = _logic.EventId, Uri = _logic.OwnUri };
-
             // Unlock the other Events. 
             // TODO: Do sazzy Parallel.ForEach here, too...?
-            foreach (var uri in _eventsToBelocked)
+            foreach (var relation in _eventsToBelocked)
             {
                 try
                 {
-                    await new EventCommunicator(uri).Unlock(eventAddress);
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock();
                 }
                 catch (Exception)
                 {

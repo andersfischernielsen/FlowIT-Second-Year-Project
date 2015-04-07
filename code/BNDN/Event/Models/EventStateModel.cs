@@ -1,13 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Event.Models
 {
     public class EventStateModel
     {
-        [Key]
-        public int Id { get; set; }
+        [Key, ForeignKey("EventIdentificationModel")]
+        public string Id { get; set; }
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public bool Pending { get; set; }
+
+        public virtual EventIdentificationModel EventIdentificationModel { get; set; }
     }
 }

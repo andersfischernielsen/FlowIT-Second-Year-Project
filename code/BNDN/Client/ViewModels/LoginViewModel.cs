@@ -20,12 +20,12 @@ namespace Client.ViewModels
                 var settingsjson = File.ReadAllText("settings.json");
                 var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
 
-                _username = settings.Username ?? "Username";
+                _username = settings.Username ?? "Enter role";
                 _serverAddress = new Uri(settings.ServerAddress ?? "http://localhost:13768/");
             }
             else
             {
-                _username = "Username";
+                _username = "Enter role";
                 _serverAddress = new Uri("http://localhost:13768/");
             }
             _status = "";
@@ -72,9 +72,9 @@ namespace Client.ViewModels
         {
             if (_loginStarted) return;
             _loginStarted = true;
+            Status = "Attempting login...";
 
             // PUT LOGIN LOGIC HERE
-            Status = "";
             var connection = new ServerConnection(_serverAddress);
             try
             {

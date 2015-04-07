@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
+using Event.Models;
 
-namespace Event.Models
+namespace Event.Storage
 {
     /// <summary>
     /// EventCommunicator handles the outgoing communication from an Event to another.
@@ -12,17 +13,20 @@ namespace Event.Models
     public class EventCommunicator : IEventFromEvent
     {
         private readonly HttpClientToolbox _httpClient;
-        private readonly EventLogic _logic;
-
+        private string TargetEventId { get; set; }
+        private string OwnEventId { get; set; }
 
         /// <summary>
         /// Create a new EventCommunicator using the provided Uri.
         /// </summary>
-        /// <param name="eventUri">The base-address of the Event whose rules are to be deleted.</param>
-        public EventCommunicator(Uri eventUri)
+        /// <param name="targetEventUri">The base-address of the Event that this instance is to communicate with.</param>
+        /// <param name="targetEventId">The id of the Event, that this EventCommunicator is to communicate with </param>
+        /// <param name="ownEventId">The id of this Event</param>
+        public EventCommunicator(Uri targetEventUri, string targetEventId, string ownEventId)
         {
-            _httpClient = new HttpClientToolbox(eventUri);
-            _logic = new EventLogic();
+            _httpClient = new HttpClientToolbox(targetEventUri);
+            TargetEventId = targetEventId;
+            OwnEventId = ownEventId;
         }
 
         /// <summary>
@@ -36,12 +40,12 @@ namespace Event.Models
 
         public async Task<bool> IsExecuted()
         {
-            return await _httpClient.Read<bool>("event/executed/" + _logic.EventId);
+            return await _httpClient.Read<bool>(String.Format("events/{0}/executed/{1}", TargetEventId,OwnEventId));
         }
 
         public async Task<bool> IsIncluded()
         {
-            return await _httpClient.Read<bool>("event/included/" + _logic.EventId);
+            return await _httpClient.Read<bool>(String.Format("events/{0}/included/{1}",TargetEventId,OwnEventId));
         }
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace Event.Models
         /// <returns>A Task object revealing af EventDto object</returns>
         public async Task<EventDto> GetEvent()
         {
-            return await _httpClient.Read<EventDto>("event");
+            return await _httpClient.Read<EventDto>(String.Format("events/{0}",TargetEventId));
         }
 
 
@@ -58,33 +62,30 @@ namespace Event.Models
         /// PostEventRules will post to another event the rules it need to adopt
         /// </summary>
         /// <param name="rules">The rule-set it need to adopt</param>
-        /// <param name="ownId">The id of the calling event</param>
-        public async Task PostEventRules(EventRuleDto rules, string ownId)
+        public async Task PostEventRules(EventRuleDto rules)
         {
-            await _httpClient.Create(String.Format("event/rules/{0}", ownId), rules);
+            await _httpClient.Create(String.Format("event/rules/{0}", OwnEventId), rules);
         }
-
+        
         /// <summary>
         /// UpdateEventRules will post to another Event the rules it need to update.
         /// </summary>
         /// <param name="replacingRules">The new (replacing ruleset)</param>
-        /// <param name="ownId">The id of the calling event</param>
         // TODO: Will the replacing ruleset contain all rules from this Event (whether or not they all need to be updated) or only those that need to be modified? 
         // The definition of the PUT-call is that the state will be set to whatever is received, so every rule
         // must be defined in replacingRules. - Mikael.
-        public async Task UpdateEventRules(EventRuleDto replacingRules, string ownId)
+        public async Task UpdateEventRules(EventRuleDto replacingRules)
         {
-            await _httpClient.Update(String.Format("event/rules/{0}", ownId), replacingRules);
+            await _httpClient.Update(String.Format("event/rules/{0}", OwnEventId), replacingRules);
         }
 
         /// <summary>
         /// Will issue a Delete call on receiving Event's rules. How the receiving Event handles this call
-        /// is an implementation detail 
+        /// is an implementation detail.
         /// </summary>
-        /// <param name="ownId">The id of the calling event</param>
-        public async Task DeleteEventRules(string ownId)
+        public async Task DeleteEventRules()
         {
-            await _httpClient.Delete(String.Format("event/rules/{0}", ownId));
+            await _httpClient.Delete(String.Format("event/rules/{0}", OwnEventId));
         }
 
         //TODO: Dont use this.
@@ -95,31 +96,31 @@ namespace Event.Models
 
         public async Task SendPending(bool newPendingValue, EventAddressDto lockDto)
         {
-            await _httpClient.Update(String.Format("event/pending/{0}", newPendingValue), lockDto);
+            await _httpClient.Update(String.Format("events/{0}/pending/{1}", TargetEventId,newPendingValue), lockDto);
         }
         public async Task SendIncluded(bool newIncludedValue, EventAddressDto lockDto)
         {
-            await _httpClient.Update(String.Format("event/included/{0}", newIncludedValue), lockDto);
+            await _httpClient.Update(String.Format("events/{0}/included/{1}", OwnEventId,newIncludedValue), lockDto);
         }
 
         /// <summary>
-        /// Tries to lock the event
+        /// Tries to lock target event
         /// </summary>
         /// <param name="lockDto"></param>
         /// <returns></returns>
         public async Task Lock(LockDto lockDto)
         {
-            await _httpClient.Create("event/lock", lockDto);
+            await _httpClient.Create(String.Format("events/{0}/lock",TargetEventId), lockDto);
         }
 
         /// <summary>
-        /// TODO: BIG TODO.. You cant send json with delete call at this moment with the httptoolbox!!
+        /// Attempts on unlocking the target Event
         /// </summary>
-        /// <param name="unlockDto"></param>
         /// <returns></returns>
-        public async Task Unlock(EventAddressDto unlockDto)
+        public async Task Unlock()
         {
-            await _httpClient.Delete(String.Format("event/lock/{0}",unlockDto.Id));
+            var unlockId = OwnEventId;
+            await _httpClient.Delete(String.Format("events/{0}/lock/{1}",TargetEventId,unlockId));
         }
     }
 }
