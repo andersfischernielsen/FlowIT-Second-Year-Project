@@ -96,8 +96,6 @@ namespace Server.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Provided input could not be mapped onto an instance of WorkflowDto"));
             }
-
-            // TODO: see that workflowId matches the dto.
             try
             {
                 // Add this Event to the specified workflow
