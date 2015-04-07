@@ -44,12 +44,6 @@ namespace Event.Storage
         public HashSet<RelationToOtherEventModel> Exclusions { get; set; }
         public HashSet<RelationToOtherEventModel> Inclusions { get; set; }
 
-        public ICollection<EventUriIdMapping> EventUriIdMappings
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
         #endregion
 
         #region Methods For Removing/Storing Data
