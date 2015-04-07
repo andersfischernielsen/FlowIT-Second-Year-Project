@@ -36,6 +36,26 @@ namespace Event.Storage
             _context.SaveChanges();
         }
 
+        public void DeleteEvent()
+        {
+            if (!_context.EventIdentification.Any(model => model.Id == EventId))
+            {
+                throw new InvalidOperationException("The EventId does not exist");
+            }
+            if (!_context.EventState.Any(model => model.Id == EventId))
+            {
+                throw new InvalidOperationException("The EventId does not exist");
+            }
+            Conditions.Clear();
+            Exclusions.Clear();
+            Inclusions.Clear();
+            Responses.Clear();
+            _context.EventIdentification.Remove(_context.EventIdentification.Single(ei => ei.Id == EventId));
+            _context.EventState.Remove(_context.EventState.Single(ei => ei.Id == EventId));
+
+            _context.SaveChanges();
+        }
+
 
         #region Properties
         public Uri OwnUri
@@ -254,7 +274,7 @@ namespace Event.Storage
                 _context.SaveChanges();
             }
         }
-        public HashSet<RelationToOtherEventModel> Responses 
+        public HashSet<RelationToOtherEventModel> Responses
         {
             get
             {
@@ -359,8 +379,8 @@ namespace Event.Storage
                 {
                     var uriToAdd = new InclusionUri()
                     {
-                        UriString = element.Uri.AbsoluteUri, 
-                        EventId = element.EventID, 
+                        UriString = element.Uri.AbsoluteUri,
+                        EventId = element.EventID,
                         EventIdentificationModelId = EventId
                     };
                     _context.Inclusions.Add(uriToAdd);

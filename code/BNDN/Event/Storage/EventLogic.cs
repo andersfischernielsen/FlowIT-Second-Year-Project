@@ -328,17 +328,10 @@ namespace Event.Storage
 
         public async Task DeleteEvent()
         {
-            if (EventId == null)
-            {
-                throw new NullReferenceException();
-            }
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
             await serverCommunicator.DeleteEventFromServer();
-            Storage.Conditions.Clear();
-            Storage.Responses.Clear();
-            Storage.Inclusions.Clear();
-            Storage.Exclusions.Clear();
-            await ResetState();
+
+            Storage.DeleteEvent();
         }
 
         public async Task Execute()
