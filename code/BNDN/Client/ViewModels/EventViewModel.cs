@@ -16,14 +16,14 @@ namespace Client.ViewModels
         public EventViewModel()
         {
             _eventAddressDto = new EventAddressDto();
-            _eventStateDto = new EventStateDto() { Executable = true };
+            _eventStateDto = new EventStateDto();
             GetState();
         }
         public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
         {
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
-            _eventStateDto = new EventStateDto() { Executable = true };
+            _eventStateDto = new EventStateDto();
             GetState();
         }
 
@@ -83,10 +83,7 @@ namespace Client.ViewModels
                     var uri = new Uri(path);
                     return new ImageBrush(new BitmapImage(uri));
                 }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
         }
 
@@ -111,10 +108,7 @@ namespace Client.ViewModels
                     var uri = new Uri(path);
                     return new ImageBrush(new BitmapImage(uri));
                 }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
         }
         public bool Included
@@ -130,7 +124,7 @@ namespace Client.ViewModels
 
         public Brush IncludedColor
         {
-            get { return new SolidColorBrush(Colors.DeepSkyBlue);}
+            get { return Included ? new SolidColorBrush(Colors.DeepSkyBlue) : null; }
         }
 
         public bool Executable
