@@ -17,7 +17,7 @@ namespace Common
         public bool Executed { get; set; }
         public bool Included { get; set; }
         [Required]
-        public string Role { get; set; }
+        public IEnumerable<string> Role { get; set; }
         public IEnumerable<EventAddressDto> Conditions { get; set; }
         public IEnumerable<EventAddressDto> Exclusions { get; set; }
         public IEnumerable<EventAddressDto> Responses { get; set; }

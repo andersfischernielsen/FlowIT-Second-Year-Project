@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Common;
 using Event.Controllers;
-using Event.Models;
+using Event.Interfaces;
 using Event.Storage;
+using Moq;
 using NUnit.Framework;
 
 namespace Event.tests
@@ -23,7 +19,11 @@ namespace Event.tests
         public void Setup()
         {
             _eventStateController = new EventStateController();
-            _eventLogic = new EventLogic(new InMemoryStorage2());
+
+            var mock = new Mock<IEventStorage>();
+            mock.SetupAllProperties();
+
+            _eventLogic = new EventLogic(mock.Object);
             _eventAddressDto = new EventAddressDto(){Id = "Lock"};
 
             _eventLogic.EventId = "1";

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Common;
 using Event.Models;
 
 namespace Event.Storage
@@ -79,15 +78,13 @@ namespace Event.Storage
 
         private async Task UnlockSome()
         {
-            EventAddressDto eventAddress = new EventAddressDto {Id = _logic.EventId, Uri = _logic.OwnUri};
-
             // Unlock the other Events. 
             // TODO: Do sazzy Parallel.ForEach here, too...?
             foreach (var relation in _lockedEvents)
             {
                 try
                 {
-                    new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock().Wait();
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock();
                 }
                 catch (Exception)
                 {
@@ -109,9 +106,6 @@ namespace Event.Storage
 
             // Optimistic approach; assuming every unlocking goes well, everyEventIsUnlocked will go unaffected 
             bool everyEventIsUnlocked = true;
-
-            // Create the same identifier, that was used when locking the Events
-            var eventAddress = new EventAddressDto() { Id = _logic.EventId, Uri = _logic.OwnUri };
 
             // Unlock the other Events. 
             // TODO: Do sazzy Parallel.ForEach here, too...?

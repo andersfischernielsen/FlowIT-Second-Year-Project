@@ -32,7 +32,6 @@ namespace Event.Interfaces
         Task<EventDto> EventDto { get; }
         #endregion
 
-        Task ResetState();
         bool CallerIsAllowedToOperate(string lockOwnerId);
         bool IsLocked();
 

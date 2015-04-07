@@ -14,5 +14,6 @@ namespace Common
         public string Id { get; set; }
         [Required]
         public Uri Uri { get; set; }
+        public IEnumerable<string> Roles { get; set; } 
     }
 }
