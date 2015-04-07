@@ -20,8 +20,22 @@ An IServerLogic instance is mocked and returns a List of elements when a method 
 Incoming HTTP requests are handled by the controller and therefore methods handling GET, POST, PUT and DELETE requests have been tested using a IServerLogic mock. 
   
 ### Event
-The outgoing communicator, WebAPI controller and event logic classes have been unit and integration tested as follows.
+The outgoing communicator, WebAPI controller and event logic classes have been unit tested as follows.
 
-#### LOL
+#### EventCommunicator
+The EventCommunicator should throw certain expections when receiving invalid requests. This has been tested for methods in the IServerFromEvent interface.
+
+#### EventLogic
+EventLogic is the implementation of the IEventLogic interface. The methods in this interface have been unit tested by creating an in-memory instance of IEventStorage and testing against this. 
+Assertions for expected results (including exceptions) is used to test that methods return the expected results. 
+
+#### EventStateController
+The locking functionality of Events has been tested using unit testing and assertions for expected results. 
 
 ### Client
+The connection of the Client to the Server has been unit tested as follows.
+
+#### ServerConnection
+The ServerConnection inherits from the IServerConnection interface and the methods defined in this interface have been unit tested.
+An instance of HTTPClientToolbox is mocked to ensure that the ServerConnection can be tested in an isolated environment. 
+Testing that the correct exceptions are thrown on invalid requests and correct data is returned on valid requests is done by assertion.
