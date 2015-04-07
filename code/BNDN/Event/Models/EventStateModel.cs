@@ -11,7 +11,6 @@ namespace Event.Models
         public bool Included { get; set; }
         public bool Pending { get; set; }
 
-        [Required]
         public virtual EventIdentificationModel EventIdentificationModel { get; set; }
     }
 }
