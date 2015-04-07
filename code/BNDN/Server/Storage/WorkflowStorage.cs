@@ -64,12 +64,12 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
-        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        public Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             throw new NotImplementedException();
         }
