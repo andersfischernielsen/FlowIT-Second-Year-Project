@@ -17,5 +17,6 @@ namespace Server.Models
         public string ServerWorkflowModelID { get; set; }
         [Required]
         public virtual ServerWorkflowModel ServerWorkflowModel { get; set; }
+        public virtual ICollection<ServerRoleModel> ServerRolesModels { get; set; }
     }
 }

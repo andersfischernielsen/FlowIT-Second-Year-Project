@@ -58,28 +58,6 @@ namespace Server.Controllers
             }
 
         }
-
-        // GET: /Login
-        /// <summary>
-        /// Returns the users roles on all workflows.
-        /// </summary>
-        /// <param name="username">Id of the requested workflow</param>
-        /// <returns>RolesOnWorkflowsDto</returns>
-        [Route("login/{username}")]
-        [HttpGet]
-        public RolesOnWorkflowsDto Login(string username)
-        {
-            try
-            {
-                var result = ServerLogic.Login(username);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-            }
-
-        }
         #endregion
 
         #region POST requests
@@ -114,7 +92,7 @@ namespace Server.Controllers
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                                                "Provided input could not be mapped onto workflowDto"));
+                                                "Provided input could not be mapped onto EventAddressDto"));
             }
 
             try

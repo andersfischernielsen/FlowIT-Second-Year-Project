@@ -7,7 +7,7 @@ using Server.Models;
 
 namespace Server.Storage
 {
-    public class ServerStorage : IServerStorage, IDisposable
+    public class ServerStorage : IServerStorage
     {
         private readonly StorageContext _db;
 
@@ -21,7 +21,7 @@ namespace Server.Storage
             return _db.Users.SingleOrDefault(user => string.Equals(user.Name, username));
         }
 
-        public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
+        public ICollection<ServerRoleModel> Login(ServerUserModel userModel)
         {
             if (userModel.ServerRolesModels == null)
             {
@@ -37,6 +37,29 @@ namespace Server.Storage
                          where workflow.ID == e.ServerWorkflowModelID
                          select e;
             return events.ToList();
+        }
+
+        public async Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
+        {
+            foreach (var role in roles)
+            {
+                if (!_db.Roles.Any(r => r.ID.Equals(role.ID) 
+                    && r.ServerWorkflowModelID.Equals(r.ServerWorkflowModelID)))
+                {
+                    _db.Roles.Add(role);
+                }
+            }
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task AddUser(ServerUserModel user)
+        {
+            if (_db.Users.Any(u => u.ID.Equals(user.ID)))
+            {
+                throw new ArgumentException("User already exists", "user");
+            }
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
         }
 
         public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)

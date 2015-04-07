@@ -4,17 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common;
+using Server.Models;
 
 namespace Server
 {
-    public interface IServerLogic 
+    public interface IServerLogic : IDisposable
     {
         /// <summary>
         /// Tries to log in / returns all the roles the user has on all workflows
         /// </summary>
-        /// <param name="loginDto"></param>
+        /// <param name="username"></param>
         /// <returns></returns>
         RolesOnWorkflowsDto Login(string username);
+
+        Task AddUser(ServerUserModel user);
         
         /// <summary>
         /// Get all events from a workflow
