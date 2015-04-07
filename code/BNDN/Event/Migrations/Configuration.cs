@@ -29,7 +29,7 @@ namespace Event.Migrations
                     Id = "",
                     Name = null,
                     OwnUri = null,
-                    Role = null,
+                    Roles = null,
                     WorkflowId = null
                 });
 
@@ -41,53 +41,6 @@ namespace Event.Migrations
                     Included = false,
                     Pending = false
                 });
-
-            /*
-            context.EventUriIdMappings.Add(new EventUriIdMapping()
-            {
-                Id = null,
-                Uri = null
-            });
-
-            
-            context.OldExclusions.Add(new ExclusionUri()
-            {
-                Id = 0,
-                UriString = null
-            });
-
-            context.OldInclusions.Add(new InclusionUri()
-            {
-                Id = 0,
-                UriString = null
-            });
-
-            context.OldConditions.Add(new ConditionUri()
-            {
-                Id = 0,
-                UriString = null
-            });
-
-            context.OldResponses.Add(new ResponseUri()
-            {
-                Id = 0,
-                UriString = null
-            });*/
-
-
-
-            //  This method will be called after migrating to the latest version.
-
-            //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
-            //  to avoid creating duplicate seed data. E.g.
-            //
-            //    context.People.AddOrUpdate(
-            //      p => p.FullName,
-            //      new Person { FullName = "Andrew Peters" },
-            //      new Person { FullName = "Brice Lambson" },
-            //      new Person { FullName = "Rowan Miller" }
-            //    );
-            //
         }
     }
 }

@@ -114,7 +114,7 @@ namespace Server.Controllers
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                                                "Provided input could not be mapped onto workflowDto"));
+                                                "Provided input could not be mapped onto EventAddressDto"));
             }
 
             try

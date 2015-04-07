@@ -110,19 +110,19 @@ namespace Event.Storage
             }
         }
 
-        public string Role
+        public IEnumerable<string> Roles
         {
             get
             {
                 EventIdentificationIsInALegalState();
 
-                return _context.EventIdentification.Single(model => model.Id == EventId).Role;
+                return _context.EventIdentification.Single(model => model.Id == EventId).Roles;
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single(model => model.Id == EventId).Role = value;
+                _context.EventIdentification.Single(model => model.Id == EventId).Roles = value;
                 _context.SaveChanges();
             }
         }

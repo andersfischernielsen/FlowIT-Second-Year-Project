@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -158,7 +159,7 @@ namespace Event.Controllers
             using (var logic = new EventLogic(eventId))
             {
                 // Check that caller claims the right role for executing this Event
-                if (!executeDto.Roles.Contains(logic.Role))
+                if (!logic.ProvidedRolesHasMatchWithEventRoles(executeDto.Roles))
                 {
                     throw new HttpResponseException(
                         Request.CreateErrorResponse(

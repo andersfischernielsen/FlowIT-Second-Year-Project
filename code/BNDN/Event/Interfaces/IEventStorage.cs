@@ -13,7 +13,7 @@ namespace Event.Interfaces
         string WorkflowId { get; set; }
         string EventId { get; set; }
         string Name { get; set; }
-        string Role { get; set; }
+        IEnumerable<string> Roles { get; set; }
         #endregion
 
         void InitializeNewEvent();
