@@ -9,10 +9,10 @@ namespace Server.Models
     {
         public ServerUserModel()
         {
-            ServerRolesModels = new List<ServerRolesModel>();
+            ServerRolesModels = new List<ServerRoleModel>();
         }
         public int ID { get; set; }
         public string Name { get; set; }
-        public virtual ICollection<ServerRolesModel> ServerRolesModels { get; set; }
+        public virtual ICollection<ServerRoleModel> ServerRolesModels { get; set; }
     }
 }

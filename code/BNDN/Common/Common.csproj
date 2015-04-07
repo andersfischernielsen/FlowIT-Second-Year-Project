@@ -55,6 +55,7 @@
     <Compile Include="LoginDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RolesOnWorkflowsDto.cs" />
+    <Compile Include="UserDto.cs" />
     <Compile Include="WorkflowDto.cs" />
   </ItemGroup>
   <ItemGroup>

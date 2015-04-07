@@ -70,36 +70,36 @@ namespace Server.Migrations
             context.SaveChanges();
 
             context.Roles.AddOrUpdate(role => role.ID,
-                new ServerRolesModel
+                new ServerRoleModel
                 {
                     ID = "teacher",
-                    ServerWorklowModelID = "course",
+                    ServerWorkflowModelID = "course",
                     ServerUserModels = new List<ServerUserModel>
                     {
                         context.Users.Find(1)
                     }
-                }, new ServerRolesModel
+                }, new ServerRoleModel
                 {
                     ID = "student",
-                    ServerWorklowModelID = "course",
+                    ServerWorkflowModelID = "course",
                     ServerUserModels = new List<ServerUserModel>
                     {
                         context.Users.Find(4),
                         context.Users.Find(6)
                     }
-                }, new ServerRolesModel
+                }, new ServerRoleModel
                 {
                     ID = "customer",
-                    ServerWorklowModelID = "gasstation",
+                    ServerWorkflowModelID = "gasstation",
                     ServerUserModels = new List<ServerUserModel>
                     {
                         context.Users.Find(2),
                         context.Users.Find(3)
                     }
-                }, new ServerRolesModel
+                }, new ServerRoleModel
                 {
                     ID = "owner",
-                    ServerWorklowModelID = "gasstation",
+                    ServerWorkflowModelID = "gasstation",
                     ServerUserModels = new List<ServerUserModel>
                     {
                         context.Users.Find(5)
