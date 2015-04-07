@@ -30,6 +30,12 @@ namespace Event.Controllers
         {
             using (IEventLogic logic = new EventLogic(eventId))
             {
+                // Check if provided eventId exists
+                if (!logic.EventIdExists())
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
+                }
+
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
