@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using Event.Interfaces;
 using Event.Models;
@@ -394,16 +393,15 @@ namespace Event.Storage
         /// </summary>
         private void EventIdentificationIsInALegalState()
         {
-            var eventIdentification = _context.EventIdentification.Where(model => model.Id == EventId);
             // Check that there's currently only a single element in database
-            if (eventIdentification.Count() > 1)
+            if (_context.EventIdentification.Count(model => model.Id == EventId) > 1)
             {
                 throw new ApplicationException(
                     "More than a single EventIdentification element in database-set in Event");
             }
 
 
-            if (!eventIdentification.Any(model => model.Id == EventId))
+            if (!_context.EventIdentification.Any(model => model.Id == EventId))
             {
                 throw new ApplicationException("EventIdentification was not initialized in Event." +
                                                "Count was zero");
@@ -432,11 +430,11 @@ namespace Event.Storage
         private void EventStateIsInALegalState()
         {
             // Check that there is no more than a single element in EventState
-            if (_context.EventState.Count() > 1)
+            if (_context.EventState.Count(model => model.Id == EventId) > 1)
             {
                 throw new ApplicationException("More than a single element in EventState set");
             }
-            if (!_context.EventState.Any())
+            if (!_context.EventState.Any(model => model.Id == EventId))
             {
                 throw new ApplicationException("EventState was not initialized in Event");
             }
