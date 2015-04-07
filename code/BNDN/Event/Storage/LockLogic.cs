@@ -52,7 +52,9 @@ namespace Event.Storage
                 // For every related, dependent Event, attempt to lock it
                 foreach (var relation in _eventsToBelocked)
                 {
-                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Lock(lockDto);
+                    var toLock = new LockDto { LockOwner = _logic.EventId, Id = relation.EventID };
+
+                    await new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Lock(toLock);
                     // Discuss: Aren't we too naive here, just assuming that the Event *actually* DID lock itself? 
                     // What if it failed to do so? We shouldn't add it to the _lockedEvents list then...
                     // TODO: Read above! 

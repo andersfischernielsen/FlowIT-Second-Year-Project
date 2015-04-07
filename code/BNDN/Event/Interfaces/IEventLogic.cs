@@ -33,7 +33,7 @@ namespace Event.Interfaces
         #endregion
 
         Task ResetState();
-        bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto);
+        bool CallerIsAllowedToOperate(string lockOwnerId);
         bool IsLocked();
 
         // TODO: I (Morten) may have bloated this interface; should we refactor

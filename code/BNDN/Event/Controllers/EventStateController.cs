@@ -33,7 +33,7 @@ namespace Event.Controllers
             using (var logic = new EventLogic(eventId))
             {
                 // Check is made to see if the caller is allowed to execute this method at the moment
-                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
+                if (!logic.CallerIsAllowedToOperate(senderId))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Cannot access this property. The event is locked."));
@@ -55,7 +55,7 @@ namespace Event.Controllers
             using (var logic = new EventLogic(eventId))
             {
                 // Check is made to see if caller is allowed to execute this method at the moment. 
-                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
+                if (!logic.CallerIsAllowedToOperate(senderId))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Cannot access this property. The event is locked."));
@@ -77,7 +77,7 @@ namespace Event.Controllers
             using (var logic = new EventLogic(eventId))
             {
                 // Check is made to see if caller is allowed to execute this method
-                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
+                if (!logic.CallerIsAllowedToOperate(senderId))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Cannot access this property. The event is locked."));
@@ -99,7 +99,7 @@ namespace Event.Controllers
             using (var logic = new EventLogic(eventId))
             {
                 // Check is made to see if caller is allowed to execute this method (at the moment)
-                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
+                if (!logic.CallerIsAllowedToOperate(senderId))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Cannot access this property. The event is locked."));
@@ -124,7 +124,7 @@ namespace Event.Controllers
             {
                 //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
                 // Check is made to see whether caller is allowed to execute this method at the moment
-                if (!senderId.Equals("-1") && !logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
+                if (!senderId.Equals("-1") && !logic.CallerIsAllowedToOperate(senderId))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Cannot access this property. The event is locked."));
@@ -251,7 +251,7 @@ namespace Event.Controllers
                 }
 
                 // Check to see if caller is currently allowed to execute this method
-                if (!logic.CallerIsAllowedToOperate(eventAddressDto))
+                if (!logic.CallerIsAllowedToOperate(eventAddressDto.Id))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "This event is already locked by someone else."));
@@ -283,7 +283,7 @@ namespace Event.Controllers
                 }
 
                 // Check if caller is allowed to execute this method at the moment
-                if (!logic.CallerIsAllowedToOperate(eventAddressDto))
+                if (!logic.CallerIsAllowedToOperate(eventAddressDto.Id))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "This event is already locked by someone else."));
@@ -326,7 +326,7 @@ namespace Event.Controllers
                 if (logic.IsLocked())
                 {
                     // Todo: Consider fixing this "hack"
-                    if (!logic.CallerIsAllowedToOperate(new EventAddressDto {Id = lockDto.LockOwner}))
+                    if (!logic.CallerIsAllowedToOperate(lockDto.LockOwner))
                     {
                         // There cannot be set a new lock, since a lock is already set.
                         throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
@@ -360,7 +360,7 @@ namespace Event.Controllers
             {
                 // Check is made to see if caller is the same as the one, who locked the Event initially
                 // the CallerIsAllowedToOperate works on Id not Uri.
-                if (!logic.CallerIsAllowedToOperate(new EventAddressDto() {Id = senderId}))
+                if (!logic.CallerIsAllowedToOperate(senderId))
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         "Lock could not be unlocked. Event was locked by someone else."));

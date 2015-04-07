@@ -235,11 +235,11 @@ namespace Event.Storage
         }
 
 
-        public bool CallerIsAllowedToOperate(EventAddressDto eventAddressDto)
+        public bool CallerIsAllowedToOperate(string lockOwnerId)
         {
             if (LockDto == null) return true;
             // TODO: Consider implementing an Equals() method on EventAddressDto
-            return LockDto.LockOwner.Equals(eventAddressDto.Id);
+            return LockDto.LockOwner.Equals(lockOwnerId);
         }
 
         // TODO: InitializeEvent and UpdateEvent has a lot of duplicated code, will look into this later

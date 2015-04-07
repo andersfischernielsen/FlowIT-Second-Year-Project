@@ -45,7 +45,7 @@ namespace Event.Storage
 
         public async Task<bool> IsIncluded()
         {
-            return await _httpClient.Read<bool>(String.Format("events/{0}included/{1}",TargetEventId,OwnEventId));
+            return await _httpClient.Read<bool>(String.Format("events/{0}/included/{1}",TargetEventId,OwnEventId));
         }
 
         /// <summary>
