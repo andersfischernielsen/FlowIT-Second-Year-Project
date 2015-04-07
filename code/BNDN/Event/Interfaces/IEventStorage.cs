@@ -16,6 +16,8 @@ namespace Event.Interfaces
         string Role { get; set; }
         #endregion
 
+        void InitializeNewEvent();
+
         #region State
         bool Executed { get; set; }
         bool Included { get; set; }

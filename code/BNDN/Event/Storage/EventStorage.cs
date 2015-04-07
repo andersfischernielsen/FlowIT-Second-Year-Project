@@ -20,17 +20,20 @@ namespace Event.Storage
         {
             EventId = eventId;
             _context = context;
+        }
 
-
-            
-            if (!_context.EventIdentification.Any(model => model.Id == eventId))
+        public void InitializeNewEvent()
+        {
+            if (_context.EventIdentification.Any(model => model.Id == EventId))
             {
-                _context.EventIdentification.Add(new EventIdentificationModel() { Id = EventId });
+                throw new InvalidOperationException("The EventId is already existing");
             }
-            if (!_context.EventState.Any(model => model.Id == eventId))
+            if (_context.EventState.Any(model => model.Id == EventId))
             {
-                _context.EventState.Add(new EventStateModel() { Id = EventId });
+                throw new InvalidOperationException("The EventId is already existing");
             }
+            _context.EventIdentification.Add(new EventIdentificationModel { Id = EventId });
+            _context.EventState.Add(new EventStateModel { Id = EventId });
             _context.SaveChanges();
         }
 

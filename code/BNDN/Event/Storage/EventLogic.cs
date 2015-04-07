@@ -120,6 +120,7 @@ namespace Event.Storage
         {
             Storage = storage;
         }
+
         #endregion
 
         #region Rule Handling
@@ -247,6 +248,10 @@ namespace Event.Storage
             {
                 throw new ArgumentNullException("eventDto", "Provided EventDto was null");
             }
+            if (!eventDto.EventId.Equals(EventId))
+            {
+                throw new ArgumentException("EventIds does not match!", "eventDto");
+            }
 
             // #1. Make sure that server will accept our entry
             var dto = new EventAddressDto
@@ -258,6 +263,8 @@ namespace Event.Storage
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
+            // Setup a new Event in database.
+            Storage.InitializeNewEvent();
 
             // #2. Then set our own fields accordingly
             EventId = eventDto.EventId;
