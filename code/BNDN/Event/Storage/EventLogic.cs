@@ -207,6 +207,7 @@ namespace Event.Storage
                     EventId = EventId,
                     WorkflowId = WorkflowId,
                     Name = Name,
+                    Role = Role,
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,
