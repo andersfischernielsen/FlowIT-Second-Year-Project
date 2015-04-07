@@ -373,9 +373,19 @@ namespace Event.Storage
         }
 
 
-
+        /// <summary>
+        /// This method determines whether the Event is locked or not. If EventLogic is associated with a non-existing
+        /// Event(id), IsLocked will return false still (and not raise an Exception)
+        /// </summary>
+        /// <returns></returns>
         public bool IsLocked()
         {
+            if (!EventIdExists())
+            {
+                // Hence, 
+                return false;
+            }
+
             return LockDto != null;
         }
 

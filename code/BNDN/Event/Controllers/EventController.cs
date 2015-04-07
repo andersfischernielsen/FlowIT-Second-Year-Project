@@ -127,7 +127,7 @@ namespace Event.Controllers
                 // Check if event even exists
                 if (!logic.EventIdExists())
                 {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventDto.EventId)));
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
                 }
 
                 // Dismiss request if Event is currently locked
