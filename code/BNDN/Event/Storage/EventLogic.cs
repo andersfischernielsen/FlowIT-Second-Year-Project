@@ -294,7 +294,6 @@ namespace Event.Storage
 
         public async Task UpdateEvent(EventDto eventDto, Uri ownUri)
         {
-
             if (eventDto == null)
             {
                 throw new NullReferenceException("Provided EventDto was null");
@@ -324,23 +323,6 @@ namespace Event.Storage
 
             // Todo: This should not be necessary..
             OwnUri = ownUri;
-
-            var dto = new EventAddressDto
-            {
-                Id = EventId,
-                Uri = OwnUri
-            };
-
-            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
-
-            var otherEvents = await serverCommunicator.PostEventToServer(dto);
-
-
-            // Todo clear old registered events!
-            //foreach (var otherEvent in otherEvents)
-            //{
-            //    await RegisterIdWithUri(otherEvent.Id, otherEvent.Uri);
-            //}
         }
 
         public async Task DeleteEvent()
