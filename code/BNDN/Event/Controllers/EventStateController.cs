@@ -332,6 +332,7 @@ namespace Event.Controllers
                         throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                             "Lock could not be acquired. Event is already locked."));
                     }
+                    return;
                 }
 
                 // Checks that the provided lockDto actually has sensible values for its fields.
