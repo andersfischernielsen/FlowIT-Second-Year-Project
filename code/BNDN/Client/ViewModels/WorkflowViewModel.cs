@@ -62,6 +62,9 @@ namespace Client.ViewModels
 
             var test = await connection.GetEventsFromWorkflow(_workflowDto);
             EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto, this)));
+
+            EventList.OrderBy(model => model.Executable).ThenBy(model => model.Name);
+            
             SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
             
             NotifyPropertyChanged("");
