@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
@@ -220,20 +219,6 @@ namespace Event.Storage
         }
         #endregion
 
-        public async Task ResetState()
-        {
-            await Task.Run(() =>
-            {
-                Storage.Name = null;
-                Storage.WorkflowId = null;
-                Storage.OwnUri = null;
-                Storage.Executed = false;
-                Storage.Included = false;
-                Storage.Pending = false;
-                Storage.EventId = null;
-            });
-        }
-
 
         public bool CallerIsAllowedToOperate(string lockOwnerId)
         {
@@ -295,35 +280,50 @@ namespace Event.Storage
 
         public async Task UpdateEvent(EventDto eventDto, Uri ownUri)
         {
-            if (eventDto == null)
+            await Task.Run(() =>
             {
-                throw new NullReferenceException("Provided EventDto was null");
-            }
-            if (EventId == null)
-            {
-                throw new NullReferenceException("EventId was null");
-            }
+                if (eventDto == null)
+                {
+                    throw new NullReferenceException("Provided EventDto was null");
+                }
+                if (EventId == null)
+                {
+                    throw new NullReferenceException("EventId was null");
+                }
 
-            if (EventId != eventDto.EventId || WorkflowId != eventDto.WorkflowId)
-            {
-                //TODO: Remove from server and add again. Maybe remove.
-            }
+                if (EventId != eventDto.EventId || WorkflowId != eventDto.WorkflowId)
+                {
+                    //TODO: Remove from server and add again. Maybe remove.
+                }
 
-            EventId = eventDto.EventId;
-            WorkflowId = eventDto.WorkflowId;
-            Name = eventDto.Name;
-            Included = eventDto.Included;
-            Pending = eventDto.Pending;
-            Executed = eventDto.Executed;
-            Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-            Exclusions = new HashSet<RelationToOtherEventModel>(eventDto.Exclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-            Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-            Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+                EventId = eventDto.EventId;
+                WorkflowId = eventDto.WorkflowId;
+                Name = eventDto.Name;
+                Included = eventDto.Included;
+                Pending = eventDto.Pending;
+                Executed = eventDto.Executed;
+                Inclusions =
+                    new HashSet<RelationToOtherEventModel>(
+                        eventDto.Inclusions.Select(
+                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
+                Exclusions =
+                    new HashSet<RelationToOtherEventModel>(
+                        eventDto.Exclusions.Select(
+                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
+                Conditions =
+                    new HashSet<RelationToOtherEventModel>(
+                        eventDto.Conditions.Select(
+                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
+                Responses =
+                    new HashSet<RelationToOtherEventModel>(
+                        eventDto.Responses.Select(
+                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
 
-           
 
-            // Todo: This should not be necessary..
-            OwnUri = ownUri;
+
+                // Todo: This should not be necessary..
+                OwnUri = ownUri;
+            });
         }
 
         public async Task DeleteEvent()
@@ -366,7 +366,7 @@ namespace Event.Storage
             {
                 return Storage.Name != null;
             }
-            catch (ApplicationException e)
+            catch (ApplicationException)
             {
                 return false;
             }
