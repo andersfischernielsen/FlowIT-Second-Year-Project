@@ -39,3 +39,14 @@ The connection of the Client to the Server has been unit tested as follows.
 The ServerConnection inherits from the IServerConnection interface and the methods defined in this interface have been unit tested.
 An instance of HTTPClientToolbox is mocked to ensure that the ServerConnection can be tested in an isolated environment. 
 Testing that the correct exceptions are thrown on invalid requests and correct data is returned on valid requests is done by assertion.
+
+## Integration Testing
+Formal test cases have been specified, but have not been evaluated formally. 
+Most functionality has been tested throughout development, but test results have not been written down due to time pressure. Getting the system to "just work" after unit testing was completed was the main focus. 
+
+## System Testing
+System testing has not yet been formally completed. 
+
+## Acceptance Testing
+Acceptance testing would preferrably be done by the receiver/user of the system using test cases specified either by the client or the developers. 
+Acceptance testing has not been done yet.
