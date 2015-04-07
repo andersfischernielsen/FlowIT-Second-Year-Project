@@ -263,23 +263,33 @@ namespace Event.Storage
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
-            // Setup a new Event in database.
-            Storage.InitializeNewEvent();
+            try
+            {
+                // Setup a new Event in database.
+                Storage.InitializeNewEvent();
 
-            // #2. Then set our own fields accordingly
-            EventId = eventDto.EventId;
-            WorkflowId = eventDto.WorkflowId;
-            Name = eventDto.Name;
-            Role = eventDto.Role;
-            Included = eventDto.Included;
-            Role = eventDto.Role;
-            Pending = eventDto.Pending;
-            Executed = eventDto.Executed;
-            Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel{EventID = addressDto.Id,Uri = addressDto.Uri}));
-            Exclusions = new HashSet<RelationToOtherEventModel>(eventDto.Exclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-            Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-            Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-            OwnUri = ownUri;
+                // #2. Then set our own fields accordingly
+                EventId = eventDto.EventId;
+                WorkflowId = eventDto.WorkflowId;
+                Name = eventDto.Name;
+                Role = eventDto.Role;
+                Included = eventDto.Included;
+                Role = eventDto.Role;
+                Pending = eventDto.Pending;
+                Executed = eventDto.Executed;
+                Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+                Exclusions = new HashSet<RelationToOtherEventModel>(eventDto.Exclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+                Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+                Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
+                OwnUri = ownUri;
+            }
+            catch (Exception)
+            {
+                // if something goes wrong, we have to delete the event from the server again.
+                serverCommunicator.DeleteEventFromServer().Wait();
+                throw;
+            }
+            
         }
 
         public async Task UpdateEvent(EventDto eventDto, Uri ownUri)

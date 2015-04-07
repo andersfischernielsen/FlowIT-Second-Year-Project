@@ -24,7 +24,6 @@ namespace Event.Models
         public string Name { get; set; }
         public string Role { get; set; }
 
-        [Required]
         public virtual EventStateModel EventStateModel { get; set; }
         public virtual LockDto LockDto { get; set; }
 
