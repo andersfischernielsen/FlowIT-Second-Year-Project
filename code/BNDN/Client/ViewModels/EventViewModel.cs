@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -13,18 +14,12 @@ namespace Client.ViewModels
         private EventStateDto _eventStateDto;
         private readonly WorkflowViewModel _parent;
 
-        public EventViewModel()
-        {
-            _eventAddressDto = new EventAddressDto();
-            _eventStateDto = new EventStateDto();
-            GetState();
-        }
         public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
         {
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
-            GetState();
+            GetState().Wait();
         }
 
         #region Databindings
@@ -141,7 +136,7 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public async void GetState()
+        public async Task GetState()
         {
             var eventConnection = new EventConnection(_eventAddressDto);
             try
