@@ -81,9 +81,9 @@ namespace Event.Controllers
             using (IEventLogic logic = new EventLogic(eventDto.EventId))
             {
                 // Check for non-existing eventId
-                if (!logic.EventIdExists())
+                if (logic.EventIdExists())
                 {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventDto.EventId)));
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, String.Format("{0} event already exists", eventDto.EventId)));
                 }
 
                 // TODO: An Event that has just been posted, should not be able to be locked already...Delete! 
@@ -124,6 +124,12 @@ namespace Event.Controllers
 
             using (IEventLogic logic = new EventLogic(eventId))
             {
+                // Check if event even exists
+                if (!logic.EventIdExists())
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventDto.EventId)));
+                }
+
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
