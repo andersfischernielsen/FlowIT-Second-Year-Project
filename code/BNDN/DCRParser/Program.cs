@@ -29,7 +29,7 @@ namespace DCRParser
                 }
                 else
                 {
-                    eventDto = new EventDto() {Responses = new HashSet<EventAddressDto>(), Conditions = new HashSet<EventAddressDto>(), Role = new HashSet<string>(), Inclusions = new HashSet<EventAddressDto>(), Exclusions = new HashSet<EventAddressDto>()};
+                    eventDto = new EventDto() {Responses = new HashSet<EventAddressDto>(), Conditions = new HashSet<EventAddressDto>(), Roles = new HashSet<string>(), Inclusions = new HashSet<EventAddressDto>(), Exclusions = new HashSet<EventAddressDto>()};
                 }
                 if (eventDto == null)
                 {
