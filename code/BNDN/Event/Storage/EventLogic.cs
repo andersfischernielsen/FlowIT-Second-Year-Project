@@ -349,15 +349,15 @@ namespace Event.Storage
             {
                 foreach (var pending in Responses)
                 {
-                    await new EventCommunicator(pending.Uri,pending.EventID,EventId).SendPending(true, addressDto);
+                    await new EventCommunicator(pending.Uri,pending.EventID,EventId).SendPending(addressDto);
                 }
                 foreach (var inclusion in Inclusions)
                 {
-                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, EventId).SendIncluded(true, addressDto);
+                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, EventId).SendIncluded(addressDto);
                 }
                 foreach (var exclusion in Exclusions)
                 {
-                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, EventId).SendIncluded(false, addressDto);
+                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, EventId).SendExcluded(addressDto);
                 }
             });
         }
