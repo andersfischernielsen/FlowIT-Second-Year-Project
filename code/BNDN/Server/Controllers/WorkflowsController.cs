@@ -37,7 +37,7 @@ namespace Server.Controllers
         }
 
 
-        #region GET requests
+            #region GET requests
         // GET: /Workflows/5
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow

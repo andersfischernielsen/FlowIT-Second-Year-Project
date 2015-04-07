@@ -109,6 +109,16 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
+        public Task<bool> RoleExists(ServerRoleModel role)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServerRoleModel> GetRole(string id, string workflowId)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
         {
             throw new NotImplementedException();

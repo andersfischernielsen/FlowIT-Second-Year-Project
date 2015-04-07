@@ -141,6 +141,16 @@ namespace Server.Storage
         {
             _cache.Remove(workflow);
         }
+
+        public Task<bool> RoleExists(ServerRoleModel role)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServerRoleModel> GetRole(string id, string workflowId)
+        {
+            throw new NotImplementedException();
+        }
 #pragma warning restore 1998
         public void Dispose()
         {

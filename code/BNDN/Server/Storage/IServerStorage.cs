@@ -55,5 +55,7 @@ namespace Server.Storage
         Task AddNewWorkflow(ServerWorkflowModel workflow);
         Task UpdateWorkflow(ServerWorkflowModel workflow);
         Task RemoveWorkflow(ServerWorkflowModel workflow);
+        Task<bool> RoleExists(ServerRoleModel role);
+        Task<ServerRoleModel> GetRole(string id, string workflowId);
     }
 }

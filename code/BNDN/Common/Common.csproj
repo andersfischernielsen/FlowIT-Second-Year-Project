@@ -57,6 +57,7 @@
     <Compile Include="RolesOnWorkflowsDto.cs" />
     <Compile Include="UserDto.cs" />
     <Compile Include="WorkflowDto.cs" />
+    <Compile Include="WorkflowRole.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

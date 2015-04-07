@@ -9,9 +9,6 @@ namespace Server.Models
 {
     public class ServerRoleModel
     {
-        
-        //Formely named as Role
-        [Required]
         [Key][Column(Order = 0)]
         public string ID { get; set; }
         [Key][Column(Order = 1)]

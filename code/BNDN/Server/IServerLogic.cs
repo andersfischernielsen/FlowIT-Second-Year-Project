@@ -17,7 +17,7 @@ namespace Server
         /// <returns></returns>
         RolesOnWorkflowsDto Login(string username);
 
-        Task AddUser(ServerUserModel user);
+        Task AddUser(UserDto user);
         
         /// <summary>
         /// Get all events from a workflow
