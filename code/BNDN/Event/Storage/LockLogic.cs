@@ -70,33 +70,31 @@ namespace Event.Storage
             }
             catch (Exception)
             {
-                UnlockSome();
+                UnlockSome().Wait();
                 return false;
             }
         }
 
-        private void UnlockSome()
+        private async Task UnlockSome()
         {
-            EventAddressDto eventAddress = new EventAddressDto() {Id = _logic.EventId, Uri = _logic.OwnUri};
+            EventAddressDto eventAddress = new EventAddressDto {Id = _logic.EventId, Uri = _logic.OwnUri};
 
-            var parallelTasks = Parallel.ForEach(_lockedEvents, pair =>
+            // Unlock the other Events. 
+            // TODO: Do sazzy Parallel.ForEach here, too...?
+            foreach (var relation in _lockedEvents)
             {
                 try
                 {
-                    new EventCommunicator(pair.Uri, pair.EventID, _logic.EventId).Unlock().Wait();
+                    new EventCommunicator(relation.Uri, relation.EventID, _logic.EventId).Unlock().Wait();
                 }
                 catch (Exception)
                 {
                     // TODO: Find out what to do if you cant even unlock. Even.
                 }
-                
-            });
-
-            while (!parallelTasks.IsCompleted)
-            {
             }
+
             _lockedEvents = null;
-            _logic.LockDto = null;
+            _logic.UnlockEvent();
         }
 
         public async Task<bool> UnlockAll()
