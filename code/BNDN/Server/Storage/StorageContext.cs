@@ -1,4 +1,5 @@
 ﻿using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
 using Server.Models;
 
 namespace Server.Storage
@@ -8,13 +9,14 @@ namespace Server.Storage
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
 
             modelBuilder.Entity<ServerUserModel>()
                 .HasMany(user => user.ServerRolesModels)
                 .WithMany(role => role.ServerUserModels)
                 .Map(m => m
                     .MapLeftKey("UserRefId")
-                    .MapRightKey("RoleRefId")
+                    .MapRightKey("RoleRefId", "WorkflowRefId")
                     .ToTable("UserRoles"));
 
             modelBuilder.Entity<ServerEventModel>()
@@ -22,8 +24,9 @@ namespace Server.Storage
                 .WithMany(role => role.ServerEventModels)
                 .Map(m => m
                     .MapLeftKey("EventRefId")
-                    .MapRightKey("RoleRefId")
+                    .MapRightKey("RoleRefId", "WorkflowRefId")
                     .ToTable("EventRoles"));
+            
 
             modelBuilder.Entity<ServerRoleModel>()
                 .HasRequired(role => role.ServerWorkflowModel)
@@ -31,10 +34,6 @@ namespace Server.Storage
                 .HasForeignKey(role => role.ServerWorkflowModelID);
         }
 
-        static StorageContext()
-        {
-            Database.SetInitializer(new CreateDatabaseIfNotExists<StorageContext>());
-        }
         public DbSet<ServerEventModel> Events { get; set; }
         public DbSet<ServerWorkflowModel> Workflows { get; set; }
         public DbSet<ServerUserModel> Users { get; set; }
