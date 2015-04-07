@@ -5,7 +5,6 @@ using System.Web.Http;
 using System.Net.Http;
 using System.Net;
 using Common;
-using Event.Models;
 using Event.Storage;
 
 namespace Event.Controllers
@@ -148,17 +147,16 @@ namespace Event.Controllers
         [HttpPut]
         public async Task Execute([FromBody] ExecuteDto executeDto, string eventId)
         {
+            // Check that provided input can be mapped onto an instance of ExecuteDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Provided input could not be mapped onto an instance of ExecuteDto; " +
+                    "No roles was provided"));
+            }
+
             using (var logic = new EventLogic(eventId))
             {
-                // TODO: Could be moved out of "using" block
-                // Check that provided input can be mapped onto an instance of ExecuteDto
-                if (!ModelState.IsValid)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        "Provided input could not be mapped onto an instance of ExecuteDto; " +
-                        "No roles was provided"));
-                }
-
                 // Check that caller claims the right role for executing this Event
                 if (!executeDto.Roles.Contains(logic.Role))
                 {

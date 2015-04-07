@@ -166,21 +166,11 @@ namespace Event.Controllers
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
-                    // Event is currently locked)
-                    // Event is currently locked)
+                    // Event is currently locked
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed,
                         "Event is currently locked"));
                 }
-
-                try
-                {
-                    await logic.DeleteEvent();
-                }
-                catch (NullReferenceException)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        "Event is not initialized!"));
-                }
+                await logic.DeleteEvent();
             }
         }
 

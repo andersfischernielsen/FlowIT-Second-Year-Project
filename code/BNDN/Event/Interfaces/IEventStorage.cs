@@ -17,6 +17,7 @@ namespace Event.Interfaces
         #endregion
 
         void InitializeNewEvent();
+        void DeleteEvent();
 
         #region State
         bool Executed { get; set; }
