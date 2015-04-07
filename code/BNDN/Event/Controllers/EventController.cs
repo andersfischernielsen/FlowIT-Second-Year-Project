@@ -74,12 +74,19 @@ namespace Event.Controllers
             }
             using (IEventLogic logic = new EventLogic(eventDto.EventId))
             {
+                // Check for non-existing eventId
+                if (!logic.EventIdExists())
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventDto.EventId)));
+                }
+
                 // TODO: An Event that has just been posted, should not be able to be locked already...Delete! 
                 // Dismiss request if Event is currently locked
                 if (logic.IsLocked())
                 {
                     // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed, "Event is currently locked"));
+
                 }
 
                 // Prepare for method-call: Gets own URI (i.e. http://address)
