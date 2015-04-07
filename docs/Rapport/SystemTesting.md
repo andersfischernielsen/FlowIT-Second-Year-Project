@@ -7,7 +7,7 @@ These include unit, integration, system and acceptance testing in varying degree
 The major components handling data that have been developed by the team (not Microsoft's libraries) have been unit tested to ensure that their functionality was correct. 
 
 ### Server
-The Controller- and ServerLogic classes have been unit tested. 
+The WebAPI controller and server logic classes have been unit tested as follows.
 
 #### IServerLogic 
 ServerLogic is the implementation of the IServerLogic interface, and has therefore been tested according to the methods specified in this interface. 
@@ -20,5 +20,8 @@ An IServerLogic instance is mocked and returns a List of elements when a method 
 Incoming HTTP requests are handled by the controller and therefore methods handling GET, POST, PUT and DELETE requests have been tested using a IServerLogic mock. 
   
 ### Event
+The outgoing communicator, WebAPI controller and event logic classes have been unit and integration tested as follows.
+
+#### LOL
 
 ### Client
