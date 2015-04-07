@@ -93,6 +93,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <None Include="Properties\PublishProfiles\flowIT %282%29.pubxml" />
+    <None Include="Properties\PublishProfiles\flowIT.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
