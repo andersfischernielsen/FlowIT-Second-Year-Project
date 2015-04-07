@@ -225,12 +225,12 @@ namespace Event.Storage
             await Task.Run(() =>
             {
                 Storage.Name = null;
-                Storage.EventId = null;
                 Storage.WorkflowId = null;
                 Storage.OwnUri = null;
                 Storage.Executed = false;
                 Storage.Included = false;
                 Storage.Pending = false;
+                Storage.EventId = null;
             });
         }
 
@@ -334,11 +334,11 @@ namespace Event.Storage
             }
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
             await serverCommunicator.DeleteEventFromServer();
+            Storage.Conditions.Clear();
+            Storage.Responses.Clear();
+            Storage.Inclusions.Clear();
+            Storage.Exclusions.Clear();
             await ResetState();
-            Storage.Conditions = new HashSet<RelationToOtherEventModel>();
-            Storage.Responses = new HashSet<RelationToOtherEventModel>();
-            Storage.Inclusions = new HashSet<RelationToOtherEventModel>();
-            Storage.Exclusions = new HashSet<RelationToOtherEventModel>();
         }
 
         public async Task Execute()
