@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Server.Models;
 
 namespace Server.Storage
 {
-    public interface IServerStorage
+    public interface IServerStorage : IDisposable
     {
         ServerUserModel GetUser(string username);
 
-        ICollection<ServerRolesModel> Login(ServerUserModel userModel);
+        ICollection<ServerRoleModel> Login(ServerUserModel userModel);
 
         /// <summary>
         /// Get all events from a workflow
@@ -17,6 +18,9 @@ namespace Server.Storage
         /// <param name="workflow"></param>
         /// <returns></returns>
         IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow);
+
+        Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
+        Task AddUser(ServerUserModel user);
         /// <summary>
         /// Add event to a workflow
         /// </summary>

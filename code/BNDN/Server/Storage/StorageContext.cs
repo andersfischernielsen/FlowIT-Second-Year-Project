@@ -16,6 +16,19 @@ namespace Server.Storage
                     .MapLeftKey("UserRefId")
                     .MapRightKey("RoleRefId")
                     .ToTable("UserRoles"));
+
+            modelBuilder.Entity<ServerEventModel>()
+                .HasMany(@event => @event.ServerRolesModels)
+                .WithMany(role => role.ServerEventModels)
+                .Map(m => m
+                    .MapLeftKey("EventRefId")
+                    .MapRightKey("RoleRefId")
+                    .ToTable("EventRoles"));
+
+            modelBuilder.Entity<ServerRoleModel>()
+                .HasRequired(role => role.ServerWorkflowModel)
+                .WithMany(workflow => workflow.ServerRolesModels)
+                .HasForeignKey(role => role.ServerWorkflowModelID);
         }
 
         static StorageContext()
@@ -25,6 +38,6 @@ namespace Server.Storage
         public DbSet<ServerEventModel> Events { get; set; }
         public DbSet<ServerWorkflowModel> Workflows { get; set; }
         public DbSet<ServerUserModel> Users { get; set; }
-        public DbSet<ServerRolesModel> Roles { get; set; }
+        public DbSet<ServerRoleModel> Roles { get; set; }
     }
 }
