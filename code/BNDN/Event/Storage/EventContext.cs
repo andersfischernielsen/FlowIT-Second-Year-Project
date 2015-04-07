@@ -6,7 +6,17 @@ using Event.Models.UriClasses;
 namespace Event.Storage
 {
     public class EventContext : DbContext, IEventContext
-    {   
+    {
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<EventIdentificationModel>()
+                .HasMany(ei => ei.Roles)
+                .WithRequired(role => role.Event)
+                .HasForeignKey(role => role.EventId);
+        }
+
         public DbSet<EventIdentificationModel> EventIdentification { get; set; }
         public DbSet<EventStateModel> EventState { get; set; }
         public DbSet<ConditionUri> Conditions { get; set; }

@@ -79,6 +79,7 @@
     <Compile Include="Controllers\EventController.cs" />
     <Compile Include="Interfaces\IEventContext.cs" />
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\EventRoleModel.cs" />
     <Compile Include="Models\RelationToOtherEventModel.cs" />
     <Compile Include="Models\UriClasses\ConditionUri.cs" />
     <Compile Include="Models\UriClasses\ExclusionUri.cs" />

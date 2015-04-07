@@ -261,7 +261,6 @@ namespace Event.Storage
                 Name = eventDto.Name;
                 Roles = eventDto.Roles;
                 Included = eventDto.Included;
-                Roles = eventDto.Roles;
                 Pending = eventDto.Pending;
                 Executed = eventDto.Executed;
                 Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
