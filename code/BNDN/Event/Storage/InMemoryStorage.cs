@@ -24,6 +24,11 @@ namespace Event.Storage
         public string EventId { get; set; }
         public string Name { get; set; }
         public LockDto LockDto { get; set; }
+        public void InitializeNewEvent()
+        {
+            throw new NotImplementedException();
+        }
+
         public bool Executed { get; set; }
         public bool Included { get; set; }
         public bool Pending { get; set; }
