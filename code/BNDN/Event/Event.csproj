@@ -101,7 +101,6 @@
     <Compile Include="Models\EventStateModel.cs" />
     <Compile Include="Storage\EventLogic.cs" />
     <Compile Include="Storage\EventStorage.cs" />
-    <Compile Include="Storage\InMemoryStorage.cs" />
     <Compile Include="Models\NotifyDtos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HeartBeatDto.cs" />
