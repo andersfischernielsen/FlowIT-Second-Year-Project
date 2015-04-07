@@ -12,9 +12,9 @@ namespace Server.Models
         
         //Formely named as Role
         [Required]
-        [Key]
+        [Key][Column(Order = 0)]
         public string ID { get; set; }
-        [Key]
+        [Key][Column(Order = 1)]
         public string ServerWorkflowModelID { get; set; }
         [ForeignKey("ServerWorkflowModelID")]
         public ServerWorkflowModel ServerWorkflowModel { get; set; }
