@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using DCRParserGraphic;
 using Microsoft.Win32;
 
@@ -63,7 +54,7 @@ namespace DcrParserGraphic
 
         private void hiddenbutton_onclick(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.staggeringbeauty.com/");
+            Process.Start("http://www.staggeringbeauty.com/");
         }
 
         private async void ButtonUpload_Click(object sender, RoutedEventArgs e)
@@ -77,6 +68,7 @@ namespace DcrParserGraphic
                     var map = parser.GetMap();
                     var roles = parser.GetRoles();
                     var uploader = new EventUploader(TextBoxWorkflowName.Text);
+                    await uploader.CreateWorkflow(TextBoxWorkflowName.Text);
                     await uploader.Upload(map.Values.ToList());
                     await uploader.UploadUsers(roles);
                     MessageBox.Show("Everything went OK. The file should have been uploaded to the given urls");
@@ -84,7 +76,7 @@ namespace DcrParserGraphic
                     TextBoxUrl.Text = "";
                     TextBoxWorkflowName.Text = "";
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     MessageBox.Show("Something went wrong, probably bad file or file doesnt exist");
                 }
