@@ -178,6 +178,7 @@ namespace DCRParserGraphic
                 var eventId = e.Attribute("id").Value;
                 var eventDto = _map[eventId];
                 eventDto.Executed = true;
+                _map[eventId] = eventDto;
             }
 
             //Included
@@ -187,6 +188,7 @@ namespace DCRParserGraphic
                 var eventId = i.Attribute("id").Value;
                 var eventDto = _map[eventId];
                 eventDto.Included = true;
+                _map[eventId] = eventDto;
             }
 
             //Pending
@@ -196,6 +198,7 @@ namespace DCRParserGraphic
                 var eventId = p.Attribute("id").Value;
                 var eventDto = _map[eventId];
                 eventDto.Pending = true;
+                _map[eventId] = eventDto;
             }
         
         }
