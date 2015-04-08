@@ -48,7 +48,8 @@ namespace DcrParserGraphic
             {
                 try
                 {
-                    new DcrParser(TextBoxFile.Text);
+                   new DcrParser(TextBoxFile.Text).CreateXmlFile();
+
                     MessageBox.Show(
                         "Everything went OK. The file should have been created in the same place as this exe file");
                     TextBoxFile.Text = "";
@@ -63,6 +64,25 @@ namespace DcrParserGraphic
         private void hiddenbutton_onclick(object sender, RoutedEventArgs e)
         {
            System.Diagnostics.Process.Start("http://www.staggeringbeauty.com/");
+        }
+
+        private void ButtonUpload_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(TextBoxFile.Text))
+            {
+                try
+                {
+                    var map = new DcrParser(TextBoxFile.Text).GetMap();
+                    new EventUploader().Upload(map.Values.ToList());
+                    MessageBox.Show(
+                        "Everything went OK. The file should have been created in the same place as this exe file");
+                    TextBoxFile.Text = "";
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Something went wrong, probably bad file or file doesnt exist");
+                }
+            }
         }
     }
 }

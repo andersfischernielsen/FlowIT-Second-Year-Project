@@ -18,6 +18,7 @@ namespace DCRParserGraphic
         private readonly Dictionary<string, EventDto> _map;
         private readonly XDocument _xDoc;
         private string _path;
+        private const string _ip = "http://localhost:13752/";
 
         public DcrParser(string path)
         {
@@ -29,7 +30,6 @@ namespace DCRParserGraphic
             MapDCRIdToRealId();
             Constraints();
             States();
-            CreateXmlFile();
         }
 
         private void InitiateAllEventAddressDtoWithRolesAndNames()
@@ -112,7 +112,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri("http://jegvedikke.dk/" + _map[target].EventId)
+                    Uri = new Uri(_ip)
                 });
                 _map[source] = eventDto;
             }
@@ -128,7 +128,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri("http://jegvedikke.dk/" + _map[target].EventId)
+                    Uri = new Uri(_ip)
                 });
                 _map[source] = eventDto;
             }
@@ -144,7 +144,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri("http://jegvedikke.dk/" + _map[target].EventId)
+                    Uri = new Uri(_ip)
                 });
                 _map[source] = eventDto;
             }
@@ -160,7 +160,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri("http://jegvedikke.dk/" + _map[target].EventId)
+                    Uri = new Uri(_ip)
                 });
                 _map[source] = eventDto;
             }
@@ -203,7 +203,7 @@ namespace DCRParserGraphic
         
         }
 
-        private void CreateXmlFile()
+        public void CreateXmlFile()
         {
             using (var sw = new StreamWriter("graph.json", false))
             {
@@ -215,6 +215,11 @@ namespace DCRParserGraphic
                     sw.WriteLine("");
                 }
             }
+        }
+
+        public Dictionary<string, EventDto> GetMap()
+        {
+            return _map;
         }
     }
 }
