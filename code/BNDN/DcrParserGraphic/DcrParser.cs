@@ -170,6 +170,34 @@ namespace DCRParserGraphic
         {
             //State stuff
             var state = _xDoc.Descendants("marking");
+
+            //Executed
+            var executed = state.Descendants("executed").Descendants("event");
+            foreach (var e in executed)
+            {
+                var eventId = e.Attribute("id").Value;
+                var eventDto = _map[eventId];
+                eventDto.Executed = true;
+            }
+
+            //Included
+            var included = state.Descendants("included").Descendants("event");
+            foreach (var i in included)
+            {
+                var eventId = i.Attribute("id").Value;
+                var eventDto = _map[eventId];
+                eventDto.Included = true;
+            }
+
+            //Pending
+            var pending = state.Descendants("pendingResponses").Descendants("event");
+            foreach (var p in pending)
+            {
+                var eventId = p.Attribute("id").Value;
+                var eventDto = _map[eventId];
+                eventDto.Pending = true;
+            }
+        
         }
 
         private void CreateXmlFile()
