@@ -30,13 +30,13 @@ namespace Server
         /// </summary>
         /// <param name="workflowToAttachToId"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
+        Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
         /// <summary>
         /// Add event to a workflow
         /// </summary>
         /// <param name="workflowToAttachToId"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
+        Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
         /// <summary>
         /// Remove an event from a workflow
         /// </summary>

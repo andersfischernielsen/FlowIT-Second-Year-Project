@@ -26,14 +26,14 @@ namespace Server.Storage
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
+        Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
         
         /// <summary>
         /// Updates an event.
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="eventToBeUpdated"></param>
-        void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated);
+        Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated);
         /// <summary>
         /// Remove an event from a workflow
         /// </summary>

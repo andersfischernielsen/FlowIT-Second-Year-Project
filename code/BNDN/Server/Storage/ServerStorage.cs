@@ -82,7 +82,7 @@ namespace Server.Storage
             await _db.SaveChangesAsync();
         }
 
-        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             //TODO: Skal 2 events kunne have samme ID?
             var workflows = from w in _db.Workflows
@@ -95,10 +95,10 @@ namespace Server.Storage
             }
 
             _db.Events.Add(eventToBeAddedDto);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             var events = from e in _db.Events
                          where e.ID == eventToBeUpdated.ID
@@ -110,7 +110,7 @@ namespace Server.Storage
             tempEvent.ServerWorkflowModelID = eventToBeUpdated.ServerWorkflowModelID;
             tempEvent.Uri = eventToBeUpdated.Uri;
 
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
