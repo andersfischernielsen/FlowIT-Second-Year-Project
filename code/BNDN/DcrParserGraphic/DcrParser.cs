@@ -11,17 +11,19 @@ using Common;
 using Newtonsoft.Json;
 using Formatting = Newtonsoft.Json.Formatting;
 
-namespace DCRParser
+namespace DCRParserGraphic
 {
     class DcrParser
     {
-        private Dictionary<string, EventDto> _map;
-        private XDocument xDoc;
+        private readonly Dictionary<string, EventDto> _map;
+        private readonly XDocument _xDoc;
+        private string _path;
 
-        public DcrParser()
+        public DcrParser(string path)
         {
+            _path = path;
             _map = new Dictionary<string, EventDto>();
-            xDoc = XDocument.Load("graph.xml");
+            _xDoc = XDocument.Load(path);
             //ORDER OF METHOD CALL IS IMPORTANT, MUST be THIS!
             InitiateAllEventAddressDtoWithRolesAndNames();
             MapDCRIdToRealId();
@@ -32,7 +34,7 @@ namespace DCRParser
 
         private void InitiateAllEventAddressDtoWithRolesAndNames()
         {
-            var events = xDoc.Descendants("events").Descendants("event");
+            var events = _xDoc.Descendants("events").Descendants("event");
             foreach (var e in events)
             {
                 EventDto eventDto;
@@ -84,7 +86,7 @@ namespace DCRParser
 
         private void MapDCRIdToRealId()
         {
-            var eventIds = xDoc.Descendants("labelMappings").Descendants("labelMapping");
+            var eventIds = _xDoc.Descendants("labelMappings").Descendants("labelMapping");
             foreach (var i in eventIds)
             {
                 var id = i.Attribute("eventId").Value;
@@ -98,7 +100,7 @@ namespace DCRParser
         private void Constraints()
         {
             //Constraints general tag into variable
-            var constraints = xDoc.Descendants("constraints");
+            var constraints = _xDoc.Descendants("constraints");
             //Conditions 
             var conditions = constraints.Descendants("conditions").Descendants("condition");
             foreach (var c in conditions)
@@ -167,7 +169,7 @@ namespace DCRParser
         private void States()
         {
             //State stuff
-            var state = xDoc.Descendants("marking");
+            var state = _xDoc.Descendants("marking");
         }
 
         private void CreateXmlFile()
@@ -182,14 +184,6 @@ namespace DCRParser
                     sw.WriteLine("");
                 }
             }
-        }
-
-
-        static void Main(string[] args)
-        {
-            new DcrParser();
-            Console.WriteLine("Done");
-            Console.ReadLine();
         }
     }
 }
