@@ -334,9 +334,11 @@ namespace Event.Storage
                 return;
             }
 
+            // Attempt to delete Event from Server
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
             await serverCommunicator.DeleteEventFromServer();
 
+            // Delete Event from own Storage
             Storage.DeleteEvent();
         }
 
