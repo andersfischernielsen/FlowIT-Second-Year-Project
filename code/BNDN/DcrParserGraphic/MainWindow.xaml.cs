@@ -68,7 +68,7 @@ namespace DcrParserGraphic
             System.Diagnostics.Process.Start("http://www.staggeringbeauty.com/");
         }
 
-        private void ButtonUpload_Click(object sender, RoutedEventArgs e)
+        private async void ButtonUpload_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(TextBoxFile.Text) && !string.IsNullOrEmpty(TextBoxUrl.Text) && !string.IsNullOrEmpty(TextBoxWorkflowName.Text))
             {
@@ -76,7 +76,7 @@ namespace DcrParserGraphic
                 {
                     //var ips = TextBoxUrl.Text.Replace(" ","").Split(',');
                     var map = new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, TextBoxUrl.Text).GetMap();
-                    new EventUploader().Upload(map.Values.ToList());
+                    await new EventUploader().Upload(map.Values.ToList());
                     MessageBox.Show("Everything went OK. The file should have been uploaded to the given urls");
                     TextBoxFile.Text = "";
                     TextBoxUrl.Text = "";

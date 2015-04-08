@@ -9,7 +9,7 @@ namespace DcrParserGraphic
 {
     public class EventUploader
     {
-        public async void Upload(IList<EventDto> events)
+        public async Task Upload(IList<EventDto> events)
         {
             var tool = new HttpClientToolbox("http://localhost:13752/");
             foreach (var e in events)
