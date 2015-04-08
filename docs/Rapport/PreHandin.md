@@ -46,7 +46,7 @@ The Server needs not be started, since it is already running online, and Client 
 ## Client
 In order to start up the Client, double-click on the Client.exe-file (located at \??\??) with the Flow-icon.
 
-### Understanding the user-interface
+### The user-interface
 
 The first window that is shown is the Login-window (see picture below)  
 In this windows type in your username and click on the Login-button.
@@ -178,7 +178,7 @@ System testing has not yet been formally completed.
 
 ## Acceptance Testing
 Acceptance testing would preferrably be done by the receiver/user of the system using test cases specified either by the client or the developers. 
-Acceptance testing has not been done yet, due to time-pressure. 
+Acceptance testing has not been done yet, as this was first planned to be carried out following this pre-handin. 
 
 
 ## Discussion of testing-approach 
@@ -192,6 +192,9 @@ The group's confidence in the system is currently restricted to a per-module lev
 
 # Conclusion
 
-The delivered software at this point provides a basis for the projects second part. 
+The delivered software at this point provides a basis for the project's second part. 
 
 # Questions regarding workflow in Brazil
+
+- In 7) the provided workflow-description, who's responsible for "p*repare patient*"?
+- "*The physician may recommend the patient an appointment with a specialist or request some exams*" Will the one exclude the other, or could both happen, i.e. could the physician both recommend the patient an appointment **and** request some exams? 
