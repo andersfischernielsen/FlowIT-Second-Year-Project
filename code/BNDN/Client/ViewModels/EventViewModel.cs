@@ -19,7 +19,7 @@ namespace Client.ViewModels
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
-            GetState().Wait();
+            GetState();
         }
 
         #region Databindings

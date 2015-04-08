@@ -14,7 +14,7 @@ namespace DcrParserGraphic
             var tool = new HttpClientToolbox("http://localhost:13752/");
             foreach (var e in events)
             {
-                await tool.Create("events/" + e.EventId, e);
+                await tool.Create("events", e);
             }
         }
     }
