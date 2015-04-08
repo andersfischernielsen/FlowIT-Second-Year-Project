@@ -59,7 +59,7 @@ namespace Client.ViewModels
 
             var workflows = await connection.GetWorkflows();
 
-            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(workflowDto, this)));
+            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(workflowDto)));
             SelectedWorkflowViewModel = WorkflowList.Count >= 1 ? WorkflowList[0] : null;
 
             NotifyPropertyChanged("");

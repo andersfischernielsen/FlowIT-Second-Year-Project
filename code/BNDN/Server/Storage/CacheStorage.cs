@@ -16,12 +16,12 @@ namespace Server.Storage
         {
             _cache = new HashSet<ServerWorkflowModel>()
             {
-                new ServerWorkflowModel(){ Name="TestWorkFlow", ID = "Test1", ServerRolesModels = new List<ServerRolesModel>(), ServerEventModels = new List<ServerEventModel>()}
+                new ServerWorkflowModel(){ Name="TestWorkFlow", ID = "Test1", ServerRolesModels = new List<ServerRoleModel>(), ServerEventModels = new List<ServerEventModel>()}
             };
             _userCache = new HashSet<ServerUserModel>()
             {
-                new ServerUserModel{ID = 1,Name="Wind",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher", ServerWorklowModelID = "Test1"},new ServerRolesModel(){ID="Student",ServerWorklowModelID= "Test1"}}},
-                new ServerUserModel{ID = 2, Name="Fischer",ServerRolesModels = new List<ServerRolesModel>{new ServerRolesModel(){ID="Teacher", ServerWorklowModelID = "Test1"}}}
+                new ServerUserModel{ID = 1,Name="Wind",ServerRolesModels = new List<ServerRoleModel>{new ServerRoleModel(){ID="Teacher", ServerWorkflowModelID = "Test1"},new ServerRoleModel(){ID="Student",ServerWorkflowModelID= "Test1"}}},
+                new ServerUserModel{ID = 2, Name="Fischer",ServerRolesModels = new List<ServerRoleModel>{new ServerRoleModel(){ID="Teacher", ServerWorkflowModelID = "Test1"}}}
             };
         }
 
@@ -52,12 +52,12 @@ namespace Server.Storage
             return _userCache.SingleOrDefault(model => String.Equals(model.Name, username, StringComparison.CurrentCultureIgnoreCase));
         }
 
-        public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
+        public ICollection<ServerRoleModel> Login(ServerUserModel userModel)
         {
             var singleOrDefault = _userCache.SingleOrDefault(model => model.ID == userModel.ID);
             if (singleOrDefault != null)
                 return singleOrDefault.ServerRolesModels;
-            return new List<ServerRolesModel>();
+            return new List<ServerRoleModel>();
         }
 
         public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
@@ -68,7 +68,22 @@ namespace Server.Storage
             return new List<ServerEventModel>();
         }
 
-        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        Task IServerStorage.AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddUser(ServerUserModel user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == eventToBeAddedDto.ServerWorkflowModelID);
             if (serverWorkflowModel != null && !serverWorkflowModel.ServerEventModels.Contains(eventToBeAddedDto))
@@ -78,7 +93,7 @@ namespace Server.Storage
             else throw new Exception("Event already exists");
         }
 
-        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (serverWorkflowModel != null)
@@ -101,6 +116,7 @@ namespace Server.Storage
             else throw new Exception("Workflow could not be found");
         }
 
+#pragma warning disable 1998
         public async Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
             var check = _cache.FirstOrDefault(model => model.ID == workflow.ID);
@@ -124,6 +140,21 @@ namespace Server.Storage
         public async Task RemoveWorkflow(ServerWorkflowModel workflow)
         {
             _cache.Remove(workflow);
+        }
+
+        public Task<bool> RoleExists(ServerRoleModel role)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServerRoleModel> GetRole(string id, string workflowId)
+        {
+            throw new NotImplementedException();
+        }
+#pragma warning restore 1998
+        public void Dispose()
+        {
+            // Don't dispose anything.
         }
     }
 }

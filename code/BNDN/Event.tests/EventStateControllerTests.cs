@@ -31,7 +31,7 @@ namespace Event.tests
             _eventLogic.Pending = true;
             _eventLogic.Executed = true;
             _eventLogic.Included = false;
-            _eventLogic.Role = "TEACHER";
+            _eventLogic.Roles = new List<string>{"TEACHER"};
             _eventLogic.LockDto = new LockDto(){LockOwner = "Lock"};
             //_eventLogic.IsExecutable();
             //_eventLogic.EventStateDto = ?

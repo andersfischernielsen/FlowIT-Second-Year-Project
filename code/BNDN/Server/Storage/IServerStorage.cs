@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Server.Models;
 
 namespace Server.Storage
 {
-    public interface IServerStorage
+    public interface IServerStorage : IDisposable
     {
         ServerUserModel GetUser(string username);
 
-        ICollection<ServerRolesModel> Login(ServerUserModel userModel);
+        ICollection<ServerRoleModel> Login(ServerUserModel userModel);
 
         /// <summary>
         /// Get all events from a workflow
@@ -17,19 +18,22 @@ namespace Server.Storage
         /// <param name="workflow"></param>
         /// <returns></returns>
         IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow);
+
+        Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
+        Task AddUser(ServerUserModel user);
         /// <summary>
         /// Add event to a workflow
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
+        Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
         
         /// <summary>
         /// Updates an event.
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="eventToBeUpdated"></param>
-        void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated);
+        Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated);
         /// <summary>
         /// Remove an event from a workflow
         /// </summary>
@@ -51,5 +55,7 @@ namespace Server.Storage
         Task AddNewWorkflow(ServerWorkflowModel workflow);
         Task UpdateWorkflow(ServerWorkflowModel workflow);
         Task RemoveWorkflow(ServerWorkflowModel workflow);
+        Task<bool> RoleExists(ServerRoleModel role);
+        Task<ServerRoleModel> GetRole(string id, string workflowId);
     }
 }

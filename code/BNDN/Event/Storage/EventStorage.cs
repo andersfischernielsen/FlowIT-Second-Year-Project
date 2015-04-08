@@ -31,7 +31,7 @@ namespace Event.Storage
             {
                 throw new InvalidOperationException("The EventId is already existing");
             }
-            _context.EventIdentification.Add(new EventIdentificationModel { Id = EventId });
+            _context.EventIdentification.Add(new EventIdentificationModel { Id = EventId, Roles = new List<EventRoleModel>()});
             _context.EventState.Add(new EventStateModel { Id = EventId });
             _context.SaveChanges();
         }
@@ -110,19 +110,19 @@ namespace Event.Storage
             }
         }
 
-        public string Role
+        public IEnumerable<string> Roles
         {
             get
             {
                 EventIdentificationIsInALegalState();
 
-                return _context.EventIdentification.Single(model => model.Id == EventId).Role;
+                return _context.EventIdentification.Single(model => model.Id == EventId).Roles.Select(role => role.Role);
             }
             set
             {
                 EventIdentificationIsInALegalState();
 
-                _context.EventIdentification.Single(model => model.Id == EventId).Role = value;
+                _context.EventIdentification.Single(model => model.Id == EventId).Roles = value.Select(role => new EventRoleModel{Role = role, EventId = EventId}).ToList();
                 _context.SaveChanges();
             }
         }

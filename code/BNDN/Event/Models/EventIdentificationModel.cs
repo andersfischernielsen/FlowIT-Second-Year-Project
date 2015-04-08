@@ -22,7 +22,7 @@ namespace Event.Models
         public string OwnUri { get; set; }
         public string WorkflowId { get; set; }
         public string Name { get; set; }
-        public string Role { get; set; }
+        public virtual ICollection<EventRoleModel> Roles { get; set; }
 
         public virtual EventStateModel EventStateModel { get; set; }
         public virtual LockDto LockDto { get; set; }

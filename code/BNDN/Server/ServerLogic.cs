@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Common;
 using Server.Models;
 using Server.Storage;
@@ -11,7 +10,7 @@ namespace Server
 {
     public class ServerLogic : IServerLogic
     {
-        private IServerStorage _storage;
+        private readonly IServerStorage _storage;
 
         public ServerLogic(IServerStorage storage)
         {
@@ -30,7 +29,7 @@ namespace Server
         public WorkflowDto GetWorkflow(string workflowId)
         {
             var workflow = _storage.GetWorkflow(workflowId);
-            return new WorkflowDto()
+            return new WorkflowDto
             {
                 Id = workflow.ID, 
                 Name = workflow.Name
@@ -50,16 +49,43 @@ namespace Server
             {
                 IList<string> list;
 
-                if (rolesOnWorkflows.TryGetValue(roleModel.ServerWorklowModelID, out list))
+                if (rolesOnWorkflows.TryGetValue(roleModel.ServerWorkflowModelID, out list))
                 {
                     list.Add(roleModel.ID);
                 }
                 else
                 {
-                    rolesOnWorkflows.Add(roleModel.ServerWorklowModelID, new List<string>{roleModel.ID});
+                    rolesOnWorkflows.Add(roleModel.ServerWorkflowModelID, new List<string>{roleModel.ID});
                 }
             }
             return new RolesOnWorkflowsDto { RolesOnWorkflows = rolesOnWorkflows };
+        }
+
+        public async Task AddUser(UserDto dto)
+        {
+            var user = new ServerUserModel {Name = dto.Name};
+            var roles = new List<ServerRoleModel>();
+
+            foreach (var role in dto.Roles)
+            {
+                var serverRole = new ServerRoleModel
+                {
+                    ID = role.Role,
+                    ServerWorkflowModelID = role.Workflow
+                };
+                if (await _storage.RoleExists(serverRole))
+                {
+                    roles.Add(await _storage.GetRole(role.Role, role.Workflow));
+                }
+                else
+                {
+                    throw new InvalidOperationException("The role does not exist");
+                }
+            }
+
+            user.ServerRolesModels = roles;
+
+            await _storage.AddUser(user);
         }
 
         public IEnumerable<EventAddressDto> GetEventsOnWorkflow(string workflowId)
@@ -68,29 +94,37 @@ namespace Server
 
             //TODO: Throw exception if result is null. See tests for this class.
             //TODO: If the workflow exists, return an empty list, otherwise throw NotFoundException.
-            return _storage.GetEventsFromWorkflow(workflow).Select(model => new EventAddressDto()
+            return _storage.GetEventsFromWorkflow(workflow).Select(model => new EventAddressDto
             {
                 Id = model.ID,
                 Uri = new Uri(model.Uri)
             });
         }
 
-        public void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        public async Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
-            _storage.AddEventToWorkflow(new ServerEventModel()
+
+            // Add roles to the current workflow if they do not exist (the storage method handles the if-part)
+            await _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
+            {
+                ID = role,
+                ServerWorkflowModelID = workflowToAttachToId
+            }));
+
+            await _storage.AddEventToWorkflow(new ServerEventModel
             {
                 ID = eventToBeAddedDto.Id,
                 Uri = eventToBeAddedDto.Uri.ToString(),
                 ServerWorkflowModelID = workflowToAttachToId,
-                ServerWorkflowModel = workflow
+                ServerWorkflowModel = workflow,
             });
         }
 
-        public void UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        public async Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
-            _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel()
+            await _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel()
             {
                 ID = eventToBeAddedDto.Id,
                 Uri = eventToBeAddedDto.Uri.ToString(),
@@ -130,6 +164,11 @@ namespace Server
                 ID = workflow.Id,
                 Name = workflow.Name,
             });
+        }
+
+        public void Dispose()
+        {
+            _storage.Dispose();
         }
     }
 }

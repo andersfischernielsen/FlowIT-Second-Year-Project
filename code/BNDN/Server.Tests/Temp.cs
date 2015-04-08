@@ -23,7 +23,7 @@ namespace Server.Tests
                 Name = "Test2",
                 ID = "1",
                 ServerEventModels = new List<ServerEventModel>(),
-                ServerRolesModels = new List<ServerRolesModel>()
+                ServerRolesModels = new List<ServerRoleModel>()
             };
             _s.AddNewWorkflow(wm);
         }
@@ -45,7 +45,7 @@ namespace Server.Tests
                 Name = "Test2",
                 ID = "1",
                 ServerEventModels = new List<ServerEventModel>(),
-                ServerRolesModels = new List<ServerRolesModel>()
+                ServerRolesModels = new List<ServerRoleModel>()
             };
             _s.AddNewWorkflow(wm);
 

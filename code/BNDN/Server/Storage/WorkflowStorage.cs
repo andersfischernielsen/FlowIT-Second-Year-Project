@@ -19,7 +19,7 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
-        public ICollection<ServerRolesModel> Login(ServerUserModel userModel)
+        public ICollection<ServerRoleModel> Login(ServerUserModel userModel)
         {
             throw new NotImplementedException();
         }
@@ -49,12 +49,27 @@ namespace Server.Storage
             }
         }
 
-        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        Task IServerStorage.AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public Task AddUser(ServerUserModel user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             throw new NotImplementedException();
         }
@@ -79,17 +94,32 @@ namespace Server.Storage
             return new List<ServerWorkflowModel>() { dummy1, dummy2 }.First(model => model.ID == workflowId);
         }
 
-        public async Task AddNewWorkflow(ServerWorkflowModel workflow)
+        public Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
             throw new NotImplementedException();
         }
 
-        public async Task UpdateWorkflow(ServerWorkflowModel workflow)
+        public Task UpdateWorkflow(ServerWorkflowModel workflow)
         {
             throw new NotImplementedException();
         }
 
-        public async Task RemoveWorkflow(ServerWorkflowModel workflow)
+        public Task RemoveWorkflow(ServerWorkflowModel workflow)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RoleExists(ServerRoleModel role)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServerRoleModel> GetRole(string id, string workflowId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
         {
             throw new NotImplementedException();
         }

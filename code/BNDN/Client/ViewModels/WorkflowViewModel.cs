@@ -9,17 +9,15 @@ namespace Client.ViewModels
     {
         private readonly WorkflowDto _workflowDto;
         public string WorkflowId { get { return _workflowDto.Id; } }
-        private readonly WorkflowListViewModel _parent;
         public WorkflowViewModel()
         {
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = new WorkflowDto();
         }
 
-        public WorkflowViewModel(WorkflowDto workflowDto, WorkflowListViewModel listViewModel)
+        public WorkflowViewModel(WorkflowDto workflowDto)
         {
             EventList = new ObservableCollection<EventViewModel>();
-            _parent = listViewModel;
             _workflowDto = workflowDto;
         }
 
@@ -60,10 +58,15 @@ namespace Client.ViewModels
             //TODO: Get the actual server address here.
             var connection = new ServerConnection(new Uri(@"http://localhost:13768/"));
 
-            var test = await connection.GetEventsFromWorkflow(_workflowDto);
-            EventList = new ObservableCollection<EventViewModel>(test.Select(eventAddressDto => new EventViewModel(eventAddressDto, this)));
+            var test = (await connection.GetEventsFromWorkflow(_workflowDto))
+                .AsParallel()
+                .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
+                .ToList();
 
-            EventList.OrderBy(model => model.Executable).ThenBy(model => model.Name);
+            EventList = new ObservableCollection<EventViewModel>(test
+                .OrderByDescending(model => model.Executable)
+                .ThenByDescending(model => model.Pending)
+                .ThenBy(model => model.Name));
             
             SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
             

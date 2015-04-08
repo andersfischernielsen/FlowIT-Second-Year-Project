@@ -4,17 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common;
+using Server.Models;
 
 namespace Server
 {
-    public interface IServerLogic 
+    public interface IServerLogic : IDisposable
     {
         /// <summary>
         /// Tries to log in / returns all the roles the user has on all workflows
         /// </summary>
-        /// <param name="loginDto"></param>
+        /// <param name="username"></param>
         /// <returns></returns>
         RolesOnWorkflowsDto Login(string username);
+
+        Task AddUser(UserDto user);
         
         /// <summary>
         /// Get all events from a workflow
@@ -27,13 +30,13 @@ namespace Server
         /// </summary>
         /// <param name="workflowToAttachToId"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
+        Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
         /// <summary>
         /// Add event to a workflow
         /// </summary>
         /// <param name="workflowToAttachToId"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
+        Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
         /// <summary>
         /// Remove an event from a workflow
         /// </summary>

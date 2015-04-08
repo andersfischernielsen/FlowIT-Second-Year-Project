@@ -94,11 +94,11 @@ namespace Event.Storage
             }
         }
 
-        //The role that a given user has to have for execution.
-        public string Role
+        // The list of rules a given user has to have for execution.
+        public IEnumerable<string> Roles
         {
-            get { return Storage.Role; }
-            set { Storage.Role = value; }
+            get { return Storage.Roles; }
+            set { Storage.Roles = value; }
         }
 
         #endregion
@@ -206,7 +206,7 @@ namespace Event.Storage
                     EventId = EventId,
                     WorkflowId = WorkflowId,
                     Name = Name,
-                    Role = Role,
+                    Roles = Roles,
                     Pending = Pending,
                     Executed = Executed,
                     Included = Included,
@@ -243,7 +243,8 @@ namespace Event.Storage
             var dto = new EventAddressDto
             {
                 Id = eventDto.EventId,
-                Uri = ownUri
+                Uri = ownUri,
+                Roles = eventDto.Roles
             };
 
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
@@ -258,9 +259,8 @@ namespace Event.Storage
                 EventId = eventDto.EventId;
                 WorkflowId = eventDto.WorkflowId;
                 Name = eventDto.Name;
-                Role = eventDto.Role;
+                Roles = eventDto.Roles;
                 Included = eventDto.Included;
-                Role = eventDto.Role;
                 Pending = eventDto.Pending;
                 Executed = eventDto.Executed;
                 Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
@@ -328,9 +328,17 @@ namespace Event.Storage
 
         public async Task DeleteEvent()
         {
+            // Check if Event exists here
+            if (!EventIdExists())
+            {
+                return;
+            }
+
+            // Attempt to delete Event from Server
             var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
             await serverCommunicator.DeleteEventFromServer();
 
+            // Delete Event from own Storage
             Storage.DeleteEvent();
         }
 
@@ -343,15 +351,15 @@ namespace Event.Storage
             {
                 foreach (var pending in Responses)
                 {
-                    await new EventCommunicator(pending.Uri,pending.EventID,EventId).SendPending(true, addressDto);
+                    await new EventCommunicator(pending.Uri,pending.EventID,EventId).SendPending(addressDto);
                 }
                 foreach (var inclusion in Inclusions)
                 {
-                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, EventId).SendIncluded(true, addressDto);
+                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, EventId).SendIncluded(addressDto);
                 }
                 foreach (var exclusion in Exclusions)
                 {
-                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, EventId).SendIncluded(false, addressDto);
+                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, EventId).SendExcluded(addressDto);
                 }
             });
         }
@@ -392,6 +400,16 @@ namespace Event.Storage
         public void Dispose()
         {
             Storage.Dispose();
+        }
+
+        // TODO: This should be a private method. "Logic" in EventStateController's Update** should be moved inside EventLogic
+        public bool ProvidedRolesHasMatchWithEventRoles(IEnumerable<string> providedRoles)
+        {
+            if (providedRoles.Any(providedRole => Roles.Contains(providedRole)))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

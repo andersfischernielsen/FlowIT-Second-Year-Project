@@ -10,7 +10,7 @@ namespace Server.Models
     {
         public ServerWorkflowModel()
         {
-            ServerRolesModels = new List<ServerRolesModel>();
+            ServerRolesModels = new List<ServerRoleModel>();
             ServerEventModels = new List<ServerEventModel>();
         }
         [Required]
@@ -19,6 +19,6 @@ namespace Server.Models
 
         public virtual ICollection<ServerEventModel> ServerEventModels { get; set; }
 
-        public virtual ICollection<ServerRolesModel> ServerRolesModels { get; set; }
+        public virtual ICollection<ServerRoleModel> ServerRolesModels { get; set; }
     }
 }
