@@ -46,12 +46,14 @@ namespace Event.Storage
             {
                 throw new InvalidOperationException("The EventId does not exist");
             }
-            Conditions.Clear();
-            Exclusions.Clear();
-            Inclusions.Clear();
-            Responses.Clear();
-            _context.EventIdentification.Remove(_context.EventIdentification.Single(ei => ei.Id == EventId));
+
+            _context.Conditions.RemoveRange(_context.Conditions.Where(ei => ei.EventIdentificationModelId == EventId));
+            _context.Exclusions.RemoveRange(_context.Exclusions.Where(ei => ei.EventIdentificationModelId == EventId));
+            _context.Inclusions.RemoveRange(_context.Inclusions.Where(ei => ei.EventIdentificationModelId == EventId));
+            _context.Responses.RemoveRange(_context.Responses.Where(ei => ei.EventIdentificationModelId == EventId));
+
             _context.EventState.Remove(_context.EventState.Single(ei => ei.Id == EventId));
+            _context.EventIdentification.Remove(_context.EventIdentification.Single(ei => ei.Id == EventId));
 
             _context.SaveChanges();
         }
