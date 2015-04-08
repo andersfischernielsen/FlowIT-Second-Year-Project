@@ -22,6 +22,11 @@ namespace Client
             var eventId = _eventDto.Id;
             return await _httpClient.Read<EventStateDto>(String.Format("events/{0}/state/-1", eventId));   
         }
+        public async Task DeleteEvent()
+        {
+            var eventId = _eventDto.Id;
+            await _httpClient.Delete(String.Format("events/{0}", eventId));
+        }
         
 
         public async Task Execute(bool b, string workflowId)

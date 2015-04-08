@@ -13,6 +13,13 @@ namespace Client
         /// </summary>
         /// <returns></returns>
         Task<EventStateDto> GetState();
+
+        /// <summary>
+        /// Delete an event. Only to be used for testing!
+        /// TODO: REMOVE THIS METHOD WHEN DONE WITH TESTING.
+        /// </summary>
+        /// <returns></returns>
+        Task DeleteEvent();
         
         /// <summary>
         /// Execute a task

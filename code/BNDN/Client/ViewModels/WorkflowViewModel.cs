@@ -81,7 +81,14 @@ namespace Client.ViewModels
         /// </summary>
         public async void ResetWorkflow()
         {
-            Console.WriteLine("heja");
+            // Delete all the events.
+            foreach (var eventViewModel in EventList)
+            {
+                var connection = new EventConnection(new EventAddressDto { Id = eventViewModel.Id, Uri = eventViewModel.Uri});
+                await connection.DeleteEvent();
+            }
+            // Create them again.
+            // TODO put create events again here.
         }
         #endregion
 
