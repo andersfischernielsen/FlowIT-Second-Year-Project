@@ -105,7 +105,7 @@ namespace DCRParserGraphic
         private void Constraints()
         {
             //Constraints general tag into variable
-            var constraints = _xDoc.Descendants("constraints");
+            var constraints = _xDoc.Descendants("constraints").ToList();
             //Conditions 
             var conditions = constraints.Descendants("conditions").Descendants("condition");
             foreach (var c in conditions)
@@ -174,7 +174,7 @@ namespace DCRParserGraphic
         private void States()
         {
             //State stuff
-            var state = _xDoc.Descendants("marking");
+            var state = _xDoc.Descendants("marking").ToList();
 
             //Executed
             var executed = state.Descendants("executed").Descendants("event");
