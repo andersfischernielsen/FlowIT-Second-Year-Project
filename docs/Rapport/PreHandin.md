@@ -1,5 +1,7 @@
 # Pre-handin 
 
+**IT-University of Copenhagen, April 9th, 2015**
+
 **Group-members:**
 
 - Adam William Engsig
@@ -14,26 +16,32 @@
 
 This report describes the software, that was designed and built by the group during the project.
 
-The purpose of the system is to "construct a generic workflow system", that enables users (through a Windows-client) to have an overview of and execute the events within a workflow. An "event" is one part / a step of a workflow. 
+As a brief introduction, the purpose of the system is to "construct a generic workflow system", that enables users (through a Windows-client) to get an overview of and execute the events within a workflow. An "event" is here a part / step of a workflow. 
 
-The project hence is concerned with implementing the software within the Windows-client, the Events and a central Server, that acts an intermediate between the Client and the Events. 
+The project hence is concerned with implementing the software within the Windows-client, the Events and a central Server, that acts an intermediate between the Client and the Events. The three parts must be implemented such that they run in a distributed fashion. 
 
 
 # Implemented workflow
 
-This section describes the workflow, that has been implemented in the delivered system. The workflow was based at a textual description, provided by external partner in Brazil. 
+This section describes the workflow, that has been implemented in the delivered system. The workflow was based at a textual description, provided by the external partner in Brazil. 
 
 The workflow concerns medical care and treatment at a hospital. 
 
-We have deliberately decided to omit certain parts of the given workflow. This was done, so the group could focus at implementing core-functionality first, before moving on to more complex workflows. 
+We have deliberately decided to simplify and omit certain parts of the given workflow. This was done, so the group could focus at implementing core-functionality first, before moving on to more complex workflows. The group hopes to be able to support more complex workflows is the second part of this project. 
 
-The implemented workflow is seen in the illustration below.
+The workflow, that is implemented in the delivered software, is seen in the illustration below, and generated through the online-tool available at [DCRGraph.net](www.dcrgraph.net)
 
 <!--Inser illustration: missing!-->
 
 # How to run the system
 
 This section describes how to run the provided software; namely the Windows Client ("Client"). 
+
+## Server
+The Server needs not be started, since it is already running online, and Client is targeting that service. 
+
+## Event
+
 
 ## Client
 In order to start up the Client, double-click on the Client.exe-file (located at \??\??) with the Flow-icon.
@@ -115,6 +123,12 @@ These include unit-, integration-, system- and acceptance testing in varying deg
 ## Unit Testing
 The major components handling data that have been developed by the team (not Microsoft's libraries) have been unit-tested to ensure that their functionality was correct. 
 
+The unit-tests can be found (and run) within the provided Visual Studio-solution in a project following the naming-convention:
+
+$$<TargetProject>.tests$$
+
+for instance the project *Server.tests* contains the unit-tests of Server. 
+
 ### Server
 The unittests on Server are found in the Server.tests project (in the provided Visual Studio solution)
 
@@ -169,12 +183,15 @@ Acceptance testing has not been done yet, due to time-pressure.
 
 ## Discussion of testing-approach 
 
+The team's testing approach has mainly been centered around unit-testing. 
 
+It has not been able to carry out acceptance-testing with external partners as of yet. 
 
-
-## Known bugs / missing functionality
+The group's confidence in the system is currently restricted to a per-module level, due to time-pressure. 
 
 
 # Conclusion
+
+The delivered software at this point provides a basis for the projects second part. 
 
 # Questions regarding workflow in Brazil
