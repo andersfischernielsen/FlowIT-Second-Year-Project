@@ -19,9 +19,11 @@ namespace DCRParserGraphic
         private string _filePath;
         private string _workflowId;
         private string _ip;
+        private HashSet<string> _rolesSet; 
 
         public DcrParser(string filePath, string workflowId, string eventIp)
         {
+            _rolesSet = new HashSet<string>();
             _ip = eventIp;
             _workflowId = workflowId;
             _filePath = filePath;
@@ -72,6 +74,7 @@ namespace DCRParserGraphic
                 foreach (var r in role)
                 {
                     var roleString = r.Value;
+                    _rolesSet.Add(roleString);
                     ((HashSet<string>)eventDto.Roles).Add(roleString);
                 }
 
@@ -217,6 +220,11 @@ namespace DCRParserGraphic
                     sw.WriteLine("");
                 }
             }
+        }
+
+        public IEnumerable<string> GetRoles()
+        {
+            return _rolesSet;
         }
 
         public Dictionary<string, EventDto> GetMap()

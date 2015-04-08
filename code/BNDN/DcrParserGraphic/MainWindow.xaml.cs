@@ -73,8 +73,12 @@ namespace DcrParserGraphic
                 try
                 {
                     //var ips = TextBoxUrl.Text.Replace(" ","").Split(',');
-                    var map = new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, TextBoxUrl.Text).GetMap();
-                    await new EventUploader().Upload(map.Values.ToList());
+                    var parser = new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, TextBoxUrl.Text);
+                    var map = parser.GetMap();
+                    var roles = parser.GetRoles();
+                    var uploader = new EventUploader(TextBoxWorkflowName.Text);
+                    await uploader.Upload(map.Values.ToList());
+                    await uploader.UploadUsers(roles);
                     MessageBox.Show("Everything went OK. The file should have been uploaded to the given urls");
                     TextBoxFile.Text = "";
                     TextBoxUrl.Text = "";
