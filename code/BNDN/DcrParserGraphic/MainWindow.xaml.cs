@@ -44,15 +44,17 @@ namespace DcrParserGraphic
 
         private void ButtonConvert_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(TextBoxFile.Text))
+            if (!string.IsNullOrEmpty(TextBoxFile.Text) && !string.IsNullOrEmpty(TextBoxUrl.Text) && !string.IsNullOrEmpty(TextBoxWorkflowName.Text))
             {
                 try
                 {
-                   new DcrParser(TextBoxFile.Text).CreateXmlFile();
+                    //var ips = TextBoxUrl.Text.Split(',');
+                    new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, TextBoxUrl.Text).CreateXmlFile();
 
-                    MessageBox.Show(
-                        "Everything went OK. The file should have been created in the same place as this exe file");
+                    MessageBox.Show("Everything went OK. The file should have been created in the same place as this exe file");
                     TextBoxFile.Text = "";
+                    TextBoxUrl.Text = "";
+                    TextBoxWorkflowName.Text = "";
                 }
                 catch (Exception)
                 {
@@ -63,20 +65,22 @@ namespace DcrParserGraphic
 
         private void hiddenbutton_onclick(object sender, RoutedEventArgs e)
         {
-           System.Diagnostics.Process.Start("http://www.staggeringbeauty.com/");
+            System.Diagnostics.Process.Start("http://www.staggeringbeauty.com/");
         }
 
         private void ButtonUpload_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(TextBoxFile.Text))
+            if (!string.IsNullOrEmpty(TextBoxFile.Text) && !string.IsNullOrEmpty(TextBoxUrl.Text) && !string.IsNullOrEmpty(TextBoxWorkflowName.Text))
             {
                 try
                 {
-                    var map = new DcrParser(TextBoxFile.Text).GetMap();
+                    //var ips = TextBoxUrl.Text.Replace(" ","").Split(',');
+                    var map = new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, TextBoxUrl.Text).GetMap();
                     new EventUploader().Upload(map.Values.ToList());
-                    MessageBox.Show(
-                        "Everything went OK. The file should have been created in the same place as this exe file");
+                    MessageBox.Show("Everything went OK. The file should have been uploaded to the given urls");
                     TextBoxFile.Text = "";
+                    TextBoxUrl.Text = "";
+                    TextBoxWorkflowName.Text = "";
                 }
                 catch (Exception)
                 {

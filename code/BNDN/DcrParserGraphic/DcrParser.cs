@@ -17,14 +17,17 @@ namespace DCRParserGraphic
     {
         private readonly Dictionary<string, EventDto> _map;
         private readonly XDocument _xDoc;
-        private string _path;
-        private const string _ip = "http://localhost:13752/";
+        private string _filePath;
+        private string _workflowId;
+        private string _ip;
 
-        public DcrParser(string path)
+        public DcrParser(string filePath, string workflowId, string eventIp)
         {
-            _path = path;
+            _ip = eventIp;
+            _workflowId = workflowId;
+            _filePath = filePath;
             _map = new Dictionary<string, EventDto>();
-            _xDoc = XDocument.Load(path);
+            _xDoc = XDocument.Load(_filePath);
             //ORDER OF METHOD CALL IS IMPORTANT, MUST be THIS!
             InitiateAllEventAddressDtoWithRolesAndNames();
             MapDCRIdToRealId();
@@ -57,7 +60,7 @@ namespace DCRParserGraphic
                         Executed = false,
                         Included = false,
                         Pending = false,
-                        WorkflowId = "SOMEWORKFLOWIDPLEASESETMECORRECT",
+                        WorkflowId = _workflowId,
                     };
                 }
                 if (eventDto == null)
