@@ -21,7 +21,7 @@ namespace Event.Storage
             _context = context;
         }
 
-        public void InitializeNewEvent()
+        public void InitializeNewEvent(InitialEventState initialEventState)
         {
             if (_context.EventIdentification.Any(model => model.Id == EventId))
             {
@@ -33,6 +33,7 @@ namespace Event.Storage
             }
             _context.EventIdentification.Add(new EventIdentificationModel { Id = EventId, Roles = new List<EventRoleModel>()});
             _context.EventState.Add(new EventStateModel { Id = EventId });
+            _context.InitialEventState.Add(initialEventState);
             _context.SaveChanges();
         }
 

@@ -253,7 +253,14 @@ namespace Event.Storage
             try
             {
                 // Setup a new Event in database.
-                Storage.InitializeNewEvent();
+                var initialEventState = new InitialEventState()
+                {
+                    EventId = eventDto.EventId,
+                    Executed = eventDto.Executed,
+                    Included = eventDto.Included,
+                    Pending = eventDto.Pending
+                };
+                Storage.InitializeNewEvent(initialEventState);
 
                 // #2. Then set our own fields accordingly
                 EventId = eventDto.EventId;

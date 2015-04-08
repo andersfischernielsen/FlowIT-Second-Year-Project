@@ -19,6 +19,7 @@ namespace Event.Interfaces
         DbSet<EventStateModel> EventState { get; set; }
         DbSet<ConditionUri> Conditions { get; set; }
         DbSet<ResponseUri> Responses { get; set; }
+        DbSet<InitialEventState> InitialEventState { get; set; }
         DbSet<InclusionUri> Inclusions { get; set; }
         DbSet<ExclusionUri> Exclusions { get; set; }
         DbSet<LockDto> LockDto { get; set; }
