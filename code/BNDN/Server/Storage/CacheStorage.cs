@@ -83,7 +83,7 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
-        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == eventToBeAddedDto.ServerWorkflowModelID);
             if (serverWorkflowModel != null && !serverWorkflowModel.ServerEventModels.Contains(eventToBeAddedDto))
@@ -93,7 +93,7 @@ namespace Server.Storage
             else throw new Exception("Event already exists");
         }
 
-        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             var serverWorkflowModel = _cache.FirstOrDefault(model => model.ID == workflow.ID);
             if (serverWorkflowModel != null)
@@ -140,6 +140,16 @@ namespace Server.Storage
         public async Task RemoveWorkflow(ServerWorkflowModel workflow)
         {
             _cache.Remove(workflow);
+        }
+
+        public Task<bool> RoleExists(ServerRoleModel role)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServerRoleModel> GetRole(string id, string workflowId)
+        {
+            throw new NotImplementedException();
         }
 #pragma warning restore 1998
         public void Dispose()

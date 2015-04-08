@@ -64,12 +64,12 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
-        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        public Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             throw new NotImplementedException();
         }
@@ -105,6 +105,16 @@ namespace Server.Storage
         }
 
         public Task RemoveWorkflow(ServerWorkflowModel workflow)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RoleExists(ServerRoleModel role)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServerRoleModel> GetRole(string id, string workflowId)
         {
             throw new NotImplementedException();
         }

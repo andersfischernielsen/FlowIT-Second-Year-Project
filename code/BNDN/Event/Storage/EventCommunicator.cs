@@ -94,13 +94,18 @@ namespace Event.Storage
             await _httpClient.Update("event/notify", dtos);
         }
 
-        public async Task SendPending(bool newPendingValue, EventAddressDto lockDto)
+        public async Task SendPending(EventAddressDto lockDto)
         {
-            await _httpClient.Update(String.Format("events/{0}/pending/{1}", TargetEventId,newPendingValue), lockDto);
+            await _httpClient.Update(String.Format("events/{0}/pending/true", TargetEventId), lockDto);
         }
-        public async Task SendIncluded(bool newIncludedValue, EventAddressDto lockDto)
+        public async Task SendIncluded(EventAddressDto lockDto)
         {
-            await _httpClient.Update(String.Format("events/{0}/included/{1}", OwnEventId,newIncludedValue), lockDto);
+            await _httpClient.Update(String.Format("events/{0}/included/true", TargetEventId), lockDto);
+        }
+
+        public async Task SendExcluded(EventAddressDto lockDto)
+        {
+            await _httpClient.Update(string.Format("events/{0}/included/false", TargetEventId), lockDto);
         }
 
         /// <summary>

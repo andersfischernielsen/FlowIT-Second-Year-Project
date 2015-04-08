@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,8 +44,7 @@ namespace Server.Storage
         {
             foreach (var role in roles)
             {
-                if (!_db.Roles.Any(r => r.ID.Equals(role.ID) 
-                    && r.ServerWorkflowModelID.Equals(r.ServerWorkflowModelID)))
+                if (!await RoleExists(role))
                 {
                     _db.Roles.Add(role);
                 }
@@ -52,17 +52,37 @@ namespace Server.Storage
             await _db.SaveChangesAsync();
         }
 
+        public async Task<ServerRoleModel> GetRole(string id, string workflowId)
+        {
+            return
+                await
+                    _db.Roles.SingleOrDefaultAsync(
+                        role => role.ID.Equals(id)
+                            && role.ServerWorkflowModelID.Equals(workflowId));
+        }
+
+        public async Task<bool> RoleExists(ServerRoleModel role)
+        {
+            return await _db.Roles.AnyAsync(rr => rr.ID.Equals(role.ID)
+                && rr.ServerWorkflowModelID.Equals(role.ServerWorkflowModelID));
+        }
+
         public async Task AddUser(ServerUserModel user)
         {
-            if (_db.Users.Any(u => u.ID.Equals(user.ID)))
+            if (_db.Users.Any(u => u.Name.Equals(user.Name)))
             {
                 throw new ArgumentException("User already exists", "user");
             }
-            _db.Users.Add(user);
+            var uu = _db.Users.Create();
+            uu.Name = user.Name;
+            uu.ServerRolesModels = user.ServerRolesModels;
+
+            _db.Users.Add(uu);
+
             await _db.SaveChangesAsync();
         }
 
-        public void AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             //TODO: Skal 2 events kunne have samme ID?
             var workflows = from w in _db.Workflows
@@ -75,10 +95,10 @@ namespace Server.Storage
             }
 
             _db.Events.Add(eventToBeAddedDto);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             var events = from e in _db.Events
                          where e.ID == eventToBeUpdated.ID
@@ -90,7 +110,7 @@ namespace Server.Storage
             tempEvent.ServerWorkflowModelID = eventToBeUpdated.ServerWorkflowModelID;
             tempEvent.Uri = eventToBeUpdated.Uri;
 
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)

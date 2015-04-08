@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Common
 {
     public class UserDto
     {
-        public int Id { get; set; }
+        [Required]
         public string Name { get; set; }
+        [Required]
         public ICollection<WorkflowRole> Roles { get; set; }
-    }
-
-    public class WorkflowRole
-    {
-        public string Role { get; set; }
-        public string Workflow { get; set; }
     }
 }

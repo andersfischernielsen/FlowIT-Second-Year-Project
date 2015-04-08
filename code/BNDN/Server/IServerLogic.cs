@@ -17,7 +17,7 @@ namespace Server
         /// <returns></returns>
         RolesOnWorkflowsDto Login(string username);
 
-        Task AddUser(ServerUserModel user);
+        Task AddUser(UserDto user);
         
         /// <summary>
         /// Get all events from a workflow
@@ -30,13 +30,13 @@ namespace Server
         /// </summary>
         /// <param name="workflowToAttachToId"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
+        Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
         /// <summary>
         /// Add event to a workflow
         /// </summary>
         /// <param name="workflowToAttachToId"></param>
         /// <param name="eventToBeAddedDto"></param>
-        void UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
+        Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
         /// <summary>
         /// Remove an event from a workflow
         /// </summary>

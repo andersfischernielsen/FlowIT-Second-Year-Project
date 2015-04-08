@@ -47,17 +47,21 @@ namespace Server.Controllers
             {
                 try
                 {
-                    var user = new ServerUserModel
+                    await serverLogic.AddUser(dto);
+                }
+                catch (InvalidOperationException)
+                {
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                        "One of the roles does not exist"));
+                }
+                catch (ArgumentException ex)
+                {
+                    if (ex.ParamName == "user")
                     {
-                        ID = dto.Id,
-                        Name = dto.Name,
-                        ServerRolesModels = dto.Roles.Select(role => new ServerRoleModel
-                        {
-                            ID = role.Role,
-                            ServerWorkflowModelID = role.Workflow
-                        }).ToList()
-                    };
-                    await serverLogic.AddUser(user);
+                        throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                            "A user with that username already exists"));
+                    }
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
                 }
                 catch (Exception ex)
                 {

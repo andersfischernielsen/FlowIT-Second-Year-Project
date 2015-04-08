@@ -61,8 +61,30 @@ namespace Server
             return new RolesOnWorkflowsDto { RolesOnWorkflows = rolesOnWorkflows };
         }
 
-        public async Task AddUser(ServerUserModel user)
+        public async Task AddUser(UserDto dto)
         {
+            var user = new ServerUserModel {Name = dto.Name};
+            var roles = new List<ServerRoleModel>();
+
+            foreach (var role in dto.Roles)
+            {
+                var serverRole = new ServerRoleModel
+                {
+                    ID = role.Role,
+                    ServerWorkflowModelID = role.Workflow
+                };
+                if (await _storage.RoleExists(serverRole))
+                {
+                    roles.Add(await _storage.GetRole(role.Role, role.Workflow));
+                }
+                else
+                {
+                    throw new InvalidOperationException("The role does not exist");
+                }
+            }
+
+            user.ServerRolesModels = roles;
+
             await _storage.AddUser(user);
         }
 
@@ -79,18 +101,18 @@ namespace Server
             });
         }
 
-        public void AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        public async Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
 
             // Add roles to the current workflow if they do not exist (the storage method handles the if-part)
-            _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
+            await _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
             {
                 ID = role,
                 ServerWorkflowModelID = workflowToAttachToId
             }));
 
-            _storage.AddEventToWorkflow(new ServerEventModel
+            await _storage.AddEventToWorkflow(new ServerEventModel
             {
                 ID = eventToBeAddedDto.Id,
                 Uri = eventToBeAddedDto.Uri.ToString(),
@@ -99,10 +121,10 @@ namespace Server
             });
         }
 
-        public void UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
+        public async Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = _storage.GetWorkflow(workflowToAttachToId);
-            _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel()
+            await _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel()
             {
                 ID = eventToBeAddedDto.Id,
                 Uri = eventToBeAddedDto.Uri.ToString(),

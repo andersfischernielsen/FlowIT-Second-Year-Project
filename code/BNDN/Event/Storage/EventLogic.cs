@@ -261,7 +261,6 @@ namespace Event.Storage
                 Name = eventDto.Name;
                 Roles = eventDto.Roles;
                 Included = eventDto.Included;
-                Roles = eventDto.Roles;
                 Pending = eventDto.Pending;
                 Executed = eventDto.Executed;
                 Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
@@ -350,15 +349,15 @@ namespace Event.Storage
             {
                 foreach (var pending in Responses)
                 {
-                    await new EventCommunicator(pending.Uri,pending.EventID,EventId).SendPending(true, addressDto);
+                    await new EventCommunicator(pending.Uri,pending.EventID,EventId).SendPending(addressDto);
                 }
                 foreach (var inclusion in Inclusions)
                 {
-                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, EventId).SendIncluded(true, addressDto);
+                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, EventId).SendIncluded(addressDto);
                 }
                 foreach (var exclusion in Exclusions)
                 {
-                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, EventId).SendIncluded(false, addressDto);
+                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, EventId).SendExcluded(addressDto);
                 }
             });
         }
