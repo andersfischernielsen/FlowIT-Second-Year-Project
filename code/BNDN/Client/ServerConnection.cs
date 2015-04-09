@@ -59,6 +59,10 @@ namespace Client
         {
             try
             {
+                // todo remove after 1. handin
+                IList<string> roles;
+                EventConnection.RoleForWorkflow.TryGetValue(workflow.Id, out roles);
+
                 return _http.ReadList<EventAddressDto>(string.Format("workflows/{0}", workflow.Id));
             }
             catch (HttpRequestException ex)
@@ -70,5 +74,6 @@ namespace Client
                 throw new ServerNotFoundException(ex);
             }
         }
+
     }
 }
