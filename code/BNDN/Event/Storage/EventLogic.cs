@@ -143,12 +143,11 @@ namespace Event.Storage
                 var executed = await eventCommunicator.IsExecuted();
                 var included = await eventCommunicator.IsIncluded();
                 // If the condition-event is not executed and currently included.
-                if (!executed || included)
+                if (included && !executed)
                 {
-                    return false; //Don't check rest because this event is not executable.
+                    return false;
                 }
             }
-
             return true; // If all conditions are executed or excluded.
         }
 
