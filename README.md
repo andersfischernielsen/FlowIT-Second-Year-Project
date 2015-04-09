@@ -1,7 +1,7 @@
 Second Year Project: Software Development in Large Teams
 =====
 
-Hacks to Fix before Final Release
+Hacks to Fix Before Final Release
 -----
 
 ### DTO-hack
