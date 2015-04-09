@@ -19,11 +19,11 @@ namespace Client.ViewModels
                 var settingsjson = File.ReadAllText("settings.json");
                 var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
 
-                _serverAddress = new Uri(settings.ServerAddress ?? "http://localhost:13768/");
+                _serverAddress = new Uri(settings.ServerAddress ?? "http://flowit.azurewebsites.net/");
             }
             else
             {
-                _serverAddress = new Uri("http://localhost:13768/");
+                _serverAddress = new Uri("http://flowit.azurewebsites.net/");
             }
 
             GetWorkflows();
