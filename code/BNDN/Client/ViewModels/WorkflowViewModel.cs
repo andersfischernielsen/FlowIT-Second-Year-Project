@@ -86,22 +86,16 @@ namespace Client.ViewModels
             if (resetEventRuns) return;
             resetEventRuns = true;
             
-            //todo super hacky solution - but needed due to time pressure
-            EventConnection.RoleForWorkflow[WorkflowId].Add("Admin");
-
             var serverConnection = new ServerConnection(new Uri(@"http://flowit.azurewebsites.net/"));
 
             var adminEventList = (await serverConnection.GetEventsFromWorkflow(_workflowDto))
                 .AsParallel()
-                .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
                 .ToList();
-
-            EventConnection.RoleForWorkflow[WorkflowId].Remove("Admin");
 
             // Reset all the events.
             foreach (var eventViewModel in adminEventList)
             {
-                var connection = new EventConnection(new EventAddressDto { Id = eventViewModel.Id, Uri = eventViewModel.Uri});
+                var connection = new EventConnection(eventViewModel);
                 await connection.ResetEvent();
             }
             NotifyPropertyChanged("");
