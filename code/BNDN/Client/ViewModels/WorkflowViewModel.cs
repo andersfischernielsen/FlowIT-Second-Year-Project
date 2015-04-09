@@ -87,6 +87,7 @@ namespace Client.ViewModels
                 var connection = new EventConnection(new EventAddressDto { Id = eventViewModel.Id, Uri = eventViewModel.Uri});
                 await connection.ResetEvent();
             }
+            GetEvents();
         }
         #endregion
 
