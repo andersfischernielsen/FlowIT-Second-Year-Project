@@ -20,6 +20,7 @@ namespace Server.Tests
         public void SetUp()
         {
             _mock = new Mock<IServerLogic>();
+            _mock.Setup(logic => logic.Dispose());
         }
 
         #region GET Workflows
