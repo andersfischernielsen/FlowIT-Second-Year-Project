@@ -1,29 +1,4 @@
-\section{Pre-handin}\label{pre-handin}
-
-
-\textbf{IT University of Copenhagen, April 9th, 2015}
-
-\textbf{Group members:}
-
-\begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
-\item
-  Adam William Engsig
-\item
-  Anders Fischer-Nielsen
-\item
-  Anders Wind Steffensen
-\item
-  Cecilie Strunge Jensen
-\item
-  Mikael Lindemann Jepsen
-\item
-  Morten Albertsen
-\end{itemize}
-
-\newpage
-
-\section{Introduction}\label{introduction}
+\chapter{Introduction}\label{introduction}
 
 This report describes the software, that was designed and built by the
 group during the project in \emph{Second Year Project: Software
@@ -31,19 +6,17 @@ Development in Large Teams with International Collaboration}.
 
 As a brief introduction, the purpose of the system is to construct a
 generic workflow system, that enables users to get an overview of and
-execute the events within a workflow throug a Windows client. An event
+execute the events within a workflow through a Windows client. An event
 is here a part / step of a workflow.
 
 The project hence is concerned with implementing the software within the
 Windows client, the events and a central server, that acts an
-intermediate between the client and the events. The three parts must be
+intermedryte between the client and the events. The three parts must be
 implemented such that they run in a distributed fashion.
 
-\section{Implemented workflow}\label{implemented-workflow}
+\chapter{Implemented workflow}\label{implemented-workflow}
 
-This section describes the workflow, that has been implemented in the
-delivered system. The workflow was based at a textual description,
-provided by the external partner in Brazil.
+This section describes the workflow, that was implemented as a sample workflow. The workflow was based at a textual description, provided by our external partner in Brazil.
 
 The workflow concerns medical care and treatment at a hospital.
 
@@ -55,47 +28,47 @@ presented, but has not been tested thorougly enough at the moment. The
 group hopes to be able to guarantee support of more complex workflows in
 the second part of this project.
 
-The workflow, that is implemented in the delivered software, is seen in
-the illustration below, and generated through the online-tool available
+The workflow, that is implemented in the delivered software, is seen in Figure \ref{fig:WorkflowIllustrationFromDCRGraphs} in 
+Appendix, and generated through the online-tool available
 at \href{www.dcrgraph.net}{DCRGraph.net}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics{Workflow.png}
-\caption{Brazilian Healthcare Workflow}
-\end{figure}
-
-\section{How to run the system}\label{how-to-run-the-system}
+\chapter{How to run the system}\label{how-to-run-the-system}
 
 This section describes how to run the provided software; namely the
-Windows Client (``Client'')
+Windows Client ("Client'')
 
 In order to start up the Client, double-click on the Client.exe-file
-(located at ????) with the Flow-icon.
+(supplied in handin-folder) with the Flow-icon.
 
-\subsection{The user-interface}\label{the-user-interface}
+\section{The user-interface}\label{the-user-interface}
 
 The first window that is shown is the Login-window (see picture
-below)\\In this windows type in your username and click on the
+below)\\
+In this windows type in your username and click on the
 Login-button.
 
-For username, use the role, you wish to access the system with; for
-instance, if you wish to access the workflow as a doctor, supply
-\textbf{doctor} as your username.
+For username, either
+\begin{itemize}
+\item Log in as \textit{Admin} This will allow you to execute any event within the workflow
+\item Use a role (as seen on the DCRGraph). For instance, to execute PatientCheckIn as CheckInReceptionist, log in as \textit{CheckInReceptionist}. Recall, that you must have the correct role to execute an event. 
+\end{itemize}
 
-\begin{figure}[htbp]
+
+
+\begin{figure}[h]
 \centering
-\includegraphics{ClientLogin.png}
+\includegraphics[width=0.8\textwidth]{ClientLogin.png}
 \caption{Client Login Window}
 \end{figure}
+
 
 If the username is correct and corresponds to a user on the
 Workflow-Server the login will succeed and the user will be presented
 with a new window which is the main Flow window.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
 \centering
-\includegraphics{ClientMainView.png}
+\includegraphics[width=0.8\textwidth]{ClientMainView.png}
 \caption{Client Main Window}
 \end{figure}
 
@@ -106,6 +79,8 @@ should be present, the Refresh-button can be pressed.
 The Refresh-button is also used to see changes in workflows, so if the
 Workflow-Server is updated with a new workflow, the user must press
 Refresh to see the new content.
+
+To Reset a workflow to it's initial state, press the Reset button.
 
 When a workflow is selected (in the left pane), the right part of the
 window is updated. This part of the window shows the events of the
@@ -149,7 +124,7 @@ The button is active only if the Event is currently executable, which
 means it must be included and all of its conditions must be executed at
 least once.
 
-\subsection{Settings file}\label{settings-file}
+\section{Settings file}\label{settings-file}
 
 The client creates a settings file (located at ????), where a few
 informations are saved.
@@ -161,7 +136,7 @@ different Workflow-Server if desired.
 The settings file also remembers the username of the last successful
 login, so the user can login without writing the username every time.
 
-\section{System architecture}\label{system-architecture}
+\chapter{System architecture}\label{system-architecture}
 
 This section provides a birds-eye view of how the system was implemented
 and what parts is was broken down into.
@@ -171,20 +146,14 @@ created: a central server (``Server''), a client (``Client) and events
 (''Event``). The three subsystems are described in the following
 section.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics{Subsystems.png}
-\caption{Subsystems and the interfaces between them.}
-\end{figure}
-
-\subsection{Central Server}\label{central-server}
+\section{Central Server}\label{central-server}
 
 The central Server functions as a RESTful WebAPI, where Events can hook
 up onto an existing workflow and the client can retrieve a list of
 workflows and related events. The server subsystem is implemented in C\#
 using the ASP.NET Web API framework.
 
-\subsection{Client}\label{client}
+\section{Client}\label{client}
 
 The main functionality of the client subsystem is to provide the users
 an overview of workflows and events on the workflows, and provide the
@@ -193,7 +162,7 @@ is implemented in C\# using the .NET framework WPF for GUI components.
 The client has a connection submodule which handles all outgoing calls
 to both the server and events.
 
-\subsection{Event}\label{event}
+\section{Event}\label{event}
 
 The event subsystem is implemented in C\# using the ASP.NET Web API
 framework, which allows for easy routing and setup of a RESTful WebAPI.
@@ -203,7 +172,7 @@ implementation of an event allows for multiple events to be stored at
 either, the same machine or be distributed across network and multiple
 machines or a combination of the two.
 
-\section{Testing}\label{testing}
+\chapter{Testing}\label{testing}
 
 This section describes how the group has tested the system and includes
 a discussion of to what extent we believe the software works as
@@ -214,7 +183,7 @@ development. These include unit-, integration-, system- and acceptance
 testing in varying degrees. Acceptance testing has also been applied
 after the inital tests were developed.
 
-\subsection{Unit Testing}\label{unit-testing}
+\section{Unit Testing}\label{unit-testing}
 
 The major components handling data that have been developed by the team
 (not Microsoft's libraries) have been unit-tested to ensure that their
@@ -228,7 +197,7 @@ Studio-solution in a project following the naming-convention:
 for instance the project \emph{Server.tests} contains the unit-tests of
 Server.
 
-\subsubsection{Server}\label{server}
+\subsection{Server}\label{server}
 
 The unittests on Server are found in the Server.tests project (in the
 provided Visual Studio solution)
@@ -236,7 +205,7 @@ provided Visual Studio solution)
 The WebAPI controller and server logic classes have been unit tested as
 follows:
 
-\paragraph{IServerLogic}\label{iserverlogic}
+\subsubsection{IServerLogic}\label{iserverlogic}
 
 ServerLogic is the implementation of the IServerLogic interface, and has
 therefore been tested according to the methods specified in this
@@ -247,7 +216,7 @@ IServerStorage, which is mocked to enable testing. Every method in this
 interface is mocked, and saves and retrieves data from an in-memory list
 using callback methods.
 
-\paragraph{WorkflowsController}\label{workflowscontroller}
+\subsubsection{WorkflowsController}\label{workflowscontroller}
 
 Mocking is used to test the implementation of the WorkflowController
 class - again to test in a controlled environment. An IServerLogic
@@ -256,7 +225,7 @@ tested. Incoming HTTP requests are handled by the WorkflowsController
 and therefore methods handling GET, POST, PUT and DELETE requests have
 been tested using a IServerLogic mock.
 
-\subsubsection{Event}\label{event-1}
+\subsection{Event}\label{event-1}
 
 The unit-tests concerning Event are located in the Event.tests project
 (in the provided Visual Studio solution)
@@ -264,13 +233,13 @@ The unit-tests concerning Event are located in the Event.tests project
 The outgoing communicator, WebAPI controller and event logic classes
 have been unit tested as follows:
 
-\paragraph{EventCommunicator}\label{eventcommunicator}
+\subsubsection{EventCommunicator}\label{eventcommunicator}
 
 The EventCommunicator should throw certain expections when receiving
 invalid requests. This has been tested for methods in the
 IServerFromEvent interface.
 
-\paragraph{EventLogic}\label{eventlogic}
+\subsubsection{EventLogic}\label{eventlogic}
 
 EventLogic is the implementation of the IEventLogic interface. The
 methods in this interface have been unit tested by creating an in-memory
@@ -278,12 +247,12 @@ instance of IEventStorage and testing against this. Assertions for
 expected results (including exceptions) is used to test that methods
 return the expected results.
 
-\paragraph{EventStateController}\label{eventstatecontroller}
+\subsubsection{EventStateController}\label{eventstatecontroller}
 
 The locking functionality of events has been tested using unit testing
 and assertions for expected results.
 
-\subsubsection{Client}\label{client-1}
+\subsection{Client}\label{client-1}
 
 The unittests on the client are located in Client.tests projects (in the
 provided Visual Studio-solution).
@@ -291,7 +260,7 @@ provided Visual Studio-solution).
 The connection from the client to the server has been unit tested as
 follows:
 
-\paragraph{ServerConnection}\label{serverconnection}
+\subsubsection{ServerConnection}\label{serverconnection}
 
 The ServerConnection inherits from the IServerConnection interface and
 the methods defined in this interface have been unit tested. An instance
@@ -300,26 +269,26 @@ be tested in an isolated environment. Testing that the correct
 exceptions are thrown on invalid requests and correct data is returned
 on valid requests is done by assertion.
 
-\subsection{Integration Testing}\label{integration-testing}
+\section{Integration Testing}\label{integration-testing}
 
 Formal test cases have been specified, but have not been evaluated
 formally. Most functionality has been tested throughout development, but
 test results have not been written down due to time pressure. Getting
-the system to ``just work'' after unit testing was completed, has been
+the system to "just work'' after unit testing was completed, has been
 main focus for the team.
 
-\subsection{System Testing}\label{system-testing}
+\section{System Testing}\label{system-testing}
 
 System testing has not yet been formally completed.
 
-\subsection{Acceptance Testing}\label{acceptance-testing}
+\section{Acceptance Testing}\label{acceptance-testing}
 
 Acceptance testing would preferrably be done by the receiver/user of the
 system using test cases specified either by the client or the
 developers. Acceptance testing has not been done yet, as this was first
 planned to be carried out following this pre-handin.
 
-\subsection{Discussion of
+\section{Discussion of
 testing-approach}\label{discussion-of-testing-approach}
 
 The team's testing approach has mainly been centered around
@@ -332,14 +301,12 @@ The group's confidence in the system is currently restricted to a
 per-module level due to time-pressure. Integration testing and system
 testing should be completed before handing in part 2 of the system.
 
-\section{Conclusion}\label{conclusion}
+\chapter{Conclusion}\label{conclusion}
 
-The delivered software at this point provides a basis for the project's
-second part. We believe we made a good solution that makes it able to
-handle rather complicated workflows.
+The delivered software at this point provides a starting-point for the project's
+second part. We think the project is ambitious, and getting the features right will be a focus for the project's second part. 
 
-\section{Questions regarding workflow in
-Brazil}\label{questions-regarding-workflow-in-brazil}
+\chapter{Questions regarding workflow in Brazil}\label{questions-regarding-workflow-in-brazil}
 
 \begin{itemize}
 \itemsep1pt\parskip0pt\parsep0pt
@@ -349,7 +316,7 @@ Brazil}\label{questions-regarding-workflow-in-brazil}
 \item
   ``\emph{The physician may recommend the patient an appointment with a
   specialist or request some exams}'' Will the one exclude the other, or
-  could both happen, i.e.~could the physician both recommend the patient
+  could both happen, i.e. could the physician both recommend the patient
   an appointment \textbf{and} request some exams?
 \item
   In 9) a patient can be referred to ROTA. Sould the hospital charge the
@@ -357,3 +324,11 @@ Brazil}\label{questions-regarding-workflow-in-brazil}
 \item
   In connection to ROTA. Can an examinator refer a patient to ROTA?
 \end{itemize}
+
+\chapter*{Appendix}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\linewidth]{Workflow.png}
+\caption{Implemented workflow in delivered software. Workflow represents healthcare-workflow from provided description. In PDF, zoom in to getter view \label{fig:WorkflowIllustrationFromDCRGraphs}}
+\end{figure}
