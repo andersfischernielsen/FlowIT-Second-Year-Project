@@ -11,11 +11,12 @@ namespace DcrParserGraphic
     {
         private readonly string _workflow;
         private readonly string _serverAddress, _eventAddress;
-        public EventUploader(string workflow, string serverAddress, string eventAddress)
+        private readonly Dictionary<string, string> _ips;
+        public EventUploader(string workflow, string serverAddress, Dictionary<string, string> ips)
         {
             _workflow = workflow;
             _serverAddress = serverAddress;
-            _eventAddress = eventAddress;
+            _ips = _ips;
         }
 
         public async Task CreateWorkflow(string workflowDescription)
@@ -26,9 +27,9 @@ namespace DcrParserGraphic
 
         public async Task Upload(IList<EventDto> events)
         {
-            var tool = new HttpClientToolbox(_eventAddress);
             foreach (var e in events)
             {
+                var tool = new HttpClientToolbox(_ips[e.EventId]);
                 await tool.Create("events", e);
             }
         }
