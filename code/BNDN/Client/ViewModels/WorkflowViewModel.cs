@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Common;
@@ -81,8 +82,20 @@ namespace Client.ViewModels
         /// </summary>
         public async void ResetWorkflow()
         {
+            //todo super hacky solution - but needed due to time pressure
+            EventConnection.RoleForWorkflow[WorkflowId].Add("admin");
+
+            var serverConnection = new ServerConnection(new Uri(@"http://flowit.azurewebsites.net/"));
+
+            var adminEventList = (await serverConnection.GetEventsFromWorkflow(_workflowDto))
+                .AsParallel()
+                .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
+                .ToList();
+
+            EventConnection.RoleForWorkflow[WorkflowId].Remove("admin");
+
             // Reset all the events.
-            foreach (var eventViewModel in EventList)
+            foreach (var eventViewModel in adminEventList)
             {
                 var connection = new EventConnection(new EventAddressDto { Id = eventViewModel.Id, Uri = eventViewModel.Uri});
                 await connection.ResetEvent();
