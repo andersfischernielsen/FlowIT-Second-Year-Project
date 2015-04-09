@@ -1,7 +1,7 @@
 ﻿<Window x:Class="DcrParserGraphic.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="425" Width="450">
+        Title="MainWindow" Height="475" Width="450" MinHeight="475" MinWidth="440">
     <Grid>
         <StackPanel Orientation="Vertical" Margin="20" VerticalAlignment="Center">
             <Button Click="hiddenbutton_onclick" Cursor="Hand">
@@ -14,9 +14,19 @@
             <TextBlock Text="INPUT FILE" HorizontalAlignment="Center" FontSize="20"/>
             <TextBox x:Name="TextBoxFile" Margin="0,5,0,5" Height="30"/>
             <Button Content="Vælg xml fil" x:Name="ButtonChoose" Click="ButtonChoose_Click" Width="250" Height="30"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="0,15,0,0">
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="Workflow Id"/>
+                    <TextBox x:Name="TextBoxWorkflowName"/>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0">
+                    <TextBlock Text="Event base Url"/>
+                    <TextBox x:Name="TextBoxUrl"/>
+                </StackPanel>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="Konverter til json fil" x:Name="ButtonConvert" Click="ButtonConvert_Click" Width="125" Height="30" Margin="0,30,10,0"/>
-                <Button Content="Upload direkte til events" x:Name="ButtonUpload" Click="ButtonUpload_Click" Width="125" Height="30" Margin="10,30,0,0"/>
+                <Button Content="Upload direkte til events" x:Name="ButtonUpload" Click="ButtonUpload_Click" Width="135" Height="30" Margin="10,30,0,0"/>
             </StackPanel>
             
             <TextBlock Text="PS: json filen ender samme sted som denne exe fil ligger, og den hedder altid graph.json" HorizontalAlignment="Center" FontSize="10" Margin="0,20,0,0"/>
