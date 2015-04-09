@@ -10,13 +10,13 @@ namespace DcrParserGraphic
     public class EventUploader
     {
         private readonly string _workflow;
-        private readonly string _serverAddress, _eventAddress;
+        private readonly string _serverAddress;
         private readonly Dictionary<string, string> _ips;
         public EventUploader(string workflow, string serverAddress, Dictionary<string, string> ips)
         {
             _workflow = workflow;
             _serverAddress = serverAddress;
-            _ips = _ips;
+            _ips = ips;
         }
 
         public async Task CreateWorkflow(string workflowDescription)
