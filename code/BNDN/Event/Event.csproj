@@ -115,6 +115,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <None Include="Properties\PublishProfiles\FlowitES1.pubxml" />
+    <None Include="Properties\PublishProfiles\FlowitES2.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

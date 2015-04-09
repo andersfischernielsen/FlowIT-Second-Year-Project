@@ -122,14 +122,14 @@ namespace DCRParserGraphic
             {
                 var source = c.Attribute("sourceId").Value;
                 var target = c.Attribute("targetId").Value;
-                var eventDto = _map[source];
+                var eventDto = _map[target];
                 ((HashSet<EventAddressDto>)eventDto.Conditions).Add(new EventAddressDto()
                 {
-                    Id = _map[target].EventId,
-                    Roles = _map[target].Roles,
-                    Uri = new Uri(IdToAddress[_map[target].EventId])
+                    Id = _map[source].EventId,
+                    Roles = _map[source].Roles,
+                    Uri = new Uri(IdToAddress[_map[source].EventId])
                 });
-                _map[source] = eventDto;
+                _map[target] = eventDto;
             }
 
             //responses

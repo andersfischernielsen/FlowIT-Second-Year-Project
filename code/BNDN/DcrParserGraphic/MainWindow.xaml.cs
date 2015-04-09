@@ -85,9 +85,9 @@ namespace DcrParserGraphic
                     ServerUrl.Text = "";
                     TextBoxWorkflowName.Text = "";
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Something went wrong, probably bad file or file doesnt exist");
+                    MessageBox.Show("Something went wrong, probably bad file or file doesnt exist" + Environment.NewLine + ex);
                 }
             }
         }
