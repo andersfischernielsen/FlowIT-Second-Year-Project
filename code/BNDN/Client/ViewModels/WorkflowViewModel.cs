@@ -9,6 +9,7 @@ namespace Client.ViewModels
     public class WorkflowViewModel : ViewModelBase
     {
         private readonly WorkflowDto _workflowDto;
+        private bool resetEventRuns = false;
         public string WorkflowId { get { return _workflowDto.Id; } }
         public WorkflowViewModel()
         {
@@ -82,6 +83,9 @@ namespace Client.ViewModels
         /// </summary>
         public async void ResetWorkflow()
         {
+            if (resetEventRuns) return;
+            resetEventRuns = true;
+            
             //todo super hacky solution - but needed due to time pressure
             EventConnection.RoleForWorkflow[WorkflowId].Add("admin");
 
@@ -102,6 +106,7 @@ namespace Client.ViewModels
             }
             NotifyPropertyChanged("");
             GetEvents();
+            resetEventRuns = false;
         }
         #endregion
 
