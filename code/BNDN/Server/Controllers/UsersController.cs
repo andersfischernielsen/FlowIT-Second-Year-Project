@@ -1,17 +1,29 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
-using Server.Models;
 using Server.Storage;
 
 namespace Server.Controllers
 {
     public class UsersController : ApiController
     {
+        private readonly IServerLogic _logic;
+
+        public UsersController() : this(new ServerLogic(new ServerStorage())) { }
+
+        public UsersController(IServerLogic logic)
+        {
+            _logic = logic;
+            // TODO: Do something better:
+            if (Request != null)
+            {
+                Request.RegisterForDispose(_logic);
+            }
+        }
+
         // GET: /Login
         /// <summary>
         /// Returns the users roles on all workflows.
@@ -22,17 +34,14 @@ namespace Server.Controllers
         [HttpGet]
         public RolesOnWorkflowsDto Login(string username)
         {
-            using (var serverLogic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
-                {
-                    var result = serverLogic.Login(username);
-                    return result;
-                }
-                catch (Exception ex)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-                }
+                var result = _logic.Login(username);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
         }
 
@@ -43,30 +52,27 @@ namespace Server.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
-            using (var serverLogic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
+                await _logic.AddUser(dto);
+            }
+            catch (InvalidOperationException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "One of the roles does not exist"));
+            }
+            catch (ArgumentException ex)
+            {
+                if (ex.ParamName == "user")
                 {
-                    await serverLogic.AddUser(dto);
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                        "A user with that username already exists"));
                 }
-                catch (InvalidOperationException)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                        "One of the roles does not exist"));
-                }
-                catch (ArgumentException ex)
-                {
-                    if (ex.ParamName == "user")
-                    {
-                        throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
-                            "A user with that username already exists"));
-                    }
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-                }
-                catch (Exception ex)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-                }
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
         }
     }

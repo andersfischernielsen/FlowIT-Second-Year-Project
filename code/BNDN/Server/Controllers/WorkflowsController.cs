@@ -14,6 +14,19 @@ namespace Server.Controllers
 
     public class WorkflowsController : ApiController
     {
+        private readonly IServerLogic _logic;
+
+        public WorkflowsController() : this(new ServerLogic(new ServerStorage())) { }
+
+        public WorkflowsController(IServerLogic logic)
+        {
+            _logic = logic;
+            // TODO: Do something better:
+            if (Request != null)
+            {
+                Request.RegisterForDispose(_logic);
+            }
+        }
 
         /// <summary>
         /// Returns a list of all workflows currently held at this Server
@@ -23,14 +36,11 @@ namespace Server.Controllers
         [Route("workflows")]
         public IEnumerable<WorkflowDto> Get()
         {
-            using (IServerLogic logic = new ServerLogic(new ServerStorage()))
-            {
-                return logic.GetAllWorkflows();
-            }
+            return _logic.GetAllWorkflows();
         }
 
 
-            #region GET requests
+        #region GET requests
         // GET: /Workflows/5
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
@@ -41,16 +51,13 @@ namespace Server.Controllers
         [HttpGet]
         public IEnumerable<EventAddressDto> Get(string workflowId)
         {
-            using (IServerLogic logic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
-                {
-                    return logic.GetEventsOnWorkflow(workflowId);
-                }
-                catch (Exception ex)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
-                }
+                return _logic.GetEventsOnWorkflow(workflowId);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
             }
         }
         #endregion
@@ -69,17 +76,14 @@ namespace Server.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Provided input could not be mapped onto an instance of WorkflowDto"));
             }
-            using (IServerLogic logic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
-                {
-                    // Add this Event to the specified workflow
-                    await logic.AddNewWorkflow(workflowDto);
-                }
-                catch (Exception ex)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-                }
+                // Add this Event to the specified workflow
+                await _logic.AddNewWorkflow(workflowDto);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
         }
 
@@ -92,23 +96,20 @@ namespace Server.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                                                 "Provided input could not be mapped onto EventAddressDto"));
             }
-            using (IServerLogic logic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
-                {
-                    // Add this Event to the specified workflow
-                    await logic.AddEventToWorkflow(workflowId, eventToAddDto);
+                // Add this Event to the specified workflow
+                await _logic.AddEventToWorkflow(workflowId, eventToAddDto);
 
-                    // To caller, return a list of the other (excluding itself) Events on the workflow
-                    return
-                        logic.GetEventsOnWorkflow(workflowId)
-                            .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-                }
+                // To caller, return a list of the other (excluding itself) Events on the workflow
+                return
+                    _logic.GetEventsOnWorkflow(workflowId)
+                        .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
         }
         #endregion
@@ -131,18 +132,14 @@ namespace Server.Controllers
                                                 "Provided input could not be mapped onto an EventAddressDto"));
             }
 
-            using (IServerLogic logic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
-                {
-                    // Add this Event to the specified workflow
-                    await logic.UpdateEventOnWorkflow(workflowId, eventToBeUpdated);
-                }
-                catch (Exception ex)
-                {
-
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
-                }
+                // Add this Event to the specified workflow
+                await _logic.UpdateEventOnWorkflow(workflowId, eventToBeUpdated);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
             }
         }
         #endregion
@@ -152,18 +149,15 @@ namespace Server.Controllers
         [HttpDelete]
         public void DeleteEventFromWorkflow(string workflowId, string eventId)
         {
-            using (IServerLogic logic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
-                {
-                    // Delete the given event id from the list of workflow-events.
-                    logic.RemoveEventFromWorkflow(workflowId, eventId);
-                }
-                catch (Exception ex)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        "Server: Failed to remove Event from workflow", ex));
-                }
+                // Delete the given event id from the list of workflow-events.
+                _logic.RemoveEventFromWorkflow(workflowId, eventId);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Server: Failed to remove Event from workflow", ex));
             }
         }
 
@@ -171,19 +165,16 @@ namespace Server.Controllers
         [HttpDelete]
         public async Task DeleteWorkflow(string workflowId)
         {
-            using (IServerLogic logic = new ServerLogic(new ServerStorage()))
+            try
             {
-                try
-                {
-                    await logic.RemoveWorkflow(logic.GetWorkflow(workflowId));
-                }
-                catch (Exception ex)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        "Server: Failed to remove workflow", ex));
-                }
+                await _logic.RemoveWorkflow(_logic.GetWorkflow(workflowId));
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Server: Failed to remove workflow", ex));
             }
         }
-        #endregion 
+        #endregion
     }
 }
