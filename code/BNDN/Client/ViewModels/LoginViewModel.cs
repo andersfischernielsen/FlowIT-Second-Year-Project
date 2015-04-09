@@ -21,12 +21,12 @@ namespace Client.ViewModels
                 var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
 
                 _username = settings.Username ?? "Enter role";
-                _serverAddress = new Uri(settings.ServerAddress ?? "http://localhost:13768/");
+                _serverAddress = new Uri(settings.ServerAddress ?? "http://flowit.azurewebsites.net/");
             }
             else
             {
                 _username = "Enter role";
-                _serverAddress = new Uri("http://localhost:13768/");
+                _serverAddress = new Uri("http://flowit.azurewebsites.net/");
             }
             _status = "";
             _password = "Password";

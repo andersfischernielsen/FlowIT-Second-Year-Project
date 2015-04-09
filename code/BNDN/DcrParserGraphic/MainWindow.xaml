@@ -15,13 +15,21 @@
             <TextBox x:Name="TextBoxFile" Margin="0,5,0,5" Height="30"/>
             <Button Content="Vælg xml fil" x:Name="ButtonChoose" Click="ButtonChoose_Click" Width="250" Height="30"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="0,15,0,0">
-                <StackPanel Margin="0,0,10,0">
+                <StackPanel Margin="0,0,0,0">
                     <TextBlock Text="Workflow Id"/>
                     <TextBox x:Name="TextBoxWorkflowName"/>
                 </StackPanel>
                 <StackPanel Margin="10,0,0,0">
-                    <TextBlock Text="Event base Url"/>
-                    <TextBox x:Name="TextBoxUrl"/>
+                    <TextBlock Text="Event (1) base Url"/>
+                    <TextBox x:Name="Event1Url"/>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0">
+                    <TextBlock Text="Event (2) base url"/>
+                    <TextBox x:Name="Event2Url" />
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0">
+                    <TextBlock Text="Server base url"/>
+                    <TextBox x:Name="ServerUrl" />
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

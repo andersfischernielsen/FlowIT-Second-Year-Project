@@ -56,7 +56,7 @@ namespace Client.ViewModels
             EventList.Clear();
 
             //TODO: Get the actual server address here.
-            var connection = new ServerConnection(new Uri(@"http://localhost:13768/"));
+            var connection = new ServerConnection(new Uri(@"http://flowit.azurewebsites.net/"));
 
             var test = (await connection.GetEventsFromWorkflow(_workflowDto))
                 .AsParallel()

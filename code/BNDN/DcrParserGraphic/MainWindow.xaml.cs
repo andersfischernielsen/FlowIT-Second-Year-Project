@@ -33,16 +33,18 @@ namespace DcrParserGraphic
 
         private void ButtonConvert_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(TextBoxFile.Text) && !string.IsNullOrEmpty(TextBoxUrl.Text) && !string.IsNullOrEmpty(TextBoxWorkflowName.Text))
+            if (!string.IsNullOrEmpty(TextBoxFile.Text) && !string.IsNullOrEmpty(Event1Url.Text) && !string.IsNullOrEmpty(TextBoxWorkflowName.Text))
             {
                 try
                 {
                     //var ips = TextBoxUrl.Text.Split(',');
-                    new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, TextBoxUrl.Text).CreateXmlFile();
+                    new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, Event1Url.Text).CreateXmlFile();
 
                     MessageBox.Show("Everything went OK. The file should have been created in the same place as this exe file");
                     TextBoxFile.Text = "";
-                    TextBoxUrl.Text = "";
+                    Event1Url.Text = "";
+                    Event2Url.Text = "";
+                    ServerUrl.Text = "";
                     TextBoxWorkflowName.Text = "";
                 }
                 catch (Exception)
@@ -59,24 +61,26 @@ namespace DcrParserGraphic
 
         private async void ButtonUpload_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(TextBoxFile.Text) && !string.IsNullOrEmpty(TextBoxUrl.Text) && !string.IsNullOrEmpty(TextBoxWorkflowName.Text))
+            if (!string.IsNullOrEmpty(TextBoxFile.Text) && !string.IsNullOrEmpty(Event1Url.Text) && !string.IsNullOrEmpty(TextBoxWorkflowName.Text))
             {
                 try
                 {
                     //var ips = TextBoxUrl.Text.Replace(" ","").Split(',');
-                    var parser = new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, TextBoxUrl.Text);
+                    var parser = new DcrParser(TextBoxFile.Text, TextBoxWorkflowName.Text, Event1Url.Text);
                     var map = parser.GetMap();
                     var roles = parser.GetRoles();
-                    var uploader = new EventUploader(TextBoxWorkflowName.Text);
+                    var uploader = new EventUploader(TextBoxWorkflowName.Text, ServerUrl.Text, Event1Url.Text);
                     await uploader.CreateWorkflow(TextBoxWorkflowName.Text);
                     await uploader.Upload(map.Values.ToList());
                     await uploader.UploadUsers(roles);
                     MessageBox.Show("Everything went OK. The file should have been uploaded to the given urls");
                     TextBoxFile.Text = "";
-                    TextBoxUrl.Text = "";
+                    Event1Url.Text = "";
+                    Event2Url.Text = "";
+                    ServerUrl.Text = "";
                     TextBoxWorkflowName.Text = "";
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     MessageBox.Show("Something went wrong, probably bad file or file doesnt exist");
                 }
