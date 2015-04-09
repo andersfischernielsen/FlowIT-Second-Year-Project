@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Common;
@@ -20,9 +19,11 @@ namespace DCRParserGraphic
         private string _filePath;
         private string _workflowId;
         private string _ip;
+        private HashSet<string> _rolesSet; 
 
         public DcrParser(string filePath, string workflowId, string eventIp)
         {
+            _rolesSet = new HashSet<string>();
             _ip = eventIp;
             _workflowId = workflowId;
             _filePath = filePath;
@@ -73,6 +74,7 @@ namespace DCRParserGraphic
                 foreach (var r in role)
                 {
                     var roleString = r.Value;
+                    _rolesSet.Add(roleString);
                     ((HashSet<string>)eventDto.Roles).Add(roleString);
                 }
 
@@ -103,7 +105,7 @@ namespace DCRParserGraphic
         private void Constraints()
         {
             //Constraints general tag into variable
-            var constraints = _xDoc.Descendants("constraints");
+            var constraints = _xDoc.Descendants("constraints").ToList();
             //Conditions 
             var conditions = constraints.Descendants("conditions").Descendants("condition");
             foreach (var c in conditions)
@@ -172,7 +174,7 @@ namespace DCRParserGraphic
         private void States()
         {
             //State stuff
-            var state = _xDoc.Descendants("marking");
+            var state = _xDoc.Descendants("marking").ToList();
 
             //Executed
             var executed = state.Descendants("executed").Descendants("event");
@@ -218,6 +220,11 @@ namespace DCRParserGraphic
                     sw.WriteLine("");
                 }
             }
+        }
+
+        public IEnumerable<string> GetRoles()
+        {
+            return _rolesSet;
         }
 
         public Dictionary<string, EventDto> GetMap()
