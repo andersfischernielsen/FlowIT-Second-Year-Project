@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Security;
 using Common;
 using Server.Storage;
 
@@ -49,11 +50,21 @@ namespace Server.Controllers
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("workflows/{workflowId}")]
         [HttpGet]
-        public IEnumerable<EventAddressDto> Get(string workflowId)
+        public IEnumerable<EventAddressDto> Get([FromBody] ExecuteDto roles, string workflowId)
         {
             try
             {
-                return _logic.GetEventsOnWorkflow(workflowId);
+                var events = _logic.GetEventsOnWorkflow(workflowId);
+                var eventsToReturn = new List<EventAddressDto>();
+                // adds a new list which only adds the eventAddress DTO which has roles that the call also has
+                foreach (var eventAddressDto in events)
+                {
+                    if (eventAddressDto.Roles.Intersect(roles.Roles).Count() != 0)
+                    {
+                        eventsToReturn.Add(eventAddressDto);
+                    }
+                }
+                return eventsToReturn;
             }
             catch (Exception ex)
             {
