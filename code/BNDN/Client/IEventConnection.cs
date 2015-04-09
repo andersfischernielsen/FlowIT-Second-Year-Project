@@ -19,7 +19,7 @@ namespace Client
         /// TODO: REMOVE THIS METHOD WHEN DONE WITH TESTING.
         /// </summary>
         /// <returns></returns>
-        Task DeleteEvent();
+        Task ResetEvent();
         
         /// <summary>
         /// Execute a task

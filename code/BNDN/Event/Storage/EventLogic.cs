@@ -247,13 +247,20 @@ namespace Event.Storage
                 Roles = eventDto.Roles
             };
 
-            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
+            var serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
             try
             {
                 // Setup a new Event in database.
-                Storage.InitializeNewEvent();
+                var initialEventState = new InitialEventState()
+                {
+                    EventId = eventDto.EventId,
+                    Executed = eventDto.Executed,
+                    Included = eventDto.Included,
+                    Pending = eventDto.Pending
+                };
+                Storage.InitializeNewEvent(initialEventState);
 
                 // #2. Then set our own fields accordingly
                 EventId = eventDto.EventId;
@@ -335,7 +342,7 @@ namespace Event.Storage
             }
 
             // Attempt to delete Event from Server
-            var serverCommunicator = new ServerCommunicator("http://localhost:13768/", EventId, WorkflowId);
+            var serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", EventId, WorkflowId);
             await serverCommunicator.DeleteEventFromServer();
 
             // Delete Event from own Storage

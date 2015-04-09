@@ -16,22 +16,23 @@ namespace DCRParserGraphic
     {
         private readonly Dictionary<string, EventDto> _map;
         private readonly XDocument _xDoc;
-        private string _filePath;
-        private string _workflowId;
-        private string _ip;
-        private HashSet<string> _rolesSet; 
+        private readonly string _workflowId;
+        private readonly string[] _ips;
+        private readonly HashSet<string> _rolesSet;
+        public Dictionary<string, string> IdToAddress { get; set; }
 
-        public DcrParser(string filePath, string workflowId, string eventIp)
+        public DcrParser(string filePath, string workflowId, string[] eventIps)
         {
+            IdToAddress = new Dictionary<string, string>();
             _rolesSet = new HashSet<string>();
-            _ip = eventIp;
+            _ips = eventIps;
             _workflowId = workflowId;
-            _filePath = filePath;
             _map = new Dictionary<string, EventDto>();
-            _xDoc = XDocument.Load(_filePath);
+            _xDoc = XDocument.Load(filePath);
             //ORDER OF METHOD CALL IS IMPORTANT, MUST be THIS!
             InitiateAllEventAddressDtoWithRolesAndNames();
-            MapDCRIdToRealId();
+            MapDcrIdToRealId();
+            DelegateIps();
             Constraints();
             States();
         }
@@ -89,7 +90,7 @@ namespace DCRParserGraphic
             }
         }
 
-        private void MapDCRIdToRealId()
+        private void MapDcrIdToRealId()
         {
             var eventIds = _xDoc.Descendants("labelMappings").Descendants("labelMapping");
             foreach (var i in eventIds)
@@ -99,6 +100,15 @@ namespace DCRParserGraphic
                 var eventDto = _map[id];
                 eventDto.EventId = eventId;
                 _map[id] = eventDto;
+            }
+        }
+
+        private void DelegateIps()
+        {
+            var random = new Random();
+            foreach (var v in _map.Values)
+            {
+                IdToAddress.Add(v.EventId, _ips[random.Next(_ips.Length)]);
             }
         }
 
@@ -117,7 +127,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri(_ip)
+                    Uri = new Uri(IdToAddress[_map[target].EventId])
                 });
                 _map[source] = eventDto;
             }
@@ -133,7 +143,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri(_ip)
+                    Uri = new Uri(IdToAddress[_map[target].EventId])
                 });
                 _map[source] = eventDto;
             }
@@ -149,7 +159,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri(_ip)
+                    Uri = new Uri(IdToAddress[_map[target].EventId])
                 });
                 _map[source] = eventDto;
             }
@@ -165,7 +175,7 @@ namespace DCRParserGraphic
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri(_ip)
+                    Uri = new Uri(IdToAddress[_map[target].EventId])
                 });
                 _map[source] = eventDto;
             }

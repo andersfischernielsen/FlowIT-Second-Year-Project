@@ -175,5 +175,29 @@ namespace Event.Controllers
         }
 
         #endregion
+
+        #region Reset Event
+
+        /// <summary>
+        /// This method resets an Event. Note, that this will reset the three bool-values of the Event
+        /// to their initial values, and reset any locks!. 
+        /// </summary>
+        /// <param name="eventId">Id of the Event, that is to be reset</param>
+        /// <param name="eventDto">Empty container</param>
+        /// <returns></returns>
+        [Route("events/{eventId}/reset")]
+        [HttpPut]
+        public void ResetEvent([FromBody] EventDto eventDto, string eventId)
+        {
+            using (IResetLogic resetLogic = new ResetLogic(eventId) )
+            {
+                // Reset locks
+                resetLogic.UnlockEvent();
+
+                // Reset to initial values
+                resetLogic.ResetToInitialValues();
+            }
+        }
+        #endregion
     }
 }

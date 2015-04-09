@@ -16,7 +16,7 @@ namespace Event.Interfaces
         IEnumerable<string> Roles { get; set; }
         #endregion
 
-        void InitializeNewEvent();
+        void InitializeNewEvent(InitialEventState initialEventState);
         void DeleteEvent();
 
         #region State

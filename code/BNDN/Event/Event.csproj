@@ -78,8 +78,11 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EventController.cs" />
     <Compile Include="Interfaces\IEventContext.cs" />
+    <Compile Include="Interfaces\IEventStorageForReset.cs" />
+    <Compile Include="Interfaces\IResetLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EventRoleModel.cs" />
+    <Compile Include="Models\InitialEventState.cs" />
     <Compile Include="Models\RelationToOtherEventModel.cs" />
     <Compile Include="Models\UriClasses\ConditionUri.cs" />
     <Compile Include="Models\UriClasses\ExclusionUri.cs" />
@@ -106,7 +109,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HeartBeatDto.cs" />
     <Compile Include="ServerCommunicator.cs" />
+    <Compile Include="Storage\EventStorageForReset.cs" />
     <Compile Include="Storage\LockLogic.cs" />
+    <Compile Include="Storage\ResetLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

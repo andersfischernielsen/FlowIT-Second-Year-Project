@@ -15,21 +15,26 @@
             <TextBox x:Name="TextBoxFile" Margin="0,5,0,5" Height="30"/>
             <Button Content="Vælg xml fil" x:Name="ButtonChoose" Click="ButtonChoose_Click" Width="250" Height="30"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="0,15,0,0">
-                <StackPanel Margin="0,0,10,0">
+                <StackPanel Margin="0,0,0,0">
                     <TextBlock Text="Workflow Id"/>
                     <TextBox x:Name="TextBoxWorkflowName"/>
                 </StackPanel>
                 <StackPanel Margin="10,0,0,0">
-                    <TextBlock Text="Event base Url"/>
-                    <TextBox x:Name="TextBoxUrl"/>
+                    <TextBlock Text="Server base url"/>
+                    <TextBox x:Name="ServerUrl" />
                 </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="10,0,0,0">
+                <TextBlock Text="Event base Urls"/>
+                <TextBox x:Name="EventUrls"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="Konverter til json fil" x:Name="ButtonConvert" Click="ButtonConvert_Click" Width="125" Height="30" Margin="0,30,10,0"/>
                 <Button Content="Upload direkte til events" x:Name="ButtonUpload" Click="ButtonUpload_Click" Width="135" Height="30" Margin="10,30,0,0"/>
             </StackPanel>
             
-            <TextBlock Text="PS: json filen ender samme sted som denne exe fil ligger, og den hedder altid graph.json" HorizontalAlignment="Center" FontSize="10" Margin="0,20,0,0"/>
+            <TextBlock Text="PS: json filen ender samme sted som denne exe fil ligger, og den hedder altid graph.json." HorizontalAlignment="Center" FontSize="10" Margin="0,20,0,0"/>
+            <TextBlock Text="komma seperer eventbase urls hvis der er flere end 1!" HorizontalAlignment="Center" FontSize="10" Margin="0,5,0,0"/>
         </StackPanel>
         
     </Grid>

@@ -56,7 +56,7 @@ namespace Client.ViewModels
             EventList.Clear();
 
             //TODO: Get the actual server address here.
-            var connection = new ServerConnection(new Uri(@"http://localhost:13768/"));
+            var connection = new ServerConnection(new Uri(@"http://flowit.azurewebsites.net/"));
 
             var test = (await connection.GetEventsFromWorkflow(_workflowDto))
                 .AsParallel()
@@ -81,14 +81,13 @@ namespace Client.ViewModels
         /// </summary>
         public async void ResetWorkflow()
         {
-            // Delete all the events.
+            // Reset all the events.
             foreach (var eventViewModel in EventList)
             {
                 var connection = new EventConnection(new EventAddressDto { Id = eventViewModel.Id, Uri = eventViewModel.Uri});
-                await connection.DeleteEvent();
+                await connection.ResetEvent();
             }
-            // Create them again.
-            // TODO put create events again here.
+            GetEvents();
         }
         #endregion
 

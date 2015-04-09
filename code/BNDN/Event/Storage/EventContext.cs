@@ -21,6 +21,7 @@ namespace Event.Storage
         public DbSet<EventStateModel> EventState { get; set; }
         public DbSet<ConditionUri> Conditions { get; set; }
         public DbSet<ResponseUri> Responses { get; set; }
+        public DbSet<InitialEventState> InitialEventState { get; set; }
         public DbSet<InclusionUri> Inclusions { get; set; }
         public DbSet<ExclusionUri> Exclusions { get; set; }
         // LockDto has been extracted out of EventState as it would become a class within a class (and as such would need workaround)

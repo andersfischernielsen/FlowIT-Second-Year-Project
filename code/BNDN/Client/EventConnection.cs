@@ -22,10 +22,10 @@ namespace Client
             var eventId = _eventDto.Id;
             return await _httpClient.Read<EventStateDto>(String.Format("events/{0}/state/-1", eventId));   
         }
-        public async Task DeleteEvent()
+        public async Task ResetEvent()
         {
             var eventId = _eventDto.Id;
-            await _httpClient.Delete(String.Format("events/{0}", eventId));
+            await _httpClient.Update(String.Format("events/{0}/reset", eventId), new EventDto{Name = "ResetDTO - DO NOT USE"});
         }
         
 
