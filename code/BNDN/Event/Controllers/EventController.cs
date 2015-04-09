@@ -183,10 +183,11 @@ namespace Event.Controllers
         /// to their initial values, and reset any locks!. 
         /// </summary>
         /// <param name="eventId">Id of the Event, that is to be reset</param>
+        /// <param name="eventDto">Empty container</param>
         /// <returns></returns>
         [Route("events/{eventId}/reset")]
-        [HttpGet]
-        public void ResetEvent(string eventId)
+        [HttpPut]
+        public void ResetEvent([FromBody] EventDto eventDto, string eventId)
         {
             using (IResetLogic resetLogic = new ResetLogic(eventId) )
             {
