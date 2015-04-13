@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Common;
 using Newtonsoft.Json;
-using Formatting = Newtonsoft.Json.Formatting;
 
 namespace DCRParserGraphic
 {
-    class DcrParser
+    public class DcrParser
     {
         private readonly Dictionary<string, EventDto> _map;
         private readonly XDocument _xDoc;
@@ -21,7 +18,20 @@ namespace DCRParserGraphic
         private readonly HashSet<string> _rolesSet;
         public Dictionary<string, string> IdToAddress { get; set; }
 
-        public DcrParser(string filePath, string workflowId, string[] eventIps)
+        public static DcrParser Parse(string filePath, string workflowId, string[] eventIps)
+        {
+            var parser = new DcrParser(filePath, workflowId, eventIps);
+            //ORDER OF METHOD CALL IS IMPORTANT, MUST be THIS!
+            parser.InitiateAllEventAddressDtoWithRolesAndNames();
+            parser.MapDcrIdToRealId();
+            parser.DelegateIps();
+            parser.Constraints();
+            parser.States();
+
+            return parser;
+        }
+
+        private DcrParser(string filePath, string workflowId, string[] eventIps)
         {
             IdToAddress = new Dictionary<string, string>();
             _rolesSet = new HashSet<string>();
@@ -29,12 +39,6 @@ namespace DCRParserGraphic
             _workflowId = workflowId;
             _map = new Dictionary<string, EventDto>();
             _xDoc = XDocument.Load(filePath);
-            //ORDER OF METHOD CALL IS IMPORTANT, MUST be THIS!
-            InitiateAllEventAddressDtoWithRolesAndNames();
-            MapDcrIdToRealId();
-            DelegateIps();
-            Constraints();
-            States();
         }
 
         private void InitiateAllEventAddressDtoWithRolesAndNames()
@@ -72,18 +76,17 @@ namespace DCRParserGraphic
 
                 //ROLES
                 var role = e.Descendants("roles").Descendants("role");
-                foreach (var r in role)
+                foreach (var r in role.Select(r => r.Value))
                 {
-                    var roleString = r.Value;
-                    _rolesSet.Add(roleString);
-                    ((HashSet<string>)eventDto.Roles).Add(roleString);
+                    _rolesSet.Add(r);
+                    ((HashSet<string>)eventDto.Roles).Add(r);
                 }
 
                 //Name / description
                 var desc = e.Descendants("eventDescription");
-                foreach (var d in desc)
+                foreach (var d in desc.Select(d => d.Value))
                 {
-                    eventDto.Name = d.Value;
+                    eventDto.Name = d;
                 }
 
                 _map[s] = eventDto;
@@ -139,7 +142,7 @@ namespace DCRParserGraphic
                 var source = c.Attribute("sourceId").Value;
                 var target = c.Attribute("targetId").Value;
                 var eventDto = _map[source];
-                ((HashSet<EventAddressDto>)eventDto.Responses).Add(new EventAddressDto()
+                ((HashSet<EventAddressDto>)eventDto.Responses).Add(new EventAddressDto
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
@@ -155,7 +158,7 @@ namespace DCRParserGraphic
                 var source = c.Attribute("sourceId").Value;
                 var target = c.Attribute("targetId").Value;
                 var eventDto = _map[source];
-                ((HashSet<EventAddressDto>)eventDto.Exclusions).Add(new EventAddressDto()
+                ((HashSet<EventAddressDto>)eventDto.Exclusions).Add(new EventAddressDto
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
@@ -171,7 +174,7 @@ namespace DCRParserGraphic
                 var source = c.Attribute("sourceId").Value;
                 var target = c.Attribute("targetId").Value;
                 var eventDto = _map[source];
-                ((HashSet<EventAddressDto>)eventDto.Inclusions).Add(new EventAddressDto()
+                ((HashSet<EventAddressDto>)eventDto.Inclusions).Add(new EventAddressDto
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
@@ -218,16 +221,16 @@ namespace DCRParserGraphic
         
         }
 
-        public void CreateXmlFile()
+        public async Task CreateJsonFile()
         {
-            using (var sw = new StreamWriter("graph.json", false))
+            using (var sw = new StreamWriter(@"graph.json", false))
             {
                 foreach (var v in _map.Values)
                 {
                     var json = JsonConvert.SerializeObject(v, Formatting.Indented);
-                    sw.WriteLine(json);
-                    sw.WriteLine("");
-                    sw.WriteLine("");
+                    await sw.WriteLineAsync(json);
+                    await sw.WriteLineAsync("");
+                    await sw.WriteLineAsync("");
                 }
             }
         }
