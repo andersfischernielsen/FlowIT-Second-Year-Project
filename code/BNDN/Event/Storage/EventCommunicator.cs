@@ -62,6 +62,7 @@ namespace Event.Storage
         /// PostEventRules will post to another event the rules it need to adopt
         /// </summary>
         /// <param name="rules">The rule-set it need to adopt</param>
+        /// TODO: NOT USED
         public async Task PostEventRules(EventRuleDto rules)
         {
             await _httpClient.Create(String.Format("event/rules/{0}", OwnEventId), rules);
@@ -72,6 +73,7 @@ namespace Event.Storage
         /// </summary>
         /// <param name="replacingRules">The new (replacing ruleset)</param>
         // TODO: Will the replacing ruleset contain all rules from this Event (whether or not they all need to be updated) or only those that need to be modified? 
+        //TODO: NOT USED
         // The definition of the PUT-call is that the state will be set to whatever is received, so every rule
         // must be defined in replacingRules. - Mikael.
         public async Task UpdateEventRules(EventRuleDto replacingRules)
@@ -83,12 +85,13 @@ namespace Event.Storage
         /// Will issue a Delete call on receiving Event's rules. How the receiving Event handles this call
         /// is an implementation detail.
         /// </summary>
+        /// TODO: NOT USED
         public async Task DeleteEventRules()
         {
             await _httpClient.Delete(String.Format("event/rules/{0}", OwnEventId));
         }
 
-        //TODO: Dont use this.
+        //TODO: Dont use this. to be deleted? If so delete NotifyDto aswell, as this is the only method using it
         public async Task SendNotify(IEnumerable<NotifyDto> dtos)
         {
             await _httpClient.Update("event/notify", dtos);
