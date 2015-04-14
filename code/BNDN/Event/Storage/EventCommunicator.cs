@@ -58,42 +58,6 @@ namespace Event.Storage
         }
 
 
-        /// <summary>
-        /// PostEventRules will post to another event the rules it need to adopt
-        /// </summary>
-        /// <param name="rules">The rule-set it need to adopt</param>
-        public async Task PostEventRules(EventRuleDto rules)
-        {
-            await _httpClient.Create(String.Format("event/rules/{0}", OwnEventId), rules);
-        }
-        
-        /// <summary>
-        /// UpdateEventRules will post to another Event the rules it need to update.
-        /// </summary>
-        /// <param name="replacingRules">The new (replacing ruleset)</param>
-        // TODO: Will the replacing ruleset contain all rules from this Event (whether or not they all need to be updated) or only those that need to be modified? 
-        // The definition of the PUT-call is that the state will be set to whatever is received, so every rule
-        // must be defined in replacingRules. - Mikael.
-        public async Task UpdateEventRules(EventRuleDto replacingRules)
-        {
-            await _httpClient.Update(String.Format("event/rules/{0}", OwnEventId), replacingRules);
-        }
-
-        /// <summary>
-        /// Will issue a Delete call on receiving Event's rules. How the receiving Event handles this call
-        /// is an implementation detail.
-        /// </summary>
-        public async Task DeleteEventRules()
-        {
-            await _httpClient.Delete(String.Format("event/rules/{0}", OwnEventId));
-        }
-
-        //TODO: Dont use this.
-        public async Task SendNotify(IEnumerable<NotifyDto> dtos)
-        {
-            await _httpClient.Update("event/notify", dtos);
-        }
-
         public async Task SendPending(EventAddressDto lockDto)
         {
             await _httpClient.Update(String.Format("events/{0}/pending/true", TargetEventId), lockDto);

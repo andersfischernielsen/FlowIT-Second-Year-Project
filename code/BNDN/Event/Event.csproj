@@ -92,7 +92,6 @@
     <Compile Include="Storage\EventCommunicator.cs" />
     <Compile Include="Storage\EventContext.cs" />
     <Compile Include="Interfaces\IEventLogic.cs" />
-    <Compile Include="Controllers\EventRulesController.cs" />
     <Compile Include="Controllers\EventStateController.cs" />
     <Compile Include="LockDto.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />

@@ -49,15 +49,6 @@ namespace Event.tests
         }
 
         #region GET-tests
-        [Test]
-        public void TestGetPendingReturnsTrue()
-        {
-            //Act
-            var result = _eventStateController.GetPending(_eventAddressDto.Id, "EventId");
-
-            //Assert
-            Assert.AreEqual(true, result);
-        }
 
         [Test]
         public void TestGetExecutedReturnsTrue()
