@@ -151,24 +151,6 @@ namespace Event.Storage
             return true; // If all conditions are executed or excluded.
         }
 
-        public async Task UpdateRules(string id, EventRuleDto rules)
-        {
-            await Task.Run(() =>
-            {
-                //Todo : Persist this stuff.
-
-                if (rules == null)
-                {
-                    throw new ArgumentNullException("rules","Provided rules was null");
-                }
-                var relation = new RelationToOtherEventModel {EventID = rules.Id, Uri = rules.Uri};
-                UpdateRule(rules.Condition, relation, Conditions);
-                UpdateRule(rules.Exclusion, relation, Exclusions);
-                UpdateRule(rules.Inclusion, relation, Inclusions);
-                UpdateRule(rules.Response, relation, Responses);
-            });
-        }
-
         private static void UpdateRule(bool shouldAdd, RelationToOtherEventModel value, ISet<RelationToOtherEventModel> collection)
         {
             //Todo : Persist this stuff.
