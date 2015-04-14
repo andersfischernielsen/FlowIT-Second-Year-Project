@@ -10,12 +10,12 @@ using Server.Storage;
 namespace Server.Tests
 {
     [TestFixture]
-    class Temp
+    class WhatAmI
     {
         private ServerStorage _s;
 
         [Test]
-        public void Test1()
+        public async void Test1()
         {
             _s = new ServerStorage();
             var wm = new ServerWorkflowModel
@@ -25,19 +25,19 @@ namespace Server.Tests
                 ServerEventModels = new List<ServerEventModel>(),
                 ServerRolesModels = new List<ServerRoleModel>()
             };
-            _s.AddNewWorkflow(wm);
+            await _s.AddNewWorkflow(wm);
         }
 
         [Test]
-        public void Test2()
+        public async void Test2()
         {
             _s = new ServerStorage();
             var v = _s.GetWorkflow("1");
-            _s.RemoveWorkflow(v);
+            await _s.RemoveWorkflow(v);
         }
 
         [Test]
-        public void Test3()
+        public async void Test3()
         {
             _s = new ServerStorage();
             var wm = new ServerWorkflowModel
@@ -47,7 +47,7 @@ namespace Server.Tests
                 ServerEventModels = new List<ServerEventModel>(),
                 ServerRolesModels = new List<ServerRoleModel>()
             };
-            _s.AddNewWorkflow(wm);
+            await _s.AddNewWorkflow(wm);
 
             var e = new ServerEventModel()
             {
@@ -57,7 +57,7 @@ namespace Server.Tests
                 ServerWorkflowModel = _s.GetWorkflow("1")
             };
 
-            _s.AddEventToWorkflow(e);
+            await _s.AddEventToWorkflow(e);
         }
 
         [Test]
