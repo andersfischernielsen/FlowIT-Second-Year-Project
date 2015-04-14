@@ -9,12 +9,12 @@ namespace Event.Interfaces
 {
     public interface IStateLogic : IDisposable
     {
-        bool IsExecuted(string eventId, string senderId);
-        bool IsIncluded(string eventId, string senderId);
+        Task<bool> IsExecuted(string eventId, string senderId);
+        Task<bool> IsIncluded(string eventId, string senderId);
         Task<EventStateDto> GetStateDto(string eventId, string senderId);
-        void SetIncluded(string eventId, bool newIncludedValue);
-        void SetPending(string eventId, bool newPendingValue);
-        void Execute(string eventId);
+        Task SetIncluded(string eventId, string senderId, bool newIncludedValue);
+        Task SetPending(string eventId, string senderId, bool newPendingValue);
+        Task<bool> Execute(string eventId, ExecuteDto executeDto);
 
     }
 }

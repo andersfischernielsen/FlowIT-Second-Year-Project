@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
@@ -20,29 +22,29 @@ namespace Event.Storage
             _context = context;
         }
 
-        public void InitializeNewEvent(InitialEventState initialEventState)
+        public async Task InitializeNewEvent(InitialEventState initialEventState)
         {
-            if (_context.EventIdentification.Any(model => model.Id == initialEventState.EventId))
+            if (await _context.EventIdentification.AnyAsync(model => model.Id == initialEventState.EventId))
             {
                 throw new InvalidOperationException("The EventId is already existing");
             }
-            if (_context.EventState.Any(model => model.Id == initialEventState.EventId))
+            if (await _context.EventState.AnyAsync(model => model.Id == initialEventState.EventId))
             {
                 throw new InvalidOperationException("The EventId is already existing");
             }
             _context.EventIdentification.Add(new EventIdentificationModel { Id = initialEventState.EventId, Roles = new List<EventRoleModel>() });
             _context.EventState.Add(new EventStateModel { Id = initialEventState.EventId });
             _context.InitialEventState.Add(initialEventState);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteEvent(string eventId)
+        public async Task DeleteEvent(string eventId)
         {
-            if (!_context.EventIdentification.Any(model => model.Id == eventId))
+            if (!await _context.EventIdentification.AnyAsync(model => model.Id == eventId))
             {
                 throw new InvalidOperationException("The EventId does not exist");
             }
-            if (!_context.EventState.Any(model => model.Id == eventId))
+            if (!await _context.EventState.AnyAsync(model => model.Id == eventId))
             {
                 throw new InvalidOperationException("The EventId does not exist");
             }
@@ -55,127 +57,127 @@ namespace Event.Storage
             _context.EventState.Remove(_context.EventState.Single(ei => ei.Id == eventId));
             _context.EventIdentification.Remove(_context.EventIdentification.Single(ei => ei.Id == eventId));
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
 
         #region Properties
 
-        public Uri GetUri(string eventId)
+        public async Task<Uri> GetUri(string eventId)
         {
-            EventIdentificationIsInALegalState(eventId);
-            return new Uri(_context.EventIdentification.Single(model => model.Id == eventId).OwnUri);
+            await EventIdentificationIsInALegalState(eventId);
+            return new Uri((await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).OwnUri);
         }
 
-        public void SetUri(string eventId, Uri value)
+        public async Task SetUri(string eventId, Uri value)
         {
-            EventIdentificationIsInALegalState(eventId);
+            await EventIdentificationIsInALegalState(eventId);
 
             // Add replacing value
             _context.EventIdentification.Single(model => model.Id == eventId).OwnUri = value.AbsoluteUri;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public string GetWorkflowId(string eventId)
+        public async Task<string> GetWorkflowId(string eventId)
         {
-            EventIdentificationIsInALegalState(eventId);
-            return _context.EventIdentification.Single(model => model.Id == eventId).WorkflowId;
+            await EventIdentificationIsInALegalState(eventId);
+            return (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).WorkflowId;
         }
 
-        public void SetWorkflowId(string eventId, string value)
+        public async Task SetWorkflowId(string eventId, string value)
         {
-            EventIdentificationIsInALegalState(eventId);
+            await EventIdentificationIsInALegalState(eventId);
 
-            _context.EventIdentification.Single(model => model.Id == eventId).WorkflowId = value;
-            _context.SaveChanges();
+            (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).WorkflowId = value;
+            await _context.SaveChangesAsync();
         }
 
-        public string GetName(string eventId)
+        public async Task<string> GetName(string eventId)
         {
-            EventIdentificationIsInALegalState(eventId);
-            return _context.EventIdentification.Single(model => model.Id == eventId).Name;
+            await EventIdentificationIsInALegalState(eventId);
+            return (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Name;
         }
 
-        public void SetName(string eventId, string value)
+        public async Task SetName(string eventId, string value)
         {
-            EventIdentificationIsInALegalState(eventId);
+            await EventIdentificationIsInALegalState(eventId);
 
-            _context.EventIdentification.Single(model => model.Id == eventId).Name = value;
-            _context.SaveChanges();
+            (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Name = value;
+            await _context.SaveChangesAsync();
         }
 
-        public IEnumerable<string> GetRoles(string eventId)
+        public async Task<IEnumerable<string>> GetRoles(string eventId)
         {
-            EventIdentificationIsInALegalState(eventId);
+            await EventIdentificationIsInALegalState(eventId);
 
-            return _context.EventIdentification.Single(model => model.Id == eventId).Roles.Select(role => role.Role);
+            return (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Roles.Select(role => role.Role);
         }
 
-        public void SetRoles(string eventId, IEnumerable<string> value)
+        public async Task SetRoles(string eventId, IEnumerable<string> value)
         {
-            EventIdentificationIsInALegalState(eventId);
+            await EventIdentificationIsInALegalState(eventId);
 
-            _context.EventIdentification.Single(model => model.Id == eventId).Roles = value.Select(role => new EventRoleModel { Role = role, EventId = eventId }).ToList();
-            _context.SaveChanges();
+            (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Roles = value.Select(role => new EventRoleModel { Role = role, EventId = eventId }).ToList();
+            await _context.SaveChangesAsync();
         }
 
-        public bool GetExecuted(string eventId)
+        public async Task<bool> GetExecuted(string eventId)
         {
-            EventStateIsInALegalState(eventId);
+            await EventStateIsInALegalState(eventId);
 
-            return _context.EventState.Single(model => model.Id == eventId).Executed;
+            return (await _context.EventState.SingleAsync(model => model.Id == eventId)).Executed;
         }
 
-        public void SetExecuted(string eventId, bool value)
+        public async Task SetExecuted(string eventId, bool value)
         {
-            EventStateIsInALegalState(eventId);
+            await EventStateIsInALegalState(eventId);
 
-            _context.EventState.Single(model => model.Id == eventId).Executed = value;
-            _context.SaveChanges();
+            (await _context.EventState.SingleAsync(model => model.Id == eventId)).Executed = value;
+            await _context.SaveChangesAsync();
         }
 
-        public bool GetIncluded(string eventId)
+        public async Task<bool> GetIncluded(string eventId)
         {
-            EventStateIsInALegalState(eventId);
+            await EventStateIsInALegalState(eventId);
 
-            return _context.EventState.Single(model => model.Id == eventId).Included;
+            return (await _context.EventState.SingleAsync(model => model.Id == eventId)).Included;
         }
-        public void SetIncluded(string eventId, bool value)
+        public async Task SetIncluded(string eventId, bool value)
         {
-            EventStateIsInALegalState(eventId);
+            await EventStateIsInALegalState(eventId);
 
-            _context.EventState.Single(model => model.Id == eventId).Included = value;
-            _context.SaveChanges();
+            (await _context.EventState.SingleAsync(model => model.Id == eventId)).Included = value;
+            await _context.SaveChangesAsync();
         }
 
-        public bool GetPending(string eventId)
+        public async Task<bool> GetPending(string eventId)
         {
-            EventStateIsInALegalState(eventId);
+            await EventStateIsInALegalState(eventId);
 
-            return _context.EventState.Single(model => model.Id == eventId).Pending;
+            return (await _context.EventState.SingleAsync(model => model.Id == eventId)).Pending;
         }
-        public void SetPending(string eventId, bool value)
+        public async Task SetPending(string eventId, bool value)
         {
-            EventStateIsInALegalState(eventId);
+            await EventStateIsInALegalState(eventId);
 
-            _context.EventState.Single(model => model.Id == eventId).Pending = value;
-            _context.SaveChanges();
+            (await _context.EventState.SingleAsync(model => model.Id == eventId)).Pending = value;
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
         /// The setter for this property should not be used to unlock the Event. If setter is provided with a null-value
         /// an ArgumentNullException will be raised. Instead, use ClearLock()-method to remove any Lock on this Event.  
         /// </summary>
-        public LockDto GetLockDto(string eventId)
+        public async Task<LockDto> GetLockDto(string eventId)
         {
-            EventLockIsInALegalState(eventId);
+            await EventLockIsInALegalState(eventId);
             // SingleOrDeafult will return either null or the actual single element in set. 
-            return _context.LockDto.SingleOrDefault(model => model.Id == eventId);
+            return await _context.LockDto.SingleOrDefaultAsync(model => model.Id == eventId);
         }
-        public void SetLockDto(string eventId, LockDto value)
+        public async Task SetLockDto(string eventId, LockDto value)
         {
-            EventLockIsInALegalState(eventId);
-            if (_context.LockDto.Any(model => model.Id == eventId))
+            await EventLockIsInALegalState(eventId);
+            if (await _context.LockDto.AnyAsync(model => model.Id == eventId))
             {
                 throw new ApplicationException("There already exists a lock on this event");
             }
@@ -196,7 +198,7 @@ namespace Event.Storage
             theLock.Id = eventId;
 
             _context.LockDto.Add(theLock);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
 
@@ -205,35 +207,29 @@ namespace Event.Storage
         /// (Setter for LockDto will raise an ArgumentNullException if provided a null-value)
         /// The method simply removes all (should be either 1 or 0) LockDto element(s) held in database. 
         /// </summary>
-        public void ClearLock(string eventId)
+        public async Task ClearLock(string eventId)
         {
-            EventLockIsInALegalState(eventId);
+            await EventLockIsInALegalState(eventId);
 
             // Clear the single LockDto-element 
             foreach (var lockDto in _context.LockDto.Where(model => model.Id == eventId))
             {
                 _context.LockDto.Remove(lockDto);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         public HashSet<RelationToOtherEventModel> GetConditions(string eventId)
         {
             var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == eventId);
-            var hashSet = new HashSet<RelationToOtherEventModel>();
 
-            foreach (var element in dbset)
+            return new HashSet<RelationToOtherEventModel>(dbset.Select(element => new RelationToOtherEventModel
             {
-                hashSet.Add(new RelationToOtherEventModel
-                {
-                    Uri = new Uri(element.UriString),
-                    EventID = element.EventId
-                });
-            }
-
-            return hashSet;
+                Uri = new Uri(element.UriString),
+                EventID = element.EventId
+            }));
         }
-        public void SetConditions(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetConditions(string eventId, HashSet<RelationToOtherEventModel> value)
         {
             foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == eventId))
             {
@@ -250,7 +246,7 @@ namespace Event.Storage
                 };
                 _context.Conditions.Add(uriToAdd);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         public HashSet<RelationToOtherEventModel> GetResponses(string eventId)
         {
@@ -268,24 +264,23 @@ namespace Event.Storage
 
             return hashSet;
         }
-        public void SetResponses(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetResponses(string eventId, HashSet<RelationToOtherEventModel> value)
         {
             foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == eventId))
             {
                 _context.Responses.Remove(uri);
             }
 
-            foreach (var element in value)
+            foreach (var uriToAdd in value.Select(element => new ResponseUri
             {
-                var uriToAdd = new ResponseUri
-                {
-                    UriString = element.Uri.AbsoluteUri,
-                    EventId = element.EventID,
-                    EventIdentificationModelId = eventId
-                };
+                UriString = element.Uri.AbsoluteUri,
+                EventId = element.EventID,
+                EventIdentificationModelId = eventId
+            }))
+            {
                 _context.Responses.Add(uriToAdd);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         public HashSet<RelationToOtherEventModel> GetExclusions(string eventId)
         {
@@ -303,24 +298,23 @@ namespace Event.Storage
 
             return hashSet;
         }
-        public void SetExclusions(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetExclusions(string eventId, HashSet<RelationToOtherEventModel> value)
         {
             foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == eventId))
             {
                 _context.Exclusions.Remove(uri);
             }
 
-            foreach (var element in value)
+            foreach (var uriToAdd in value.Select(element => new ExclusionUri
             {
-                var uriToAdd = new ExclusionUri
-                {
-                    UriString = element.Uri.AbsoluteUri,
-                    EventId = element.EventID,
-                    EventIdentificationModelId = eventId
-                };
+                UriString = element.Uri.AbsoluteUri,
+                EventId = element.EventID,
+                EventIdentificationModelId = eventId
+            }))
+            {
                 _context.Exclusions.Add(uriToAdd);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         public HashSet<RelationToOtherEventModel> GetInclusions(string eventId)
         {
@@ -338,24 +332,23 @@ namespace Event.Storage
 
             return hashSet;
         }
-        public void SetInclusions(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetInclusions(string eventId, HashSet<RelationToOtherEventModel> value)
         {
             foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == eventId))
             {
                 _context.Inclusions.Remove(uri);
             }
 
-            foreach (var element in value)
+            foreach (var uriToAdd in value.Select(element => new InclusionUri
             {
-                var uriToAdd = new InclusionUri()
-                {
-                    UriString = element.Uri.AbsoluteUri,
-                    EventId = element.EventID,
-                    EventIdentificationModelId = eventId
-                };
+                UriString = element.Uri.AbsoluteUri,
+                EventId = element.EventID,
+                EventIdentificationModelId = eventId
+            }))
+            {
                 _context.Inclusions.Add(uriToAdd);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         #endregion
@@ -380,17 +373,17 @@ namespace Event.Storage
         /// EventIdentificationIsInALegalState makes two checks on EventIdentification-set,
         /// that when combined ensures that EventIdentification only has a single element. 
         /// </summary>
-        private void EventIdentificationIsInALegalState(string eventId)
+        private async Task EventIdentificationIsInALegalState(string eventId)
         {
             // Check that there's currently only a single element in database
-            if (_context.EventIdentification.Count(model => model.Id == eventId) > 1)
+            if (await _context.EventIdentification.CountAsync(model => model.Id == eventId) > 1)
             {
                 throw new ApplicationException(
                     "More than a single EventIdentification element in database-set in Event");
             }
 
 
-            if (!_context.EventIdentification.Any(model => model.Id == eventId))
+            if (!await _context.EventIdentification.AnyAsync(model => model.Id == eventId))
             {
                 throw new ApplicationException("EventIdentification was not initialized in Event." +
                                                "Count was zero");
@@ -401,10 +394,10 @@ namespace Event.Storage
         /// EventLockIsInALegalState makes two checks on LockDto-set,
         /// that when combined ensures that LockDto only has a single element. 
         /// </summary>
-        private void EventLockIsInALegalState(string eventId)
+        private async Task EventLockIsInALegalState(string eventId)
         {
             // Check that there's currently only a single element in database
-            if (_context.LockDto.Count(model => model.Id == eventId) > 1)
+            if (await _context.LockDto.CountAsync(model => model.Id == eventId) > 1)
             {
                 throw new ApplicationException(
                     "More than a single Lock element in database-set in Event");
@@ -415,14 +408,14 @@ namespace Event.Storage
         /// EventStateIsInALegalState makes two checks on EventState-set,
         /// that when combined ensures that EventState only has a single element. 
         /// </summary>
-        private void EventStateIsInALegalState(string eventId)
+        private async Task EventStateIsInALegalState(string eventId)
         {
             // Check that there is no more than a single element in EventState
-            if (_context.EventState.Count(model => model.Id == eventId) > 1)
+            if (await _context.EventState.CountAsync(model => model.Id == eventId) > 1)
             {
                 throw new ApplicationException("More than a single element in EventState set");
             }
-            if (!_context.EventState.Any(model => model.Id == eventId))
+            if (!await _context.EventState.AnyAsync(model => model.Id == eventId))
             {
                 throw new ApplicationException("EventState was not initialized in Event");
             }
