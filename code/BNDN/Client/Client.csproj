@@ -80,7 +80,6 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ServerConnection.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="ViewModels\EventListViewModel.cs" />
     <Compile Include="ViewModels\EventViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
@@ -149,6 +148,7 @@
   <ItemGroup>
     <Resource Include="Assets\Pending.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
