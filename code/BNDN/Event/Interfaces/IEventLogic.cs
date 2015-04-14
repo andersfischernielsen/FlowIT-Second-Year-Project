@@ -15,6 +15,8 @@ namespace Event.Interfaces
         bool Included { get; set; }
         bool Pending { get; set; }
         IEnumerable<string> Roles { get; set; }
+
+        string EventId { get; set; }
         #endregion
 
         #region Locking

@@ -15,14 +15,15 @@ namespace Event.Storage
     {
         private IEventContext _context;
 
-        public EventStorage(string eventId, IEventContext context)
+        public EventStorage(IEventContext context)
         {
-            EventId = eventId;
             _context = context;
         }
 
         public void InitializeNewEvent(InitialEventState initialEventState)
         {
+            if (EventId == null) throw new InvalidOperationException("EventId must be set");
+
             if (_context.EventIdentification.Any(model => model.Id == EventId))
             {
                 throw new InvalidOperationException("The EventId is already existing");
@@ -39,6 +40,7 @@ namespace Event.Storage
 
         public void DeleteEvent()
         {
+            if (EventId == null) throw new InvalidOperationException("EventId must be set");
             if (!_context.EventIdentification.Any(model => model.Id == EventId))
             {
                 throw new InvalidOperationException("The EventId does not exist");
@@ -65,11 +67,13 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
                 return new Uri(_context.EventIdentification.Single(model => model.Id == EventId).OwnUri);
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
 
                 // Add replacing value
@@ -83,11 +87,13 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
                 return _context.EventIdentification.Single(model => model.Id == EventId).WorkflowId;
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
 
                 _context.EventIdentification.Single(model => model.Id == EventId).WorkflowId = value;
@@ -101,11 +107,13 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
                 return _context.EventIdentification.Single(model => model.Id == EventId).Name;
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
 
                 _context.EventIdentification.Single(model => model.Id == EventId).Name = value;
@@ -117,12 +125,14 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
 
                 return _context.EventIdentification.Single(model => model.Id == EventId).Roles.Select(role => role.Role);
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventIdentificationIsInALegalState();
 
                 _context.EventIdentification.Single(model => model.Id == EventId).Roles = value.Select(role => new EventRoleModel{Role = role, EventId = EventId}).ToList();
@@ -134,12 +144,14 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventStateIsInALegalState();
 
                 return _context.EventState.Single(model => model.Id == EventId).Executed;
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventStateIsInALegalState();
 
                 _context.EventState.Single(model => model.Id == EventId).Executed = value;
@@ -151,12 +163,14 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventStateIsInALegalState();
 
                 return _context.EventState.Single(model => model.Id == EventId).Included;
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventStateIsInALegalState();
 
                 _context.EventState.Single(model => model.Id == EventId).Included = value;
@@ -168,12 +182,14 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventStateIsInALegalState();
 
                 return _context.EventState.Single(model => model.Id == EventId).Pending;
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventStateIsInALegalState();
 
                 _context.EventState.Single(model => model.Id == EventId).Pending = value;
@@ -189,12 +205,14 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventLockIsInALegalState();
                 // SingleOrDeafult will return either null or the actual single element in set. 
                 return _context.LockDto.SingleOrDefault(model => model.Id == EventId);
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 EventLockIsInALegalState();
                 if (_context.LockDto.Any(model => model.Id == EventId))
                 {
@@ -229,6 +247,7 @@ namespace Event.Storage
         /// </summary>
         public void ClearLock()
         {
+            if (EventId == null) throw new InvalidOperationException("EventId must be set");
             EventLockIsInALegalState();
 
             // Clear the single LockDto-element 
@@ -243,6 +262,7 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
@@ -259,6 +279,7 @@ namespace Event.Storage
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Conditions.Remove(uri);
@@ -281,6 +302,7 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
@@ -297,6 +319,7 @@ namespace Event.Storage
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Responses.Remove(uri);
@@ -319,6 +342,7 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
@@ -335,6 +359,7 @@ namespace Event.Storage
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Exclusions.Remove(uri);
@@ -357,6 +382,7 @@ namespace Event.Storage
         {
             get
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId);
                 var hashSet = new HashSet<RelationToOtherEventModel>();
 
@@ -373,6 +399,7 @@ namespace Event.Storage
             }
             set
             {
+                if (EventId == null) throw new InvalidOperationException("EventId must be set");
                 foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId))
                 {
                     _context.Inclusions.Remove(uri);
@@ -416,6 +443,7 @@ namespace Event.Storage
         /// </summary>
         private void EventIdentificationIsInALegalState()
         {
+            if (EventId == null) throw new InvalidOperationException("EventId must be set");
             // Check that there's currently only a single element in database
             if (_context.EventIdentification.Count(model => model.Id == EventId) > 1)
             {
@@ -437,6 +465,7 @@ namespace Event.Storage
         /// </summary>
         private void EventLockIsInALegalState()
         {
+            if (EventId == null) throw new InvalidOperationException("EventId must be set");
             var lockDto = _context.LockDto.Where(model => model.Id == EventId);
             // Check that there's currently only a single element in database
             if (lockDto.Count() > 1)
@@ -452,6 +481,7 @@ namespace Event.Storage
         /// </summary>
         private void EventStateIsInALegalState()
         {
+            if (EventId == null) throw new InvalidOperationException("EventId must be set");
             // Check that there is no more than a single element in EventState
             if (_context.EventState.Count(model => model.Id == EventId) > 1)
             {

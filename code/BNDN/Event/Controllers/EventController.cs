@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
-using Event.Models;
 using Event.Storage;
 
 namespace Event.Controllers
@@ -17,6 +16,25 @@ namespace Event.Controllers
     /// </summary>
     public class EventController : ApiController
     {
+        private readonly IEventLogic _logic;
+
+        /// <summary>
+        /// Constructor which is used by the WebAPI framework at runtime.
+        /// </summary>
+        public EventController()
+        {
+            _logic = new EventLogic(new EventStorage(new EventContext()));
+        }
+
+        /// <summary>
+        /// Constructor used for dependency injection.
+        /// </summary>
+        /// <param name="logic">The logic to inject</param>
+        public EventController(IEventLogic logic)
+        {
+            _logic = logic;
+        }
+
 
         #region EventDto
         /// <summary>
@@ -28,23 +46,21 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent(string eventId)
         {
-            using (IEventLogic logic = new EventLogic(eventId))
+            _logic.EventId = eventId;
+            // Check if provided eventId exists
+            if (!_logic.EventIdExists())
             {
-                // Check if provided eventId exists
-                if (!logic.EventIdExists())
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
-                }
-
-                // Dismiss request if Event is currently locked
-                if (logic.IsLocked())
-                {
-                    // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
-                }
-
-                return await logic.EventDto;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
             }
+
+            // Dismiss request if Event is currently locked
+            if (_logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
+
+            return await _logic.EventDto;
         }
 
         /// <summary>
@@ -78,30 +94,28 @@ namespace Event.Controllers
                 // TODO: Provide nicer description / error message
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
-            using (IEventLogic logic = new EventLogic(eventDto.EventId))
+            _logic.EventId = eventDto.EventId;
+            // Check for non-existing eventId
+            if (_logic.EventIdExists())
             {
-                // Check for non-existing eventId
-                if (logic.EventIdExists())
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, String.Format("{0} event already exists", eventDto.EventId)));
-                }
-
-                // TODO: An Event that has just been posted, should not be able to be locked already...Delete! 
-                // Dismiss request if Event is currently locked
-                if (logic.IsLocked())
-                {
-                    // Event is currently locked)
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed, "Event is currently locked"));
-
-                }
-
-                // Prepare for method-call: Gets own URI (i.e. http://address)
-                var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
-                var ownUri = new Uri(s);
-
-                // Method call
-                await logic.InitializeEvent(eventDto, ownUri);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, String.Format("{0} event already exists", eventDto.EventId)));
             }
+
+            // TODO: An Event that has just been posted, should not be able to be locked already...Delete! 
+            // Dismiss request if Event is currently locked
+            if (_logic.IsLocked())
+            {
+                // Event is currently locked)
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed, "Event is currently locked"));
+
+            }
+
+            // Prepare for method-call: Gets own URI (i.e. http://address)
+            var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
+            var ownUri = new Uri(s);
+
+            // Method call
+            await _logic.InitializeEvent(eventDto, ownUri);
         }
 
 
@@ -122,33 +136,31 @@ namespace Event.Controllers
                                 "Provided input could not be mapped onto an instance of EventDto"));
             }
 
-            using (IEventLogic logic = new EventLogic(eventId))
+            _logic.EventId = eventId;
+            // Check if event even exists
+            if (!_logic.EventIdExists())
             {
-                // Check if event even exists
-                if (!logic.EventIdExists())
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
-                }
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
+            }
 
-                // Dismiss request if Event is currently locked
-                if (logic.IsLocked())
-                {
-                    // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
-                }
+            // Dismiss request if Event is currently locked
+            if (_logic.IsLocked())
+            {
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
+            }
 
-                // Prepare for method-call
-                var ownUri = new Uri(string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
+            // Prepare for method-call
+            var ownUri = new Uri(string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
 
-                try
-                {
-                    await logic.UpdateEvent(eventDto, ownUri);
-                }
-                catch (NullReferenceException)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
-                        ModelState));
-                }
+            try
+            {
+                await _logic.UpdateEvent(eventDto, ownUri);
+            }
+            catch (NullReferenceException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    ModelState));
             }
         }
 
@@ -161,17 +173,15 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteEvent(string eventId)
         {
-            using (IEventLogic logic = new EventLogic(eventId))
+            _logic.EventId = eventId;
+            // Dismiss request if Event is currently locked
+            if (_logic.IsLocked())
             {
-                // Dismiss request if Event is currently locked
-                if (logic.IsLocked())
-                {
-                    // Event is currently locked
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed,
-                        "Event is currently locked"));
-                }
-                await logic.DeleteEvent();
+                // Event is currently locked
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.MethodNotAllowed,
+                    "Event is currently locked"));
             }
+            await _logic.DeleteEvent();
         }
 
         #endregion
@@ -189,7 +199,7 @@ namespace Event.Controllers
         [HttpPut]
         public void ResetEvent([FromBody] EventDto eventDto, string eventId)
         {
-            using (IResetLogic resetLogic = new ResetLogic(eventId) )
+            using (IResetLogic resetLogic = new ResetLogic(eventId))
             {
                 // Reset locks
                 resetLogic.UnlockEvent();
@@ -199,5 +209,12 @@ namespace Event.Controllers
             }
         }
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            _logic.Dispose();
+            // TODO: Breakpoint inserted to check that dispose is called.
+            base.Dispose(disposing);
+        }
     }
 }

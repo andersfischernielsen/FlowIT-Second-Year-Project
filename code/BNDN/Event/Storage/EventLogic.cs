@@ -111,9 +111,9 @@ namespace Event.Storage
         /// Constructor for EventLogic
         /// </summary>
         /// <param name="eventId">The id of the event, that this EventLogic instance should represent</param>
-        public EventLogic(string eventId)
+        public EventLogic()
         {
-            Storage = new EventStorage(eventId, new EventContext());
+            Storage = new EventStorage(new EventContext());
         }
         public EventLogic(IEventStorage storage)
         {
