@@ -32,6 +32,8 @@ namespace Event.Interfaces
         #region DTO Creation
         Task<EventStateDto> EventStateDto { get; }
         Task<EventDto> EventDto { get; }
+        IEnumerable<RelationToOtherEventModel> RelationsToLock { get; }
+
         #endregion
 
         bool CallerIsAllowedToOperate(string lockOwnerId);
@@ -46,5 +48,6 @@ namespace Event.Interfaces
 
         bool EventIdExists();
 
+        bool ProvidedRolesHasMatchWithEventRoles(IEnumerable<string> providedRoles);
     }
 }

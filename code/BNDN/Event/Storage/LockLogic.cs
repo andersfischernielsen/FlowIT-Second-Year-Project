@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Event.Interfaces;
 using Event.Models;
 
 namespace Event.Storage
@@ -10,7 +11,7 @@ namespace Event.Storage
     /// </summary>
     public class LockLogic
     {
-        private readonly EventLogic _logic;
+        private readonly IEventLogic _logic;
         /// <summary>
         /// Because lock-logic is created for each request at a Controller, this _eventsToBelocked should not become outdated
         /// TODO: Discuss: I am right about above, right?
@@ -18,7 +19,7 @@ namespace Event.Storage
         private readonly IEnumerable<RelationToOtherEventModel> _eventsToBelocked;
         private HashSet<RelationToOtherEventModel> _lockedEvents; 
         // TODO: MEGA-ÜBER non-chilled Morten: would an IEventLogic not be preferable / "more ideal" in constructor?
-        public LockLogic(EventLogic logic)
+        public LockLogic(IEventLogic logic)
         {
             _logic = logic;
             _eventsToBelocked = _logic.RelationsToLock; // ER DET HER DEN RIGTIGE LISTE?

@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Client.Connections;
 using Newtonsoft.Json;
 
 namespace Client.ViewModels
@@ -49,6 +50,10 @@ namespace Client.ViewModels
 
         #region Actions
 
+        /// <summary>
+        /// Is called to get all the workflows on the server. Events on the workflows are not retrieved.
+        /// The method is called when the button "Refresh" is cliWcked.
+        /// </summary>
         public async void GetWorkflows()
         {
             SelectedWorkflowViewModel = null;
@@ -65,6 +70,10 @@ namespace Client.ViewModels
             NotifyPropertyChanged("");
         }
 
+        /// <summary>
+        /// This method is called when the selection on the workflowList is changed.
+        /// It gets all the event and in the end their states on the given workflow.
+        /// </summary>
         public void GetEventsOnWorkflow()
         {
             if (SelectedWorkflowViewModel != null) SelectedWorkflowViewModel.GetEvents();
