@@ -277,8 +277,6 @@ namespace Event.tests
             }
             catch (Exception ex)
             {
-                //Assert
-                Assert.AreEqual("Provided EventDto was null\r\nParameternavn: eventDto", ex.InnerException.Message);
                 throw ex.InnerException;
             }
         }

@@ -118,52 +118,6 @@ namespace Event.Controllers
             await _logic.InitializeEvent(eventDto, ownUri);
         }
 
-
-        /// <summary>
-        /// This method will override the current info held in this Event, with the data held in 
-        /// the provided EventDto-argument passed to the method call
-        /// </summary>
-        /// <param name="eventDto">Holds the data that should override the current data held in this Event</param>
-        /// <param name="eventId">Id of the Event that is to be updated</param>
-        /// <returns></returns>
-        [Route("events/{eventId}")]
-        [HttpPut]
-        public async Task PutEvent([FromBody] EventDto eventDto, string eventId)
-        {
-            if (!ModelState.IsValid)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                                "Provided input could not be mapped onto an instance of EventDto"));
-            }
-
-            _logic.EventId = eventId;
-            // Check if event even exists
-            if (!_logic.EventIdExists())
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
-            }
-
-            // Dismiss request if Event is currently locked
-            if (_logic.IsLocked())
-            {
-                // Event is currently locked)
-                StatusCode(HttpStatusCode.MethodNotAllowed);
-            }
-
-            // Prepare for method-call
-            var ownUri = new Uri(string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority));
-
-            try
-            {
-                await _logic.UpdateEvent(eventDto, ownUri);
-            }
-            catch (NullReferenceException)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
-                    ModelState));
-            }
-        }
-
         /// <summary>
         /// DeleteEvent will delete an Event
         /// </summary>

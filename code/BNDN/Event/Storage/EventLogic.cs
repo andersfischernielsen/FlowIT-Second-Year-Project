@@ -246,7 +246,7 @@ namespace Event.Storage
                 Roles = eventDto.Roles
             };
 
-            var serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
+            IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
             try
@@ -341,7 +341,7 @@ namespace Event.Storage
             }
 
             // Attempt to delete Event from Server
-            var serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", EventId, WorkflowId);
+            IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", EventId, WorkflowId);
             await serverCommunicator.DeleteEventFromServer();
 
             // Delete Event from own Storage

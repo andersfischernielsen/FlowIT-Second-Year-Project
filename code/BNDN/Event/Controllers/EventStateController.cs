@@ -30,26 +30,6 @@ namespace Event.Controllers
         }
 
         #region GET-requests
-        /// <summary>
-        /// GetPending returns the (bool) value of Event's pending state. Callers of this method must identify themselves
-        /// through an EventAddressDto
-        /// <param name="senderId">Used as a representation for caller of this method</param>
-        /// <param name="eventId">The id of the Event, whose pending value is to be returned</param>
-        /// <returns>Event's pending (bool) value</returns>
-        /// </summary>
-        [Route("events/{eventId}/pending/{senderId}")]
-        [HttpGet]
-        public bool GetPending(string senderId, string eventId)
-        {
-            _logic.EventId = eventId;
-            // Check is made to see if the caller is allowed to execute this method at the moment
-            if (!_logic.CallerIsAllowedToOperate(senderId))
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Cannot access this property. The event is locked."));
-            }
-            return _logic.Pending;
-        }
 
         /// <summary>
         /// GetExecuted returns the Event's current (bool) Executed value. 
@@ -89,26 +69,6 @@ namespace Event.Controllers
                     "Cannot access this property. The event is locked."));
             }
             return _logic.Included;
-        }
-
-        /// <summary>
-        /// Returns Event's current value of Executable.
-        /// </summary>
-        /// <param name="senderId">Content should represent caller</param>
-        /// <param name="eventId">Id of the Event, whose Executable value is to be returned</param>
-        /// <returns>Current value of Event's Executable</returns>
-        [Route("events/{eventId}/executable/{senderId}")]
-        [HttpGet]
-        public async Task<bool> GetExecutable(string senderId, string eventId)
-        {
-            _logic.EventId = eventId;
-            // Check is made to see if caller is allowed to execute this method (at the moment)
-            if (!_logic.CallerIsAllowedToOperate(senderId))
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Cannot access this property. The event is locked."));
-            }
-            return await _logic.IsExecutable();
         }
 
         /// <summary>

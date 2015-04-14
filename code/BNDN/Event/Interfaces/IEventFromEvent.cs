@@ -11,9 +11,5 @@ namespace Event.Interfaces
         Task<bool> IsExecuted();
         Task<bool> IsIncluded();
         Task<EventDto> GetEvent();
-        Task PostEventRules(EventRuleDto rules);
-        Task UpdateEventRules(EventRuleDto replacingRules);
-        Task DeleteEventRules();
-        Task SendNotify(IEnumerable<NotifyDto> dtos);
     }
 }
