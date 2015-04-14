@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Client.Connections;
 using Newtonsoft.Json;
 
 namespace Client.ViewModels

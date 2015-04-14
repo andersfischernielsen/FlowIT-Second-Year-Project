@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Client.ViewModels;
 using Common;
 
-namespace Client
+namespace Client.Connections
 {
     public class EventConnection : IEventConnection
     {

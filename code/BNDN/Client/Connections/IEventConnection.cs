@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Common;
 
-namespace Client
+namespace Client.Connections
 {
     /// <summary>
     /// Connection to an event

@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 
-namespace Client
+namespace Client.Connections
 {
     public class ServerConnection : IServerConnection
     {
