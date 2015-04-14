@@ -19,7 +19,7 @@ namespace Event.Controllers
         // Constructor used by framework
         public LifecycleController()
         {
-            _logic = new LifecycleLogic(new EventStorage(new EventContext()));
+
         }
 
         // Constructor used for dependency-injection
@@ -112,27 +112,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent(string eventId)
         {
-            return _logic.GetEventDto(eventId);
-
-            /*
-            _logic.EventId = eventId;
-            // Check if provided eventId exists
-            if (!_logic.EventIdExists())
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Format("{0} event does not exist", eventId)));
-            }
-
-            // TODO: Now, call logic
-            /*
-            // Dismiss request if Event is currently locked
-            if (_logic.IsLocked())
-            {
-                // Event is currently locked)
-                StatusCode(HttpStatusCode.MethodNotAllowed);
-            }
-
-            return _logic.GetEventDto();
-             * */
+            return await _logic.GetEventDto(eventId);
         }
     }
 }

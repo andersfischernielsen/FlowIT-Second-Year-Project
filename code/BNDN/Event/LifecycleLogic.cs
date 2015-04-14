@@ -81,10 +81,10 @@ namespace Event
             }
         }
 
-        public void DeleteEvent(string eventId)
+        public async Task DeleteEvent(string eventId)
         {
             // Notice that the following check will (should) fail, if this Event is locked by another Event
-            if (!_lockLogic.IsAllowedToOperate(eventId, eventId))
+            if (! await _lockLogic.IsAllowedToOperate(eventId, eventId))
             {
                 throw new LockedException();
             }
@@ -97,7 +97,7 @@ namespace Event
             }
 
             // Attempt to delete Event from Server
-            string workflowId = _storage.GetWorkflowId(eventId);
+            string workflowId = await _storage.GetWorkflowId(eventId);
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventId, workflowId);
             serverCommunicator.DeleteEventFromServer();
 
@@ -118,22 +118,23 @@ namespace Event
             _resetStorage.ResetToInitialState(eventId);
         }
 
-        public EventDto GetEventDto(string eventId)
+        public async Task<EventDto> GetEventDto(string eventId)
         {
-            return new EventDto
+            var returnValue =  new EventDto
             {
                 EventId = eventId,
-                WorkflowId = _storage.GetWorkflowId(eventId),
-                Name = _storage.GetName(eventId),
-                Roles = _storage.GetRoles(eventId),
-                Pending = _storage.GetPending(eventId),
-                Executed = _storage.GetExecuted(eventId),
-                Included = _storage.GetIncluded(eventId),
+                WorkflowId = await _storage.GetWorkflowId(eventId),
+                Name = await _storage.GetName(eventId),
+                Roles = await _storage.GetRoles(eventId),
+                Pending = await _storage.GetPending(eventId),
+                Executed = await _storage.GetExecuted(eventId),
+                Included = await _storage.GetIncluded(eventId),
                 Conditions = _storage.GetConditions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
                 Exclusions = _storage.GetExclusions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
                 Responses = _storage.GetResponses(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
                 Inclusions = _storage.GetInclusions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri })
             };
+            return returnValue;
         }
 
         public void Dispose()

@@ -21,7 +21,7 @@ namespace Event.Logic
             _storage = storage;
         }
 
-        public void LockSelf(string eventId, LockDto lockDto)
+        public async Task LockSelf(string eventId, LockDto lockDto)
         {
             // Check input
             if (lockDto == null)
@@ -30,7 +30,7 @@ namespace Event.Logic
             }
 
             // Check if this Event is currently locked
-            if (!IsAllowedToOperate(eventId, lockDto.LockOwner))
+            if (! await IsAllowedToOperate(eventId, lockDto.LockOwner))
             {
                 // TODO: Throw more relevant exception
                 throw new ApplicationException();
@@ -47,9 +47,9 @@ namespace Event.Logic
             _storage.SetLockDto(eventId, lockDto);
         }
 
-        public void UnlockSelf(string eventId, string callerId)
+        public async Task UnlockSelf(string eventId, string callerId)
         {
-            if (!IsAllowedToOperate(eventId, callerId))
+            if (!await IsAllowedToOperate(eventId, callerId))
             {
                 throw new LockedException();
             }
@@ -142,9 +142,9 @@ namespace Event.Logic
             return everyEventIsUnlocked;
         }
 
-        public bool IsAllowedToOperate(string eventId, string callerId)
+        public async Task<bool> IsAllowedToOperate(string eventId, string callerId)
         {
-            var lockDto = _storage.GetLockDto(eventId);
+            var lockDto = await _storage.GetLockDto(eventId);
             if (lockDto == null)
             {   // No lock is set!
                 return true;

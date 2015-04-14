@@ -10,8 +10,8 @@ namespace Event.Interfaces
     public interface ILifecycleLogic : IDisposable
     {
         Task CreateEvent(EventDto eventDto, Uri ownUri);
-        void DeleteEvent(string eventId);
+        Task DeleteEvent(string eventId);
         void ResetEvent(string eventId);
-        EventDto GetEventDto(string eventId);
+        Task<EventDto> GetEventDto(string eventId);
     }
 }

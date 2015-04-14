@@ -37,20 +37,20 @@ namespace Event.Logic
             _authLogic = authLogic;
         }
 
-        public Task<bool> IsExecuted(string eventId, string senderId)
+        public async Task<bool> IsExecuted(string eventId, string senderId)
         {
             // Check is made to see if caller is allowed to execute this method at the moment. 
-            if (!_lockingLogic.IsAllowedToOperate(eventId, senderId))
+            if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
                 throw new LockedException();
             }
-            return _storage.GetExecuted(eventId);
+            return await _storage.GetExecuted(eventId);
         }
 
         public async Task<bool> IsIncluded(string eventId, string senderId)
         {
             // Check is made to see if caller is allowed to execute this method
-            if (!_lockingLogic.IsAllowedToOperate(eventId, senderId))
+            if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
                 throw new LockedException();
             }
@@ -61,7 +61,7 @@ namespace Event.Logic
         {
             //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
             // Check is made to see whether caller is allowed to execute this method at the moment
-            if (!senderId.Equals("-1") && !_lockingLogic.IsAllowedToOperate(eventId, senderId))
+            if (!senderId.Equals("-1") && !await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
                 throw new LockedException();
             }
@@ -102,7 +102,7 @@ namespace Event.Logic
         public async Task SetIncluded(string eventId, string senderId, bool newIncludedValue)
         {
             // Check to see if caller is currently allowed to execute this method
-            if (!_lockingLogic.IsAllowedToOperate(eventId, senderId))
+            if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
                 throw new LockedException();
             }
@@ -112,7 +112,7 @@ namespace Event.Logic
         public async Task SetPending(string eventId, string senderId, bool newPendingValue)
         {
             // Check if caller is allowed to execute this method at the moment
-            if (!_lockingLogic.IsAllowedToOperate(eventId, senderId))
+            if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
                 throw new LockedException();
             }
@@ -128,7 +128,7 @@ namespace Event.Logic
             }
 
             // Check if Event is currently locked
-            if (!_lockingLogic.IsAllowedToOperate(eventId, eventId))
+            if (!await _lockingLogic.IsAllowedToOperate(eventId, eventId))
             {
                 throw new LockedException();
             }
@@ -140,7 +140,7 @@ namespace Event.Logic
 
             // Lock all dependent Events (including one-self)
             // TODO: Check: Does the following include locking on this Event itself...?
-            if (!_lockingLogic.LockAll(eventId))
+            if (!await _lockingLogic.LockAll(eventId))
             {
                 throw new FailedToLockOtherEventException();
             }
@@ -169,7 +169,7 @@ namespace Event.Logic
                 allOk = false;
             }
 
-            if (!_lockingLogic.UnlockAll(eventId))
+            if (!await _lockingLogic.UnlockAll(eventId))
             {
                 throw new FailedToUnlockOtherEventException();
                 //Kunne ikke unlocke alt, hvad skal der ske?
