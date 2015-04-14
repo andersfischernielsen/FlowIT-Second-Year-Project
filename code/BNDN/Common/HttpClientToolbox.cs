@@ -18,6 +18,15 @@ namespace Common
         public HttpClient HttpClient { get; set; }
 
         /// <summary>
+        /// Get/set the authetication header to the given value. Used for API's which needs authentication.
+        /// </summary>
+        public AuthenticationHeaderValue AuthenticationHeader
+        {
+            get { return HttpClient.DefaultRequestHeaders.Authorization; }
+            set { HttpClient.DefaultRequestHeaders.Authorization = value; }
+        }
+
+        /// <summary>
         /// Instantiate a HttpClientToolbox with a given URL (as a string).
         /// </summary>
         /// <param name="uri">Uri (as a string) to use.</param>
