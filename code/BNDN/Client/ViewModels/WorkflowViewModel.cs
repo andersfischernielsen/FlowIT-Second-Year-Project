@@ -97,7 +97,7 @@ namespace Client.ViewModels
             // Reset all the events.
             foreach (var eventViewModel in adminEventList)
             {
-                IEventConnection connection = new EventConnection(eventViewModel);
+                IEventConnection connection = new EventConnection(eventViewModel, WorkflowId);
                 await connection.ResetEvent();
             }
             NotifyPropertyChanged("");

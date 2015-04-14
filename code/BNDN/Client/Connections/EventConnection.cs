@@ -10,14 +10,7 @@ namespace Client.Connections
     {
         private readonly HttpClientToolbox _httpClient;
         private readonly EventAddressDto _eventDto;
-        private readonly IList<string> _roles; 
-
-        public EventConnection(EventAddressDto eventDto)
-            : this(new HttpClientToolbox(eventDto.Uri))
-        {
-            _eventDto = eventDto;
-            _roles = new List<string>();
-        }
+        private readonly string _workflowId;
 
         /// <summary>
         /// This constructor is used forwhen the connection should have knowlegde about roles.
@@ -28,8 +21,7 @@ namespace Client.Connections
             : this(new HttpClientToolbox(eventDto.Uri))
         {
             _eventDto = eventDto;
-
-            LoginViewModel.RoleForWorkflow.TryGetValue(workflowId, out _roles);
+            _workflowId = workflowId;
         }
 
 
@@ -56,8 +48,11 @@ namespace Client.Connections
 
         public async Task Execute(bool b)
         {
+            IList<string> roles;
+            LoginViewModel.RoleForWorkflow.TryGetValue(_workflowId, out roles);
+
             var eventId = _eventDto.Id;
-            await _httpClient.Update(String.Format("events/{0}/executed/", eventId), new ExecuteDto { Roles = _roles });
+            await _httpClient.Update(String.Format("events/{0}/executed/", eventId), new ExecuteDto { Roles = roles });
         }
     }
 }
