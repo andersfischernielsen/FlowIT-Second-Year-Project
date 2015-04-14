@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Common;
@@ -16,6 +18,7 @@ namespace DCRParserGraphic
         private readonly string _workflowId;
         private readonly string[] _ips;
         private readonly HashSet<string> _rolesSet;
+
         public Dictionary<string, string> IdToAddress { get; set; }
 
         public static DcrParser Parse(string filePath, string workflowId, string[] eventIps)
@@ -44,62 +47,71 @@ namespace DCRParserGraphic
         private void InitiateAllEventAddressDtoWithRolesAndNames()
         {
             var events = _xDoc.Descendants("events").Descendants("event");
-            foreach (var e in events)
+            foreach (var element in events)
             {
                 EventDto eventDto;
-                //DCR-ID
-                var s = e.Attribute("id").Value;
-                var b = _map.ContainsKey(s);
-                if (b)
-                {
-                    _map.TryGetValue(s, out eventDto);
-                }
-                else
-                {
-                    eventDto = new EventDto()
-                    {
-                        Responses = new HashSet<EventAddressDto>(),
-                        Conditions = new HashSet<EventAddressDto>(),
-                        Roles = new HashSet<string>(),
-                        Inclusions = new HashSet<EventAddressDto>(),
-                        Exclusions = new HashSet<EventAddressDto>(),
-                        Executed = false,
-                        Included = false,
-                        Pending = false,
-                        WorkflowId = _workflowId,
-                    };
-                }
+
+                var dto = ExtractFromId(element, out eventDto);
+
+                //TODO: Redundant check? Remove? 
                 if (eventDto == null)
                 {
                     throw new NullReferenceException();
                 }
 
-                //ROLES
-                var role = e.Descendants("roles").Descendants("role");
+                //Get roles.
+                var role = element.Descendants("roles").Descendants("role");
                 foreach (var r in role.Select(r => r.Value))
                 {
                     _rolesSet.Add(r);
                     ((HashSet<string>)eventDto.Roles).Add(r);
                 }
 
-                //Name / description
-                var desc = e.Descendants("eventDescription");
+                //Get name & description.
+                var desc = element.Descendants("eventDescription");
                 foreach (var d in desc.Select(d => d.Value))
                 {
                     eventDto.Name = d;
                 }
 
-                _map[s] = eventDto;
+                //Save to map.
+                _map[dto] = eventDto;
             }
+        }
+
+        private string ExtractFromId(XElement element, out EventDto eventDto)
+        {
+            var dto = element.Attribute("id").Value;
+            var exists = _map.ContainsKey(dto);
+
+            if (exists) {
+                _map.TryGetValue(dto, out eventDto);
+            }
+            else {
+                eventDto = new EventDto
+                {
+                    Responses = new HashSet<EventAddressDto>(),
+                    Conditions = new HashSet<EventAddressDto>(),
+                    Roles = new HashSet<string>(),
+                    Inclusions = new HashSet<EventAddressDto>(),
+                    Exclusions = new HashSet<EventAddressDto>(),
+                    Executed = false,
+                    Included = false,
+                    Pending = false,
+                    WorkflowId = _workflowId,
+                };
+            }
+            return dto;
         }
 
         private void MapDcrIdToRealId()
         {
             var eventIds = _xDoc.Descendants("labelMappings").Descendants("labelMapping");
-            foreach (var i in eventIds)
+
+            foreach (var element in eventIds)
             {
-                var id = i.Attribute("eventId").Value;
-                var eventId = i.Attribute("labelId").Value;
+                var id = element.Attribute("eventId").Value;
+                var eventId = element.Attribute("labelId").Value;
                 var eventDto = _map[id];
                 eventDto.EventId = eventId;
                 _map[id] = eventDto;
@@ -109,6 +121,7 @@ namespace DCRParserGraphic
         private void DelegateIps()
         {
             var random = new Random();
+
             foreach (var v in _map.Values)
             {
                 IdToAddress.Add(v.EventId, _ips[random.Next(_ips.Length)]);
@@ -119,67 +132,47 @@ namespace DCRParserGraphic
         {
             //Constraints general tag into variable
             var constraints = _xDoc.Descendants("constraints").ToList();
-            //Conditions 
-            var conditions = constraints.Descendants("conditions").Descendants("condition");
-            foreach (var c in conditions)
-            {
-                var source = c.Attribute("sourceId").Value;
-                var target = c.Attribute("targetId").Value;
-                var eventDto = _map[target];
-                ((HashSet<EventAddressDto>)eventDto.Conditions).Add(new EventAddressDto()
-                {
-                    Id = _map[source].EventId,
-                    Roles = _map[source].Roles,
-                    Uri = new Uri(IdToAddress[_map[source].EventId])
-                });
-                _map[target] = eventDto;
-            }
 
-            //responses
-            var responses = constraints.Descendants("responses").Descendants("response");
-            foreach (var c in responses)
+            ExtractRules(constraints, "conditions", "condition", (eventDto => (HashSet<EventAddressDto>) eventDto.Conditions));
+            ExtractRules(constraints, "responses", "response", (eventDto => (HashSet<EventAddressDto>) eventDto.Responses));
+            ExtractRules(constraints, "excludes", "exclude", (eventDto => (HashSet<EventAddressDto>) eventDto.Exclusions));
+        }
+
+        private void ExtractRules(IEnumerable<XElement> constraints, string descendantParent, string descendant, Func<EventDto, HashSet<EventAddressDto>> getPropertyFunc)
+        {
+            var rules = constraints.Descendants(descendantParent).Descendants(descendant);
+
+            foreach (var rule in rules)
             {
-                var source = c.Attribute("sourceId").Value;
-                var target = c.Attribute("targetId").Value;
-                var eventDto = _map[source];
-                ((HashSet<EventAddressDto>)eventDto.Responses).Add(new EventAddressDto
+                string source;
+                string target;
+
+                //Anoying check to swap variables if we're dealing with conditions.
+                if (descendant == "condition")
+                {
+                    target = rule.Attribute("sourceId").Value;
+                    source = rule.Attribute("targetId").Value;
+                }
+                else
+                {
+                    source = rule.Attribute("sourceId").Value;
+                    target = rule.Attribute("targetId").Value;
+                }
+
+                //If no Uri is provided, use a fake one.
+                var uriString = IdToAddress[_map[target].EventId] ?? "http://ImNotReallyAProperURI.com";
+
+                var toAdd = new EventAddressDto
                 {
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
-                    Uri = new Uri(IdToAddress[_map[target].EventId])
-                });
-                _map[source] = eventDto;
-            }
+                    Uri = new Uri(uriString)
+                };
 
-            //excludes
-            var excludes = constraints.Descendants("excludes").Descendants("exclude");
-            foreach (var c in excludes)
-            {
-                var source = c.Attribute("sourceId").Value;
-                var target = c.Attribute("targetId").Value;
                 var eventDto = _map[source];
-                ((HashSet<EventAddressDto>)eventDto.Exclusions).Add(new EventAddressDto
-                {
-                    Id = _map[target].EventId,
-                    Roles = _map[target].Roles,
-                    Uri = new Uri(IdToAddress[_map[target].EventId])
-                });
-                _map[source] = eventDto;
-            }
+                var ruleCollection = getPropertyFunc(eventDto);
+                ruleCollection.Add(toAdd);
 
-            //includes
-            var includes = constraints.Descendants("includes").Descendants("include");
-            foreach (var c in includes)
-            {
-                var source = c.Attribute("sourceId").Value;
-                var target = c.Attribute("targetId").Value;
-                var eventDto = _map[source];
-                ((HashSet<EventAddressDto>)eventDto.Inclusions).Add(new EventAddressDto
-                {
-                    Id = _map[target].EventId,
-                    Roles = _map[target].Roles,
-                    Uri = new Uri(IdToAddress[_map[target].EventId])
-                });
                 _map[source] = eventDto;
             }
         }
@@ -190,35 +183,25 @@ namespace DCRParserGraphic
             var state = _xDoc.Descendants("marking").ToList();
 
             //Executed
-            var executed = state.Descendants("executed").Descendants("event");
+            ExtractStates(state, "executed", "event", (eventDto => eventDto.Executed = true));
+
+            //Included
+            ExtractStates(state, "included", "event", (eventDto => eventDto.Executed = true));
+
+            //Pending
+            ExtractStates(state, "pendingResponses", "event", (eventDto => eventDto.Executed = true));
+        }
+
+        private void ExtractStates(IEnumerable<XElement> state, string descendantParent, string descendant, Func<EventDto, bool> setPropertyFunc)
+        {
+            var executed = state.Descendants(descendantParent).Descendants(descendant);
             foreach (var e in executed)
             {
                 var eventId = e.Attribute("id").Value;
                 var eventDto = _map[eventId];
-                eventDto.Executed = true;
+                setPropertyFunc(eventDto);
                 _map[eventId] = eventDto;
             }
-
-            //Included
-            var included = state.Descendants("included").Descendants("event");
-            foreach (var i in included)
-            {
-                var eventId = i.Attribute("id").Value;
-                var eventDto = _map[eventId];
-                eventDto.Included = true;
-                _map[eventId] = eventDto;
-            }
-
-            //Pending
-            var pending = state.Descendants("pendingResponses").Descendants("event");
-            foreach (var p in pending)
-            {
-                var eventId = p.Attribute("id").Value;
-                var eventDto = _map[eventId];
-                eventDto.Pending = true;
-                _map[eventId] = eventDto;
-            }
-        
         }
 
         public async Task CreateJsonFile()

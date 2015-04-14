@@ -24,5 +24,6 @@ namespace Event.Interfaces
         DbSet<ExclusionUri> Exclusions { get; set; }
         DbSet<LockDto> LockDto { get; set; }
         int SaveChanges();
+        Task<int> SaveChangesAsync();
     }
 }

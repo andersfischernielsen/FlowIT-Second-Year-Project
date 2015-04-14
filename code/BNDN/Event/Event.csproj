@@ -85,10 +85,10 @@
     <Compile Include="Interfaces\IEventStorageForReset.cs" />
     <Compile Include="Interfaces\ILifecycleLogic.cs" />
     <Compile Include="Interfaces\ILockingLogic.cs" />
-    <Compile Include="Interfaces\IResetLogic.cs" />
     <Compile Include="Interfaces\IStateLogic.cs" />
     <Compile Include="LifecycleLogic.cs" />
     <Compile Include="Exceptions\LockedException.cs" />
+    <Compile Include="Logic\LockingLogic.cs" />
     <Compile Include="Logic\StateLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EventRoleModel.cs" />
@@ -120,7 +120,6 @@
     <Compile Include="Storage\EventStorageForReset.cs" />
     <Compile Include="Interfaces\ILockLogic.cs" />
     <Compile Include="Storage\LockLogic.cs" />
-    <Compile Include="Storage\ResetLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

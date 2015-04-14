@@ -69,17 +69,19 @@ namespace DcrParserGraphic.ViewModels
             var openFileDialog1 = new OpenFileDialog { Filter = "XML Files (*.xml)|*.xml", FilterIndex = 1 };
 
             // Set filter options and filter index.
-            if (openFileDialog1.ShowDialog() ?? false)
-            {
-                var file = openFileDialog1.FileName;
-                XmlFilePath = file;
-            }
+            if (!(openFileDialog1.ShowDialog() ?? false)) return;
+
+            var file = openFileDialog1.FileName;
+            XmlFilePath = file;
         }
 
         public async void Convert()
         {
-            if (!string.IsNullOrEmpty(XmlFilePath) && !string.IsNullOrEmpty(EventUris) && !string.IsNullOrEmpty(WorkflowId))
-            {
+            if (string.IsNullOrEmpty(XmlFilePath) || string.IsNullOrEmpty(EventUris) || string.IsNullOrEmpty(WorkflowId)) {
+                await DcrParser.Parse(XmlFilePath, WorkflowId, new string[1]).CreateJsonFile();
+            }
+                
+            else {
                 try
                 {
                     var eventUrls = GetUrls(EventUris);
