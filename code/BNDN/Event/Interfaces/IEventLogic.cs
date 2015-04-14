@@ -26,7 +26,6 @@ namespace Event.Interfaces
 
         #region Rules
         Task<bool> IsExecutable();
-        Task UpdateRules(string id, EventRuleDto rules);
         #endregion
 
         #region DTO Creation
