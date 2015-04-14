@@ -139,7 +139,7 @@ namespace Client.ViewModels
 
         public async Task GetState()
         {
-            var eventConnection = new EventConnection(_eventAddressDto);
+            IEventConnection eventConnection = new EventConnection(_eventAddressDto);
             try
             {
                 _eventStateDto = await eventConnection.GetState();
@@ -151,12 +151,15 @@ namespace Client.ViewModels
             }
         }
 
+        /// <summary>
+        /// This method gets called by the Execute Button in the UI
+        /// </summary>
         public async void Execute()
         {
             try
             {
-                var eventConnection = new EventConnection(_eventAddressDto);
-                await eventConnection.Execute(true, _parent.WorkflowId);
+                IEventConnection eventConnection = new EventConnection(_eventAddressDto, _parent.WorkflowId);
+                await eventConnection.Execute(true);
                 _parent.GetEvents();
             }
             catch (Exception e)
