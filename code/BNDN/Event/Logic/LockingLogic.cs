@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Http;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
@@ -44,7 +41,7 @@ namespace Event.Logic
             }
 
             lockDto.Id = eventId;
-            _storage.SetLockDto(eventId, lockDto);
+            await _storage.SetLockDto(eventId, lockDto);
         }
 
         public async Task UnlockSelf(string eventId, string callerId)
@@ -53,7 +50,7 @@ namespace Event.Logic
             {
                 throw new LockedException();
             }
-            _storage.ClearLock(eventId);
+            await _storage.ClearLock(eventId);
         }
 
         public async Task<bool> LockAll(string eventId)
@@ -68,7 +65,7 @@ namespace Event.Logic
             var lockDto = new LockDto {LockOwner = eventId, Id = eventId};
 
             // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
-            _storage.SetLockDto(eventId, lockDto);
+            await _storage.SetLockDto(eventId, lockDto);
 
 
             // Get dependent events

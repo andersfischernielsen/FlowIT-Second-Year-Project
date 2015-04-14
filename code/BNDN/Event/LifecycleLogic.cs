@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Common;
 using Event.Exceptions;
 using Event.Interfaces;
@@ -43,7 +40,7 @@ namespace Event
             {
                 throw new ArgumentNullException("eventDto", "Provided EventDto was null");
             }
-            if (EventIdExists(eventDto.EventId))
+            if (await EventIdExists(eventDto.EventId))
             {
                 // TODO: Throw more relevant exception
                 throw new ApplicationException("An event with the Id already exists");
@@ -57,7 +54,12 @@ namespace Event
                 Roles = eventDto.Roles
             };
 
+            // Todo: Check that this works correcly when deployed!
+#if DEBUG
+            IServerFromEvent serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
+#else
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
+#endif
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
             try
@@ -71,7 +73,7 @@ namespace Event
                     Pending = eventDto.Pending
                 };
 
-                _storage.InitializeNewEvent(initialEventState);
+                await _storage.InitializeNewEvent(initialEventState);
             }
             catch (Exception)
             {
@@ -90,7 +92,7 @@ namespace Event
             }
 
             // Check if Event exists here
-            if (!EventIdExists(eventId))
+            if (!await EventIdExists(eventId))
             {
                 // No need to do more, event already does not exist
                 return;
@@ -98,24 +100,30 @@ namespace Event
 
             // Attempt to delete Event from Server
             string workflowId = await _storage.GetWorkflowId(eventId);
+
+            // Todo: Check that this works correcly when deployed!
+#if DEBUG
+            IServerFromEvent serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventId, workflowId);
+#else
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventId, workflowId);
-            serverCommunicator.DeleteEventFromServer();
+#endif
+            await serverCommunicator.DeleteEventFromServer();
 
             // Delete Event from own Storage
-            _storage.DeleteEvent(eventId);
+            await _storage.DeleteEvent(eventId);
         }
 
         /// <summary>
         /// ResetEvent will bruteforce reset this Event, regardless of whether it is currently locked
         /// </summary>
         /// <param name="eventId"></param>
-        public void ResetEvent(string eventId)
+        public async Task ResetEvent(string eventId)
         {
             // Clear lock
-            _resetStorage.ClearLock(eventId);
+            await _resetStorage.ClearLock(eventId);
 
             // Reset to initial state
-            _resetStorage.ResetToInitialState(eventId);
+            await _resetStorage.ResetToInitialState(eventId);
         }
 
         public async Task<EventDto> GetEventDto(string eventId)
@@ -142,15 +150,14 @@ namespace Event
             _storage.Dispose();
         }
 
-        private bool EventIdExists(string eventId)
+        private async Task<bool> EventIdExists(string eventId)
         {
             try
             {
-                return _storage.GetName(eventId) != null;
+                return await _storage.GetName(eventId) != null;
             }
             catch (ApplicationException)
             {
-                
                 return false;
             }
         }

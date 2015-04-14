@@ -9,7 +9,7 @@ namespace Event.Interfaces
 {
     public interface IEventStorageForReset : IDisposable
     {
-        void ClearLock(string eventId);
-        void ResetToInitialState(string eventId);
+        Task ClearLock(string eventId);
+        Task ResetToInitialState(string eventId);
     }
 }

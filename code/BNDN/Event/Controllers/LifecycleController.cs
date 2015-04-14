@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -8,7 +6,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
-using Event.Storage;
 
 namespace Event.Controllers
 {
@@ -19,7 +16,7 @@ namespace Event.Controllers
         // Constructor used by framework
         public LifecycleController()
         {
-
+            _logic = new LifecycleLogic();
         }
 
         // Constructor used for dependency-injection
@@ -67,7 +64,7 @@ namespace Event.Controllers
             // TODO: Now, call logic 
             try
             {
-                _logic.CreateEvent(eventDto, ownUri);
+                await _logic.CreateEvent(eventDto, ownUri);
             }
             catch (ApplicationException)
             {                
@@ -85,7 +82,7 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteEvent(string eventId)
         {
-            _logic.DeleteEvent(eventId);
+            await _logic.DeleteEvent(eventId);
         }
 
 
@@ -98,9 +95,9 @@ namespace Event.Controllers
         /// <returns></returns>
         [Route("events/{eventId}/reset")]
         [HttpPut]
-        public void ResetEvent([FromBody] EventDto eventDto, string eventId)
+        public async Task ResetEvent([FromBody] EventDto eventDto, string eventId)
         {
-            _logic.ResetEvent(eventId);
+            await _logic.ResetEvent(eventId);
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace Event.Interfaces
     {
         Task CreateEvent(EventDto eventDto, Uri ownUri);
         Task DeleteEvent(string eventId);
-        void ResetEvent(string eventId);
+        Task ResetEvent(string eventId);
         Task<EventDto> GetEventDto(string eventId);
     }
 }
