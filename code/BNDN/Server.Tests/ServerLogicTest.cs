@@ -16,21 +16,21 @@ namespace Server.Tests
         private Mock _mock;
         private ServerLogic _toTest;
 
-        /// <summary>
-        /// Set up a Mock IServerStorage for validating logic.
-        /// </summary>
-        [SetUp]
-        public void Setup()
+        [TestFixtureSetUp]
+        public void Init()
         {
+            Setup();
+
             //Create dummy objects.
-            SetUpList();
             var toSetup = new Mock<IServerStorage>();
 
             //Set up method for adding events to workflows. The callback adds the input parameters to the list.
             toSetup.Setup(m => m.AddEventToWorkflow(It.IsAny<ServerEventModel>()))
                 .Callback((ServerEventModel eventToAdd) =>
                 {
-                    _list.Find(workflow => workflow.ID == eventToAdd.ServerWorkflowModelID).ServerEventModels.Add(eventToAdd);
+                    var result = _list.Find(workflow => workflow.Id == eventToAdd.ServerWorkflowModelId);
+                    var eventmodel = result.ServerEventModels;
+                    eventmodel.Add(eventToAdd);
                 });
 
             //Set up method for adding a new workflow. The callback adds the input parameter to the list.
@@ -47,23 +47,23 @@ namespace Server.Tests
 
             //Set up method for getting a specific workflow. Finds the given workflow in the list.
             toSetup.Setup(m => m.GetWorkflow(It.IsAny<string>()))
-                .Returns((string workflowId) => _list.Find(x => x.ID == (workflowId)));
+                .Returns((string workflowId) => _list.Find(x => x.Id == (workflowId)));
 
             //Set up method for removing an event from a workflow. 
             //Finds the given workflow in the list, finds the event in the workflow and removes it.
             toSetup.Setup(m => m.RemoveEventFromWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<string>()))
                 .Callback((ServerWorkflowModel toRemoveFrom, string eventId) =>
                 {
-                    var events = _list.Find(x => x.ID == toRemoveFrom.ID).ServerEventModels;
-                    var toRemove = events.First(x => x.ID == eventId);
+                    var events = _list.Find(x => x.Id == toRemoveFrom.Id).ServerEventModels;
+                    var toRemove = events.First(x => x.Id == eventId);
                     events.Remove(toRemove);
                 });
-            
+
             //Set up method for removing workflow. Removes the input workflow from the list. 
             toSetup.Setup(m => m.RemoveWorkflow(It.IsAny<ServerWorkflowModel>()))
                 .Callback((ServerWorkflowModel dtoToRemove) =>
                 {
-                    var toRemove = _list.Find(x => x.ID == dtoToRemove.ID);
+                    var toRemove = _list.Find(x => x.Id == dtoToRemove.Id);
                     _list.Remove(toRemove);
                 });
 
@@ -72,8 +72,8 @@ namespace Server.Tests
             toSetup.Setup(m => m.UpdateEventOnWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<ServerEventModel>()))
                 .Callback((ServerWorkflowModel toUpdateOn, ServerEventModel eventToUpdate) =>
                 {
-                    var events = _list.Find(x => x.ID == toUpdateOn.ID).ServerEventModels;
-                    var toReplace = events.First(x => x.ID == eventToUpdate.ID);
+                    var events = _list.Find(x => x.Id == toUpdateOn.Id).ServerEventModels;
+                    var toReplace = events.First(x => x.Id == eventToUpdate.Id);
                     var index = events.ToList().IndexOf(toReplace);
                     events.ToList().Insert(index, eventToUpdate);
                 });
@@ -83,7 +83,7 @@ namespace Server.Tests
             toSetup.Setup(m => m.UpdateWorkflow(It.IsAny<ServerWorkflowModel>()))
                 .Callback((ServerWorkflowModel toUpdate) =>
                 {
-                    var oldWorkflow = _list.Find(x => x.ID == toUpdate.ID);
+                    var oldWorkflow = _list.Find(x => x.Id == toUpdate.Id);
                     var index = _list.IndexOf(oldWorkflow);
                     _list.Insert(index, toUpdate);
                 });
@@ -94,47 +94,74 @@ namespace Server.Tests
             _toTest = new ServerLogic((IServerStorage)_mock.Object);
         }
 
-        private void SetUpList()
+        /// <summary>
+        /// Set up a Mock IServerStorage for validating logic.
+        /// </summary>
+        [SetUp]
+        public void Setup()
         {
-            var w1 = new ServerWorkflowModel {Name = "w1", ID = "1"};
-            w1.ServerEventModels.Add(new ServerEventModel {ID = "1", Uri = "http://2.2.2.2/"});
-            var w2 = new ServerWorkflowModel {Name = "w2", ID = "2"};
-            _list = new List<ServerWorkflowModel> {w1, w2};
+            //Setup roles.
+            var role = new ServerRoleModel { Id = "test", ServerWorkflowModelId = "1"};
+            var roles = new List<ServerRoleModel> { role };
+
+            //Create empty workflows.
+            var w1 = new ServerWorkflowModel { Name = "w1", Id = "1" };
+            var w2 = new ServerWorkflowModel { Name = "w2", Id = "2" };
+
+            //Ensure that it's REALLY set up this time...
+            role.ServerWorkflowModel = w1;
+            w1.ServerRolesModels = roles;
+
+            //Create an event with a role.
+            var eventToAdd = new ServerEventModel
+            {
+                Id = "1",
+                ServerWorkflowModelId = "1",
+                ServerRolesModels = roles,
+                ServerWorkflowModel = w1,
+                Uri = "http://2.2.2.2/"
+            };
+
+            //Add the event to one of the events.
+            w1.ServerEventModels.Add(eventToAdd);
+
+            _list = new List<ServerWorkflowModel> { w1, w2 };
         }
 
 
         [Test]
         public async void TestAddEventToWorkflow()
         {
-            SetUpList();
+            var toAdd = new EventAddressDto
+            {
+                Id = "3",
+                Roles = new List<string> {"lol"},
+                Uri = new Uri("http://1.1.1.1/")
+            };
 
-            await _toTest.AddEventToWorkflow("1", new EventAddressDto { Id="3", Roles = new List<string> {"lol"}, Uri = new Uri("http://1.1.1.1/") });
+            await _toTest.AddEventToWorkflow("1", toAdd);
 
-            var workflow = _list.First(x => x.ID == "1");
-            var expectedEvent = workflow.ServerEventModels.First(x => x.ID == "3");
+            var workflow = _list.First(x => x.Id == "1");
+            var expectedEvent = workflow.ServerEventModels.First(x => x.Id == "3");
 
-            Assert.AreEqual(expectedEvent.ID, "3");
+            Assert.AreEqual(expectedEvent.Id, "3");
             Assert.AreEqual(expectedEvent.Uri, "http://1.1.1.1/");
         }
 
         [Test]
-        public void TestAddNewWorkflow()
+        public async void TestAddNewWorkflow()
         {
-            SetUpList();
+            await _toTest.AddNewWorkflow(new WorkflowDto { Id = "3", Name = "w3"});
 
-            _toTest.AddNewWorkflow(new WorkflowDto { Id = "3", Name = "w3"});
-
-            var expectedWorkflow = _list.Find(x => x.ID == "3");
+            var expectedWorkflow = _list.Find(x => x.Id == "3");
             Assert.IsNotNull(expectedWorkflow);
             Assert.AreEqual(expectedWorkflow.Name, "w3");
-            Assert.AreEqual(expectedWorkflow.ID, "3");
+            Assert.AreEqual(expectedWorkflow.Id, "3");
         }
 
         [Test]
         public void TestGetAllWorkflows()
         {
-            SetUpList();
-
             var expected = _toTest.GetAllWorkflows().ToList();
 
             var w1 = new WorkflowDto {Id = "1", Name = "w1"};
@@ -152,8 +179,6 @@ namespace Server.Tests
         [Test]
         public void TestGetEventsOnWorkflow()
         {
-            SetUpList();
-
             var result = _toTest.GetEventsOnWorkflow("1").ToList();
             var expectedEvent = result.First(x => x.Id == "1");
 
@@ -166,68 +191,58 @@ namespace Server.Tests
         [Test]
         public void TestGetWorkflow()
         {
-            SetUpList();
-
             var result = _toTest.GetWorkflow("1");
-            var actual = _list.First(x => x.ID == "1");
+            var actual = _list.First(x => x.Id == "1");
 
-            Assert.AreEqual(actual.ID, result.Id);
+            Assert.AreEqual(actual.Id, result.Id);
             Assert.AreEqual(actual.Name, result.Name);
         }
 
         [Test]
         public void TestRemoveEventFromWorkflow()
         {
-            SetUpList();
-
             _toTest.RemoveEventFromWorkflow("1", "1");
 
-            Assert.IsNotNull(_list.Find(x => x.ID == "1"));
-            Assert.IsEmpty(_list.Find(x => x.ID == "1").ServerEventModels);
+            Assert.IsNotNull(_list.Find(x => x.Id == "1"));
+            Assert.IsEmpty(_list.Find(x => x.Id == "1").ServerEventModels);
         }
 
         [Test]
-        public void TestRemoveWorkflow()
+        public async void TestRemoveWorkflow()
         {
-            SetUpList();
-
-            Assert.AreEqual(1, _list.Count(x => x.ID == "1"));
+            Assert.AreEqual(1, _list.Count(x => x.Id == "1"));
             
-            _toTest.RemoveWorkflow(new WorkflowDto { Id = "1", Name = "w1" });
+            await _toTest.RemoveWorkflow(new WorkflowDto { Id = "1", Name = "w1" });
 
-            Assert.AreEqual(0, _list.Count(x => x.ID == "1"));
+            Assert.AreEqual(0, _list.Count(x => x.Id == "1"));
         }
 
         [Test]
-        public void TestUpdateEventOnWorkflow()
+        public async void TestUpdateEventOnWorkflow()
         {
-            SetUpList();
-
-            var workflow = _list.Find(x => x.ID == "1");
-            var existing = workflow.ServerEventModels.First(x => x.ID == "1");
+            var workflow = _list.Find(x => x.Id == "1");
+            var existing = workflow.ServerEventModels.First(x => x.Id == "1");
             Assert.IsNotNull(existing);
             Assert.AreEqual(existing.Uri, "http://2.2.2.2/");
 
-            _toTest.UpdateEventOnWorkflow("1", new EventAddressDto { Id = "1", Uri = new Uri("http://3.3.3.3") });
+            await _toTest.UpdateEventOnWorkflow("1", new EventAddressDto { Id = "1", Uri = new Uri("http://3.3.3.3") });
 
-            var updated = workflow.ServerEventModels.First(x => x.ID == "1");
+            var updated = workflow.ServerEventModels.First(x => x.Id == "1");
             Assert.IsNotNull(updated);
             Assert.AreEqual(updated.Uri, "http://3.3.3.3/");
         }
 
         [Test]
-        public void TestUpdateWorkflow()
+        public async void TestUpdateWorkflow()
         {
-            SetUpList();
-
-            var existing = _list.Find(x => x.ID == "1");
+            var existing = _list.Find(x => x.Id == "1");
             Assert.IsNotNull(existing);
             Assert.AreEqual(existing.Name, "w1");
             Assert.IsNotEmpty(existing.ServerEventModels);
 
-            _toTest.UpdateWorkflow(new WorkflowDto { Id = "1", Name = "CHANGED" });
+            await _toTest.UpdateWorkflow(new WorkflowDto { Id = "1", Name = "CHANGED" });
 
-            var updated = _list.Find(x => x.ID == "1");
+            var updated = _list.Find(x => x.Id == "1");
             Assert.IsNotNull(updated);
             Assert.AreEqual(updated.Name, "CHANGED");
         }

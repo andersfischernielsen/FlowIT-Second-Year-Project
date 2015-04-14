@@ -55,9 +55,7 @@ namespace Client.Tests
             var testDelegate = new TestDelegate(async () => await serverConnection.GetWorkflows());
 
             // Assert
-            Assert.Throws<HttpRequestException>(testDelegate);
-            Assert.Fail("Should the exception just propagate further up?" +
-                        "Or should it be turned into another exception which is easier to respond to?");
+            Assert.Throws<ServerNotFoundException>(testDelegate);
         }
 
         [Test]
@@ -118,7 +116,7 @@ namespace Client.Tests
             var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
 
             m.Setup(t => t.Read<RolesOnWorkflowsDto>(It.IsAny<string>()))
-                .ThrowsAsync(new HttpRequestException());
+                .ThrowsAsync(new HttpRequestException("400 (Bad Request)"));
 
             var serverConnection = new ServerConnection(m.Object);
 
@@ -126,9 +124,7 @@ namespace Client.Tests
             var testDelegate = new TestDelegate(async () => await serverConnection.Login("wrongUsername"));
 
             // Assert
-            Assert.Throws<HttpRequestException>(testDelegate);
-            Assert.Fail("Should the exception just propagate further up?" +
-                        "Or should it be turned into another exception which is easier to respond to?");
+            Assert.Throws<LoginFailedException>(testDelegate);
         }
 
         [Test]
@@ -201,7 +197,7 @@ namespace Client.Tests
             var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
 
             m.Setup(t => t.ReadList<EventAddressDto>(It.IsAny<string>()))
-                .ThrowsAsync(new HttpRequestException());
+                .Throws(new HttpRequestException()); //no message, we expect the ServerNotFoundException exception
 
             var serverConnection = new ServerConnection(m.Object);
 
@@ -213,9 +209,7 @@ namespace Client.Tests
             }));
 
             // Assert
-            Assert.Throws<HttpRequestException>(testDelegate);
-            Assert.Fail("Should the exception just propagate further up?" +
-                        "Or should it be turned into another exception which is easier to respond to?");
+            Assert.Throws<ServerNotFoundException>(testDelegate);
         }
     }
 }

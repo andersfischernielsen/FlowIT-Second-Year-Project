@@ -24,18 +24,16 @@ namespace Server.Storage
 
         public ICollection<ServerRoleModel> Login(ServerUserModel userModel)
         {
-            if (userModel.ServerRolesModels == null)
-            {
-                var user = _db.Users.Find(userModel.ID);
-                return user != null ? user.ServerRolesModels : null;
-            }
-            return userModel.ServerRolesModels;
+            if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;
+
+            var user = _db.Users.Find(userModel.Id);
+            return user != null ? user.ServerRolesModels : null;
         }
 
         public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
             var events = from e in _db.Events
-                         where workflow.ID == e.ServerWorkflowModelID
+                         where workflow.Id == e.ServerWorkflowModelId
                          select e;
             return events.ToList();
         }
@@ -54,17 +52,13 @@ namespace Server.Storage
 
         public async Task<ServerRoleModel> GetRole(string id, string workflowId)
         {
-            return
-                await
-                    _db.Roles.SingleOrDefaultAsync(
-                        role => role.ID.Equals(id)
-                            && role.ServerWorkflowModelID.Equals(workflowId));
+            return await _db.Roles.SingleOrDefaultAsync(role => role.Id.Equals(id) && role.ServerWorkflowModelId.Equals(workflowId));
         }
 
         public async Task<bool> RoleExists(ServerRoleModel role)
         {
-            return await _db.Roles.AnyAsync(rr => rr.ID.Equals(role.ID)
-                && rr.ServerWorkflowModelID.Equals(role.ServerWorkflowModelID));
+            return await _db.Roles.AnyAsync(rr => rr.Id.Equals(role.Id)
+                && rr.ServerWorkflowModelId.Equals(role.ServerWorkflowModelId));
         }
 
         public async Task AddUser(ServerUserModel user)
@@ -84,9 +78,8 @@ namespace Server.Storage
 
         public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
-            //TODO: Skal 2 events kunne have samme ID?
             var workflows = from w in _db.Workflows
-                            where eventToBeAddedDto.ServerWorkflowModelID == w.ID
+                            where eventToBeAddedDto.ServerWorkflowModelId == w.Id
                             select w;
 
             if (workflows.Count() != 1)
@@ -101,13 +94,12 @@ namespace Server.Storage
         public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
             var events = from e in _db.Events
-                         where e.ID == eventToBeUpdated.ID
+                         where e.Id == eventToBeUpdated.Id
                          select e;
 
             var tempEvent = events.Single();
-            // TODO: Is it possible to change workflow? 
             tempEvent.ServerWorkflowModel = eventToBeUpdated.ServerWorkflowModel;
-            tempEvent.ServerWorkflowModelID = eventToBeUpdated.ServerWorkflowModelID;
+            tempEvent.ServerWorkflowModelId = eventToBeUpdated.ServerWorkflowModelId;
             tempEvent.Uri = eventToBeUpdated.Uri;
 
             await _db.SaveChangesAsync();
@@ -116,7 +108,7 @@ namespace Server.Storage
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
             var events = from e in _db.Events
-                         where e.ID == eventId
+                         where e.Id == eventId
                          select e;
 
             var eventToRemove = events.SingleOrDefault();
@@ -140,7 +132,7 @@ namespace Server.Storage
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
             var workflows = from w in _db.Workflows
-                            where w.ID == workflowId
+                            where w.Id == workflowId
                             select w;
 
             return workflows.Single();
@@ -148,7 +140,6 @@ namespace Server.Storage
 
         public async Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
-            //TODO: Skal der tjekkes for om der eksisterer et workflow med samme ID, eller er det okay?
             _db.Workflows.Add(workflow);
             await _db.SaveChangesAsync();
         }
@@ -156,7 +147,7 @@ namespace Server.Storage
         public async Task UpdateWorkflow(ServerWorkflowModel workflow)
         {
             var workflows = from w in _db.Workflows
-                            where w.ID == workflow.ID
+                            where w.Id == workflow.Id
                             select w;
 
             var tempWorkflow = workflows.Single();
@@ -169,7 +160,7 @@ namespace Server.Storage
         {
             var workflows =
                 from w in _db.Workflows
-                where w.ID == workflow.ID
+                where w.Id == workflow.Id
                 select w;
 
             if (workflow.ServerEventModels.Count > 0)

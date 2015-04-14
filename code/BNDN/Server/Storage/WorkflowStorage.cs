@@ -26,7 +26,7 @@ namespace Server.Storage
 
         public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
-            switch (workflow.ID)
+            switch (workflow.Id)
             {
                 case "computer":
                     // Dummy data (before deleting: it may be used for testing...?) 
@@ -82,16 +82,16 @@ namespace Server.Storage
         public ICollection<ServerWorkflowModel> GetAllWorkflows()
         {
             // Dummy workflows for now (before deleting: consider if it can be used for testing)
-            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", ID = "computer" };
-            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", ID = "car" };
+            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", Id = "computer" };
+            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", Id = "car" };
             return new List<ServerWorkflowModel>() { dummy1, dummy2 };
         }
 
         public ServerWorkflowModel GetWorkflow(string workflowId)
         {
-            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", ID = "computer" };
-            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", ID = "car" };
-            return new List<ServerWorkflowModel>() { dummy1, dummy2 }.First(model => model.ID == workflowId);
+            var dummy1 = new ServerWorkflowModel() { Name = "Pay rent", Id = "computer" };
+            var dummy2 = new ServerWorkflowModel() { Name = "How to get good grades", Id = "car" };
+            return new List<ServerWorkflowModel>() { dummy1, dummy2 }.First(model => model.Id == workflowId);
         }
 
         public Task AddNewWorkflow(ServerWorkflowModel workflow)

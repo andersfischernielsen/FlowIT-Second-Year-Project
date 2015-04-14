@@ -57,7 +57,6 @@ namespace Event.Storage
             return await _httpClient.Read<EventDto>(String.Format("events/{0}",TargetEventId));
         }
 
-
         public async Task SendPending(EventAddressDto lockDto)
         {
             await _httpClient.Update(String.Format("events/{0}/pending/true", TargetEventId), lockDto);

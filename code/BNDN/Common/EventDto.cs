@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Common
 {
-    // TODO: Discuss: Currently only 2 fields are [Required] - is that sufficient?
     public class EventDto
     {
         [Required]
