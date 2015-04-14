@@ -20,12 +20,12 @@ namespace Client.Connections
         /// </summary>
         /// <returns></returns>
         Task ResetEvent();
-        
+
         /// <summary>
         /// Execute a task
         /// </summary>
         /// <param name="b"></param>
         /// <returns></returns>
-        Task Execute(bool b, string workflowId);
+        Task Execute(bool b);
     }
 }
