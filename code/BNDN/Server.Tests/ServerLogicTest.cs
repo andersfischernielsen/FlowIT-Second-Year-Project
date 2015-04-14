@@ -28,7 +28,10 @@ namespace Server.Tests
 
             //Set up method for adding events to workflows. The callback adds the input parameters to the list.
             toSetup.Setup(m => m.AddEventToWorkflow(It.IsAny<ServerEventModel>()))
-                .Callback((ServerWorkflowModel workFlowToAddTo, ServerEventModel eventToAdd) => _list.Find(e => e.Name == workFlowToAddTo.Name).ServerEventModels.Add(eventToAdd));
+                .Callback((ServerEventModel eventToAdd) =>
+                {
+                    _list.Find(workflow => workflow.ID == eventToAdd.ServerWorkflowModelID).ServerEventModels.Add(eventToAdd);
+                });
 
             //Set up method for adding a new workflow. The callback adds the input parameter to the list.
             toSetup.Setup(m => m.AddNewWorkflow(It.IsAny<ServerWorkflowModel>()))
@@ -101,11 +104,11 @@ namespace Server.Tests
 
 
         [Test]
-        public void TestAddEventToWorkflow()
+        public async void TestAddEventToWorkflow()
         {
             SetUpList();
 
-            _toTest.AddEventToWorkflow("1", new EventAddressDto { Id="3", Uri = new Uri("http://1.1.1.1/") });
+            await _toTest.AddEventToWorkflow("1", new EventAddressDto { Id="3", Roles = new List<string> {"lol"}, Uri = new Uri("http://1.1.1.1/") });
 
             var workflow = _list.First(x => x.ID == "1");
             var expectedEvent = workflow.ServerEventModels.First(x => x.ID == "3");

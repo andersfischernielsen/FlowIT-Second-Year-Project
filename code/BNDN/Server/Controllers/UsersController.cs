@@ -17,11 +17,12 @@ namespace Server.Controllers
         public UsersController(IServerLogic logic)
         {
             _logic = logic;
-            // TODO: Do something better:
-            if (Request != null)
-            {
-                Request.RegisterForDispose(_logic);
-            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _logic.Dispose();
+            base.Dispose(disposing);
         }
 
         // GET: /Login
