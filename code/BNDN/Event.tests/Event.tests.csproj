@@ -50,10 +50,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EventCommunicatorTests.cs" />
-    <Compile Include="EventControllerTests.cs" />
     <Compile Include="EventLogicTests.cs" />
     <Compile Include="EventStateControllerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StateLogicTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
