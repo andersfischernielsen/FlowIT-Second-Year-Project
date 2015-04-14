@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Http;
+using System.Net.Http;
 using Common;
-using Event.Controllers;
 using Event.Models;
 using Event.Storage;
 using NUnit.Framework;
@@ -22,7 +18,7 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpResponseException))]
+        [ExpectedException(typeof(HttpRequestException))]
         public void IsExecuted_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
@@ -38,7 +34,7 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpResponseException))]
+        [ExpectedException(typeof(HttpRequestException))]
         public void IsIncluded_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
@@ -53,7 +49,7 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpResponseException))]
+        [ExpectedException(typeof(HttpRequestException))]
         public void GetEvent_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
@@ -68,7 +64,7 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpResponseException))]
+        [ExpectedException(typeof(HttpRequestException))]
         public void PostEventRules_FailsWithWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
@@ -83,7 +79,7 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpResponseException))]
+        [ExpectedException(typeof(HttpRequestException))]
         public void UpdateEventRules_FailsWithWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
@@ -98,7 +94,7 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpResponseException))]
+        [ExpectedException(typeof(HttpRequestException))]
         public void DeleteEventRules_FailsWithWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
@@ -113,7 +109,7 @@ namespace Event.tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpResponseException))]
+        [ExpectedException(typeof(HttpRequestException))]
         public void SendNotify_FailsWithWrongUri()
         {
             var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
