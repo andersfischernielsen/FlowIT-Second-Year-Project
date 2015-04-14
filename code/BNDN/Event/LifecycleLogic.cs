@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.ModelBinding;
 using Common;
 using Event.Exceptions;
 using Event.Interfaces;
@@ -39,6 +40,10 @@ namespace Event
             if (eventDto == null)
             {
                 throw new ArgumentNullException("eventDto", "Provided EventDto was null");
+            }
+            if (ownUri == null)
+            {
+                throw new ArgumentNullException("ownUri", "Provided Uri was null");   
             }
             if (await EventIdExists(eventDto.EventId))
             {

@@ -52,6 +52,7 @@
     <Compile Include="EventCommunicatorTests.cs" />
     <Compile Include="EventLogicTests.cs" />
     <Compile Include="EventStateControllerTests.cs" />
+    <Compile Include="LifecycleLogicTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateLogicTests.cs" />
   </ItemGroup>
