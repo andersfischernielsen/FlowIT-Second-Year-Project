@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Client.Connections;
 using Client.Views;
 using Newtonsoft.Json;
 
@@ -77,7 +78,7 @@ namespace Client.ViewModels
             Status = "Attempting login...";
 
             // PUT LOGIN LOGIC HERE
-            var connection = new ServerConnection(_serverAddress);
+            IServerConnection connection = new ServerConnection(_serverAddress);
             try
             {
                 var roles = await connection.Login(Username);

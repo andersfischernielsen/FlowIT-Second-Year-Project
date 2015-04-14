@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using Client.Connections;
 using Common;
 using Moq;
 using NUnit.Framework;

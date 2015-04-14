@@ -76,9 +76,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ClientExceptions.cs" />
-    <Compile Include="EventConnection.cs" />
+    <Compile Include="Connections\EventConnection.cs" />
+    <Compile Include="Connections\IEventConnection.cs" />
+    <Compile Include="Connections\IServerConnection.cs" />
+    <Compile Include="Connections\ServerConnection.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="ServerConnection.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\EventViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
@@ -95,8 +97,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IEventConnection.cs" />
-    <Compile Include="IServerConnection.cs" />
     <Page Include="Views\LoginView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Common;
 
-namespace Client
+namespace Client.Connections
 {
     public interface IServerConnection
     {
