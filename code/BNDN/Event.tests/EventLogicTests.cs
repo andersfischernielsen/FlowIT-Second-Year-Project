@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Web.Http;
 using Common;
 using Event.Interfaces;
+using Event.Logic;
 using Event.Models;
 using Event.Storage;
 using Moq;
@@ -33,8 +32,8 @@ namespace Event.tests
         {
             //Arrange
             var mock = new Mock<IEventStorage>();
-            mock.Setup(storage => storage.Included).Returns(true);
-            mock.Setup(storage => storage.Conditions).Returns(new HashSet<RelationToOtherEventModel>());
+            mock.Setup(storage => storage.GetIncluded(It.IsAny<string>())).Returns(true);
+            mock.Setup(storage => storage.GetConditions(It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
 
             var eventLogic = new EventLogic(mock.Object);
 
@@ -49,7 +48,7 @@ namespace Event.tests
         {
             //Arrange
             var mock = new Mock<IEventStorage>();
-            mock.Setup(storage => storage.Included).Returns(false);
+            mock.Setup(storage => storage.GetIncluded(It.IsAny<string>())).Returns(false);
 
             var eventLogic = new EventLogic(mock.Object);
 
@@ -160,15 +159,17 @@ namespace Event.tests
         public async void GetEventStateDtoWhenIncludedIsFalseTest()
         {
             //Arrange
-            var mock = new Mock<IEventStorage>();
-            mock.Setup(storage => storage.Included).Returns(false);
-            mock.Setup(storage => storage.Executed).Returns(true);
-            mock.Setup(storage => storage.Pending).Returns(true);
+            var storage = new Mock<IEventStorage>();
+            storage.Setup(s => s.GetIncluded(It.IsAny<string>())).Returns(false);
+            storage.Setup(s => s.GetExecuted(It.IsAny<string>())).Returns(true);
+            storage.Setup(s => s.GetPending(It.IsAny<string>())).Returns(true);
 
-            var eventLogic = new EventLogic(mock.Object);
+            var locklogic = new Mock<ILockingLogic>();
+
+            var stateLogic = new StateLogic(storage.Object, locklogic.Object, new AuthLogic(storage.Object));
 
             //Act
-            var result = await eventLogic.GetEventStateDto();
+            var result = await stateLogic.GetStateDto("eventId", "-1");
 
             //Assert
             Assert.AreEqual(false,result.Included);
@@ -185,10 +186,10 @@ namespace Event.tests
         {
             //Arrange
             var mock = new Mock<IEventStorage>();
-            mock.Setup(storage => storage.Included).Returns(true);
-            mock.Setup(storage => storage.Executed).Returns(false);
-            mock.Setup(storage => storage.Pending).Returns(false);
-            mock.Setup(storage => storage.Conditions).Returns(new HashSet<RelationToOtherEventModel>());
+            mock.Setup(storage => storage.GetIncluded(It.IsAny<string>())).Returns(true);
+            mock.Setup(storage => storage.GetExecuted(It.IsAny<string>())).Returns(false);
+            mock.Setup(storage => storage.GetPending(It.IsAny<string>())).Returns(false);
+            mock.Setup(storage => storage.GetConditions(It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
 
             var eventLogic = new EventLogic(mock.Object);
           
@@ -268,12 +269,12 @@ namespace Event.tests
         public void InitializeEventEventDtoIsNull()
         {
             //Arrange
-            var eventLogic = new EventLogic(Mock.Of<IEventStorage>());
+            var lifecycleLogic = new LifecycleLogic(Mock.Of<IEventStorage>());
 
             //Act
             try
             {
-                eventLogic.InitializeEvent(null, new Uri("http://test/")).Wait();
+                lifecycleLogic.CreateEvent(null, new Uri("http://test/")).Wait();
             }
             catch (Exception ex)
             {
@@ -289,13 +290,12 @@ namespace Event.tests
             var mock = new Mock<IEventStorage>();
             mock.SetupAllProperties();
 
-            var eventLogic = new EventLogic(mock.Object);
-            eventLogic.EventId = "Test";
+            var lifecycleLogic = new LifecycleLogic(mock.Object);
 
             //Act
             try
             {
-                await eventLogic.InitializeEvent(new EventDto(), new Uri("http://test/"));
+                await lifecycleLogic.CreateEvent(new EventDto(), new Uri("http://test/"));
             }
             catch (Exception ex)
             {
