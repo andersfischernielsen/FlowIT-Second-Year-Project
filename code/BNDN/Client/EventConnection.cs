@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Client.ViewModels;
 using Common;
 
 namespace Client
@@ -9,7 +10,6 @@ namespace Client
     {
         private readonly HttpClientToolbox _httpClient;
         private readonly EventAddressDto _eventDto;
-        public static Dictionary<string, IList<string>> RoleForWorkflow { get; set; }
 
         public EventConnection(EventAddressDto eventDto)
         {
@@ -32,7 +32,7 @@ namespace Client
         public async Task Execute(bool b, string workflowId)
         {
             IList<string> roles;
-            RoleForWorkflow.TryGetValue(workflowId, out roles);
+            LoginViewModel.RoleForWorkflow.TryGetValue(workflowId, out roles);
 
             var eventId = _eventDto.Id;
             await _httpClient.Update(String.Format("events/{0}/executed/",eventId),new ExecuteDto{Roles = roles});
