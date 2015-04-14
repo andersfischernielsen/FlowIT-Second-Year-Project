@@ -129,7 +129,7 @@ namespace Event.Controllers
         /// <param name="eventId">The id of the Event, whose Pending value is to be set</param>
         [Route("events/{eventId}/pending/{boolValueForPending}")]
         [HttpPut]
-        public async Task UpdatePending([FromBody] EventAddressDto eventAddressDto, bool boolValueForPending, string eventId)
+        public async Task UpdatePending(string eventId, bool boolValueForPending, [FromBody] EventAddressDto eventAddressDto)
         {
             // Check to see whether caller provided a legal instance of an EventAddressDto
             if (!ModelState.IsValid)
