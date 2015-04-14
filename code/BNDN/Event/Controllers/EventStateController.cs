@@ -91,7 +91,7 @@ namespace Event.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Cannot access this property. The event is locked."));
             }
-            return await _logic.EventStateDto;
+            return await _logic.GetEventStateDto();
         }
         #endregion
 
@@ -115,6 +115,15 @@ namespace Event.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Provided input could not be mapped onto an instance of ExecuteDto; " +
                     "No roles was provided"));
+            }
+            try
+            {
+                _logic.Execute();
+            }
+            catch (Exception)
+            {
+                
+                throw;
             }
 
             _logic.EventId = eventId;
@@ -146,7 +155,7 @@ namespace Event.Controllers
 
             // Lock all dependent Events (including one-self)
             // TODO: Check: Does the following include locking on this Event itself...?
-            LockLogic lockLogic = new LockLogic(_logic);
+            ILockLogic lockLogic = new LockLogic(_logic);
             if (await lockLogic.LockAll())
             {
                 var allOk = true;

@@ -40,7 +40,7 @@ namespace Event.Controllers
         /// <summary>
         /// Get the entire Event, (namely rules and state for this Event)
         /// </summary>
-        /// <param name="eventId">The id of the Event, that you wish to get an EventDto representation of</param>
+        /// <param n ame="eventId">The id of the Event, that you wish to get an EventDto representation of</param>
         /// <returns>A task containing a single EventDto which represents the Events current state.</returns>
         [Route("events/{eventId}")]
         [HttpGet]
@@ -60,7 +60,7 @@ namespace Event.Controllers
                 StatusCode(HttpStatusCode.MethodNotAllowed);
             }
 
-            return await _logic.EventDto;
+            return _logic.GetEventDto();
         }
 
         /// <summary>

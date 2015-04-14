@@ -77,9 +77,16 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EventController.cs" />
+    <Compile Include="Controllers\LifecycleController.cs" />
+    <Compile Include="Controllers\LockController.cs" />
+    <Compile Include="Controllers\StateController.cs" />
+    <Compile Include="Interfaces\IAuthLogic.cs" />
     <Compile Include="Interfaces\IEventContext.cs" />
     <Compile Include="Interfaces\IEventStorageForReset.cs" />
+    <Compile Include="Interfaces\ILifecycleLogic.cs" />
+    <Compile Include="Interfaces\ILockingLogic.cs" />
     <Compile Include="Interfaces\IResetLogic.cs" />
+    <Compile Include="Interfaces\IStateLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EventRoleModel.cs" />
     <Compile Include="Models\InitialEventState.cs" />
@@ -108,6 +115,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerCommunicator.cs" />
     <Compile Include="Storage\EventStorageForReset.cs" />
+    <Compile Include="Interfaces\ILockLogic.cs" />
     <Compile Include="Storage\LockLogic.cs" />
     <Compile Include="Storage\ResetLogic.cs" />
   </ItemGroup>

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Common;
 using Event.Models;
@@ -26,12 +24,11 @@ namespace Event.Interfaces
 
         #region Rules
         Task<bool> IsExecutable();
-        Task UpdateRules(string id, EventRuleDto rules);
         #endregion
 
         #region DTO Creation
-        Task<EventStateDto> EventStateDto { get; }
-        Task<EventDto> EventDto { get; }
+        Task<EventStateDto> GetEventStateDto();
+        EventDto GetEventDto();
         IEnumerable<RelationToOtherEventModel> RelationsToLock { get; }
 
         #endregion
@@ -41,7 +38,6 @@ namespace Event.Interfaces
 
         // TODO: I (Morten) may have bloated this interface; should we refactor
         Task InitializeEvent(EventDto eventDto, Uri ownUri);
-        Task UpdateEvent(EventDto eventDto, Uri ownUri);
         Task DeleteEvent();
 
         Task Execute();

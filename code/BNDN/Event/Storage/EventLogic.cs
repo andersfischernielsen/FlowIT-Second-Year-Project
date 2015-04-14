@@ -151,24 +151,6 @@ namespace Event.Storage
             return true; // If all conditions are executed or excluded.
         }
 
-        public async Task UpdateRules(string id, EventRuleDto rules)
-        {
-            await Task.Run(() =>
-            {
-                //Todo : Persist this stuff.
-
-                if (rules == null)
-                {
-                    throw new ArgumentNullException("rules","Provided rules was null");
-                }
-                var relation = new RelationToOtherEventModel {EventID = rules.Id, Uri = rules.Uri};
-                UpdateRule(rules.Condition, relation, Conditions);
-                UpdateRule(rules.Exclusion, relation, Exclusions);
-                UpdateRule(rules.Inclusion, relation, Inclusions);
-                UpdateRule(rules.Response, relation, Responses);
-            });
-        }
-
         private static void UpdateRule(bool shouldAdd, RelationToOtherEventModel value, ISet<RelationToOtherEventModel> collection)
         {
             //Todo : Persist this stuff.
@@ -180,27 +162,23 @@ namespace Event.Storage
 
         #region DTO Creation
 
-        public Task<EventStateDto> EventStateDto
+        public async Task<EventStateDto> GetEventStateDto()
         {
-            get
+
+            return new EventStateDto
             {
-                return Task.Run(async () => new EventStateDto
-                {
-                    Id = EventId,
-                    Name = Name,
-                    Executed = Executed,
-                    Included = Included,
-                    Pending = Pending,
-                    Executable = await IsExecutable()
-                });
-            }
+                Id = EventId,
+                Name = Name,
+                Executed = Executed,
+                Included = Included,
+                Pending = Pending,
+                Executable = await IsExecutable()
+            };
         }
 
-        public Task<EventDto> EventDto
+        public EventDto GetEventDto()
         {
-            get
-            {
-                return Task.Run(() => new EventDto
+                return new EventDto
                 {
                     EventId = EventId,
                     WorkflowId = WorkflowId,
@@ -213,8 +191,7 @@ namespace Event.Storage
                     Exclusions = Exclusions.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
                     Responses = Responses.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
                     Inclusions = Inclusions.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri })
-                });
-            }
+                };
         }
         #endregion
 
@@ -282,54 +259,6 @@ namespace Event.Storage
                 throw;
             }
             
-        }
-
-        public async Task UpdateEvent(EventDto eventDto, Uri ownUri)
-        {
-            await Task.Run(() =>
-            {
-                if (eventDto == null)
-                {
-                    throw new NullReferenceException("Provided EventDto was null");
-                }
-                if (EventId == null)
-                {
-                    throw new NullReferenceException("EventId was null");
-                }
-
-                if (EventId != eventDto.EventId || WorkflowId != eventDto.WorkflowId)
-                {
-                    //TODO: Remove from server and add again. Maybe remove.
-                }
-
-                EventId = eventDto.EventId;
-                WorkflowId = eventDto.WorkflowId;
-                Name = eventDto.Name;
-                Included = eventDto.Included;
-                Pending = eventDto.Pending;
-                Executed = eventDto.Executed;
-                Inclusions =
-                    new HashSet<RelationToOtherEventModel>(
-                        eventDto.Inclusions.Select(
-                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
-                Exclusions =
-                    new HashSet<RelationToOtherEventModel>(
-                        eventDto.Exclusions.Select(
-                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
-                Conditions =
-                    new HashSet<RelationToOtherEventModel>(
-                        eventDto.Conditions.Select(
-                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
-                Responses =
-                    new HashSet<RelationToOtherEventModel>(
-                        eventDto.Responses.Select(
-                            addressDto => new RelationToOtherEventModel {EventID = addressDto.Id, Uri = addressDto.Uri}));
-
-
-
-                // Todo: This should not be necessary..
-                OwnUri = ownUri;
-            });
         }
 
         public async Task DeleteEvent()

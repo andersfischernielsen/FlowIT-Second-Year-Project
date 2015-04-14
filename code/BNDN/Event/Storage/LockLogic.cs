@@ -9,7 +9,7 @@ namespace Event.Storage
     /// <summary>
     /// LockLogic is the class that handles the operations regarding locking this Event and other related, dependent Events. 
     /// </summary>
-    public class LockLogic
+    public class LockLogic : ILockLogic
     {
         private readonly IEventLogic _logic;
         /// <summary>

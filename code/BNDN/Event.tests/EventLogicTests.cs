@@ -168,7 +168,7 @@ namespace Event.tests
             var eventLogic = new EventLogic(mock.Object);
 
             //Act
-            var result = await eventLogic.EventStateDto;
+            var result = await eventLogic.GetEventStateDto();
 
             //Assert
             Assert.AreEqual(false,result.Included);
@@ -193,7 +193,7 @@ namespace Event.tests
             var eventLogic = new EventLogic(mock.Object);
           
             //Act
-            var result = await eventLogic.EventStateDto;
+            var result = await eventLogic.GetEventStateDto();
 
             //Assert
             Assert.AreEqual(true, result.Included);
@@ -208,7 +208,7 @@ namespace Event.tests
         #endregion
 
         [Test]
-        public async void GetEventDtoPropertyTest()
+        public void GetEventDtoPropertyTest()
         {
             //Arrange
             var mock = new Mock<IEventStorage>();
@@ -228,7 +228,7 @@ namespace Event.tests
 
 
             //Act
-            var result = await eventLogic.EventDto;
+            var result = eventLogic.GetEventDto();
 
             //Assert
             Assert.AreEqual(true, result.Included);
@@ -304,100 +304,6 @@ namespace Event.tests
                 throw ex.InnerException;
             }
         }
-
-        [Test]
-        //This test only tests that values are set, and not a connection to the server is established.
-        public async void UpdateEventRuns()
-        {
-            //Arrange
-            var mock = new Mock<IEventStorage>();
-            mock.SetupAllProperties();
-            mock.Setup(storage => storage.EventId).Returns("TestId");
-
-            var eventLogic = new EventLogic(mock.Object);
-            var eventDto = new EventDto()
-            {
-                EventId = "TestId",
-                WorkflowId = "TestWId",
-                Name = "TestName",
-                Included = true,
-                Pending = true,
-                Executed = true,
-                Inclusions = new HashSet<EventAddressDto>(),
-                Exclusions = new HashSet<EventAddressDto>(),
-                Conditions = new HashSet<EventAddressDto>(),
-                Responses = new HashSet<EventAddressDto>(),
-            };
-
-            //Act
-            try
-            {
-                await eventLogic.UpdateEvent(eventDto, new Uri("http://test/"));
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-
-
-            //Assert
-            Assert.AreEqual(true, eventLogic.Included);
-            Assert.AreEqual(true, eventLogic.Executed);
-            Assert.AreEqual(true, eventLogic.Pending);
-            Assert.AreEqual("TestWId", eventLogic.WorkflowId);
-            Assert.AreEqual("TestName", eventLogic.Name);
-            Assert.AreEqual("TestId", eventLogic.EventId);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Inclusions);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Exclusions);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Conditions);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Responses);
-        }
-
-        [Test]
-        [ExpectedException(typeof(NullReferenceException))]
-        public async void UpdateEventEventDtoIsNull()
-        {
-            //Arrange
-            var eventLogic = new EventLogic(Mock.Of<IEventStorage>());
-
-            //Act
-            try
-            {
-                await eventLogic.UpdateEvent(null, new Uri("http://test/"));
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.AreEqual("Provided EventDto was null", ex.InnerException.Message);
-                throw ex.InnerException;
-            }
-        }
-
-        [Test]
-        [ExpectedException(typeof(NullReferenceException))]
-        public async void UpdateEventEventIdIsNull()
-        {
-            //Arrange
-            var mock = new Mock<IEventStorage>();
-            mock.SetupAllProperties();
-
-            var eventLogic = new EventLogic(mock.Object);
-            eventLogic.EventId = null;
-
-            //Act
-            try
-            {
-                await eventLogic.UpdateEvent(new EventDto(), new Uri("http://test/"));
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.AreEqual("EventId was null", ex.InnerException.Message);
-                throw ex.InnerException;
-            }
-        }
-
-      
         #endregion
 
     }
