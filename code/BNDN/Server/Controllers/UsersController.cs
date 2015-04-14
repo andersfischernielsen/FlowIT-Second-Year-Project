@@ -19,30 +19,23 @@ namespace Server.Controllers
             _logic = logic;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            _logic.Dispose();
-            base.Dispose(disposing);
-        }
-
-        // GET: /Login
+        // GET: /Logins
         /// <summary>
         /// Returns the users roles on all workflows.
         /// </summary>
-        /// <param name="username">Id of the requested workflow</param>
-        /// <returns>RolesOnWorkflowsDto</returns>
+        /// <param name="username">Id of the requested workflow.</param>
+        /// <returns></returns>
         [Route("login/{username}")]
         [HttpGet]
         public RolesOnWorkflowsDto Login(string username)
         {
             try
             {
-                var result = _logic.Login(username);
-                return result;
+                return _logic.Login(username);
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, ex));
             }
         }
 
@@ -53,6 +46,7 @@ namespace Server.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
             }
+
             try
             {
                 await _logic.AddUser(dto);
@@ -60,21 +54,28 @@ namespace Server.Controllers
             catch (InvalidOperationException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    "One of the roles does not exist"));
+                    "One of the roles does not exist."));
             }
             catch (ArgumentException ex)
             {
                 if (ex.ParamName == "user")
                 {
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
-                        "A user with that username already exists"));
+                        "A user with that username already exists."));
                 }
+
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
             catch (Exception ex)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _logic.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

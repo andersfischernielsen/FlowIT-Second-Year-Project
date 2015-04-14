@@ -21,7 +21,7 @@ namespace Server.Tests
             var wm = new ServerWorkflowModel
             {
                 Name = "Test2",
-                ID = "1",
+                Id = "1",
                 ServerEventModels = new List<ServerEventModel>(),
                 ServerRolesModels = new List<ServerRoleModel>()
             };
@@ -43,7 +43,7 @@ namespace Server.Tests
             var wm = new ServerWorkflowModel
             {
                 Name = "Test2",
-                ID = "1",
+                Id = "1",
                 ServerEventModels = new List<ServerEventModel>(),
                 ServerRolesModels = new List<ServerRoleModel>()
             };
@@ -51,8 +51,8 @@ namespace Server.Tests
 
             var e = new ServerEventModel()
             {
-                ID = "Adam",
-                ServerWorkflowModelID = "1",
+                Id = "Adam",
+                ServerWorkflowModelId = "1",
                 Uri = "http://www.google.dk",
                 ServerWorkflowModel = _s.GetWorkflow("1")
             };

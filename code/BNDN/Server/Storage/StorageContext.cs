@@ -31,7 +31,7 @@ namespace Server.Storage
             modelBuilder.Entity<ServerRoleModel>()
                 .HasRequired(role => role.ServerWorkflowModel)
                 .WithMany(workflow => workflow.ServerRolesModels)
-                .HasForeignKey(role => role.ServerWorkflowModelID);
+                .HasForeignKey(role => role.ServerWorkflowModelId);
         }
 
         public DbSet<ServerEventModel> Events { get; set; }

@@ -24,12 +24,7 @@ namespace Server.Controllers
             _logic = logic;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            _logic.Dispose();
-            base.Dispose(disposing);
-        }
-
+        #region GET requests
         /// <summary>
         /// Returns a list of all workflows currently held at this Server
         /// </summary>
@@ -42,7 +37,6 @@ namespace Server.Controllers
         }
 
 
-        #region GET requests
         // GET: /Workflows/5
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
@@ -59,7 +53,7 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, ex.Message));
             }
         }
         #endregion
@@ -76,8 +70,9 @@ namespace Server.Controllers
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Provided input could not be mapped onto an instance of WorkflowDto"));
+                    "Provided input could not be mapped onto an instance of WorkflowDto."));
             }
+
             try
             {
                 // Add this Event to the specified workflow
@@ -85,7 +80,7 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
             }
         }
 
@@ -98,6 +93,7 @@ namespace Server.Controllers
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                                                 "Provided input could not be mapped onto EventAddressDto"));
             }
+
             try
             {
                 // Add this Event to the specified workflow
@@ -110,12 +106,10 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
             }
         }
         #endregion
-
 
         #region PUT requests
         /// <summary>
@@ -141,7 +135,7 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
         #endregion
@@ -158,7 +152,7 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "Server: Failed to remove Event from workflow", ex));
             }
         }
@@ -173,10 +167,16 @@ namespace Server.Controllers
             }
             catch (Exception ex)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "Server: Failed to remove workflow", ex));
             }
         }
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            _logic.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }
