@@ -84,24 +84,16 @@ namespace Common
         /// <returns>An object that was created at the API.</returns>
         public virtual async Task Create<T>(string uri, T toCreate)
         {
-            try
-            {
-                var response = await HttpClient.PostAsJsonAsync(uri, objectToCreate);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.StackTrace);
-                throw;
-            }
+            var response = await HttpClient.PostAsJsonAsync(uri, toCreate);
+            response.EnsureSuccessStatusCode();
         }
 
-        public virtual async Task<TResult> Create<TArgument, TResult>(string uri, TArgument objectToPost)
+        public virtual async Task<TResult> Create<TArgument, TResult>(string uri, TArgument toPost)
         {
-            var response = await HttpClient.PostAsJsonAsync(uri, objectToPost);
+            var response = await HttpClient.PostAsJsonAsync(uri, toPost);
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadAsAsync<TResult>();
-            return result;
+
+            return await response.Content.ReadAsAsync<TResult>();
         }
 
         /// <summary>
@@ -113,19 +105,14 @@ namespace Common
         /// <returns>All objects of type T at the API.</returns>
         public virtual async Task<IList<T>> ReadList<T>(string uri)
         {
-            T[] objects;
-            try
-            {
-                var response = await HttpClient.GetAsync(uri);
-                response.EnsureSuccessStatusCode();
-                objects = await response.Content.ReadAsAsync<T[]>();
-                return objects.ToList();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            var response = await HttpClient.GetAsync(uri);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadAsAsync<T[]>();
+            return result.ToList();
         }
+
+
         /// <summary>
         /// Reads an object of type T at the API at (base address + URI). 
         /// T and the URI string must match.
@@ -135,17 +122,11 @@ namespace Common
         /// <returns>An object of type T at the API.</returns>
         public virtual async Task<T> Read<T>(string uri)
         {
-            try
-            {
-                HttpResponseMessage response = await HttpClient.GetAsync(uri);
-                response.EnsureSuccessStatusCode();
-                T objectToRead = await response.Content.ReadAsAsync<T>();
-                return objectToRead;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            var response = await HttpClient.GetAsync(uri);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadAsAsync<T>();
+            return result;
         }
 
         /// <summary>
@@ -155,33 +136,20 @@ namespace Common
         /// <typeparam name="T"> An object matching the expected object at the address (baseaddress + URI)</typeparam>
         /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
         /// <param name="toUpdate"> The type of object to update at the API.</param>
+        public virtual async Task Update<T>(string uri, T toUpdate)
         {
-            try
-            {
-                var response = await HttpClient.PutAsJsonAsync(uri, objectToUpdate);
-                response.EnsureSuccessStatusCode();
-                //return await response.Content.ReadAsAsync<T>();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            var response = await HttpClient.PutAsJsonAsync(uri, toUpdate);
+            response.EnsureSuccessStatusCode();
         }
+
         /// <summary>
         /// Sends a DELETE http request to the address (baseaddress + URI).
         /// </summary>
         /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
         public virtual async Task Delete(string uri)
         {
-            try
-            {
-                var response = await HttpClient.DeleteAsync(uri);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            var response = await HttpClient.DeleteAsync(uri);
+            response.EnsureSuccessStatusCode();
         }
     }
 }
