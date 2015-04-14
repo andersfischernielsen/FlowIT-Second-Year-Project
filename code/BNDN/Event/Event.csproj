@@ -88,6 +88,8 @@
     <Compile Include="Interfaces\IResetLogic.cs" />
     <Compile Include="Interfaces\IStateLogic.cs" />
     <Compile Include="LifecycleLogic.cs" />
+    <Compile Include="Exceptions\LockedException.cs" />
+    <Compile Include="Logic\StateLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EventRoleModel.cs" />
     <Compile Include="Models\InitialEventState.cs" />
