@@ -7,11 +7,11 @@ using Common;
 
 namespace Event.Interfaces
 {
-    interface IStateLogic
+    public interface IStateLogic : IDisposable
     {
-        bool IsExecuted(string eventId);
-        bool IsIncluded(string eventId);
-        EventStateDto GetStateDto(string eventId);
+        bool IsExecuted(string eventId, string senderId);
+        bool IsIncluded(string eventId, string senderId);
+        Task<EventStateDto> GetStateDto(string eventId, string senderId);
         void SetIncluded(string eventId, bool newIncludedValue);
         void SetPending(string eventId, bool newPendingValue);
         void Execute(string eventId);

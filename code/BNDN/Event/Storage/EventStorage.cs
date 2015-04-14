@@ -22,221 +22,181 @@ namespace Event.Storage
 
         public void InitializeNewEvent(InitialEventState initialEventState)
         {
-            if (EventId == null) throw new InvalidOperationException("EventId must be set");
-
-            if (_context.EventIdentification.Any(model => model.Id == EventId))
+            if (_context.EventIdentification.Any(model => model.Id == initialEventState.EventId))
             {
                 throw new InvalidOperationException("The EventId is already existing");
             }
-            if (_context.EventState.Any(model => model.Id == EventId))
+            if (_context.EventState.Any(model => model.Id == initialEventState.EventId))
             {
                 throw new InvalidOperationException("The EventId is already existing");
             }
-            _context.EventIdentification.Add(new EventIdentificationModel { Id = EventId, Roles = new List<EventRoleModel>()});
-            _context.EventState.Add(new EventStateModel { Id = EventId });
+            _context.EventIdentification.Add(new EventIdentificationModel { Id = initialEventState.EventId, Roles = new List<EventRoleModel>() });
+            _context.EventState.Add(new EventStateModel { Id = initialEventState.EventId });
             _context.InitialEventState.Add(initialEventState);
             _context.SaveChanges();
         }
 
-        public void DeleteEvent()
+        public void DeleteEvent(string eventId)
         {
-            if (EventId == null) throw new InvalidOperationException("EventId must be set");
-            if (!_context.EventIdentification.Any(model => model.Id == EventId))
+            if (!_context.EventIdentification.Any(model => model.Id == eventId))
             {
                 throw new InvalidOperationException("The EventId does not exist");
             }
-            if (!_context.EventState.Any(model => model.Id == EventId))
+            if (!_context.EventState.Any(model => model.Id == eventId))
             {
                 throw new InvalidOperationException("The EventId does not exist");
             }
 
-            _context.Conditions.RemoveRange(_context.Conditions.Where(ei => ei.EventIdentificationModelId == EventId));
-            _context.Exclusions.RemoveRange(_context.Exclusions.Where(ei => ei.EventIdentificationModelId == EventId));
-            _context.Inclusions.RemoveRange(_context.Inclusions.Where(ei => ei.EventIdentificationModelId == EventId));
-            _context.Responses.RemoveRange(_context.Responses.Where(ei => ei.EventIdentificationModelId == EventId));
+            _context.Conditions.RemoveRange(_context.Conditions.Where(ei => ei.EventIdentificationModelId == eventId));
+            _context.Exclusions.RemoveRange(_context.Exclusions.Where(ei => ei.EventIdentificationModelId == eventId));
+            _context.Inclusions.RemoveRange(_context.Inclusions.Where(ei => ei.EventIdentificationModelId == eventId));
+            _context.Responses.RemoveRange(_context.Responses.Where(ei => ei.EventIdentificationModelId == eventId));
 
-            _context.EventState.Remove(_context.EventState.Single(ei => ei.Id == EventId));
-            _context.EventIdentification.Remove(_context.EventIdentification.Single(ei => ei.Id == EventId));
+            _context.EventState.Remove(_context.EventState.Single(ei => ei.Id == eventId));
+            _context.EventIdentification.Remove(_context.EventIdentification.Single(ei => ei.Id == eventId));
 
             _context.SaveChanges();
         }
 
 
         #region Properties
-        public Uri OwnUri
+
+        public Uri GetUri(string eventId)
         {
-            get
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
-                return new Uri(_context.EventIdentification.Single(model => model.Id == EventId).OwnUri);
-            }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
-
-                // Add replacing value
-                _context.EventIdentification.Single(model => model.Id == EventId).OwnUri = value.AbsoluteUri;
-                _context.SaveChanges();
-
-            }
+            EventIdentificationIsInALegalState(eventId);
+            return new Uri(_context.EventIdentification.Single(model => model.Id == eventId).OwnUri);
         }
 
-        public string WorkflowId
+        public void SetUri(string eventId, Uri value)
         {
-            get
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
-                return _context.EventIdentification.Single(model => model.Id == EventId).WorkflowId;
-            }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
+            EventIdentificationIsInALegalState(eventId);
 
-                _context.EventIdentification.Single(model => model.Id == EventId).WorkflowId = value;
-                _context.SaveChanges();
-            }
+            // Add replacing value
+            _context.EventIdentification.Single(model => model.Id == eventId).OwnUri = value.AbsoluteUri;
+            _context.SaveChanges();
         }
 
-        public string EventId { get; set; }
-
-        public string Name
+        public string GetWorkflowId(string eventId)
         {
-            get
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
-                return _context.EventIdentification.Single(model => model.Id == EventId).Name;
-            }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
-
-                _context.EventIdentification.Single(model => model.Id == EventId).Name = value;
-                _context.SaveChanges();
-            }
+            EventIdentificationIsInALegalState(eventId);
+            return _context.EventIdentification.Single(model => model.Id == eventId).WorkflowId;
         }
 
-        public IEnumerable<string> Roles
+        public void SetWorkflowId(string eventId, string value)
         {
-            get
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
+            EventIdentificationIsInALegalState(eventId);
 
-                return _context.EventIdentification.Single(model => model.Id == EventId).Roles.Select(role => role.Role);
-            }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventIdentificationIsInALegalState();
-
-                _context.EventIdentification.Single(model => model.Id == EventId).Roles = value.Select(role => new EventRoleModel{Role = role, EventId = EventId}).ToList();
-                _context.SaveChanges();
-            }
+            _context.EventIdentification.Single(model => model.Id == eventId).WorkflowId = value;
+            _context.SaveChanges();
         }
 
-        public bool Executed
+        public string GetName(string eventId)
         {
-            get
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventStateIsInALegalState();
-
-                return _context.EventState.Single(model => model.Id == EventId).Executed;
-            }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventStateIsInALegalState();
-
-                _context.EventState.Single(model => model.Id == EventId).Executed = value;
-                _context.SaveChanges();
-            }
+            EventIdentificationIsInALegalState(eventId);
+            return _context.EventIdentification.Single(model => model.Id == eventId).Name;
         }
 
-        public bool Included
+        public void SetName(string eventId, string value)
         {
-            get
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventStateIsInALegalState();
+            EventIdentificationIsInALegalState(eventId);
 
-                return _context.EventState.Single(model => model.Id == EventId).Included;
-            }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventStateIsInALegalState();
-
-                _context.EventState.Single(model => model.Id == EventId).Included = value;
-                _context.SaveChanges();
-            }
+            _context.EventIdentification.Single(model => model.Id == eventId).Name = value;
+            _context.SaveChanges();
         }
 
-        public bool Pending
+        public IEnumerable<string> GetRoles(string eventId)
         {
-            get
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventStateIsInALegalState();
+            EventIdentificationIsInALegalState(eventId);
 
-                return _context.EventState.Single(model => model.Id == EventId).Pending;
-            }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventStateIsInALegalState();
+            return _context.EventIdentification.Single(model => model.Id == eventId).Roles.Select(role => role.Role);
+        }
 
-                _context.EventState.Single(model => model.Id == EventId).Pending = value;
-                _context.SaveChanges();
-            }
+        public void SetRoles(string eventId, IEnumerable<string> value)
+        {
+            EventIdentificationIsInALegalState(eventId);
+
+            _context.EventIdentification.Single(model => model.Id == eventId).Roles = value.Select(role => new EventRoleModel { Role = role, EventId = eventId }).ToList();
+            _context.SaveChanges();
+        }
+
+        public bool GetExecuted(string eventId)
+        {
+            EventStateIsInALegalState(eventId);
+
+            return _context.EventState.Single(model => model.Id == eventId).Executed;
+        }
+
+        public void SetExecuted(string eventId, bool value)
+        {
+            EventStateIsInALegalState(eventId);
+
+            _context.EventState.Single(model => model.Id == eventId).Executed = value;
+            _context.SaveChanges();
+        }
+
+        public bool GetIncluded(string eventId)
+        {
+            EventStateIsInALegalState(eventId);
+
+            return _context.EventState.Single(model => model.Id == eventId).Included;
+        }
+        public void SetIncluded(string eventId, bool value)
+        {
+            EventStateIsInALegalState(eventId);
+
+            _context.EventState.Single(model => model.Id == eventId).Included = value;
+            _context.SaveChanges();
+        }
+
+        public bool GetPending(string eventId)
+        {
+            EventStateIsInALegalState(eventId);
+
+            return _context.EventState.Single(model => model.Id == eventId).Pending;
+        }
+        public void SetPending(string eventId, bool value)
+        {
+            EventStateIsInALegalState(eventId);
+
+            _context.EventState.Single(model => model.Id == eventId).Pending = value;
+            _context.SaveChanges();
         }
 
         /// <summary>
         /// The setter for this property should not be used to unlock the Event. If setter is provided with a null-value
         /// an ArgumentNullException will be raised. Instead, use ClearLock()-method to remove any Lock on this Event.  
         /// </summary>
-        public LockDto LockDto
+        public LockDto GetLockDto(string eventId)
         {
-            get
+            EventLockIsInALegalState(eventId);
+            // SingleOrDeafult will return either null or the actual single element in set. 
+            return _context.LockDto.SingleOrDefault(model => model.Id == eventId);
+        }
+        public void SetLockDto(string eventId, LockDto value)
+        {
+            EventLockIsInALegalState(eventId);
+            if (_context.LockDto.Any(model => model.Id == eventId))
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventLockIsInALegalState();
-                // SingleOrDeafult will return either null or the actual single element in set. 
-                return _context.LockDto.SingleOrDefault(model => model.Id == EventId);
+                throw new ApplicationException("There already exists a lock on this event");
             }
-            set
+            if (value == null)
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                EventLockIsInALegalState();
-                if (_context.LockDto.Any(model => model.Id == EventId))
-                {
-                    throw new ApplicationException("There already exists a lock on this event");
-                }
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value", "The provided LockDto was null. To unlock Event, " +
-                                                            "see documentation");
-                }
-
-                // Remove current LockDto (should be either only a single element or no element at all
-                // Should not be neccesary.
-                foreach (var element in _context.LockDto.Where(model => model.Id == EventId))
-                {
-                    _context.LockDto.Remove(element);
-                }
-                //Todo: Maybe this should not be done here - but this is the safest way.
-                var theLock = value;
-                theLock.Id = EventId;
-
-                _context.LockDto.Add(theLock);
-                _context.SaveChanges();
+                throw new ArgumentNullException("value", "The provided LockDto was null. To unlock Event, " +
+                                                        "see documentation");
             }
+
+            // Remove current LockDto (should be either only a single element or no element at all
+            // Should not be neccesary.
+            foreach (var element in _context.LockDto.Where(model => model.Id == eventId))
+            {
+                _context.LockDto.Remove(element);
+            }
+            //Todo: Maybe this should not be done here - but this is the safest way.
+            var theLock = value;
+            theLock.Id = eventId;
+
+            _context.LockDto.Add(theLock);
+            _context.SaveChanges();
         }
 
 
@@ -245,178 +205,157 @@ namespace Event.Storage
         /// (Setter for LockDto will raise an ArgumentNullException if provided a null-value)
         /// The method simply removes all (should be either 1 or 0) LockDto element(s) held in database. 
         /// </summary>
-        public void ClearLock()
+        public void ClearLock(string eventId)
         {
-            if (EventId == null) throw new InvalidOperationException("EventId must be set");
-            EventLockIsInALegalState();
+            EventLockIsInALegalState(eventId);
 
             // Clear the single LockDto-element 
-            foreach (var lockDto in _context.LockDto.Where(model => model.Id == EventId))
+            foreach (var lockDto in _context.LockDto.Where(model => model.Id == eventId))
             {
                 _context.LockDto.Remove(lockDto);
             }
             _context.SaveChanges();
         }
 
-        public HashSet<RelationToOtherEventModel> Conditions
+        public HashSet<RelationToOtherEventModel> GetConditions(string eventId)
         {
-            get
+            var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == eventId);
+            var hashSet = new HashSet<RelationToOtherEventModel>();
+
+            foreach (var element in dbset)
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<RelationToOtherEventModel>();
-
-                foreach (var element in dbset)
+                hashSet.Add(new RelationToOtherEventModel
                 {
-                    hashSet.Add(new RelationToOtherEventModel
-                    {
-                        Uri = new Uri(element.UriString),
-                        EventID = element.EventId
-                    });
-                }
-
-                return hashSet;
+                    Uri = new Uri(element.UriString),
+                    EventID = element.EventId
+                });
             }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == EventId))
-                {
-                    _context.Conditions.Remove(uri);
-                }
 
-                foreach (var element in value)
-                {
-                    var uriToAdd = new ConditionUri()
-                    {
-                        UriString = element.Uri.AbsoluteUri,
-                        EventId = element.EventID,
-                        EventIdentificationModelId = EventId
-                    };
-                    _context.Conditions.Add(uriToAdd);
-                }
-                _context.SaveChanges();
-            }
+            return hashSet;
         }
-        public HashSet<RelationToOtherEventModel> Responses
+        public void SetConditions(string eventId, HashSet<RelationToOtherEventModel> value)
         {
-            get
+            foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == eventId))
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<RelationToOtherEventModel>();
-
-                foreach (var element in dbset)
-                {
-                    hashSet.Add(new RelationToOtherEventModel
-                    {
-                        Uri = new Uri(element.UriString),
-                        EventID = element.EventId
-                    });
-                }
-
-                return hashSet;
+                _context.Conditions.Remove(uri);
             }
-            set
+
+            foreach (var element in value)
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == EventId))
+                var uriToAdd = new ConditionUri()
                 {
-                    _context.Responses.Remove(uri);
-                }
-
-                foreach (var element in value)
-                {
-                    var uriToAdd = new ResponseUri()
-                    {
-                        UriString = element.Uri.AbsoluteUri,
-                        EventId = element.EventID,
-                        EventIdentificationModelId = EventId
-                    };
-                    _context.Responses.Add(uriToAdd);
-                }
-                _context.SaveChanges();
+                    UriString = element.Uri.AbsoluteUri,
+                    EventId = element.EventID,
+                    EventIdentificationModelId = eventId
+                };
+                _context.Conditions.Add(uriToAdd);
             }
+            _context.SaveChanges();
         }
-        public HashSet<RelationToOtherEventModel> Exclusions
+        public HashSet<RelationToOtherEventModel> GetResponses(string eventId)
         {
-            get
+            var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == eventId);
+            var hashSet = new HashSet<RelationToOtherEventModel>();
+
+            foreach (var element in dbset)
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<RelationToOtherEventModel>();
-
-                foreach (var element in dbset)
+                hashSet.Add(new RelationToOtherEventModel
                 {
-                    hashSet.Add(new RelationToOtherEventModel
-                    {
-                        Uri = new Uri(element.UriString),
-                        EventID = element.EventId
-                    });
-                }
-
-                return hashSet;
+                    Uri = new Uri(element.UriString),
+                    EventID = element.EventId
+                });
             }
-            set
-            {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == EventId))
-                {
-                    _context.Exclusions.Remove(uri);
-                }
 
-                foreach (var element in value)
-                {
-                    var uriToAdd = new ExclusionUri()
-                    {
-                        UriString = element.Uri.AbsoluteUri,
-                        EventId = element.EventID,
-                        EventIdentificationModelId = EventId
-                    };
-                    _context.Exclusions.Add(uriToAdd);
-                }
-                _context.SaveChanges();
-            }
+            return hashSet;
         }
-        public HashSet<RelationToOtherEventModel> Inclusions
+        public void SetResponses(string eventId, HashSet<RelationToOtherEventModel> value)
         {
-            get
+            foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == eventId))
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId);
-                var hashSet = new HashSet<RelationToOtherEventModel>();
-
-                foreach (var element in dbset)
-                {
-                    hashSet.Add(new RelationToOtherEventModel
-                    {
-                        Uri = new Uri(element.UriString),
-                        EventID = element.EventId
-                    });
-                }
-
-                return hashSet;
+                _context.Responses.Remove(uri);
             }
-            set
+
+            foreach (var element in value)
             {
-                if (EventId == null) throw new InvalidOperationException("EventId must be set");
-                foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == EventId))
+                var uriToAdd = new ResponseUri
                 {
-                    _context.Inclusions.Remove(uri);
-                }
-
-                foreach (var element in value)
-                {
-                    var uriToAdd = new InclusionUri()
-                    {
-                        UriString = element.Uri.AbsoluteUri,
-                        EventId = element.EventID,
-                        EventIdentificationModelId = EventId
-                    };
-                    _context.Inclusions.Add(uriToAdd);
-                }
-                _context.SaveChanges();
+                    UriString = element.Uri.AbsoluteUri,
+                    EventId = element.EventID,
+                    EventIdentificationModelId = eventId
+                };
+                _context.Responses.Add(uriToAdd);
             }
+            _context.SaveChanges();
+        }
+        public HashSet<RelationToOtherEventModel> GetExclusions(string eventId)
+        {
+            var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == eventId);
+            var hashSet = new HashSet<RelationToOtherEventModel>();
+
+            foreach (var element in dbset)
+            {
+                hashSet.Add(new RelationToOtherEventModel
+                {
+                    Uri = new Uri(element.UriString),
+                    EventID = element.EventId
+                });
+            }
+
+            return hashSet;
+        }
+        public void SetExclusions(string eventId, HashSet<RelationToOtherEventModel> value)
+        {
+            foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == eventId))
+            {
+                _context.Exclusions.Remove(uri);
+            }
+
+            foreach (var element in value)
+            {
+                var uriToAdd = new ExclusionUri
+                {
+                    UriString = element.Uri.AbsoluteUri,
+                    EventId = element.EventID,
+                    EventIdentificationModelId = eventId
+                };
+                _context.Exclusions.Add(uriToAdd);
+            }
+            _context.SaveChanges();
+        }
+        public HashSet<RelationToOtherEventModel> GetInclusions(string eventId)
+        {
+            var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == eventId);
+            var hashSet = new HashSet<RelationToOtherEventModel>();
+
+            foreach (var element in dbset)
+            {
+                hashSet.Add(new RelationToOtherEventModel
+                {
+                    Uri = new Uri(element.UriString),
+                    EventID = element.EventId
+                });
+            }
+
+            return hashSet;
+        }
+        public void SetInclusions(string eventId, HashSet<RelationToOtherEventModel> value)
+        {
+            foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == eventId))
+            {
+                _context.Inclusions.Remove(uri);
+            }
+
+            foreach (var element in value)
+            {
+                var uriToAdd = new InclusionUri()
+                {
+                    UriString = element.Uri.AbsoluteUri,
+                    EventId = element.EventID,
+                    EventIdentificationModelId = eventId
+                };
+                _context.Inclusions.Add(uriToAdd);
+            }
+            _context.SaveChanges();
         }
 
         #endregion
@@ -441,18 +380,17 @@ namespace Event.Storage
         /// EventIdentificationIsInALegalState makes two checks on EventIdentification-set,
         /// that when combined ensures that EventIdentification only has a single element. 
         /// </summary>
-        private void EventIdentificationIsInALegalState()
+        private void EventIdentificationIsInALegalState(string eventId)
         {
-            if (EventId == null) throw new InvalidOperationException("EventId must be set");
             // Check that there's currently only a single element in database
-            if (_context.EventIdentification.Count(model => model.Id == EventId) > 1)
+            if (_context.EventIdentification.Count(model => model.Id == eventId) > 1)
             {
                 throw new ApplicationException(
                     "More than a single EventIdentification element in database-set in Event");
             }
 
 
-            if (!_context.EventIdentification.Any(model => model.Id == EventId))
+            if (!_context.EventIdentification.Any(model => model.Id == eventId))
             {
                 throw new ApplicationException("EventIdentification was not initialized in Event." +
                                                "Count was zero");
@@ -463,12 +401,10 @@ namespace Event.Storage
         /// EventLockIsInALegalState makes two checks on LockDto-set,
         /// that when combined ensures that LockDto only has a single element. 
         /// </summary>
-        private void EventLockIsInALegalState()
+        private void EventLockIsInALegalState(string eventId)
         {
-            if (EventId == null) throw new InvalidOperationException("EventId must be set");
-            var lockDto = _context.LockDto.Where(model => model.Id == EventId);
             // Check that there's currently only a single element in database
-            if (lockDto.Count() > 1)
+            if (_context.LockDto.Count(model => model.Id == eventId) > 1)
             {
                 throw new ApplicationException(
                     "More than a single Lock element in database-set in Event");
@@ -479,15 +415,14 @@ namespace Event.Storage
         /// EventStateIsInALegalState makes two checks on EventState-set,
         /// that when combined ensures that EventState only has a single element. 
         /// </summary>
-        private void EventStateIsInALegalState()
+        private void EventStateIsInALegalState(string eventId)
         {
-            if (EventId == null) throw new InvalidOperationException("EventId must be set");
             // Check that there is no more than a single element in EventState
-            if (_context.EventState.Count(model => model.Id == EventId) > 1)
+            if (_context.EventState.Count(model => model.Id == eventId) > 1)
             {
                 throw new ApplicationException("More than a single element in EventState set");
             }
-            if (!_context.EventState.Any(model => model.Id == EventId))
+            if (!_context.EventState.Any(model => model.Id == eventId))
             {
                 throw new ApplicationException("EventState was not initialized in Event");
             }
