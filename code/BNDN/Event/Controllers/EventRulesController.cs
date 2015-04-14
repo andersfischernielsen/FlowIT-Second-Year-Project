@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Event.Interfaces;
 using Event.Models;
 using Event.Storage;
 
@@ -13,6 +14,17 @@ namespace Event.Controllers
     /// </summary>
     public class EventRulesController : ApiController
     {
+        private readonly IEventLogic _logic;
+
+        public EventRulesController()
+        {
+            _logic = new EventLogic(new EventStorage(new EventContext()));
+        }
+
+        public EventRulesController(IEventLogic logic)
+        {
+            _logic = logic;
+        }
 
         /// <summary>
         /// Add a rule to this Event.
@@ -25,36 +37,34 @@ namespace Event.Controllers
         [HttpPost]
         public async Task PostRules(string senderId, [FromBody] EventRuleDto ruleDto, string eventId)
         {
-            using (var logic = new EventLogic(eventId))
+            _logic.EventId = eventId;
+            // Dismiss request if Event is currently locked
+            if (_logic.IsLocked())
             {
-                // Dismiss request if Event is currently locked
-                if (logic.IsLocked())
-                {
-                    // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
-                }
-
-                // Check that provided input can be mapped onto a legal instance of EventRuleDto
-                if (!ModelState.IsValid)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        "Provided input could not be mapped onto an instance of EventRuleDto"));
-                }
-                if (ruleDto == null)
-                {
-                    // TODO: Discuss: This check should be obsolete by now, eith above !ModelState.IsValid check
-                    BadRequest("Request requires data");
-                }
-
-                // TODO: Discuss: Are we sure about the following logic? Seems fishy
-                // if new entry, add Event to the endPoints-table.
-                //if (await logic.KnowsId(senderId))
-                //{
-                //    BadRequest(string.Format("{0} already exists!", senderId));
-                //}
-
-                await logic.UpdateRules(senderId, ruleDto);
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
             }
+
+            // Check that provided input can be mapped onto a legal instance of EventRuleDto
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Provided input could not be mapped onto an instance of EventRuleDto"));
+            }
+            if (ruleDto == null)
+            {
+                // TODO: Discuss: This check should be obsolete by now, eith above !ModelState.IsValid check
+                BadRequest("Request requires data");
+            }
+
+            // TODO: Discuss: Are we sure about the following logic? Seems fishy
+            // if new entry, add Event to the endPoints-table.
+            //if (await logic.KnowsId(senderId))
+            //{
+            //    BadRequest(string.Format("{0} already exists!", senderId));
+            //}
+
+            await _logic.UpdateRules(senderId, ruleDto);
         }
 
 
@@ -70,34 +80,32 @@ namespace Event.Controllers
         [HttpPut]
         public async Task PutRules(string senderId, [FromBody] EventRuleDto ruleDto, string eventId)
         {
-            using (var logic = new EventLogic(eventId))
+            _logic.EventId = eventId;
+            // Dismiss request if Event is currently locked
+            if (_logic.IsLocked())
             {
-                // Dismiss request if Event is currently locked
-                if (logic.IsLocked())
-                {
-                    // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        "Provided input could not be mapped onto an instance of EvemtRuleDto"));
-                }
-                if (ruleDto == null)
-                {
-                    // TODO: Discuss: This check should be obsolete by now, eith above !ModelState.IsValid check. Consider deleting
-                    BadRequest("Request requires data");
-                }
-
-                // If the id is not known to this event, the PUT-call shall fail!
-                //if (!await logic.KnowsId(senderId))
-                //{
-                //    BadRequest(string.Format("{0} does not exist!", senderId));
-                //}
-
-                await logic.UpdateRules(senderId, ruleDto);
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
             }
+
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Provided input could not be mapped onto an instance of EvemtRuleDto"));
+            }
+            if (ruleDto == null)
+            {
+                // TODO: Discuss: This check should be obsolete by now, eith above !ModelState.IsValid check. Consider deleting
+                BadRequest("Request requires data");
+            }
+
+            // If the id is not known to this event, the PUT-call shall fail!
+            //if (!await logic.KnowsId(senderId))
+            //{
+            //    BadRequest(string.Format("{0} does not exist!", senderId));
+            //}
+
+            await _logic.UpdateRules(senderId, ruleDto);
         }
 
 
@@ -111,38 +119,41 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteRules(string senderId, string eventId)
         {
-            using (var logic = new EventLogic(eventId))
+            _logic.EventId = eventId;
+            // Dismiss request if Event is currently locked
+            if (_logic.IsLocked())
             {
-                // Dismiss request if Event is currently locked
-                if (logic.IsLocked())
-                {
-                    // Event is currently locked)
-                    StatusCode(HttpStatusCode.MethodNotAllowed);
-                }
-
-                //if (!await logic.KnowsId(senderId))
-                //{
-                //    BadRequest(string.Format("{0} does not exist!", senderId));
-                //}
-
-                // TODO: Consider: Is this way of deleting still legit?
-                await logic.UpdateRules(senderId,
-                    // Set all states to false to remove them from storage.
-                    // This effectively removes all rules associated with the given id.
-                    // Possibly - to save memory - it could be null instead.
-                    // Todo: Read above
-                    new EventRuleDto
-                    {
-                        Id = senderId,
-                        Condition = false,
-                        Exclusion = false,
-                        Inclusion = false,
-                        Response = false
-                    });
-                // Remove the id because it is no longer associated with any rules.
-                //await logic.RemoveIdAndUri(senderId);
+                // Event is currently locked)
+                StatusCode(HttpStatusCode.MethodNotAllowed);
             }
+
+            //if (!await logic.KnowsId(senderId))
+            //{
+            //    BadRequest(string.Format("{0} does not exist!", senderId));
+            //}
+
+            // TODO: Consider: Is this way of deleting still legit?
+            await _logic.UpdateRules(senderId,
+                // Set all states to false to remove them from storage.
+                // This effectively removes all rules associated with the given id.
+                // Possibly - to save memory - it could be null instead.
+                // Todo: Read above
+                new EventRuleDto
+                {
+                    Id = senderId,
+                    Condition = false,
+                    Exclusion = false,
+                    Inclusion = false,
+                    Response = false
+                });
+            // Remove the id because it is no longer associated with any rules.
+            //await logic.RemoveIdAndUri(senderId);
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            _logic.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }
