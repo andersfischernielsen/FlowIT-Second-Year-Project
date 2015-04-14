@@ -203,64 +203,6 @@ namespace Event.Storage
             return LockDto.LockOwner.Equals(lockOwnerId);
         }
 
-        // TODO: InitializeEvent and UpdateEvent has a lot of duplicated code, will look into this later
-        public async Task InitializeEvent(EventDto eventDto, Uri ownUri)
-        {
-            if (eventDto == null)
-            {
-                throw new ArgumentNullException("eventDto", "Provided EventDto was null");
-            }
-            if (!eventDto.EventId.Equals(EventId))
-            {
-                throw new ArgumentException("EventIds does not match!", "eventDto");
-            }
-
-            // #1. Make sure that server will accept our entry
-            var dto = new EventAddressDto
-            {
-                Id = eventDto.EventId,
-                Uri = ownUri,
-                Roles = eventDto.Roles
-            };
-
-            IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
-            var otherEvents = await serverCommunicator.PostEventToServer(dto);
-
-            try
-            {
-                // Setup a new Event in database.
-                var initialEventState = new InitialEventState()
-                {
-                    EventId = eventDto.EventId,
-                    Executed = eventDto.Executed,
-                    Included = eventDto.Included,
-                    Pending = eventDto.Pending
-                };
-                Storage.InitializeNewEvent(initialEventState);
-
-                // #2. Then set our own fields accordingly
-                EventId = eventDto.EventId;
-                WorkflowId = eventDto.WorkflowId;
-                Name = eventDto.Name;
-                Roles = eventDto.Roles;
-                Included = eventDto.Included;
-                Pending = eventDto.Pending;
-                Executed = eventDto.Executed;
-                Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                Exclusions = new HashSet<RelationToOtherEventModel>(eventDto.Exclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                OwnUri = ownUri;
-            }
-            catch (Exception)
-            {
-                // if something goes wrong, we have to delete the event from the server again.
-                serverCommunicator.DeleteEventFromServer().Wait();
-                throw;
-            }
-            
-        }
-
         public async Task DeleteEvent()
         {
             // Check if Event exists here

@@ -7,9 +7,9 @@ using Common;
 
 namespace Event.Interfaces
 {
-    interface ILifecycleLogic
+    public interface ILifecycleLogic : IDisposable
     {
-        void CreateEvent(EventDto eventDto);
+        Task CreateEvent(EventDto eventDto, Uri ownUri);
         void DeleteEvent(string eventId);
         void ResetEvent(string eventId);
         EventDto GetEventDto(string eventId);

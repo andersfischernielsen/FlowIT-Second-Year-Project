@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace Event.Interfaces
 {
-    interface ILockingLogic
+    interface ILockingLogic : IDisposable
     {
         void LockSelf(string eventId,string callerId);
         void UnlockSelf(string eventId, string callerId);
