@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using Common;
 using Event.Controllers;
 using Event.Interfaces;
+using Event.Models;
 using Event.Storage;
 using Moq;
 using NUnit.Framework;
@@ -18,23 +20,32 @@ namespace Event.tests
         [SetUp]
         public void Setup()
         {
-            _eventStateController = new EventStateController();
+
 
             var mock = new Mock<IEventStorage>();
             mock.SetupAllProperties();
+
+            mock.Setup(m => m.ClearLock()).Callback(() => mock.Object.LockDto = null);
 
             _eventLogic = new EventLogic(mock.Object);
             _eventAddressDto = new EventAddressDto(){Id = "Lock"};
 
             _eventLogic.EventId = "1";
             _eventLogic.WorkflowId = "2";
+            _eventLogic.Name = "TestEvent";
             _eventLogic.Pending = true;
             _eventLogic.Executed = true;
             _eventLogic.Included = false;
             _eventLogic.Roles = new List<string>{"TEACHER"};
             _eventLogic.LockDto = new LockDto(){LockOwner = "Lock"};
+            _eventLogic.Inclusions = new HashSet<RelationToOtherEventModel>();
+            _eventLogic.Responses = new HashSet<RelationToOtherEventModel>();
+            _eventLogic.Conditions = new HashSet<RelationToOtherEventModel>();
+            _eventLogic.Exclusions = new HashSet<RelationToOtherEventModel>();
             //_eventLogic.IsExecutable();
             //_eventLogic.EventStateDto = ?
+
+            _eventStateController = new EventStateController(_eventLogic);
         }
 
         #region GET-tests
@@ -74,6 +85,8 @@ namespace Event.tests
         [Test]
         public async void TestExecute()
         {
+            _eventLogic.Included = true;
+            _eventLogic.UnlockEvent();
             //Test execution of event with a given role.
             await _eventStateController.Execute(new ExecuteDto {Roles = new List<string> {"TEACHER"}},"SenderId");
             Assert.IsTrue(_eventLogic.Executed);
