@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
@@ -261,54 +262,6 @@ namespace Event.tests
             Assert.IsNull(eventLogic.WorkflowId);
             Assert.IsNull(eventLogic.OwnUri);
         }*/
-
-        [Test]
-        //This test only tests that values are set, and not a connection to the server is established.
-        public async void InitializeEventRuns()
-        {
-            //Arrange
-            var mock = new Mock<IEventStorage>();
-            mock.SetupAllProperties();
-            mock.Setup(storage => storage.EventId).Returns("TestId");
-
-            var eventLogic = new EventLogic(mock.Object);
-            var eventDto = new EventDto
-            {
-                EventId = "TestId",
-                WorkflowId = "TestWId",
-                Name = "TestName",
-                Included = true,
-                Pending = true,
-                Executed = true,
-                Inclusions = new HashSet<EventAddressDto>(),
-                Exclusions = new HashSet<EventAddressDto>(),
-                Conditions = new HashSet<EventAddressDto>(),
-                Responses = new HashSet<EventAddressDto>(),
-            };
-
-            //Act
-            try
-            {
-                await eventLogic.InitializeEvent(eventDto, new Uri("http://test/"));
-            }
-            catch (HttpResponseException)
-            {
-                // ignored
-            }
-
-
-            //Assert
-            Assert.AreEqual(true, eventLogic.Included);
-            Assert.AreEqual(true, eventLogic.Executed);
-            Assert.AreEqual(true, eventLogic.Pending);
-            Assert.AreEqual("TestWId", eventLogic.WorkflowId);
-            Assert.AreEqual("TestName", eventLogic.Name);
-            Assert.AreEqual("TestId", eventLogic.EventId);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Inclusions);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Exclusions);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Conditions);
-            Assert.AreEqual(new HashSet<Uri>(), eventLogic.Responses);
-        }
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
