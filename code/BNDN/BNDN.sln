@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Event.tests", "Event.tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Tests", "Client.Tests\Client.Tests.csproj", "{19468B6D-29A8-4FDA-BFBD-AD2FE247DE8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DcrParserGraphic", "DcrParserGraphic\DcrParserGraphic.csproj", "{11E938AB-31B1-42A8-9F6E-3AF4507DB350}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLtoJSONParser", "DcrParserGraphic\XMLtoJSONParser.csproj", "{11E938AB-31B1-42A8-9F6E-3AF4507DB350}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
