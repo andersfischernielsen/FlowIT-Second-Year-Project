@@ -115,7 +115,6 @@
     <Compile Include="Models\EventIdentificationModel.cs" />
     <Compile Include="Models\EventStateModel.cs" />
     <Compile Include="Storage\EventStorage.cs" />
-    <Compile Include="Models\NotifyDtos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerCommunicator.cs" />
     <Compile Include="Storage\EventStorageForReset.cs" />
