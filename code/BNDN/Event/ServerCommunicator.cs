@@ -67,18 +67,6 @@ namespace Event
         }
 
         /**
-         * SendHeartbeatToServer communicates to Server, that this Event is alive.
-         * The method will rely on the eventId that was provided during initialization
-         */
-        // TODO: Discuss with Server-implemter what is expected (on ServerSide) to be contained within HeartbeatDto
-        public async void SendHeartbeatToServer()
-        {
-            var path = _workflowId + "/" + _eventId;
-            var heartBeatDto = new HeartBeatDto {EventId = _eventId};
-            await _httpClient.Create(path, heartBeatDto);
-        }
-
-        /**
          * RequestDeletionOfEventAtServer will inform Server that an event with id eventToBeDeletedId
          * should be deleted (typically because the event has been detected as being 'dead')
          */
