@@ -13,17 +13,17 @@ namespace Event.Storage
 
         public ResetLogic(string eventId)
         {
-            Storage = new EventStorageForReset(eventId,new EventContext());
+            Storage = new EventStorageForReset(new EventContext());
         }
         
         public void UnlockEvent()
         {
-            Storage.ClearLock();
+            Storage.ClearLock("");
         }
 
         public void ResetToInitialValues()
         {
-            Storage.ResetToInitialState();
+            Storage.ResetToInitialState("");
         }
 
         public void Dispose()

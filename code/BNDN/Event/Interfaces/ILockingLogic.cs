@@ -7,12 +7,13 @@ using System.Xml.Serialization;
 
 namespace Event.Interfaces
 {
-    interface ILockingLogic : IDisposable
+    public interface ILockingLogic : IDisposable
     {
-        void LockSelf(string eventId,string callerId);
+        void LockSelf(string eventId, LockDto lockDto);
         void UnlockSelf(string eventId, string callerId);
-        void LockAll(string eventId);
-        void UnlockAll(string eventId);
+        Task<bool> LockAll(string eventId);
+
+        Task<bool> UnlockAll(string eventId);
         bool IsAllowedToOperate(string eventId, string callerId);
     }
 }

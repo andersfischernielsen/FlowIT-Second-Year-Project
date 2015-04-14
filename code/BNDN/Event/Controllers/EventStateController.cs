@@ -316,6 +316,7 @@ namespace Event.Controllers
         [HttpDelete]
         public void Unlock(string senderId, string eventId)
         {
+
             _logic.EventId = eventId;
             // Check is made to see if caller is the same as the one, who locked the Event initially
             // the CallerIsAllowedToOperate works on Id not Uri.

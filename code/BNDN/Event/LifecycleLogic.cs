@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Common;
+using Event.Exceptions;
 using Event.Interfaces;
+using Event.Logic;
 using Event.Models;
 using Event.Storage;
 
@@ -13,31 +16,37 @@ namespace Event
     public class LifecycleLogic : ILifecycleLogic
     {
         private readonly IEventStorage _storage;
+        private readonly IEventStorageForReset _resetStorage;
+        private readonly ILockingLogic _lockLogic;
 
-        public LifecycleLogic(IEventStorage storage)
+        // Default constructor
+        public LifecycleLogic()
+        {
+            var context = new EventContext();
+            _storage = new EventStorage(context);
+            _resetStorage = new EventStorageForReset(context);
+            _lockLogic = new LockingLogic(_storage);
+        }
+
+        // Constructor to be used for dependency-injection
+        public LifecycleLogic(IEventStorage storage, IEventStorageForReset resetStorage, ILockingLogic lockLogic)
         {
             _storage = storage;
+            _resetStorage = resetStorage;
+            _lockLogic = lockLogic;
         }
 
 
-        public Task CreateEvent(EventDto eventDto, Uri ownUri)
+        public async Task CreateEvent(EventDto eventDto, Uri ownUri)
         {
-            // Set eventId 
-            _storage.EventId = eventDto.EventId;
-
-            if (EventIdExists())
-            {
-                // TODO: Throw more relevant exception
-                throw new ApplicationException("An event with the Id already exists");
-            }
-
             if (eventDto == null)
             {
                 throw new ArgumentNullException("eventDto", "Provided EventDto was null");
             }
-            if (!eventDto.EventId.Equals(_storage.EventId))
+            if (EventIdExists(eventDto.EventId))
             {
-                throw new ArgumentException("EventIds does not match!", "eventDto");
+                // TODO: Throw more relevant exception
+                throw new ApplicationException("An event with the Id already exists");
             }
 
             // #1. Make sure that server will accept our entry
@@ -53,7 +62,7 @@ namespace Event
 
             try
             {
-                // Setup a new Event in database.
+                // Setup a new Event in own database.
                 var initialEventState = new InitialEventState()
                 {
                     EventId = eventDto.EventId,
@@ -61,22 +70,8 @@ namespace Event
                     Included = eventDto.Included,
                     Pending = eventDto.Pending
                 };
-                // TODO: Morten - do check of this
-                _storage.InitializeNewEvent(initialEventState);
 
-                // #2. Then set our own fields accordingly
-                _storage.EventId = eventDto.EventId;
-                _storage.WorkflowId = eventDto.WorkflowId;
-                _storage.Name = eventDto.Name;
-                _storage.Roles = eventDto.Roles;
-                _storage.Included = eventDto.Included;
-                _storage.Pending = eventDto.Pending;
-                _storage.Executed = eventDto.Executed;
-                _storage.Inclusions = new HashSet<RelationToOtherEventModel>(eventDto.Inclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                _storage.Exclusions = new HashSet<RelationToOtherEventModel>(eventDto.Exclusions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                _storage.Conditions = new HashSet<RelationToOtherEventModel>(eventDto.Conditions.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                _storage.Responses = new HashSet<RelationToOtherEventModel>(eventDto.Responses.Select(addressDto => new RelationToOtherEventModel { EventID = addressDto.Id, Uri = addressDto.Uri }));
-                _storage.OwnUri = ownUri;
+                _storage.InitializeNewEvent(initialEventState);
             }
             catch (Exception)
             {
@@ -88,43 +83,56 @@ namespace Event
 
         public void DeleteEvent(string eventId)
         {
-            // TODO: Implement locking check
+            // Notice that the following check will (should) fail, if this Event is locked by another Event
+            if (!_lockLogic.IsAllowedToOperate(eventId, eventId))
+            {
+                throw new LockedException();
+            }
 
             // Check if Event exists here
-            if (!EventIdExists())
+            if (!EventIdExists(eventId))
             {
+                // No need to do more, event already does not exist
                 return;
             }
 
             // Attempt to delete Event from Server
-            string workflowId = _storage.WorkflowId;
+            string workflowId = _storage.GetWorkflowId(eventId);
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventId, workflowId);
             serverCommunicator.DeleteEventFromServer();
 
             // Delete Event from own Storage
-            _storage.DeleteEvent();
+            _storage.DeleteEvent(eventId);
         }
 
+        /// <summary>
+        /// ResetEvent will bruteforce reset this Event, regardless of whether it is currently locked
+        /// </summary>
+        /// <param name="eventId"></param>
         public void ResetEvent(string eventId)
         {
-            throw new NotImplementedException();
+            // Clear lock
+            _resetStorage.ClearLock(eventId);
+
+            // Reset to initial state
+            _resetStorage.ResetToInitialState(eventId);
         }
 
         public EventDto GetEventDto(string eventId)
         {
             return new EventDto
             {
-                EventId = _storage.EventId,
-                WorkflowId = _storage.WorkflowId,
-                Name = _storage.Name,
-                Roles = _storage.Roles,
-                Pending = _storage.Pending,
-                Executed = _storage.Executed,
-                Included = _storage.Included,
-                Conditions = _storage.Conditions.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
-                Exclusions = _storage.Exclusions.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
-                Responses = _storage.Responses.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
-                Inclusions = _storage.Inclusions.Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri })
+                EventId = eventId,
+                WorkflowId = _storage.GetWorkflowId(eventId),
+                Name = _storage.GetName(eventId),
+                Roles = _storage.GetRoles(eventId),
+                Pending = _storage.GetPending(eventId),
+                Executed = _storage.GetExecuted(eventId),
+                Included = _storage.GetIncluded(eventId),
+                Conditions = _storage.GetConditions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
+                Exclusions = _storage.GetExclusions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
+                Responses = _storage.GetResponses(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
+                Inclusions = _storage.GetInclusions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri })
             };
         }
 
@@ -133,11 +141,11 @@ namespace Event
             _storage.Dispose();
         }
 
-        private bool EventIdExists()
+        private bool EventIdExists(string eventId)
         {
             try
             {
-                return _storage.Name != null;
+                return _storage.GetName(eventId) != null;
             }
             catch (ApplicationException)
             {

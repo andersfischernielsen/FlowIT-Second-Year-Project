@@ -34,7 +34,7 @@ namespace Event.Logic
             {
                 throw new LockedException();
             }
-            return _storage.Executed;
+            return _storage.GetExecuted(eventId);
         }
 
         public bool IsIncluded(string eventId, string senderId)
@@ -44,7 +44,7 @@ namespace Event.Logic
             {
                 throw new LockedException();
             }
-            return _storage.Included;
+            return _storage.GetIncluded(eventId);
         }
 
         public async Task<EventStateDto> GetStateDto(string eventId, string senderId)
@@ -58,11 +58,11 @@ namespace Event.Logic
 
             return new EventStateDto
             {
-                Id = _storage.EventId,
-                Name = _storage.Name,
-                Executed = _storage.Executed,
-                Included = _storage.Included,
-                Pending = _storage.Pending,
+                Id = eventId,
+                Name = _storage.GetName(eventId),
+                Executed = _storage.GetExecuted(eventId),
+                Included = _storage.GetIncluded(eventId),
+                Pending = _storage.GetPending(eventId),
                 Executable = await IsExecutable(eventId)
             };
         }
@@ -70,22 +70,23 @@ namespace Event.Logic
         private async Task<bool> IsExecutable(string eventId)
         {
             //If this event is excluded, return false.
-            if (!_storage.Included)
+            if (!_storage.GetIncluded(eventId))
             {
                 return false;
             }
 
-            foreach (var condition in _storage.Conditions)
+            foreach (var condition in _storage.GetConditions(eventId))
             {
-                using (IEventFromEvent eventCommunicator = new EventCommunicator(condition.Uri, condition.EventID, eventId)) {
-                var executed = await eventCommunicator.IsExecuted();
-                var included = await eventCommunicator.IsIncluded();
-                // If the condition-event is not executed and currently included.
-                if (included && !executed)
+                using (IEventFromEvent eventCommunicator = new EventCommunicator(condition.Uri, condition.EventID, eventId)) 
                 {
-                    return false;
+                    var executed = await eventCommunicator.IsExecuted();
+                    var included = await eventCommunicator.IsIncluded();
+                    // If the condition-event is not executed and currently included.
+                    if (included && !executed)
+                    {
+                        return false;
+                    }
                 }
-}
             }
             return true; // If all conditions are executed or excluded.
         }

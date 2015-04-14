@@ -85,7 +85,6 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteEvent(string eventId)
         {
-            // TODO: Now, call logic
             _logic.DeleteEvent(eventId);
         }
 

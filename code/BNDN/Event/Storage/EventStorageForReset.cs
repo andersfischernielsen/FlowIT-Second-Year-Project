@@ -10,32 +10,30 @@ namespace Event.Storage
 {
     public class EventStorageForReset : IEventStorageForReset
     {
-        private string _eventId;
         private IEventContext _context;
 
-        public EventStorageForReset(string eventId, IEventContext context)
+        public EventStorageForReset(IEventContext context)
         {
-            _eventId = eventId;
             _context = context;
         }
 
-        public void ClearLock()
+        public void ClearLock(string eventId)
         {
             // Clear any LockDto-element (should only exist a single)
-            foreach (var lockDto in _context.LockDto.Where(model => model.Id == _eventId))
+            foreach (var lockDto in _context.LockDto.Where(model => model.Id == eventId))
             {
                 _context.LockDto.Remove(lockDto);
             }
             _context.SaveChanges();
         }
 
-        public void ResetToInitialState()
+        public void ResetToInitialState(string eventId)
         {
             // Retrieve initial state
-            var initialState = _context.InitialEventState.Single(x => x.EventId == _eventId);
+            var initialState = _context.InitialEventState.Single(x => x.EventId == eventId);
             
             // Extract current state
-            var currentState = _context.EventState.Single(x => x.Id == _eventId);
+            var currentState = _context.EventState.Single(x => x.Id == eventId);
 
             var replacingState = new EventStateModel()
             {

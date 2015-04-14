@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Event.Interfaces
 {
-    interface IEventStorageForReset : IDisposable
+    public interface IEventStorageForReset : IDisposable
     {
-        void ClearLock();
-        void ResetToInitialState();
+        void ClearLock(string eventId);
+        void ResetToInitialState(string eventId);
     }
 }
