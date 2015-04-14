@@ -15,17 +15,8 @@ namespace Client.ViewModels
         {
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
 
-            if (File.Exists("settings.json"))
-            {
-                var settingsjson = File.ReadAllText("settings.json");
-                var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
-
-                _serverAddress = new Uri(settings.ServerAddress ?? "http://flowit.azurewebsites.net/");
-            }
-            else
-            {
-                _serverAddress = new Uri("http://flowit.azurewebsites.net/");
-            }
+            var settings = Settings.LoadSettings();
+            _serverAddress = new Uri(settings.ServerAddress);
 
             GetWorkflows();
         }
