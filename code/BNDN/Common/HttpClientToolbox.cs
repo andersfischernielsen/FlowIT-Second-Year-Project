@@ -10,13 +10,18 @@ namespace Common
 {
     /// <summary>
     /// <para>The class contains a static Dictionary which all instances of the class will be added to. That way one can access different httpClients without having to create them all over again (for example if login is required each time).</para>
-    /// <para>Instantiatte the class with a string / uri which represents the rest api's base address for example http://driveit.azurewebsites.net/api/ </para>
-    /// <para> Then when you make the CRUD calls, add the object and the rest of the uml eg "cars". If you dont know the object type, just use object </para>
+    /// <para>Instantiate the class with a string / uri which represents the rest api's base address for example http://driveit.azurewebsites.net/api/. </para>
+    /// <para> Then when you make the CRUD calls, add the object and the rest of the uml eg "cars". If you dont know the object type, just use object. </para>
     /// </summary>
     public class HttpClientToolbox
     {
         public HttpClient HttpClient { get; set; }
 
+        /// <summary>
+        /// Instantiate a HttpClientToolbox with a given URL (as a string).
+        /// </summary>
+        /// <param name="uri">Uri (as a string) to use.</param>
+        /// <param name="authenticationHeader">Optional authentocationheader.</param>
         public HttpClientToolbox(string uri, AuthenticationHeaderValue authenticationHeader = null)
         {
             HttpClient = new HttpClient { BaseAddress = new Uri(uri) };
@@ -27,6 +32,11 @@ namespace Common
             }
         }
 
+        /// <summary>
+        /// Instantiate a HttpClientToolbox with a given URI.
+        /// </summary>
+        /// <param name="uri">Uri to use.</param>
+        /// <param name="authenticationHeader">Optional authentocationheader.</param>
         public HttpClientToolbox(Uri uri, AuthenticationHeaderValue authenticationHeader = null)
         {
             HttpClient = new HttpClient { BaseAddress = uri };
@@ -38,16 +48,7 @@ namespace Common
         }
 
         /// <summary>
-        /// Resets the httpclient and then sets the base address.
-        /// </summary>
-        /// <param name="uri"></param>
-        public void SetBaseAddress(Uri uri)
-        {
-            HttpClient = new HttpClient { BaseAddress = uri };
-        }
-
-        /// <summary>
-        /// Resets the httpclient and then sets the base address.
+        /// Resets the HttpClient with the base address.
         /// </summary>
         /// <param name="uri"></param>
         public void SetBaseAddress(string uri)
@@ -56,33 +57,23 @@ namespace Common
         }
 
         /// <summary>
-        /// Adds the mediatype header to the default httprequests.
+        /// Resets the HttpClient with the base address.
         /// </summary>
-        /// <param name="mediaHeaderType">For Json use: new MediaTypeWithQualityHeaderValue("application/json")</param>
-        [Obsolete("SetMediaHeaders is deprecated, since only JSON is supported atm.", true)]
-        public void SetMediaHeaders(MediaTypeWithQualityHeaderValue mediaHeaderType)
+        /// <param name="uri"></param>
+        public void SetBaseAddress(Uri uri)
         {
-            HttpClient.DefaultRequestHeaders.Accept.Add(mediaHeaderType);
+            HttpClient = new HttpClient { BaseAddress = uri };
         }
 
         /// <summary>
-        /// Sets the authetication header to the given value. Used for API's which needs authentication.
+        /// Creates a POST http request with the type T to the address (baseaddress + URI). 
+        /// T and the URI string must match.
         /// </summary>
-        /// <param name="authenticationHeader"></param>
-        public void SetAuthenticationHeader(AuthenticationHeaderValue authenticationHeader)
-        {
-            HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
-        }
-
-        /// <summary>
-        /// Creates a Post httprequest with the generic T to the webAPI at the url BaseAddress + uri. 
-        /// T and the uri string must match.
-        /// </summary>
-        /// <typeparam name="T"> An object matching the expected object in the API at url (BaseAddress+Uri)</typeparam>
-        /// <param name="uri">The uri of the api where T objects are stored</param>
-        /// <param name="objectToCreate"> the object to create at the APi</param>
-        /// <returns>The object which was created at the API</returns>
-        public virtual async Task Create<T>(string uri, T objectToCreate)
+        /// <typeparam name="T"> An object matching the expected object at the address (baseaddress + URI)</typeparam>
+        /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
+        /// <param name="toCreate"> The type of object to send to the API.</param>
+        /// <returns>An object that was created at the API.</returns>
+        public virtual async Task Create<T>(string uri, T toCreate)
         {
             try
             {
@@ -105,12 +96,12 @@ namespace Common
         }
 
         /// <summary>
-        /// Reads all the objects of type T at the webAPI on the string BaseAddress + uri. 
-        /// T and the uri string must match.
+        /// Reads all the objects of type T at the API at (base address + URI). 
+        /// T and the URI string must match.
         /// </summary>
-        /// <typeparam name="T"> An object matching the expected object in the API at url (BaseAddress+Uri)</typeparam>
-        /// <param name="uri">The uri of the api where T objects are stored</param>
-        /// <returns>All T objects in the API using the URI</returns>
+        /// <typeparam name="T"> An object matching the expected object at the URL (base address + URI).</typeparam>
+        /// <param name="uri">The URI of the API where objects of type T are stored.</param>
+        /// <returns>All objects of type T at the API.</returns>
         public virtual async Task<IList<T>> ReadList<T>(string uri)
         {
             T[] objects;
@@ -127,12 +118,12 @@ namespace Common
             }
         }
         /// <summary>
-        /// Reads the object of type T at the webAPI on the string BaseAddress + uri. 
-        /// T and the uri string must match.
+        /// Reads an object of type T at the API at (base address + URI). 
+        /// T and the URI string must match.
         /// </summary>
-        /// <typeparam name="T"> An object matching the expected object in the API at url (BaseAddress+Uri)</typeparam>
-        /// <param name="uri">The uri of the api where a single T object is stored</param>
-        /// <returns>An T object in the API using the URI</returns>
+        /// <typeparam name="T"> An object matching the expected object at the URL (base address + URI).</typeparam>
+        /// <param name="uri">The URI of the API where an object of type T is stored.</param>
+        /// <returns>An object of type T at the API.</returns>
         public virtual async Task<T> Read<T>(string uri)
         {
             try
@@ -149,14 +140,12 @@ namespace Common
         }
 
         /// <summary>
-        /// Creates a Put httprequest with the generic T to the webAPI at the url BaseAddress + uri. 
-        /// T and the uri string must match.
+        /// Sends a PUT http request with the type T to the address (baseaddress + URI). 
+        /// T and the URI string must match.
         /// </summary>
-        /// <typeparam name="T"> An object matching the expected object in the API at url (BaseAddress+Uri)</typeparam>
-        /// <param name="uri">The uri of the api where T objects are stored</param>
-        /// <param name="objectToUpdate"> the object to update at the APi with an ID</param>
-        /// <returns>A Task to await</returns>
-        public virtual async Task Update<T>(string uri, T objectToUpdate)
+        /// <typeparam name="T"> An object matching the expected object at the address (baseaddress + URI)</typeparam>
+        /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
+        /// <param name="toUpdate"> The type of object to update at the API.</param>
         {
             try
             {
@@ -170,10 +159,9 @@ namespace Common
             }
         }
         /// <summary>
-        /// Creates a Delete httprequest to the webAPI at the url BaseAddress + uri. 
+        /// Sends a DELETE http request to the address (baseaddress + URI).
         /// </summary>
-        /// <param name="uri">The uri of the API indicating a single object</param>
-        /// <returns>A Task to await</returns>
+        /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
         public virtual async Task Delete(string uri)
         {
             try
