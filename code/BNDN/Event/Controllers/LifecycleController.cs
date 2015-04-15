@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Event.Interfaces;
+using Event.Logic;
 
 namespace Event.Controllers
 {

@@ -90,5 +90,10 @@ namespace Event.Storage
             var unlockId = OwnEventId;
             await _httpClient.Delete(String.Format("events/{0}/lock/{1}",TargetEventId,unlockId));
         }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
+        }
     }
 }

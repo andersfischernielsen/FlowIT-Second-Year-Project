@@ -98,26 +98,35 @@ namespace Server.Storage
             throw new NotImplementedException();
         }
 
-        public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
+        public Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
-            var serverWorkflowModel = _cache.FirstOrDefault(model => model.Id == eventToBeAddedDto.ServerWorkflowModelId);
-            if (serverWorkflowModel != null && !serverWorkflowModel.ServerEventModels.Contains(eventToBeAddedDto))
+            return Task.Run(() =>
             {
-                serverWorkflowModel.ServerEventModels.Add(eventToBeAddedDto);
-            }
-            else throw new Exception("Event already exists");
+                var serverWorkflowModel =
+                    _cache.FirstOrDefault(model => model.Id == eventToBeAddedDto.ServerWorkflowModelId);
+                if (serverWorkflowModel != null && !serverWorkflowModel.ServerEventModels.Contains(eventToBeAddedDto))
+                {
+                    serverWorkflowModel.ServerEventModels.Add(eventToBeAddedDto);
+                }
+                else throw new Exception("Event already exists");
+            });
         }
 
-        public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        public Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
-            var serverWorkflowModel = _cache.FirstOrDefault(model => model.Id == workflow.Id);
-            if (serverWorkflowModel != null)
+            return Task.Run(() =>
             {
-                var existingElement = serverWorkflowModel.ServerEventModels.First(model => model.Id == eventToBeUpdated.Id); // throws exception if not found.
-                var index = serverWorkflowModel.ServerEventModels.ToList().IndexOf(existingElement);
-                serverWorkflowModel.ServerEventModels.ToList()[index] = eventToBeUpdated;
-            }
-            else throw new Exception("Element could not be found");
+                var serverWorkflowModel = _cache.FirstOrDefault(model => model.Id == workflow.Id);
+                if (serverWorkflowModel != null)
+                {
+                    var existingElement =
+                        serverWorkflowModel.ServerEventModels.First(model => model.Id == eventToBeUpdated.Id);
+                    // throws exception if not found.
+                    var index = serverWorkflowModel.ServerEventModels.ToList().IndexOf(existingElement);
+                    serverWorkflowModel.ServerEventModels.ToList()[index] = eventToBeUpdated;
+                }
+                else throw new Exception("Element could not be found");
+            });
         }
 
         public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)

@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 
 namespace Client.Connections
 {
-    public interface IServerConnection
+    public interface IServerConnection : IDisposable
     {
         Task<RolesOnWorkflowsDto> Login(string username);
         Task<IList<WorkflowDto>> GetWorkflows();

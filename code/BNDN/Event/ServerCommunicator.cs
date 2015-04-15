@@ -47,5 +47,10 @@ namespace Event
             var path = string.Format("workflows/{0}/{1}", _workflowId, _eventId);
             await _httpClient.Delete(path);
         }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
+        }
     }
 }

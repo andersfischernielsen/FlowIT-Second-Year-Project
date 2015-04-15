@@ -20,7 +20,7 @@ namespace Client.ViewModels
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
-            GetState();
+            GetState(); // Dont wait this! 
         }
 
         #region Databindings
@@ -137,9 +137,9 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public async Task GetState()
+        public async void GetState()
         {
-            IEventConnection eventConnection = new EventConnection(_eventAddressDto);
+            IEventConnection eventConnection = new EventConnection(_eventAddressDto, _parent.WorkflowId);
             try
             {
                 _eventStateDto = await eventConnection.GetState();

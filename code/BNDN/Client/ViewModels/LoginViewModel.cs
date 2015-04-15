@@ -17,19 +17,10 @@ namespace Client.ViewModels
 
         public LoginViewModel()
         {
-            if (File.Exists("settings.json"))
-            {
-                var settingsjson = File.ReadAllText("settings.json");
-                var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
+            var settings = Settings.LoadSettings();
+            Username = settings.Username;
+            _serverAddress = new Uri(settings.ServerAddress);
 
-                _username = settings.Username ?? "Enter role";
-                _serverAddress = new Uri(settings.ServerAddress ?? "http://flowit.azurewebsites.net/");
-            }
-            else
-            {
-                _username = "Enter role";
-                _serverAddress = new Uri("http://flowit.azurewebsites.net/");
-            }
             _status = "";
             _password = "Password";
         }

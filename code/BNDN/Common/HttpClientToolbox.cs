@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -13,7 +12,7 @@ namespace Common
     /// <para>Instantiate the class with a string / uri which represents the rest api's base address for example http://driveit.azurewebsites.net/api/. </para>
     /// <para> Then when you make the CRUD calls, add the object and the rest of the uml eg "cars". If you dont know the object type, just use object. </para>
     /// </summary>
-    public class HttpClientToolbox
+    public class HttpClientToolbox : IDisposable
     {
         public HttpClient HttpClient { get; set; }
 
@@ -150,6 +149,11 @@ namespace Common
         {
             var response = await HttpClient.DeleteAsync(uri);
             response.EnsureSuccessStatusCode();
+        }
+
+        public void Dispose()
+        {
+            HttpClient.Dispose();
         }
     }
 }

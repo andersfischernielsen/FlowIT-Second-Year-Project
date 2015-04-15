@@ -71,5 +71,9 @@ namespace Client.Connections
             }
         }
 
+        public void Dispose()
+        {
+            _http.Dispose();
+        }
     }
 }

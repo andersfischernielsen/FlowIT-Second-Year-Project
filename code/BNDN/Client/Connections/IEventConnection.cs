@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Common;
 
 namespace Client.Connections
@@ -6,7 +7,7 @@ namespace Client.Connections
     /// <summary>
     /// Connection to an event
     /// </summary>
-    public interface IEventConnection
+    public interface IEventConnection : IDisposable
     {
         /// <summary>
         /// Get the state of a task
