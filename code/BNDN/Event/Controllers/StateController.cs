@@ -47,8 +47,7 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    string.Format("{0} does not exist")));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
@@ -72,8 +71,7 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    string.Format("{0} does not exist")));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
@@ -99,8 +97,7 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    string.Format("{0} does not exist")));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
@@ -130,8 +127,7 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    string.Format("{0} does not exist")));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
@@ -163,8 +159,7 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    string.Format("{0} does not exist")));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
@@ -196,8 +191,7 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    string.Format("{0} does not exist")));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
