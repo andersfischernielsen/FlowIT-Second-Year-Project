@@ -87,9 +87,7 @@
     <Compile Include="Models\ServerWorkflowModel.cs" />
     <Compile Include="Storage\ServerStorage.cs" />
     <Compile Include="Storage\StorageContext.cs" />
-    <Compile Include="Storage\CacheStorage.cs" />
     <Compile Include="Storage\IServerStorage.cs" />
-    <Compile Include="Storage\WorkflowStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
