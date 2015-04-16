@@ -1,0 +1,71 @@
+﻿<Window x:Class="DcrParserGraphic.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions" 
+        xmlns:viewModels="clr-namespace:DcrParserGraphic.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+        Title="MainWindow" Height="475" Width="450" MinHeight="475" MinWidth="440">
+    <Grid>
+        <Grid.DataContext>
+            <viewModels:ParsingViewModel />
+        </Grid.DataContext>
+        <StackPanel Orientation="Vertical" Margin="20" VerticalAlignment="Center">
+            <Button Cursor="Hand" Click="hiddenbutton_onclick">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image Source="hund.jpg" Width="120px" Stretch="UniformToFill"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <TextBlock Text="INPUT FILE" HorizontalAlignment="Center" FontSize="20"/>
+            <TextBox x:Name="TextBoxFile" Margin="0,5,0,5" Height="30" Text="{Binding XmlFilePath}"/>
+            <Button Content="Vælg xml fil" x:Name="ButtonChoose" Width="250" Height="30">
+            	<i:Interaction.Triggers>
+            		<i:EventTrigger EventName="Click">
+            			<ei:CallMethodAction MethodName="Choose" TargetObject="{Binding Mode=OneWay}"/>
+            		</i:EventTrigger>
+            	</i:Interaction.Triggers>
+            </Button>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="0,15,0,0">
+                <StackPanel Margin="0,0,0,0">
+                    <TextBlock Text="Workflow Id"/>
+                    <TextBox x:Name="TextBoxWorkflowId" Text="{Binding WorkflowId}"/>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0">
+                    <TextBlock Text="Workflow Name"/>
+                    <TextBox x:Name="TextBoxWorkflowName" Text="{Binding WorkflowName}"/>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0">
+                    <TextBlock Text="Server base url"/>
+                    <TextBox x:Name="ServerUrl" Text="{Binding ServerUri}" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="10,0,0,0">
+                <TextBlock Text="Event base Urls"/>
+                <TextBox x:Name="EventUrls" Text="{Binding EventUris}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Konverter til json fil" x:Name="ButtonConvert" Width="125" Height="30" Margin="0,30,10,0">
+                	<i:Interaction.Triggers>
+                		<i:EventTrigger EventName="Click">
+                			<ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="Convert"/>
+                		</i:EventTrigger>
+                	</i:Interaction.Triggers>
+                </Button>
+                <Button Content="Upload direkte til events" x:Name="ButtonUpload" Width="135" Height="30" Margin="10,30,0,0">
+                	<i:Interaction.Triggers>
+                		<i:EventTrigger EventName="Click">
+                			<ei:CallMethodAction MethodName="Upload" TargetObject="{Binding Mode=OneWay}"/>
+                		</i:EventTrigger>
+                	</i:Interaction.Triggers>
+                </Button>
+            </StackPanel>
+
+            <TextBlock Text="PS: json filen ender samme sted som denne exe fil ligger, og den hedder altid graph.json." HorizontalAlignment="Center" FontSize="10" Margin="0,20,0,0"/>
+            <TextBlock Text="komma seperer eventbase urls hvis der er flere end 1!" HorizontalAlignment="Center" FontSize="10" Margin="0,5,0,0"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Client.Connections;
 using Common;
 
 namespace Client.ViewModels
@@ -19,7 +20,7 @@ namespace Client.ViewModels
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
-            GetState().Wait();
+            GetState(); // Dont wait this! 
         }
 
         #region Databindings
@@ -136,9 +137,9 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public async Task GetState()
+        public async void GetState()
         {
-            var eventConnection = new EventConnection(_eventAddressDto);
+            IEventConnection eventConnection = new EventConnection(_eventAddressDto, _parent.WorkflowId);
             try
             {
                 _eventStateDto = await eventConnection.GetState();
@@ -150,12 +151,15 @@ namespace Client.ViewModels
             }
         }
 
+        /// <summary>
+        /// This method gets called by the Execute Button in the UI
+        /// </summary>
         public async void Execute()
         {
             try
             {
-                var eventConnection = new EventConnection(_eventAddressDto);
-                await eventConnection.Execute(true, _parent.WorkflowId);
+                IEventConnection eventConnection = new EventConnection(_eventAddressDto, _parent.WorkflowId);
+                await eventConnection.Execute(true);
                 _parent.GetEvents();
             }
             catch (Exception e)

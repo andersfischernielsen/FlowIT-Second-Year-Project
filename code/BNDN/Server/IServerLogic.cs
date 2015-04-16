@@ -17,6 +17,10 @@ namespace Server
         /// <returns></returns>
         RolesOnWorkflowsDto Login(string username);
 
+        /// <summary>
+        /// Add a new user.
+        /// </summary>
+        /// <param name="user">The UserDto to use for adding.</param>
         Task AddUser(UserDto user);
         
         /// <summary>

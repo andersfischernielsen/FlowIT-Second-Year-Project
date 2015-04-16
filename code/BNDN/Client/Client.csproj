@@ -76,11 +76,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ClientExceptions.cs" />
-    <Compile Include="EventConnection.cs" />
+    <Compile Include="Connections\EventConnection.cs" />
+    <Compile Include="Connections\IEventConnection.cs" />
+    <Compile Include="Connections\IServerConnection.cs" />
+    <Compile Include="Connections\ServerConnection.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="ServerConnection.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="ViewModels\EventListViewModel.cs" />
     <Compile Include="ViewModels\EventViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
@@ -96,8 +97,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IEventConnection.cs" />
-    <Compile Include="IServerConnection.cs" />
     <Page Include="Views\LoginView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -111,11 +110,11 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
@@ -149,14 +148,15 @@
   <ItemGroup>
     <Resource Include="Assets\Pending.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if not exist $(TargetDir)Assets mkdir $(TargetDir)Assets
+xcopy /Y $(ProjectDir)Assets $(TargetDir)Assets</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

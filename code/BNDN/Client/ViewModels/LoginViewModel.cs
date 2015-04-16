@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using Client.Connections;
 using Client.Views;
 using Newtonsoft.Json;
 
@@ -7,33 +9,25 @@ namespace Client.ViewModels
 {
     public class LoginViewModel : ViewModelBase
     {
-        public Action CloseAction { get; set; }
+        public Action CloseAction { get; set; }       
+        public static Dictionary<string, IList<string>> RoleForWorkflow { get; set; }
+
         private bool _loginStarted;
-        private string _password;
-        private string _status;
-        private string _username;
         private readonly Uri _serverAddress;
+
         public LoginViewModel()
         {
-            if (File.Exists("settings.json"))
-            {
-                var settingsjson = File.ReadAllText("settings.json");
-                var settings = JsonConvert.DeserializeObject<Settings>(settingsjson);
+            var settings = Settings.LoadSettings();
+            Username = settings.Username;
+            _serverAddress = new Uri(settings.ServerAddress);
 
-                _username = settings.Username ?? "Enter role";
-                _serverAddress = new Uri(settings.ServerAddress ?? "http://localhost:13768/");
-            }
-            else
-            {
-                _username = "Enter role";
-                _serverAddress = new Uri("http://localhost:13768/");
-            }
             _status = "";
             _password = "Password";
         }
 
         #region Databindings
 
+        private string _username;
         public string Username
         {
             get { return _username; }
@@ -44,7 +38,7 @@ namespace Client.ViewModels
             }
         }
 
-
+        private string _status;
         public string Status
         {
             get { return _status; }
@@ -54,7 +48,7 @@ namespace Client.ViewModels
                 NotifyPropertyChanged("Status");
             }
         }
-
+        private string _password;
         public string Password
         {
             get { return _password; }
@@ -75,12 +69,12 @@ namespace Client.ViewModels
             Status = "Attempting login...";
 
             // PUT LOGIN LOGIC HERE
-            var connection = new ServerConnection(_serverAddress);
+            IServerConnection connection = new ServerConnection(_serverAddress);
             try
             {
                 var roles = await connection.Login(Username);
                 Status = "Login successful";
-                EventConnection.RoleForWorkflow = roles.RolesOnWorkflows;
+                RoleForWorkflow = roles.RolesOnWorkflows;
 
 
                 // Save settings
@@ -112,5 +106,7 @@ namespace Client.ViewModels
         }
 
         #endregion
+
+        
     }
 }

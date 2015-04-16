@@ -76,21 +76,38 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\EventController.cs" />
+    <Compile Include="Communicators\EventCommunicator.cs" />
+    <Compile Include="Controllers\LifecycleController.cs" />
+    <Compile Include="Controllers\LockController.cs" />
+    <Compile Include="Controllers\StateController.cs" />
+    <Compile Include="Exceptions\FailedToLockOtherEventException.cs" />
+    <Compile Include="Exceptions\FailedToUnlockOtherEventException.cs" />
+    <Compile Include="Exceptions\FailedToUpdateStateAtOtherEventException.cs" />
+    <Compile Include="Exceptions\NotAuthorizedException.cs" />
+    <Compile Include="Exceptions\NotExecutableException.cs" />
+    <Compile Include="Interfaces\IAuthLogic.cs" />
     <Compile Include="Interfaces\IEventContext.cs" />
+    <Compile Include="Interfaces\IEventStorageForReset.cs" />
+    <Compile Include="Interfaces\ILifecycleLogic.cs" />
+    <Compile Include="Interfaces\ILockingLogic.cs" />
+    <Compile Include="Interfaces\IStateLogic.cs" />
+    <Compile Include="Exceptions\FailedToUpdateStateException.cs" />
+    <Compile Include="Logic\LifecycleLogic.cs" />
+    <Compile Include="Exceptions\LockedException.cs" />
+    <Compile Include="Logic\AuthLogic.cs" />
+    <Compile Include="Logic\LockingLogic.cs" />
+    <Compile Include="Exceptions\NotFoundException.cs" />
+    <Compile Include="Logic\StateLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EventRoleModel.cs" />
+    <Compile Include="Models\InitialEventState.cs" />
     <Compile Include="Models\RelationToOtherEventModel.cs" />
     <Compile Include="Models\UriClasses\ConditionUri.cs" />
     <Compile Include="Models\UriClasses\ExclusionUri.cs" />
     <Compile Include="Models\UriClasses\InclusionUri.cs" />
     <Compile Include="Models\UriClasses\ResponseUri.cs" />
     <Compile Include="Models\UriClasses\UriRepresentationName.cs" />
-    <Compile Include="Storage\EventCommunicator.cs" />
     <Compile Include="Storage\EventContext.cs" />
-    <Compile Include="Interfaces\IEventLogic.cs" />
-    <Compile Include="Controllers\EventRulesController.cs" />
-    <Compile Include="Controllers\EventStateController.cs" />
     <Compile Include="LockDto.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />
     <Compile Include="Interfaces\IServerFromEvent.cs" />
@@ -100,16 +117,15 @@
     <Compile Include="Interfaces\IEventStorage.cs" />
     <Compile Include="Models\EventIdentificationModel.cs" />
     <Compile Include="Models\EventStateModel.cs" />
-    <Compile Include="Storage\EventLogic.cs" />
     <Compile Include="Storage\EventStorage.cs" />
-    <Compile Include="Models\NotifyDtos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HeartBeatDto.cs" />
     <Compile Include="ServerCommunicator.cs" />
-    <Compile Include="Storage\LockLogic.cs" />
+    <Compile Include="Storage\EventStorageForReset.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <None Include="Properties\PublishProfiles\FlowitES1.pubxml" />
+    <None Include="Properties\PublishProfiles\FlowitES2.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

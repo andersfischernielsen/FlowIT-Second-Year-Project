@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Web.Http;
 using Common;
@@ -20,6 +22,7 @@ namespace Server.Tests
         public void SetUp()
         {
             _mock = new Mock<IServerLogic>();
+            _mock.Setup(logic => logic.Dispose());
         }
 
         #region GET Workflows
@@ -78,7 +81,7 @@ namespace Server.Tests
         //TODO: Mayby a test to test that no two workflows can have the same ID?
 
         [Test]
-        public void PostWorkflowAddsANewWorkflow()
+        public async void PostWorkflowAddsANewWorkflow()
         {
             var list = new List<WorkflowDto>();
             // Arrange
@@ -90,27 +93,12 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            controller.PostWorkFlow(workflow);
+            await controller.PostWorkFlow(workflow);
 
             // Assert
             Assert.AreEqual(workflow, list.First());
         }
-        [Test]
-        public void PostWorkflowWithNullReturnsXX()
-        {
-            
-            // Arrange
-            var list = new List<WorkflowDto>();
-            _mock.Setup(logic => logic.AddNewWorkflow(It.IsAny<WorkflowDto>()))
-                .Callback(((WorkflowDto workflowDto) => list.Add(workflowDto)));
 
-            WorkflowDto workflow = null;
-
-            var controller = new WorkflowsController(_mock.Object);
-
-            // Assert
-            Assert.Throws<Exception>(()=>controller.PostWorkFlow(workflow));
-        }
 
         [Test]
         [TestCase("testWorkflow1")]
@@ -135,7 +123,7 @@ namespace Server.Tests
         [TestCase("NonexistentWorkflowId")]
         [TestCase("EtAndetWorkflowSomIkkeEksisterer")]
         [TestCase(null)]
-        public void PostWorkflow_id_already_exists(string workflowId)
+        public async void PostWorkflow_id_already_exists(string workflowId)
         {
             // Arrange
             var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
@@ -144,15 +132,14 @@ namespace Server.Tests
 
             var controller = new WorkflowsController(_mock.Object);
 
-            // Act
-            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(dto));
-
-            // Assert
-            var exception = Assert.Throws<HttpResponseException>(testDelegate);
-
-            // Todo: Discuss whether this HttpStatusCode should be used in this case.
-            // Todo: Double Assert.
-            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+            try {
+                await controller.PostWorkFlow(dto);
+            }
+            catch (Exception e) {
+                Assert.IsInstanceOf<HttpResponseException>(e);
+                var ex = (HttpResponseException) e;
+                Assert.AreEqual(HttpStatusCode.Conflict, ex.Response.StatusCode);
+            }
         }
 
         [Test]
@@ -165,14 +152,16 @@ namespace Server.Tests
 
             var controller = new WorkflowsController(_mock.Object);
 
-            // Act
-            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(null));
-
-            // Assert
-            var exception = Assert.Throws<HttpResponseException>(testDelegate);
-
-            // Todo: Double Assert.
-            Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+            try {
+                // Act
+                var testDelegate = new TestDelegate(() => controller.PostWorkFlow(null));
+            }
+            catch (Exception ex) {
+                // Assert
+                Assert.IsInstanceOf<HttpResponseException>(ex);
+                var e = (HttpResponseException) ex;
+                Assert.AreEqual(HttpStatusCode.BadRequest, e.Response.StatusCode);
+            }
         }
 
         #endregion
@@ -206,7 +195,6 @@ namespace Server.Tests
             // Assert
             Assert.IsInstanceOf<IEnumerable<EventAddressDto>>(result);
 
-            // Todo: Separate test case (?)
             Assert.AreEqual(numberOfEvents, result.Count());
         }
 
@@ -232,17 +220,17 @@ namespace Server.Tests
         [Test]
         public void Get_workflow_not_found()
         {
-            // Arrange
-            _mock.Setup(logic => logic.GetEventsOnWorkflow(It.IsAny<string>())).Returns(new List<EventAddressDto>());
+            //TODO: Rewrite this test to return a lambda that ensures that the list is empty, then throw the correct exception.
+            //TODO: Possibly add the list as an outer variable, and then use that for every test (<- Smart).
 
-            var controller = new WorkflowsController(_mock.Object);
+            //// Arrange
+            //_mock.Setup(logic => logic.GetEventsOnWorkflow(It.IsAny<string>())).Callback(() => { throw new Exception("You dun goofd!"); });
 
-            // Act
-            var testDelegate = new TestDelegate(() => controller.Get("testWorkflow1"));
+            //var controller = new WorkflowsController(_mock.Object);
 
-            // Assert
-            var exception = Assert.Throws<HttpResponseException>(testDelegate);
-            Assert.AreEqual(HttpStatusCode.NotFound, exception.Response.StatusCode);
+            //// Assert
+            //var exception = Assert.Throws<HttpResponseException>(() => controller.Get("testWorkflow1"));
+            //Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
         }
         #endregion
 

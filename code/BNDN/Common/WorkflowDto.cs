@@ -6,8 +6,8 @@ namespace Common
     {
         [Required]
         public string Name { get; set; }
+
         [Required]
         public string Id { get; set; }
-        //Todo: Discuss whether a Workflow should have a more user-friendly Title or/and a Description.
     }
 }

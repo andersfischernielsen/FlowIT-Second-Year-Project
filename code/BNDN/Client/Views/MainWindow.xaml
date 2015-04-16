@@ -42,11 +42,11 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Content="Events" Margin="10,0" VerticalAlignment="Top" FontSize="24" HorizontalAlignment="Left"/>
-            <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}">
+            <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}" Margin="10,10,10,60">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <UniformGrid Rows="1" Columns="3">
-                            <Label Content="{Binding Name}" HorizontalAlignment="Left" FontWeight="Bold" />
+                            <Label Content="{Binding Name}" HorizontalAlignment="Left"/>
                             <UniformGrid Rows="1" Columns="3">
                                 <Rectangle Height="20" Width="20" Fill="{Binding PendingColor, Mode=OneWay}" Stroke="Black">
                                     <Rectangle.ToolTip>
@@ -75,6 +75,13 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <Button Content="Reset Workflow" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="205" Style="{DynamicResource ButtonDefaultStyle}" DataContext="{Binding SelectedWorkflowViewModel}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="ResetWorkflow"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
         </Grid>
     </Grid>
 </Window>

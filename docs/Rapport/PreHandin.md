@@ -14,11 +14,11 @@
 
 # Introduction
 
-This report describes the software, that was designed and built by the group during the project.
+This report describes the software, that was designed and built by the group during the project in *Second Year Project: Software Development in Large Teams with International Collaboration*.
 
-As a brief introduction, the purpose of the system is to "construct a generic workflow system", that enables users (through a Windows-client) to get an overview of and execute the events within a workflow. An "event" is here a part / step of a workflow. 
+As a brief introduction, the purpose of the system is to construct a generic workflow system, that enables users to get an overview of and execute the events within a workflow throug a Windows client. An event is here a part / step of a workflow. 
 
-The project hence is concerned with implementing the software within the Windows-client, the Events and a central Server, that acts an intermediate between the Client and the Events. The three parts must be implemented such that they run in a distributed fashion. 
+The project hence is concerned with implementing the software within the Windows client, the events and a central server, that acts an intermediate between the client and the events. The three parts must be implemented such that they run in a distributed fashion. 
 
 
 # Implemented workflow
@@ -27,26 +27,19 @@ This section describes the workflow, that has been implemented in the delivered 
 
 The workflow concerns medical care and treatment at a hospital. 
 
-We have deliberately decided to simplify and omit certain parts of the given workflow. This was done, so the group could focus at implementing core-functionality first, before moving on to more complex workflows. The group hopes to be able to support more complex workflows is the second part of this project. 
+We have deliberately decided to simplify and omit certain parts of the given workflow. This was done, so the group could focus at implementing core-functionality first, before moving on to more complex workflows. The system should be able to handle more complex workflows than the one presented, but has not been tested thorougly enough at the moment. The group hopes to be able to guarantee support of more complex workflows in the second part of this project. 
 
 The workflow, that is implemented in the delivered software, is seen in the illustration below, and generated through the online-tool available at [DCRGraph.net](www.dcrgraph.net)
 
-<!--Inser illustration: missing!-->
+![Brazilian Healthcare Workflow](Workflow.png)
 
 # How to run the system
 
-This section describes how to run the provided software; namely the Windows Client ("Client"). 
+This section describes how to run the provided software; namely the Windows Client ("Client") 
 
-## Server
-The Server needs not be started, since it is already running online, and Client is targeting that service. 
-
-## Event
-
-
-## Client
 In order to start up the Client, double-click on the Client.exe-file (located at \??\??) with the Flow-icon.
 
-### The user-interface
+## The user-interface
 
 The first window that is shown is the Login-window (see picture below)  
 In this windows type in your username and click on the Login-button.
@@ -83,7 +76,7 @@ The Execute-button tells the Event to execute, which effectively means that it m
 
 The button is active only if the Event is currently executable, which means it must be included and all of its conditions must be executed at least once.
 
-### Settings file
+## Settings file
 The client creates a settings file (located at \??\??), where a few informations are saved.
 
 It is possible to use the settings file to change the URL of the Workflow-Server, which means it is possible to point the client to a different Workflow-Server if desired.
@@ -94,36 +87,34 @@ The settings file also remembers the username of the last successful login, so t
 
 This section provides a birds-eye view of how the system was implemented and what parts is was broken down into. 
 
-
 To fulfill the requirements of the project, three subsystems are created: a central server ("Server"), a client ("Client) and events ("Event"). The three subsystems are described in the following section.
 
-<!--![Subsystems and the interfaces between them.](Subsystems.png)
--->
-### Central Server
-The central Server functions as a RESTfull WebAPI, where Events can hook up onto (an existing) Workflow and the Client can retrieve a list of Workflows and related Events. The Server subsystem is implemented in C# using the ASP.NET WEP API framework
+![Subsystems and the interfaces between them.](Subsystems.png)
 
-### Client
+## Central Server
+The central Server functions as a RESTful WebAPI, where Events can hook up onto an existing workflow and the client can retrieve a list of workflows and related events. The server subsystem is implemented in C# using the ASP.NET Web API framework.
 
-The main functionality of the Client subsystem is to provide the users an overview of Workflows and Events on the workflows, and provide the user with a way to send an Execute call to a specific event.
-The Client is implemented in C# using the .NET framework WPF for GUI components. The client has a connection submodule which handles all outgoing calls to both the Server and events.
+## Client
 
-### Event
+The main functionality of the client subsystem is to provide the users an overview of workflows and events on the workflows, and provide the user with a way to send an Execute call to a specific event.
+The Client is implemented in C# using the .NET framework WPF for GUI components. The client has a connection submodule which handles all outgoing calls to both the server and events.
 
-The Event subsystem is implemented in C# using the ASP.NET WEP API framework, which allows for easy routing and setup of a RESTful WebAPI. An Event also have submodules which controls all outgoing calls to the Server and to the events which (the Event) is related to. 
-The implementation of Event allows for multiple Events to be stored at either, the same machine or be distributed across network and multiple machines or a combination of the two first. 
+## Event
+
+The event subsystem is implemented in C# using the ASP.NET Web API framework, which allows for easy routing and setup of a RESTful WebAPI. An event also have submodules which controls all outgoing calls to the server and to the events which (the event) is related to. 
+The implementation of an event allows for multiple events to be stored at either, the same machine or be distributed across network and multiple machines or a combination of the two. 
 
 # Testing
 
 This section describes how the group has tested the system and includes a discussion of to what extent we believe the software works as intended. 
-
-
+ 
 A variety of testing approaches have been used to test the system during development. 
 These include unit-, integration-, system- and acceptance testing in varying degrees. Acceptance testing has also been applied after the inital tests were developed.
 
 ## Unit Testing
 The major components handling data that have been developed by the team (not Microsoft's libraries) have been unit-tested to ensure that their functionality was correct. 
 
-The unit-tests can be found (and run) within the provided Visual Studio-solution in a project following the naming-convention:
+The unit-tests can be found and run within the provided Visual Studio-solution in a project following the naming-convention:
 
 $$<TargetProject>.tests$$
 
@@ -136,8 +127,8 @@ The WebAPI controller and server logic classes have been unit tested as follows:
 
 #### IServerLogic 
 ServerLogic is the implementation of the IServerLogic interface, and has therefore been tested according to the methods specified in this interface. 
-Mocking has been used extensively (using the Moq nuGet package) to ensure that the logic was tested in an isolated and controlled environment. 
-The logic saves data to an instance of IServerStorage, which is mocked to enable testing. Every method in this interface is mocked, and saves and retrieves data from an in-memory List using callback methods.
+Mocking has been used extensively (using the Moq NuGet package) to ensure that the logic was tested in an isolated and controlled environment. 
+The logic saves data to an instance of IServerStorage, which is mocked to enable testing. Every method in this interface is mocked, and saves and retrieves data from an in-memory list using callback methods.
 
 #### WorkflowsController
 Mocking is used to test the implementation of the WorkflowController class - again to test in a controlled environment. 
@@ -157,12 +148,12 @@ EventLogic is the implementation of the IEventLogic interface. The methods in th
 Assertions for expected results (including exceptions) is used to test that methods return the expected results. 
 
 #### EventStateController
-The locking functionality of Events has been tested using unit testing and assertions for expected results. 
+The locking functionality of events has been tested using unit testing and assertions for expected results. 
 
 ### Client
-The unittests on Client are located in Client.tests projects (in the provided Visual Studio-solution)
+The unittests on the client are located in Client.tests projects (in the provided Visual Studio-solution).
 
-The connection of the Client to the Server has been unit tested as follows:
+The connection from the client to the server has been unit tested as follows:
 
 #### ServerConnection
 The ServerConnection inherits from the IServerConnection interface and the methods defined in this interface have been unit tested.
@@ -182,19 +173,21 @@ Acceptance testing has not been done yet, as this was first planned to be carrie
 
 
 ## Discussion of testing-approach 
-
 The team's testing approach has mainly been centered around unit-testing. 
 
 It has not been able to carry out acceptance-testing with external partners as of yet. 
 
-The group's confidence in the system is currently restricted to a per-module level, due to time-pressure. 
+The group's confidence in the system is currently restricted to a per-module level due to time-pressure. Integration testing and system testing should be completed before handing in part 2 of the system.  
 
 
 # Conclusion
+The delivered software at this point provides a basis for the project's second part. We believe we made a good solution that makes it able to handle rather complicated workflows. 
 
-The delivered software at this point provides a basis for the project's second part. 
 
 # Questions regarding workflow in Brazil
 
-- In 7) the provided workflow-description, who's responsible for "p*repare patient*"?
+- In 7) the provided workflow-description, who's responsible for "*prepare patient*"?
 - "*The physician may recommend the patient an appointment with a specialist or request some exams*" Will the one exclude the other, or could both happen, i.e. could the physician both recommend the patient an appointment **and** request some exams? 
+- In 9) a patient can be referred to ROTA. Sould the hospital charge the government after referal or not?
+- In connection to ROTA. Can an examinator refer a patient to ROTA?
+

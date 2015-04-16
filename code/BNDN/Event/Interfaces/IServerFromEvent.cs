@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 
 namespace Event.Interfaces
 {
-    interface IServerFromEvent
+    interface IServerFromEvent : IDisposable
     {
-        Task<IList<EventAddressDto>> GetWorkFlowEvents(int workflowId);
-        void SendHeartbeatToServer();
-        Task RequestDeletionOfEventAtServer(string eventToBeDeleted);
-
         Task DeleteEventFromServer();
         Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto dto);
     }

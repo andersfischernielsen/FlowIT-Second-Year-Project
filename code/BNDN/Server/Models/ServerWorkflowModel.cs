@@ -13,8 +13,10 @@ namespace Server.Models
             ServerRolesModels = new List<ServerRoleModel>();
             ServerEventModels = new List<ServerEventModel>();
         }
+
         [Required]
-        public string ID { get; set; }
+        public string Id { get; set; }
+
         public string Name { get; set; }
 
         public virtual ICollection<ServerEventModel> ServerEventModels { get; set; }
