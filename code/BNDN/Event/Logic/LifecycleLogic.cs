@@ -44,7 +44,7 @@ namespace Event.Logic
             {
                 throw new ArgumentNullException("ownUri", "Provided Uri was null");   
             }
-            if (await EventIdExists(eventDto.EventId))
+            if (await _storage.Exists(eventDto.EventId))
             {
                 // TODO: Throw more relevant exception
                 throw new ApplicationException("An event with the Id already exists");
@@ -64,7 +64,8 @@ namespace Event.Logic
 #else
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
 #endif
-            var otherEvents = await serverCommunicator.PostEventToServer(dto);
+            // Todo: Do we need what this method returns or is it waste of data-transfer?
+            await serverCommunicator.PostEventToServer(dto);
 
             try
             {
@@ -96,7 +97,7 @@ namespace Event.Logic
             }
 
             // Check if Event exists here
-            if (!await EventIdExists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 // No need to do more, event already does not exist
                 return;
@@ -152,18 +153,6 @@ namespace Event.Logic
         public void Dispose()
         {
             _storage.Dispose();
-        }
-
-        private async Task<bool> EventIdExists(string eventId)
-        {
-            try
-            {
-                return await _storage.GetName(eventId) != null;
-            }
-            catch (ApplicationException)
-            {
-                return false;
-            }
         }
     }
 }

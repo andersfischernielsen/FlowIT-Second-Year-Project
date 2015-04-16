@@ -43,22 +43,9 @@ namespace Event.Logic
             _eventCommunicator = eventCommunicator;
         }
 
-        private async Task<bool> Exists(string eventId)
-        {
-            // Todo: Make storage handle this kind of call.
-            try
-            {
-                return await _storage.GetName(eventId) != null;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
         public async Task<bool> IsExecuted(string eventId, string senderId)
         {
-            if (!await Exists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 throw new NotFoundException();
             }
@@ -73,7 +60,7 @@ namespace Event.Logic
 
         public async Task<bool> IsIncluded(string eventId, string senderId)
         {
-            if (!await Exists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 throw new NotFoundException();
             }
@@ -88,7 +75,7 @@ namespace Event.Logic
 
         public async Task<EventStateDto> GetStateDto(string eventId, string senderId)
         {
-            if (!await Exists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 throw new NotFoundException();
             }
@@ -113,7 +100,7 @@ namespace Event.Logic
 
         private async Task<bool> IsExecutable(string eventId)
         {
-            if (!await Exists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 throw new NotFoundException();
             }
@@ -139,7 +126,7 @@ namespace Event.Logic
 
         public async Task SetIncluded(string eventId, string senderId, bool newIncludedValue)
         {
-            if (!await Exists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 throw new NotFoundException();
             }
@@ -154,7 +141,7 @@ namespace Event.Logic
 
         public async Task SetPending(string eventId, string senderId, bool newPendingValue)
         {
-            if (!await Exists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 throw new NotFoundException();
             }
@@ -169,7 +156,7 @@ namespace Event.Logic
 
         public async Task<bool> Execute(string eventId, RoleDto executeDto)
         {
-            if (!await Exists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 throw new NotFoundException();
             }
