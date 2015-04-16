@@ -14,6 +14,7 @@ namespace Event.Logic
         private readonly IEventStorage _storage;
         private readonly ILockingLogic _lockingLogic;
         private readonly IAuthLogic _authLogic;
+        private readonly IEventFromEvent _eventCommunicator;
 
         /// <summary>
         /// Runtime Constructor.
@@ -24,6 +25,7 @@ namespace Event.Logic
             _storage = new EventStorage(new EventContext());
             _lockingLogic = null; // Todo: Use actual implementation.
             _authLogic = new AuthLogic(_storage);
+            _eventCommunicator = new EventCommunicator();
         }
 
         /// <summary>
@@ -32,11 +34,13 @@ namespace Event.Logic
         /// <param name="storage">An implementation of IEventStorage</param>
         /// <param name="lockingLogic">An implementation of ILockingLogic</param>
         /// <param name="authLogic">An implementation of IAuthLogic</param>
-        public StateLogic(IEventStorage storage, ILockingLogic lockingLogic, IAuthLogic authLogic)
+        /// <param name="eventCommunicator">An implementation of IEventFromEvent</param>
+        public StateLogic(IEventStorage storage, ILockingLogic lockingLogic, IAuthLogic authLogic, IEventFromEvent eventCommunicator)
         {
             _storage = storage;
             _lockingLogic = lockingLogic;
             _authLogic = authLogic;
+            _eventCommunicator = eventCommunicator;
         }
 
         public async Task<bool> IsExecuted(string eventId, string senderId)
@@ -89,9 +93,8 @@ namespace Event.Logic
 
             foreach (var condition in _storage.GetConditions(eventId))
             {
-                IEventFromEvent eventCommunicator = new EventCommunicator(condition.Uri, condition.EventID, eventId);
-                var executed = await eventCommunicator.IsExecuted();
-                var included = await eventCommunicator.IsIncluded();
+                var executed = await _eventCommunicator.IsExecuted(condition.Uri, condition.EventID, eventId);
+                var included = await _eventCommunicator.IsIncluded(condition.Uri, condition.EventID, eventId);
                 // If the condition-event is not executed and currently included.
                 if (included && !executed)
                 {
@@ -156,15 +159,15 @@ namespace Event.Logic
                 var addressDto = new EventAddressDto {Id = eventId, Uri = await _storage.GetUri(eventId)};
                 foreach (var pending in _storage.GetResponses(eventId))
                 {
-                    await new EventCommunicator(pending.Uri, pending.EventID, eventId).SendPending(addressDto);
+                    await _eventCommunicator.SendPending(pending.Uri, addressDto, pending.EventID);
                 }
                 foreach (var inclusion in _storage.GetInclusions(eventId))
                 {
-                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, eventId).SendIncluded(addressDto);
+                    await _eventCommunicator.SendIncluded(inclusion.Uri, addressDto, inclusion.EventID);
                 }
                 foreach (var exclusion in _storage.GetExclusions(eventId))
                 {
-                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, eventId).SendExcluded(addressDto);
+                    await _eventCommunicator.SendExcluded(exclusion.Uri, addressDto, exclusion.EventID);
                 }
             }
             catch (HttpRequestException)
@@ -195,6 +198,7 @@ namespace Event.Logic
             _storage.Dispose();
             _lockingLogic.Dispose();
             _authLogic.Dispose();
+            _eventCommunicator.Dispose();
         }
     }
 }

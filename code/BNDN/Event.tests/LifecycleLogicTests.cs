@@ -65,7 +65,7 @@ namespace Event.tests
         }
 
         [Test]
-        public async Task CreateEvent_WithIdAlreadyInDatabase()
+        public void CreateEvent_WithIdAlreadyInDatabase()
         {
             
         }

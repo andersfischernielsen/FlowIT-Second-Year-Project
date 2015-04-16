@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
+using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
@@ -21,7 +22,7 @@ namespace Event.Logic
             var context = new EventContext();
             _storage = new EventStorage(context);
             _resetStorage = new EventStorageForReset(context);
-            _lockLogic = new LockingLogic(_storage);
+            _lockLogic = new LockingLogic(_storage, new EventCommunicator());
         }
 
         // Constructor to be used for dependency-injection

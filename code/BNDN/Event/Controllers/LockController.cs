@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Event.Communicators;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Storage;
@@ -19,7 +17,7 @@ namespace Event.Controllers
         public LockController()
         {
             _storage = new EventStorage(new EventContext());
-            _lockLogic = new LockingLogic(_storage);
+            _lockLogic = new LockingLogic(_storage, new EventCommunicator());
         }
 
         // Controller used to dependency-inject during testing

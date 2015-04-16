@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 using Event.Exceptions;
@@ -19,6 +20,7 @@ namespace Event.tests
         private Mock<IEventStorage> _eventStorageMock;
         private Mock<ILockingLogic> _lockingLogicMock;
         private Mock<IAuthLogic> _authLogicMock;
+        private Mock<IEventFromEvent> _eventCommunicatorMock;
         
         [SetUp]
         public void SetUp()
@@ -43,7 +45,9 @@ namespace Event.tests
             // Make the caller authorized
             _authLogicMock.Setup(a => a.IsAuthorized(It.IsAny<string>(), It.IsAny<IEnumerable<string>>())).ReturnsAsync(true);
 
-            _stateLogic = new StateLogic(_eventStorageMock.Object, _lockingLogicMock.Object, _authLogicMock.Object);
+            _eventCommunicatorMock = new Mock<IEventFromEvent>();
+
+            _stateLogic = new StateLogic(_eventStorageMock.Object, _lockingLogicMock.Object, _authLogicMock.Object, _eventCommunicatorMock.Object);
         }
 
         [Test]
@@ -280,6 +284,10 @@ namespace Event.tests
                     }
                 });
 
+            _eventCommunicatorMock.Setup(
+                c => c.SendPending(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>()))
+                .Throws<HttpRequestException>();
+
             // Act
             var testDelegate =
                 new TestDelegate(
@@ -304,6 +312,10 @@ namespace Event.tests
                     }
                 });
 
+            _eventCommunicatorMock.Setup(
+                c => c.SendIncluded(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>()))
+                .Throws<HttpRequestException>();
+
             // Act
             var testDelegate =
                 new TestDelegate(
@@ -327,6 +339,10 @@ namespace Event.tests
                         Uri = new Uri("http://localhost:65443/")
                     }
                 });
+
+            _eventCommunicatorMock.Setup(
+                c => c.SendExcluded(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>()))
+                .Throws<HttpRequestException>();
 
             // Act
             var testDelegate =
