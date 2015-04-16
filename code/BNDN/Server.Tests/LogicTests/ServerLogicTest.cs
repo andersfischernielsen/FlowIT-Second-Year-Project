@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Common;
 using Moq;
 using NUnit.Framework;
@@ -9,7 +8,7 @@ using Server.Logic;
 using Server.Models;
 using Server.Storage;
 
-namespace Server.Tests
+namespace Server.Tests.LogicTests
 {
     [TestFixture]
     public class ServerLogicTest
