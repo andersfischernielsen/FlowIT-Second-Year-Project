@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 using Event.Exceptions;
@@ -146,11 +147,12 @@ namespace Event.Logic
             }
 
             var allOk = true;
+            Exception exception = null;
             try
             {
                 await _storage.SetExecuted(eventId, true);
                 await _storage.SetPending(eventId, false);
-                var addressDto = new EventAddressDto { Id = eventId, Uri = await _storage.GetUri(eventId) };
+                var addressDto = new EventAddressDto {Id = eventId, Uri = await _storage.GetUri(eventId)};
                 foreach (var pending in _storage.GetResponses(eventId))
                 {
                     await new EventCommunicator(pending.Uri, pending.EventID, eventId).SendPending(addressDto);
@@ -164,9 +166,15 @@ namespace Event.Logic
                     await new EventCommunicator(exclusion.Uri, exclusion.EventID, eventId).SendExcluded(addressDto);
                 }
             }
+            catch (HttpRequestException)
+            {
+                allOk = false;
+                exception = new FailedToUpdateStateAtOtherEventException();
+            }
             catch (Exception)
             {
                 allOk = false;
+                exception = new FailedToUpdateStateException();
             }
 
             if (!await _lockingLogic.UnlockAll(eventId))
@@ -178,7 +186,7 @@ namespace Event.Logic
             {
                 return true;
             }
-            throw new FailedToUpdateStateAtOtherEventException();
+            throw exception;
         }
 
         public void Dispose()

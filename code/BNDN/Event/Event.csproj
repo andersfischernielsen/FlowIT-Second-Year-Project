@@ -90,6 +90,7 @@
     <Compile Include="Interfaces\ILifecycleLogic.cs" />
     <Compile Include="Interfaces\ILockingLogic.cs" />
     <Compile Include="Interfaces\IStateLogic.cs" />
+    <Compile Include="Exceptions\FailedToUpdateStateException.cs" />
     <Compile Include="Logic\LifecycleLogic.cs" />
     <Compile Include="Exceptions\LockedException.cs" />
     <Compile Include="Logic\AuthLogic.cs" />
