@@ -11,20 +11,13 @@ namespace Event.Communicators
     public class EventCommunicator : IEventFromEvent
     {
         private readonly HttpClientToolbox _httpClient;
-        private string TargetEventId { get; set; }
-        private string OwnEventId { get; set; }
 
         /// <summary>
-        /// Create a new EventCommunicator using the provided Uri.
+        /// Create a new EventCommunicator with no outgoing communication addresses.
         /// </summary>
-        /// <param name="targetEventUri">The base-address of the Event that this instance is to communicate with.</param>
-        /// <param name="targetEventId">The id of the Event, that this EventCommunicator is to communicate with </param>
-        /// <param name="ownEventId">The id of this Event</param>
-        public EventCommunicator(Uri targetEventUri, string targetEventId, string ownEventId)
+        public EventCommunicator()
         {
-            _httpClient = new HttpClientToolbox(targetEventUri);
-            TargetEventId = targetEventId;
-            OwnEventId = ownEventId;
+            _httpClient = new HttpClientToolbox();
         }
 
         /// <summary>
@@ -36,57 +29,57 @@ namespace Event.Communicators
             _httpClient = toolbox;
         }
 
-        public async Task<bool> IsExecuted()
+        public async Task<bool> IsExecuted(Uri targetEventUri, string targetId, string ownId)
         {
-            return await _httpClient.Read<bool>(String.Format("events/{0}/executed/{1}", TargetEventId,OwnEventId));
+            _httpClient.SetBaseAddress(targetEventUri);
+            return await _httpClient.Read<bool>(String.Format("events/{0}/executed/{1}", targetId, ownId));
         }
 
-        public async Task<bool> IsIncluded()
+        public async Task<bool> IsIncluded(Uri targetEventUri, string targetId, string ownId)
         {
-            return await _httpClient.Read<bool>(String.Format("events/{0}/included/{1}",TargetEventId,OwnEventId));
+            _httpClient.SetBaseAddress(targetEventUri);
+            return await _httpClient.Read<bool>(String.Format("events/{0}/included/{1}", targetId, ownId));
         }
 
-        /// <summary>
-        /// GetEvent will return a representation of the Event asked for
-        /// </summary>
-        /// <returns>A Task object revealing af EventDto object</returns>
-        public async Task<EventDto> GetEvent()
+        public async Task SendPending(Uri targetEventUri, EventAddressDto lockDto, string targetId)
         {
-            return await _httpClient.Read<EventDto>(String.Format("events/{0}",TargetEventId));
+            _httpClient.SetBaseAddress(targetEventUri);
+            await _httpClient.Update(String.Format("events/{0}/pending/true", targetId), lockDto);
         }
 
-        public async Task SendPending(EventAddressDto lockDto)
+        public async Task SendIncluded(Uri targetEventUri, EventAddressDto lockDto, string targetId)
         {
-            await _httpClient.Update(String.Format("events/{0}/pending/true", TargetEventId), lockDto);
-        }
-        public async Task SendIncluded(EventAddressDto lockDto)
-        {
-            await _httpClient.Update(String.Format("events/{0}/included/true", TargetEventId), lockDto);
+            _httpClient.SetBaseAddress(targetEventUri);
+            await _httpClient.Update(String.Format("events/{0}/included/true", targetId), lockDto);
         }
 
-        public async Task SendExcluded(EventAddressDto lockDto)
+        public async Task SendExcluded(Uri targetEventUri, EventAddressDto lockDto, string targetId)
         {
-            await _httpClient.Update(string.Format("events/{0}/included/false", TargetEventId), lockDto);
+            _httpClient.SetBaseAddress(targetEventUri);
+            await _httpClient.Update(string.Format("events/{0}/included/false", targetId), lockDto);
         }
 
         /// <summary>
         /// Tries to lock target event
         /// </summary>
+        /// <param name="targetEventUri"></param>
         /// <param name="lockDto"></param>
+        /// <param name="targetId"></param>
         /// <returns></returns>
-        public async Task Lock(LockDto lockDto)
+        public async Task Lock(Uri targetEventUri, LockDto lockDto, string targetId)
         {
-            await _httpClient.Create(String.Format("events/{0}/lock",TargetEventId), lockDto);
+            _httpClient.SetBaseAddress(targetEventUri);
+            await _httpClient.Create(String.Format("events/{0}/lock",targetId), lockDto);
         }
 
         /// <summary>
         /// Attempts on unlocking the target Event
         /// </summary>
         /// <returns></returns>
-        public async Task Unlock()
+        public async Task Unlock(Uri targetEventUri, string targetId, string unlockId)
         {
-            var unlockId = OwnEventId;
-            await _httpClient.Delete(String.Format("events/{0}/lock/{1}",TargetEventId,unlockId));
+            _httpClient.SetBaseAddress(targetEventUri);
+            await _httpClient.Delete(String.Format("events/{0}/lock/{1}", targetId, unlockId));
         }
 
         public void Dispose()

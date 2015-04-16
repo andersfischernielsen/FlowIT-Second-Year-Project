@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using Common;
+using Event.Communicators;
 using Event.Models;
 using Event.Storage;
 using NUnit.Framework;
