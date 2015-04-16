@@ -10,7 +10,7 @@ using Event.Models;
 using Moq;
 using NUnit.Framework;
 
-namespace Event.tests
+namespace Event.Tests.LogicTests
 {
     [TestFixture]
     class StateLogicTests

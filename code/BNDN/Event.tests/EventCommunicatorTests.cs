@@ -3,7 +3,7 @@ using System.Net.Http;
 using Event.Communicators;
 using NUnit.Framework;
 
-namespace Event.tests
+namespace Event.Tests
 {
     [TestFixture]
     public class EventCommunicatorTests

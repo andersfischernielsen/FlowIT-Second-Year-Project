@@ -6,7 +6,7 @@ using Event.Interfaces;
 using Event.Logic;
 using NUnit.Framework;
 
-namespace Event.tests
+namespace Event.Tests.LogicTests
 {
     [TestFixture]
     class LifecycleLogicTests
