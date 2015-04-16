@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
+using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Storage;

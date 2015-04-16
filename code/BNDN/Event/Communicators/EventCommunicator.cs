@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
-using Event.Models;
 
-namespace Event.Storage
+namespace Event.Communicators
 {
     /// <summary>
     /// EventCommunicator handles the outgoing communication from an Event to another.
