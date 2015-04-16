@@ -218,7 +218,6 @@ namespace Event.Tests.ControllersTests
         #endregion
 
         #region GetState
-
         // Not all cases can occur in our code, but for the sake of testing:
         [TestCase(true, true, true, true)]
         [TestCase(true, true, true, false)]
@@ -351,6 +350,113 @@ namespace Event.Tests.ControllersTests
             // Assert
             Assert.AreEqual(y, logicIncluded);
         }
+
+        [Test]
+        public void UpdateIncluded_ModelState_HttpResponseException()
+        {
+            // Arrange
+            _stateController.ModelState.AddModelError("eventAddressDto",
+                "Could not be deserialised into an EventAddressDto");
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("eventId", true, null));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void UpdateIncluded_ModelState_BadRequest_HttpResponseException()
+        {
+            // Arrange
+            _stateController.ModelState.AddModelError("eventAddressDto",
+                "Could not be deserialised into an EventAddressDto");
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("eventId", true, null));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void UpdateIncluded_NotFound_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<NotFoundException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void UpdateIncluded_NotFound_Throws_404_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<NotFoundException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.NotFound, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void UpdateIncluded_Locked_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<LockedException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void UpdateIncluded_Locked_Throws_409_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<LockedException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+        }
         #endregion
 
         #region UpdatePending
@@ -367,13 +473,122 @@ namespace Event.Tests.ControllersTests
                 .Returns((string eventId, string senderId, bool newPending) => Task.Run(() => logicPending = newPending));
 
             // Act
-            // Update included:
+            // Update pending:
             await _stateController.UpdatePending("eventId", y, new EventAddressDto { Id = "senderId" });
 
             // Assert
             Assert.AreEqual(y, logicPending);
         }
 
+        [Test]
+        public void UpdatePending_ModelState_HttpResponseException()
+        {
+            // Arrange
+            _stateController.ModelState.AddModelError("eventAddressDto",
+                "Could not be deserialised into an EventAddressDto");
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("eventId", true, null));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void UpdatePending_ModelState_BadRequest_HttpResponseException()
+        {
+            // Arrange
+            _stateController.ModelState.AddModelError("eventAddressDto",
+                "Could not be deserialised into an EventAddressDto");
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("eventId", true, null));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void UpdatePending_NotFound_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<NotFoundException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void UpdatePending_NotFound_Throws_404_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<NotFoundException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.NotFound, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void UpdatePending_Locked_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<LockedException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void UpdatePending_Locked_Throws_409_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<LockedException>();
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate =
+                new TestDelegate(
+                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+        }
+        #endregion
+
+        #region Execute
         #endregion
     }
 }
