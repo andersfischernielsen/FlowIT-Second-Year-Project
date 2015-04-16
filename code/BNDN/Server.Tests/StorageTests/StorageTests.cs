@@ -22,25 +22,20 @@ namespace Server.Tests.StorageTests
             var context = new Mock<StorageContext>();
 
             //Mock USERS:
-            var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName" } }.AsQueryable();
-            var userList = users.AsQueryable();
-
-            context.Object.Users = new FakeDbSet<ServerUserModel>(userList).Object;
+            var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName" } };
+            context.Object.Users = new FakeDbSet<ServerUserModel>(users).Object;
 
             //Mock WORKFLOWS:
-            var workflows = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "1", Name = "TestingName" } }.AsQueryable();
-            var workflowList = workflows.AsQueryable();
-            context.Object.Workflows = new FakeDbSet<ServerWorkflowModel>(workflowList).Object;
+            var workflows = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "1", Name = "TestingName" } };
+            context.Object.Workflows = new FakeDbSet<ServerWorkflowModel>(workflows).Object;
 
             //EVENTS:
-            var events = new List<ServerEventModel> { new ServerEventModel { Id = "1", ServerWorkflowModelId = "1", Uri = "http://testing.com" } }.AsQueryable();
-            var eventList = events.AsQueryable();
-            context.Object.Events = new FakeDbSet<ServerEventModel>(eventList).Object;
+            var events = new List<ServerEventModel> { new ServerEventModel { Id = "1", ServerWorkflowModelId = "1", Uri = "http://testing.com" } };
+            context.Object.Events = new FakeDbSet<ServerEventModel>(events).Object;
 
             //ROLES:
-            var roles = new List<ServerRoleModel> { new ServerRoleModel { Id = "1", ServerWorkflowModelId = "TestingName" } }.AsQueryable();
-            var rolesList = roles.AsQueryable();
-            context.Object.Roles = new FakeDbSet<ServerRoleModel>(rolesList).Object;
+            var roles = new List<ServerRoleModel> { new ServerRoleModel { Id = "1", ServerWorkflowModelId = "TestingName" } };
+            context.Object.Roles = new FakeDbSet<ServerRoleModel>(roles).Object;
 
             //Assign the mocked StorageContext for use in tests.
             _context = context.Object;
@@ -50,18 +45,19 @@ namespace Server.Tests.StorageTests
 
             public DbSet<T> Object { get; private set; }
 
-            public FakeDbSet(IQueryable<T> list)
+            public FakeDbSet(IEnumerable<T> list)
             {
                 //Below is a bunch of crazy-looking code, which enables us to use a list as a DbSet. 
                 //Credit to http://www.loganfranken.com/blog/517/mocking-dbset-queries-in-ef6/ for figuring this out.
                 //This is done to validate what the ServerStorage instance does to the (fake) database.
 
                 // Force DbSet to return the IQueryable members of our converted list object as its data source.
+                var asQueryable = list.AsQueryable();
                 var mockSet = new Mock<DbSet<T>>();
-                mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(list.Provider);
-                mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(list.Expression);
-                mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(list.ElementType);
-                mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(list.GetEnumerator());
+                mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(asQueryable.Provider);
+                mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(asQueryable.Expression);
+                mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(asQueryable.ElementType);
+                mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(asQueryable.GetEnumerator());
 
                 Object = mockSet.Object;
             }
