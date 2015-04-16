@@ -2,20 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
-using Event.Storage;
 
 namespace Event.Logic
 {
     public class LockingLogic : ILockingLogic
     {
         private readonly IEventStorage _storage;
+        private readonly IEventFromEvent _eventCommunicator;
 
-        public LockingLogic(IEventStorage storage)
+        public LockingLogic(IEventStorage storage, IEventFromEvent eventCommunicator)
         {
             _storage = storage;
+            _eventCommunicator = eventCommunicator;
         }
 
         public async Task LockSelf(string eventId, LockDto lockDto)
@@ -81,7 +83,7 @@ namespace Event.Logic
 
                 try
                 {
-                    await new EventCommunicator(relation.Uri, relation.EventID, eventId).Lock(toLock);
+                    await _eventCommunicator.Lock(relation.Uri, toLock, relation.EventID);
                     lockedEvents.Add(relation);
                 }
                 catch (Exception)
@@ -127,7 +129,7 @@ namespace Event.Logic
             {
                 try
                 {
-                    await new EventCommunicator(relation.Uri, relation.EventID, eventId).Unlock();
+                    await _eventCommunicator.Unlock(relation.Uri, relation.EventID, eventId);
                 }
                 catch (Exception)
                 {
@@ -153,6 +155,7 @@ namespace Event.Logic
         public void Dispose()
         {
             _storage.Dispose();
+            _eventCommunicator.Dispose();
         }
 
         private async Task UnlockSome(string eventId, List<RelationToOtherEventModel> eventsToBeUnlocked)
@@ -162,7 +165,7 @@ namespace Event.Logic
             {
                 try
                 {
-                    await new EventCommunicator(relation.Uri, relation.EventID, eventId).Unlock();
+                    await _eventCommunicator.Unlock(relation.Uri, relation.EventID, eventId);
                 }
                 catch (Exception)
                 {

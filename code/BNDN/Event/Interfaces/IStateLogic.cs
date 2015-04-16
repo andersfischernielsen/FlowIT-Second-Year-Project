@@ -14,7 +14,7 @@ namespace Event.Interfaces
         Task<EventStateDto> GetStateDto(string eventId, string senderId);
         Task SetIncluded(string eventId, string senderId, bool newIncludedValue);
         Task SetPending(string eventId, string senderId, bool newPendingValue);
-        Task<bool> Execute(string eventId, ExecuteDto executeDto);
+        Task<bool> Execute(string eventId, RoleDto executeDto);
 
     }
 }

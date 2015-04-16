@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 using Event.Exceptions;
@@ -9,7 +10,7 @@ using Event.Models;
 using Moq;
 using NUnit.Framework;
 
-namespace Event.tests
+namespace Event.Tests.LogicTests
 {
     [TestFixture]
     class StateLogicTests
@@ -19,12 +20,14 @@ namespace Event.tests
         private Mock<IEventStorage> _eventStorageMock;
         private Mock<ILockingLogic> _lockingLogicMock;
         private Mock<IAuthLogic> _authLogicMock;
-        
+        private Mock<IEventFromEvent> _eventCommunicatorMock;
+
         [SetUp]
         public void SetUp()
         {
             _eventStorageMock = new Mock<IEventStorage>();
 
+            _eventStorageMock.Setup(s => s.Exists(It.IsAny<string>())).ReturnsAsync(true);
             _eventStorageMock.Setup(s => s.GetIncluded(It.IsAny<string>())).ReturnsAsync(true);
             _eventStorageMock.Setup(s => s.GetConditions(It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
             _eventStorageMock.Setup(s => s.GetResponses(It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
@@ -43,7 +46,9 @@ namespace Event.tests
             // Make the caller authorized
             _authLogicMock.Setup(a => a.IsAuthorized(It.IsAny<string>(), It.IsAny<IEnumerable<string>>())).ReturnsAsync(true);
 
-            _stateLogic = new StateLogic(_eventStorageMock.Object, _lockingLogicMock.Object, _authLogicMock.Object);
+            _eventCommunicatorMock = new Mock<IEventFromEvent>();
+
+            _stateLogic = new StateLogic(_eventStorageMock.Object, _lockingLogicMock.Object, _authLogicMock.Object, _eventCommunicatorMock.Object);
         }
 
         [Test]
@@ -76,6 +81,19 @@ namespace Event.tests
             Assert.Throws<LockedException>(async () => await _stateLogic.IsExecuted("eventId", "senderId"));
         }
 
+        [Test]
+        public void IsExecuted_Throws_NotFoundException()
+        {
+            // Arrange
+            _eventStorageMock.Setup(s => s.Exists(It.IsAny<string>())).ReturnsAsync(false);
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateLogic.IsExecuted("eventId", "senderId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
         public async Task IsIncluded_ReturnsTrue()
         {
             // Arrange
@@ -106,6 +124,20 @@ namespace Event.tests
             Assert.Throws<LockedException>(testDelegate);
         }
 
+        [Test]
+        public void IsIncluded_Throws_NotFoundException()
+        {
+            // Arrange
+            _eventStorageMock.Setup(s => s.Exists(It.IsAny<string>())).ReturnsAsync(false);
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateLogic.IsIncluded("eventId", "senderId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        // Todo: Make tests on GetStateDto() that takes the loop in IsExecutable into account.
         [Test]
         public async Task GetStateDto_Returns_Executable_State()
         {
@@ -171,6 +203,20 @@ namespace Event.tests
         }
 
         [Test]
+        public void GetStateDto_Throws_NotFoundException()
+        {
+            // Arrange
+            _eventStorageMock.Setup(s => s.Exists(It.IsAny<string>())).ReturnsAsync(false);
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateLogic.GetStateDto("eventId", "senderId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        // Todo: Make tests that takes loops into account.
+        [Test]
         public void Execute_Throws_LockedException_When_Another_Event_Has_Lock()
         {
             // Arrange
@@ -192,7 +238,7 @@ namespace Event.tests
             _authLogicMock.Setup(a => a.IsAuthorized(It.IsAny<string>(), It.IsAny<IEnumerable<string>>())).ReturnsAsync(false);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string>{ "WrongRole"}}));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "WrongRole" } }));
 
             // Assert
             Assert.Throws<NotAuthorizedException>(testDelegate);
@@ -208,7 +254,7 @@ namespace Event.tests
             _authLogicMock.Setup(a => a.IsAuthorized(It.IsAny<string>(), It.IsAny<List<string>>())).ReturnsAsync(true);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto{ Roles = new List<string>{ "RightRole"}}));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<NotExecutableException>(testDelegate);
@@ -221,7 +267,7 @@ namespace Event.tests
             _lockingLogicMock.Setup(l => l.LockAll(It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto{ Roles = new List<string>{"Roles"}}));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "Roles" } }));
 
             // Assert
             Assert.Throws<FailedToLockOtherEventException>(testDelegate);
@@ -234,7 +280,7 @@ namespace Event.tests
             _lockingLogicMock.Setup(l => l.UnlockAll(It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "Roles" } }));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "Roles" } }));
 
             // Assert
             Assert.Throws<FailedToUnlockOtherEventException>(testDelegate);
@@ -247,7 +293,7 @@ namespace Event.tests
             _eventStorageMock.Setup(s => s.SetExecuted(It.IsAny<string>(), It.IsAny<bool>())).Throws<Exception>();
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateException>(testDelegate);
@@ -260,7 +306,7 @@ namespace Event.tests
             _eventStorageMock.Setup(s => s.SetPending(It.IsAny<string>(), It.IsAny<bool>())).Throws<Exception>();
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateException>(testDelegate);
@@ -280,11 +326,15 @@ namespace Event.tests
                     }
                 });
 
+            _eventCommunicatorMock.Setup(
+                c => c.SendPending(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>()))
+                .Throws<HttpRequestException>();
+
             // Act
             var testDelegate =
                 new TestDelegate(
                     async () =>
-                        await _stateLogic.Execute("eventId", new ExecuteDto {Roles = new List<string> {"RightRole"}}));
+                        await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
@@ -304,11 +354,15 @@ namespace Event.tests
                     }
                 });
 
+            _eventCommunicatorMock.Setup(
+                c => c.SendIncluded(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>()))
+                .Throws<HttpRequestException>();
+
             // Act
             var testDelegate =
                 new TestDelegate(
                     async () =>
-                        await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+                        await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
@@ -328,14 +382,31 @@ namespace Event.tests
                     }
                 });
 
+            _eventCommunicatorMock.Setup(
+                c => c.SendExcluded(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>()))
+                .Throws<HttpRequestException>();
+
             // Act
             var testDelegate =
                 new TestDelegate(
                     async () =>
-                        await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+                        await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_Throws_NotFoundException()
+        {
+            // Arrange
+            _eventStorageMock.Setup(s => s.Exists(It.IsAny<string>())).ReturnsAsync(false);
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
         }
     }
 

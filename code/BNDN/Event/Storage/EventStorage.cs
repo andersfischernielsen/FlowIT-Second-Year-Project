@@ -63,6 +63,11 @@ namespace Event.Storage
 
         #region Properties
 
+        public async  Task<bool> Exists(string eventId)
+        {
+            return await _context.EventIdentification.AnyAsync(ei => ei.Id == eventId);
+        }
+
         public async Task<Uri> GetUri(string eventId)
         {
             await EventIdentificationIsInALegalState(eventId);

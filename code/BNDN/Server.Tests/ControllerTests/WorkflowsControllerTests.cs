@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Web.Http;
 using Common;
 using Moq;
 using NUnit.Framework;
 using Server.Controllers;
+using Server.Logic;
+using Server.Models;
 
-namespace Server.Tests
+namespace Server.Tests.ControllerTests
 {
     [TestFixture]
     class WorkflowsControllerTests
@@ -48,10 +48,13 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            var result = controller.Get();
+            var result = controller.Get().ToList();
 
             // Assert
             Assert.AreEqual(1, result.Count());
+            Assert.IsNotNull(result[0]);
+            Assert.AreEqual("testWorkflow", result[0].Id);
+            Assert.AreEqual("Test Workflow", result[0].Name);
         }
 
         [Test]
@@ -77,53 +80,60 @@ namespace Server.Tests
         #endregion
 
         #region POST Workflow
-        //TODO: Mayby a test to test that no two workflows can have the same ID?
 
         [Test]
-        public void PostWorkflowAddsANewWorkflow()
+        public async void PostWorkflowAddsANewWorkflow()
         {
             var list = new List<WorkflowDto>();
             // Arrange
             _mock.Setup(logic => logic.AddNewWorkflow(It.IsAny<WorkflowDto>()))
-                .Callback(((WorkflowDto workflowDto) => list.Add(workflowDto)));
+                .Returns(async (WorkflowDto workflowDto) => list.Add(workflowDto));
 
-            var workflow = new WorkflowDto() {Id = "id", Name = "name"};
+            var workflow = new WorkflowDto {Id = "id", Name = "name"};
 
             var controller = new WorkflowsController(_mock.Object);
 
+            Assert.IsEmpty(list);
+
             // Act
-            controller.PostWorkFlow(workflow);
+            await controller.PostWorkFlow(workflow);
 
             // Assert
-            Assert.AreEqual(workflow, list.First());
+            Assert.IsNotEmpty(list);
+            Assert.AreEqual(workflow.Id, list.First().Id);
+            Assert.AreEqual(workflow.Name, list.First().Name);
         }
 
 
         [Test]
         [TestCase("testWorkflow1")]
         [TestCase("IdMedSværeBogstaverÅØOgTegn$")]
-        public void PostWorkflow_id_that_does_not_exist(string workflowId)
+        public async void PostWorkflow_id_that_does_not_exist(string workflowId)
         {
-            // Arrange
-            var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
+            var list = new List<ServerWorkflowModel>();
+            _mock.Setup((logic => logic.AddNewWorkflow(It.IsAny<WorkflowDto>())))
+                .Returns(async (WorkflowDto incoming) => list.Add(new ServerWorkflowModel {Id = incoming.Id, Name = incoming.Id}));
 
-            _mock.Setup(logic => logic.AddNewWorkflow(dto)).Verifiable();
+            // Arrange
+            var dto = new WorkflowDto {Id = workflowId, Name = "Workflow Name"};
 
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            controller.PostWorkFlow(dto);
+            await controller.PostWorkFlow(dto);
 
             // Assert
-            Assert.DoesNotThrow(() => _mock.Verify(logic => logic.AddNewWorkflow(dto), Times.Once()));
+            Assert.IsNotEmpty(list);
+            Assert.IsNotNull(list.First(w => w.Id == workflowId));
         }
 
         [Test]
         [TestCase("NonexistentWorkflowId")]
         [TestCase("EtAndetWorkflowSomIkkeEksisterer")]
         [TestCase(null)]
-        public void PostWorkflow_id_already_exists(string workflowId)
+        public async void PostWorkflow_id_already_exists(string workflowId)
         {
+            //TODO: Michael?
             // Arrange
             var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
 
@@ -131,15 +141,14 @@ namespace Server.Tests
 
             var controller = new WorkflowsController(_mock.Object);
 
-            // Act
-            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(dto));
-
-            // Assert
-            var exception = Assert.Throws<HttpResponseException>(testDelegate);
-
-            // Todo: Discuss whether this HttpStatusCode should be used in this case.
-            // Todo: Double Assert.
-            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+            try {
+                await controller.PostWorkFlow(dto);
+            }
+            catch (Exception e) {
+                Assert.IsInstanceOf<HttpResponseException>(e);
+                var ex = (HttpResponseException) e;
+                Assert.AreEqual(HttpStatusCode.Conflict, ex.Response.StatusCode);
+            }
         }
 
         [Test]
@@ -168,6 +177,43 @@ namespace Server.Tests
 
         #region DELETE Workflow
 
+        [Test]
+        public void Delete_Workflow_That_Does_Exist(string workflowId)
+        {
+            //TODO: Make this test not return a weird reflection exception.
+            var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesExist", Name = "This is a test..."} };
+
+            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
+                .Callback(async (WorkflowDto incoming) => list.Remove(list.Find(w => w.Id == incoming.Id)));
+
+            var dto = new WorkflowDto { Id = "DoesExist", Name = "lol"};
+            var controller = new WorkflowsController(_mock.Object);
+
+            Assert.DoesNotThrow(async () => controller.DeleteWorkflow(dto.Id));
+            Assert.IsEmpty(list.Where(w => w.Id == workflowId));
+        }
+
+        [Test]
+        public void Delete_Workflow_That_Does_Not_Exist(string workflowId)
+        {
+            //TODO: Make this test not return a weird reflection exception.
+            var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesNotExist", Name = "This is a test..." } };
+
+            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
+                .Callback(async (WorkflowDto incoming) =>
+                {
+                    if (list.Count(w => w.Id == incoming.Id) != 0) return;
+
+                    list.Remove(list.Find(w => w.Id == incoming.Id));
+                });
+
+            var dto = new WorkflowDto { Id = "SomeDto", Name = "lol" };
+            var controller = new WorkflowsController(_mock.Object);
+
+            Assert.DoesNotThrow(async () => controller.DeleteWorkflow(dto.Id));
+            Assert.IsNotEmpty(list.Where(w => w.Id == workflowId));
+        }
+
         #endregion
 
         #region GET Workflow/Get Events
@@ -195,7 +241,6 @@ namespace Server.Tests
             // Assert
             Assert.IsInstanceOf<IEnumerable<EventAddressDto>>(result);
 
-            // Todo: Separate test case (?)
             Assert.AreEqual(numberOfEvents, result.Count());
         }
 

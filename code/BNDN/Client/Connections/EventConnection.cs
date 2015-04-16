@@ -52,7 +52,7 @@ namespace Client.Connections
             LoginViewModel.RoleForWorkflow.TryGetValue(_workflowId, out roles);
 
             var eventId = _eventDto.Id;
-            await _httpClient.Update(String.Format("events/{0}/executed/", eventId), new ExecuteDto { Roles = roles });
+            await _httpClient.Update(String.Format("events/{0}/executed/", eventId), new RoleDto { Roles = roles });
         }
 
         public void Dispose()

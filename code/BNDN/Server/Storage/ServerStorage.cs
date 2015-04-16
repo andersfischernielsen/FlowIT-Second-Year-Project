@@ -12,9 +12,9 @@ namespace Server.Storage
     {
         private readonly StorageContext _db;
 
-        public ServerStorage()
+        public ServerStorage(StorageContext context = null)
         {
-            _db = new StorageContext();
+            _db = context ?? new StorageContext();
         }
 
         public ServerUserModel GetUser(string username)

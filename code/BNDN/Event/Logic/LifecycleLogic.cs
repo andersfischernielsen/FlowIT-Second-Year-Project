@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
+using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
@@ -21,7 +22,7 @@ namespace Event.Logic
             var context = new EventContext();
             _storage = new EventStorage(context);
             _resetStorage = new EventStorageForReset(context);
-            _lockLogic = new LockingLogic(_storage);
+            _lockLogic = new LockingLogic(_storage, new EventCommunicator());
         }
 
         // Constructor to be used for dependency-injection
@@ -43,7 +44,7 @@ namespace Event.Logic
             {
                 throw new ArgumentNullException("ownUri", "Provided Uri was null");   
             }
-            if (await EventIdExists(eventDto.EventId))
+            if (await _storage.Exists(eventDto.EventId))
             {
                 // TODO: Throw more relevant exception
                 throw new ApplicationException("An event with the Id already exists");
@@ -66,6 +67,8 @@ namespace Event.Logic
             // TODO: try-catch here?
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
+            // Todo: Do we need what this method returns or is it waste of data-transfer?
+            await serverCommunicator.PostEventToServer(dto);
             try
             {
                 // Setup a new Event in own database.
@@ -96,7 +99,7 @@ namespace Event.Logic
             }
 
             // Check if Event exists here
-            if (!await EventIdExists(eventId))
+            if (!await _storage.Exists(eventId))
             {
                 // No need to do more, event already does not exist
                 return;

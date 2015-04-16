@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
+using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Storage;
@@ -13,16 +14,18 @@ namespace Event.Logic
         private readonly IEventStorage _storage;
         private readonly ILockingLogic _lockingLogic;
         private readonly IAuthLogic _authLogic;
+        private readonly IEventFromEvent _eventCommunicator;
 
         /// <summary>
         /// Runtime Constructor.
-        /// Uses default implementations of IEventStorage, ILockingLogic, IAuthLogic.
+        /// Uses default implementations of IEventStorage, ILockingLogic, IAuthLogic and IEventFromEvent.
         /// </summary>
         public StateLogic()
         {
             _storage = new EventStorage(new EventContext());
             _lockingLogic = null; // Todo: Use actual implementation.
             _authLogic = new AuthLogic(_storage);
+            _eventCommunicator = new EventCommunicator();
         }
 
         /// <summary>
@@ -31,15 +34,22 @@ namespace Event.Logic
         /// <param name="storage">An implementation of IEventStorage</param>
         /// <param name="lockingLogic">An implementation of ILockingLogic</param>
         /// <param name="authLogic">An implementation of IAuthLogic</param>
-        public StateLogic(IEventStorage storage, ILockingLogic lockingLogic, IAuthLogic authLogic)
+        /// <param name="eventCommunicator">An implementation of IEventFromEvent</param>
+        public StateLogic(IEventStorage storage, ILockingLogic lockingLogic, IAuthLogic authLogic, IEventFromEvent eventCommunicator)
         {
             _storage = storage;
             _lockingLogic = lockingLogic;
             _authLogic = authLogic;
+            _eventCommunicator = eventCommunicator;
         }
 
         public async Task<bool> IsExecuted(string eventId, string senderId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check is made to see if caller is allowed to execute this method at the moment. 
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -50,6 +60,11 @@ namespace Event.Logic
 
         public async Task<bool> IsIncluded(string eventId, string senderId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check is made to see if caller is allowed to execute this method
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -60,6 +75,11 @@ namespace Event.Logic
 
         public async Task<EventStateDto> GetStateDto(string eventId, string senderId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
             // Check is made to see whether caller is allowed to execute this method at the moment
             if (!senderId.Equals("-1") && !await _lockingLogic.IsAllowedToOperate(eventId, senderId))
@@ -80,6 +100,11 @@ namespace Event.Logic
 
         private async Task<bool> IsExecutable(string eventId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             //If this event is excluded, return false.
             if (!await _storage.GetIncluded(eventId))
             {
@@ -88,9 +113,8 @@ namespace Event.Logic
 
             foreach (var condition in _storage.GetConditions(eventId))
             {
-                IEventFromEvent eventCommunicator = new EventCommunicator(condition.Uri, condition.EventID, eventId);
-                var executed = await eventCommunicator.IsExecuted();
-                var included = await eventCommunicator.IsIncluded();
+                var executed = await _eventCommunicator.IsExecuted(condition.Uri, condition.EventID, eventId);
+                var included = await _eventCommunicator.IsIncluded(condition.Uri, condition.EventID, eventId);
                 // If the condition-event is not executed and currently included.
                 if (included && !executed)
                 {
@@ -102,6 +126,11 @@ namespace Event.Logic
 
         public async Task SetIncluded(string eventId, string senderId, bool newIncludedValue)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check to see if caller is currently allowed to execute this method
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -112,6 +141,11 @@ namespace Event.Logic
 
         public async Task SetPending(string eventId, string senderId, bool newPendingValue)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check if caller is allowed to execute this method at the moment
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -120,8 +154,13 @@ namespace Event.Logic
             await _storage.SetPending(eventId, newPendingValue);
         }
 
-        public async Task<bool> Execute(string eventId, ExecuteDto executeDto)
+        public async Task<bool> Execute(string eventId, RoleDto executeDto)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check that caller claims the right role for executing this Event
             if (!await _authLogic.IsAuthorized(eventId, executeDto.Roles))
             {
@@ -155,15 +194,15 @@ namespace Event.Logic
                 var addressDto = new EventAddressDto {Id = eventId, Uri = await _storage.GetUri(eventId)};
                 foreach (var pending in _storage.GetResponses(eventId))
                 {
-                    await new EventCommunicator(pending.Uri, pending.EventID, eventId).SendPending(addressDto);
+                    await _eventCommunicator.SendPending(pending.Uri, addressDto, pending.EventID);
                 }
                 foreach (var inclusion in _storage.GetInclusions(eventId))
                 {
-                    await new EventCommunicator(inclusion.Uri, inclusion.EventID, eventId).SendIncluded(addressDto);
+                    await _eventCommunicator.SendIncluded(inclusion.Uri, addressDto, inclusion.EventID);
                 }
                 foreach (var exclusion in _storage.GetExclusions(eventId))
                 {
-                    await new EventCommunicator(exclusion.Uri, exclusion.EventID, eventId).SendExcluded(addressDto);
+                    await _eventCommunicator.SendExcluded(exclusion.Uri, addressDto, exclusion.EventID);
                 }
             }
             catch (HttpRequestException)
@@ -194,6 +233,7 @@ namespace Event.Logic
             _storage.Dispose();
             _lockingLogic.Dispose();
             _authLogic.Dispose();
+            _eventCommunicator.Dispose();
         }
     }
 }

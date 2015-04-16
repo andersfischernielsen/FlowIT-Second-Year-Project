@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using Common;
-using Event.Models;
-using Event.Storage;
+using Event.Communicators;
 using NUnit.Framework;
 
-namespace Event.tests
+namespace Event.Tests
 {
     [TestFixture]
     public class EventCommunicatorTests
@@ -14,18 +11,18 @@ namespace Event.tests
         [Test]
         public void Constructor_Runs()
         {
-            var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
+            var eventCommunicator = new EventCommunicator();
         }
 
         [Test]
         [ExpectedException(typeof(HttpRequestException))]
         public void IsExecuted_FailsOnWrongUri()
         {
-            var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
+            var eventCommunicator = new EventCommunicator();
             
             try
             {
-                var result = eventCommunicator.IsExecuted().Result;
+                var result = eventCommunicator.IsExecuted(new Uri("http://test.dk/"), "TargetID", "SenderId").Result;
             }
             catch (Exception ex)
             {
@@ -37,25 +34,10 @@ namespace Event.tests
         [ExpectedException(typeof(HttpRequestException))]
         public void IsIncluded_FailsOnWrongUri()
         {
-            var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
+            var eventCommunicator = new EventCommunicator();
             try
             {
-                var result = eventCommunicator.IsIncluded().Result;
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException;
-            }
-        }
-
-        [Test]
-        [ExpectedException(typeof(HttpRequestException))]
-        public void GetEvent_FailsOnWrongUri()
-        {
-            var eventCommunicator = new EventCommunicator(new Uri("http://test.dk/"), "TargetID", "SenderId");
-            try
-            {
-                var result = eventCommunicator.GetEvent().Result;
+                var result = eventCommunicator.IsIncluded(new Uri("http://test.dk/"), "TargetID", "SenderId").Result;
             }
             catch (Exception ex)
             {

@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Communicators\EventCommunicator.cs" />
     <Compile Include="Controllers\LifecycleController.cs" />
     <Compile Include="Controllers\LockController.cs" />
     <Compile Include="Controllers\StateController.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="Exceptions\LockedException.cs" />
     <Compile Include="Logic\AuthLogic.cs" />
     <Compile Include="Logic\LockingLogic.cs" />
+    <Compile Include="Exceptions\NotFoundException.cs" />
     <Compile Include="Logic\StateLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EventRoleModel.cs" />
@@ -105,7 +107,6 @@
     <Compile Include="Models\UriClasses\InclusionUri.cs" />
     <Compile Include="Models\UriClasses\ResponseUri.cs" />
     <Compile Include="Models\UriClasses\UriRepresentationName.cs" />
-    <Compile Include="Storage\EventCommunicator.cs" />
     <Compile Include="Storage\EventContext.cs" />
     <Compile Include="LockDto.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />

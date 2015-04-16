@@ -18,7 +18,6 @@ namespace Event.Controllers
         /// </summary>
         public StateController()
         {
-            
             _logic = new StateLogic();
         }
 
@@ -45,6 +44,10 @@ namespace Event.Controllers
             {
                 return await _logic.IsExecuted(eventId, senderId);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+            }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
@@ -64,6 +67,10 @@ namespace Event.Controllers
             try
             {
                 return await _logic.IsIncluded(eventId, senderId);
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
@@ -86,6 +93,10 @@ namespace Event.Controllers
             try
             {
                 return await _logic.GetStateDto(eventId, senderId);
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
             }
             catch (LockedException)
             {
@@ -113,12 +124,14 @@ namespace Event.Controllers
             {
                 await _logic.SetIncluded(eventId, eventAddressDto.Id, boolValueForIncluded);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+            }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
             }
-            // TODO: Research what the right response to a PUT call is (I believe it is the updates value of the property) 
-            // TODO: (and implement it here and on the other PUT-calls)
         }
 
         /// <summary>
@@ -141,6 +154,10 @@ namespace Event.Controllers
             {
                 await _logic.SetPending(eventId, eventAddressDto.Id, boolValueForPending);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+            }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
@@ -156,7 +173,7 @@ namespace Event.Controllers
         /// <returns></returns>
         [Route("events/{eventId}/executed")]
         [HttpPut]
-        public async Task<bool> Execute([FromBody] ExecuteDto executeDto, string eventId)
+        public async Task<bool> Execute(string eventId, [FromBody] RoleDto executeDto)
         {
             // Check that provided input can be mapped onto an instance of ExecuteDto
             if (!ModelState.IsValid)
@@ -169,29 +186,39 @@ namespace Event.Controllers
             {
                 return await _logic.Execute(eventId, executeDto);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+            }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
             }
             catch (NotAuthorizedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "You do not have permission to execute this event"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
+                    "You do not have permission to execute this event"));
             }
             catch (NotExecutableException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed, "Event is not executable."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed,
+                    "Event is not executable."));
             }
             catch (FailedToLockOtherEventException)
             {
-                return false;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Another event is locked"));
             }
             catch (FailedToUnlockOtherEventException)
             {
-                return false;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Could not unlock other events."));
+            }
+            catch (FailedToUpdateStateException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "State could not be saved!"));
             }
             catch (FailedToUpdateStateAtOtherEventException)
             {
-                return false;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Another event could not save state!"));
             }
         }
 
