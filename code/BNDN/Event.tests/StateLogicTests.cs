@@ -32,6 +32,7 @@ namespace Event.tests
             _eventStorageMock.Setup(s => s.GetResponses(It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
             _eventStorageMock.Setup(s => s.GetInclusions(It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
             _eventStorageMock.Setup(s => s.GetExclusions(It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
+            _eventStorageMock.Setup(s => s.GetName(It.IsAny<string>())).ReturnsAsync("eventId");
 
             _lockingLogicMock = new Mock<ILockingLogic>();
 
