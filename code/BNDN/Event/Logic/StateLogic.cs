@@ -124,7 +124,7 @@ namespace Event.Logic
             await _storage.SetPending(eventId, newPendingValue);
         }
 
-        public async Task<bool> Execute(string eventId, ExecuteDto executeDto)
+        public async Task<bool> Execute(string eventId, RoleDto executeDto)
         {
             // Check that caller claims the right role for executing this Event
             if (!await _authLogic.IsAuthorized(eventId, executeDto.Roles))

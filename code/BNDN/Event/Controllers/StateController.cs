@@ -156,7 +156,7 @@ namespace Event.Controllers
         /// <returns></returns>
         [Route("events/{eventId}/executed")]
         [HttpPut]
-        public async Task<bool> Execute([FromBody] ExecuteDto executeDto, string eventId)
+        public async Task<bool> Execute([FromBody] RoleDto executeDto, string eventId)
         {
             // Check that provided input can be mapped onto an instance of ExecuteDto
             if (!ModelState.IsValid)

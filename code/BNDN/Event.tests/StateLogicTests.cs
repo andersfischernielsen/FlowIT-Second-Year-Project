@@ -196,7 +196,7 @@ namespace Event.tests
             _authLogicMock.Setup(a => a.IsAuthorized(It.IsAny<string>(), It.IsAny<IEnumerable<string>>())).ReturnsAsync(false);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string>{ "WrongRole"}}));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string>{ "WrongRole"}}));
 
             // Assert
             Assert.Throws<NotAuthorizedException>(testDelegate);
@@ -212,7 +212,7 @@ namespace Event.tests
             _authLogicMock.Setup(a => a.IsAuthorized(It.IsAny<string>(), It.IsAny<List<string>>())).ReturnsAsync(true);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto{ Roles = new List<string>{ "RightRole"}}));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto{ Roles = new List<string>{ "RightRole"}}));
 
             // Assert
             Assert.Throws<NotExecutableException>(testDelegate);
@@ -225,7 +225,7 @@ namespace Event.tests
             _lockingLogicMock.Setup(l => l.LockAll(It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto{ Roles = new List<string>{"Roles"}}));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto{ Roles = new List<string>{"Roles"}}));
 
             // Assert
             Assert.Throws<FailedToLockOtherEventException>(testDelegate);
@@ -238,7 +238,7 @@ namespace Event.tests
             _lockingLogicMock.Setup(l => l.UnlockAll(It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "Roles" } }));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "Roles" } }));
 
             // Assert
             Assert.Throws<FailedToUnlockOtherEventException>(testDelegate);
@@ -251,7 +251,7 @@ namespace Event.tests
             _eventStorageMock.Setup(s => s.SetExecuted(It.IsAny<string>(), It.IsAny<bool>())).Throws<Exception>();
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateException>(testDelegate);
@@ -264,7 +264,7 @@ namespace Event.tests
             _eventStorageMock.Setup(s => s.SetPending(It.IsAny<string>(), It.IsAny<bool>())).Throws<Exception>();
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+            var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateException>(testDelegate);
@@ -292,7 +292,7 @@ namespace Event.tests
             var testDelegate =
                 new TestDelegate(
                     async () =>
-                        await _stateLogic.Execute("eventId", new ExecuteDto {Roles = new List<string> {"RightRole"}}));
+                        await _stateLogic.Execute("eventId", new RoleDto {Roles = new List<string> {"RightRole"}}));
 
             // Assert
             Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
@@ -320,7 +320,7 @@ namespace Event.tests
             var testDelegate =
                 new TestDelegate(
                     async () =>
-                        await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+                        await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
@@ -348,7 +348,7 @@ namespace Event.tests
             var testDelegate =
                 new TestDelegate(
                     async () =>
-                        await _stateLogic.Execute("eventId", new ExecuteDto { Roles = new List<string> { "RightRole" } }));
+                        await _stateLogic.Execute("eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
             Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
