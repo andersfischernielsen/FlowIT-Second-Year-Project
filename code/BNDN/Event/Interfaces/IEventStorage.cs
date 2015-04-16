@@ -8,6 +8,9 @@ namespace Event.Interfaces
     public interface IEventStorage : IDisposable
     {
         #region Ids
+
+        Task<bool> Exists(string eventId);
+
         //For notifying server about this event. Is fetched when receiving EventDto on creation!
         Task<Uri> GetUri(string eventId);
         Task SetUri(string eventId, Uri value);

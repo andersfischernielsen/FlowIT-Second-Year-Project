@@ -45,6 +45,11 @@ namespace Event.Controllers
             {
                 return await _logic.IsExecuted(eventId, senderId);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    string.Format("{0} does not exist")));
+            }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
@@ -64,6 +69,11 @@ namespace Event.Controllers
             try
             {
                 return await _logic.IsIncluded(eventId, senderId);
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    string.Format("{0} does not exist")));
             }
             catch (LockedException)
             {
@@ -86,6 +96,11 @@ namespace Event.Controllers
             try
             {
                 return await _logic.GetStateDto(eventId, senderId);
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    string.Format("{0} does not exist")));
             }
             catch (LockedException)
             {
@@ -112,6 +127,11 @@ namespace Event.Controllers
             try
             {
                 await _logic.SetIncluded(eventId, eventAddressDto.Id, boolValueForIncluded);
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    string.Format("{0} does not exist")));
             }
             catch (LockedException)
             {
@@ -141,6 +161,11 @@ namespace Event.Controllers
             {
                 await _logic.SetPending(eventId, eventAddressDto.Id, boolValueForPending);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    string.Format("{0} does not exist")));
+            }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
@@ -169,23 +194,34 @@ namespace Event.Controllers
             {
                 return await _logic.Execute(eventId, executeDto);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    string.Format("{0} does not exist")));
+            }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
             }
             catch (NotAuthorizedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "You do not have permission to execute this event"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
+                    "You do not have permission to execute this event"));
             }
             catch (NotExecutableException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed, "Event is not executable."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed,
+                    "Event is not executable."));
             }
             catch (FailedToLockOtherEventException)
             {
                 return false;
             }
             catch (FailedToUnlockOtherEventException)
+            {
+                return false;
+            }
+            catch (FailedToUpdateStateException)
             {
                 return false;
             }

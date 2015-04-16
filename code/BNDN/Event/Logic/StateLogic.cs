@@ -45,6 +45,11 @@ namespace Event.Logic
 
         public async Task<bool> IsExecuted(string eventId, string senderId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check is made to see if caller is allowed to execute this method at the moment. 
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -55,6 +60,11 @@ namespace Event.Logic
 
         public async Task<bool> IsIncluded(string eventId, string senderId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check is made to see if caller is allowed to execute this method
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -65,6 +75,11 @@ namespace Event.Logic
 
         public async Task<EventStateDto> GetStateDto(string eventId, string senderId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
             // Check is made to see whether caller is allowed to execute this method at the moment
             if (!senderId.Equals("-1") && !await _lockingLogic.IsAllowedToOperate(eventId, senderId))
@@ -85,6 +100,11 @@ namespace Event.Logic
 
         private async Task<bool> IsExecutable(string eventId)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             //If this event is excluded, return false.
             if (!await _storage.GetIncluded(eventId))
             {
@@ -106,6 +126,11 @@ namespace Event.Logic
 
         public async Task SetIncluded(string eventId, string senderId, bool newIncludedValue)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check to see if caller is currently allowed to execute this method
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -116,6 +141,11 @@ namespace Event.Logic
 
         public async Task SetPending(string eventId, string senderId, bool newPendingValue)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check if caller is allowed to execute this method at the moment
             if (!await _lockingLogic.IsAllowedToOperate(eventId, senderId))
             {
@@ -126,6 +156,11 @@ namespace Event.Logic
 
         public async Task<bool> Execute(string eventId, RoleDto executeDto)
         {
+            if (!await _storage.Exists(eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Check that caller claims the right role for executing this Event
             if (!await _authLogic.IsAuthorized(eventId, executeDto.Roles))
             {
