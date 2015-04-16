@@ -63,6 +63,7 @@ namespace Event.Logic
 #else
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
 #endif
+            // TODO: try-catch here?
             var otherEvents = await serverCommunicator.PostEventToServer(dto);
 
             try
@@ -157,7 +158,10 @@ namespace Event.Logic
         {
             try
             {
-                return await _storage.GetName(eventId) != null;
+                var name = await _storage.GetName(eventId);
+                return name != null;
+
+                //return await _storage.GetName(eventId) != null;
             }
             catch (ApplicationException)
             {
