@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Common
 {
-    public class ExecuteDto
+    public class RoleDto
     {
         [Required]
         public IList<string> Roles { get; set; }
