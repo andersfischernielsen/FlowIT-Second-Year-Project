@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControllersTests\StateControllerTests.cs" />
     <Compile Include="EventCommunicatorTests.cs" />
     <Compile Include="LogicTests\EventLogicTests.cs" />
     <Compile Include="ControllersTests\EventStateControllerTests.cs" />
