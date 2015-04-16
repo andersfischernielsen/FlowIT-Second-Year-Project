@@ -46,7 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExecuteDto.cs" />
+    <Compile Include="RoleDto.cs" />
     <Compile Include="HttpClientToolbox.cs" />
     <Compile Include="EventAddressDto.cs" />
     <Compile Include="EventDto.cs" />
