@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Common;
 using Moq;
 using NUnit.Framework;
@@ -26,16 +27,15 @@ namespace Server.Tests
 
             //Set up method for adding events to workflows. The callback adds the input parameters to the list.
             toSetup.Setup(m => m.AddEventToWorkflow(It.IsAny<ServerEventModel>()))
-                .Callback((ServerEventModel eventToAdd) =>
+                .Returns(async (ServerEventModel eventToAdd) =>
                 {
-                    var result = _list.Find(workflow => workflow.Id == eventToAdd.ServerWorkflowModelId);
-                    var eventmodel = result.ServerEventModels;
-                    eventmodel.Add(eventToAdd);
+                    var eventModel = _list.Find(workflow => workflow.Id == eventToAdd.ServerWorkflowModelId).ServerEventModels;
+                    eventModel.Add(eventToAdd);
                 });
 
             //Set up method for adding a new workflow. The callback adds the input parameter to the list.
             toSetup.Setup(m => m.AddNewWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Callback((ServerWorkflowModel toAdd) => _list.Add(toAdd));
+                .Returns(async (ServerWorkflowModel toAdd) => _list.Add(toAdd));
 
             //Set up method for getting all workflows. Simply returns the dummy list.
             toSetup.Setup(m => m.GetAllWorkflows())
@@ -61,7 +61,7 @@ namespace Server.Tests
 
             //Set up method for removing workflow. Removes the input workflow from the list. 
             toSetup.Setup(m => m.RemoveWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Callback((ServerWorkflowModel dtoToRemove) =>
+                .Returns(async (ServerWorkflowModel dtoToRemove) =>
                 {
                     var toRemove = _list.Find(x => x.Id == dtoToRemove.Id);
                     _list.Remove(toRemove);
@@ -70,18 +70,20 @@ namespace Server.Tests
             //Set up method for updating an event in a workflow.
             //Finds the workflow in the list, finds the event in the workflow and replaces it with the new event.
             toSetup.Setup(m => m.UpdateEventOnWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<ServerEventModel>()))
-                .Callback((ServerWorkflowModel toUpdateOn, ServerEventModel eventToUpdate) =>
+                .Returns(async (ServerWorkflowModel toUpdateOn, ServerEventModel eventToUpdate) =>
                 {
                     var events = _list.Find(x => x.Id == toUpdateOn.Id).ServerEventModels;
                     var toReplace = events.First(x => x.Id == eventToUpdate.Id);
-                    var index = events.ToList().IndexOf(toReplace);
-                    events.ToList().Insert(index, eventToUpdate);
+                    var asList = events.ToList();
+                    var index = asList.IndexOf(toReplace);
+                    asList[index] = eventToUpdate;
+                    _list.Find(x => x.Id == toUpdateOn.Id).ServerEventModels = asList;
                 });
 
             //Set up method for updating a workflow.
             //Finds the workflow to update in the list, then replaces it with the new workflow.
             toSetup.Setup(m => m.UpdateWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Callback((ServerWorkflowModel toUpdate) =>
+                .Returns(async (ServerWorkflowModel toUpdate) =>
                 {
                     var oldWorkflow = _list.Find(x => x.Id == toUpdate.Id);
                     var index = _list.IndexOf(oldWorkflow);
