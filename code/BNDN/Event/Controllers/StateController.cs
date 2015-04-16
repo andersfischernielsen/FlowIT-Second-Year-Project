@@ -173,7 +173,7 @@ namespace Event.Controllers
         /// <returns></returns>
         [Route("events/{eventId}/executed")]
         [HttpPut]
-        public async Task<bool> Execute([FromBody] RoleDto executeDto, string eventId)
+        public async Task<bool> Execute(string eventId, [FromBody] RoleDto executeDto)
         {
             // Check that provided input can be mapped onto an instance of ExecuteDto
             if (!ModelState.IsValid)
@@ -210,16 +210,15 @@ namespace Event.Controllers
             }
             catch (FailedToUnlockOtherEventException)
             {
-                // Todo: What status codes should be thrown for these 3 exceptions? Internal Server error?
-                return false;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Could not unlock other events."));
             }
             catch (FailedToUpdateStateException)
             {
-                return false;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "State could not be saved!"));
             }
             catch (FailedToUpdateStateAtOtherEventException)
             {
-                return false;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Another event could not save state!"));
             }
         }
 

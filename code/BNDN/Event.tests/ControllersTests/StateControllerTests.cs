@@ -589,6 +589,328 @@ namespace Event.Tests.ControllersTests
         #endregion
 
         #region Execute
+
+        [Test]
+        public void Execute_Invalid_ModelState_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateController.ModelState.AddModelError("roleDto", "RoleDto is empty");
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_Invalid_ModelState_Throws_BadRequest_HttpResponseException()
+        {
+            // Arrange
+            _stateController.ModelState.AddModelError("roleDto", "RoleDto is empty");
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_Not_Authorized_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new NotAuthorizedException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_Not_Authorized_Throws_Unauthorized_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new NotAuthorizedException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.Unauthorized, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_Locked_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new LockedException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_Locked_Throws_Conflict_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new LockedException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_NotFound_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new NotFoundException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_NotFound_Throws_NotFound_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new NotFoundException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.NotFound, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_NotExecutable_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new NotExecutableException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_NotExecutable_Throws_PreconditionFailed_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new NotExecutableException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.PreconditionFailed, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_FailedToLockOtherEvent_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToLockOtherEventException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_FailedToLockOtherEvent_Throws_Conflict_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToLockOtherEventException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_FailedToUnlockOtherEvent_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToUnlockOtherEventException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_FailedToUnlockOtherEvent_Throws_InternalServerError_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToUnlockOtherEventException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.InternalServerError, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_FailedToUpdateState_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToUpdateStateException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_FailedToUpdateState_Throws_InternalServerError_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToUpdateStateException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.InternalServerError, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public void Execute_FailedToUpdateStateAtOtherEvent_Throws_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            Assert.Throws<HttpResponseException>(testDelegate);
+        }
+
+        [Test]
+        public void Execute_FailedToUpdateStateAtOtherEvent_Throws_InternalServerError_HttpResponseException()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
+
+            _stateController.Request = new HttpRequestMessage();
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+
+            // Assert
+            var exception = Assert.Throws<HttpResponseException>(testDelegate);
+            Assert.AreEqual(HttpStatusCode.InternalServerError, exception.Response.StatusCode);
+        }
+
+        [Test]
+        public async Task Execute_Calls_Logic_Execute()
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(true).Verifiable();
+
+            // Act
+            await _stateController.Execute("eventId", new RoleDto());
+
+            // Assert
+            _stateLogicMock.Verify(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()), Times.Once());
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Execute_Returns_x(bool x)
+        {
+            // Arrange
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(x);
+
+            // Act
+            var result = await _stateController.Execute("eventId", new RoleDto());
+
+            // Assert
+            Assert.AreEqual(x, result);
+        }
         #endregion
     }
 }
