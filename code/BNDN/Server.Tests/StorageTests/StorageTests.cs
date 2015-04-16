@@ -21,11 +21,11 @@ namespace Server.Tests.StorageTests
         {
             var context = new Mock<StorageContext>();
 
-            //Mock USERS:
+            //USERS:
             var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName" } };
             context.Object.Users = new FakeDbSet<ServerUserModel>(users).Object;
 
-            //Mock WORKFLOWS:
+            //WORKFLOWS:
             var workflows = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "1", Name = "TestingName" } };
             context.Object.Workflows = new FakeDbSet<ServerWorkflowModel>(workflows).Object;
 
