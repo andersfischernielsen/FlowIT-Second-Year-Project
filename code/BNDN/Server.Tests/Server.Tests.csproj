@@ -64,10 +64,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="ServerLogicTest.cs" />
+    <Compile Include="ControllerTests\UserControllerTests.cs" />
+    <Compile Include="ControllerTests\WorkflowsControllerTests.cs" />
+    <Compile Include="LogicTests\ServerLogicTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WhatAmI.cs" />
-    <Compile Include="WorkflowsControllerTests.cs" />
+    <Compile Include="StorageTests\StorageTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
@@ -83,10 +84,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ControllerTests\" />
-    <Folder Include="StorageTests\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

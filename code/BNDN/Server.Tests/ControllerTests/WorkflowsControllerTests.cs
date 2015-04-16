@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Web.Http;
 using Common;
 using Moq;
@@ -12,7 +9,7 @@ using NUnit.Framework;
 using Server.Controllers;
 using Server.Logic;
 
-namespace Server.Tests
+namespace Server.Tests.ControllerTests
 {
     [TestFixture]
     class WorkflowsControllerTests
