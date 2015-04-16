@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -80,7 +81,7 @@ namespace Server.Tests
         //TODO: Mayby a test to test that no two workflows can have the same ID?
 
         [Test]
-        public void PostWorkflowAddsANewWorkflow()
+        public async void PostWorkflowAddsANewWorkflow()
         {
             var list = new List<WorkflowDto>();
             // Arrange
@@ -92,7 +93,7 @@ namespace Server.Tests
             var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            controller.PostWorkFlow(workflow);
+            await controller.PostWorkFlow(workflow);
 
             // Assert
             Assert.AreEqual(workflow, list.First());
@@ -122,7 +123,7 @@ namespace Server.Tests
         [TestCase("NonexistentWorkflowId")]
         [TestCase("EtAndetWorkflowSomIkkeEksisterer")]
         [TestCase(null)]
-        public void PostWorkflow_id_already_exists(string workflowId)
+        public async void PostWorkflow_id_already_exists(string workflowId)
         {
             // Arrange
             var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
@@ -131,15 +132,14 @@ namespace Server.Tests
 
             var controller = new WorkflowsController(_mock.Object);
 
-            // Act
-            var testDelegate = new TestDelegate(() => controller.PostWorkFlow(dto));
-
-            // Assert
-            var exception = Assert.Throws<HttpResponseException>(testDelegate);
-
-            // Todo: Discuss whether this HttpStatusCode should be used in this case.
-            // Todo: Double Assert.
-            Assert.AreEqual(HttpStatusCode.Conflict, exception.Response.StatusCode);
+            try {
+                await controller.PostWorkFlow(dto);
+            }
+            catch (Exception e) {
+                Assert.IsInstanceOf<HttpResponseException>(e);
+                var ex = (HttpResponseException) e;
+                Assert.AreEqual(HttpStatusCode.Conflict, ex.Response.StatusCode);
+            }
         }
 
         [Test]
@@ -195,7 +195,6 @@ namespace Server.Tests
             // Assert
             Assert.IsInstanceOf<IEnumerable<EventAddressDto>>(result);
 
-            // Todo: Separate test case (?)
             Assert.AreEqual(numberOfEvents, result.Count());
         }
 
