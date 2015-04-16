@@ -137,6 +137,7 @@ namespace Event.Tests.LogicTests
             Assert.Throws<NotFoundException>(testDelegate);
         }
 
+        // Todo: Make tests on GetStateDto() that takes the loop in IsExecutable into account.
         [Test]
         public async Task GetStateDto_Returns_Executable_State()
         {
@@ -214,6 +215,7 @@ namespace Event.Tests.LogicTests
             Assert.Throws<NotFoundException>(testDelegate);
         }
 
+        // Todo: Make tests that takes loops into account.
         [Test]
         public void Execute_Throws_LockedException_When_Another_Event_Has_Lock()
         {
