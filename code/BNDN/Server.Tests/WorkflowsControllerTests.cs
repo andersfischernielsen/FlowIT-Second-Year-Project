@@ -10,6 +10,7 @@ using Common;
 using Moq;
 using NUnit.Framework;
 using Server.Controllers;
+using Server.Logic;
 
 namespace Server.Tests
 {

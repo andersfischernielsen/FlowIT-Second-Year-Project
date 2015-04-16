@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -9,7 +8,7 @@ using Common;
 using Server.Models;
 using Server.Storage;
 
-namespace Server
+namespace Server.Logic
 {
     public class ServerLogic : IServerLogic
     {
