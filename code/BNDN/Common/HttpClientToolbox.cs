@@ -25,6 +25,12 @@ namespace Common
             set { HttpClient.DefaultRequestHeaders.Authorization = value; }
         }
 
+        public HttpClientToolbox()
+        {
+            HttpClient = new HttpClient();
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
         /// <summary>
         /// Instantiate a HttpClientToolbox with a given URL (as a string).
         /// </summary>
