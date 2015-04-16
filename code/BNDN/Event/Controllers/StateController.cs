@@ -18,7 +18,6 @@ namespace Event.Controllers
         /// </summary>
         public StateController()
         {
-            
             _logic = new StateLogic();
         }
 
@@ -133,8 +132,6 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
             }
-            // TODO: Research what the right response to a PUT call is (I believe it is the updates value of the property) 
-            // TODO: (and implement it here and on the other PUT-calls)
         }
 
         /// <summary>
@@ -209,10 +206,11 @@ namespace Event.Controllers
             }
             catch (FailedToLockOtherEventException)
             {
-                return false;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Another event is locked"));
             }
             catch (FailedToUnlockOtherEventException)
             {
+                // Todo: What status codes should be thrown for these 3 exceptions? Internal Server error?
                 return false;
             }
             catch (FailedToUpdateStateException)
