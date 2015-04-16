@@ -7,8 +7,8 @@
     <ProjectGuid>{B6D4B206-E143-4931-B429-7E0340408DEE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Event.tests</RootNamespace>
-    <AssemblyName>Event.tests</AssemblyName>
+    <RootNamespace>Event.Tests</RootNamespace>
+    <AssemblyName>Event.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -50,11 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EventCommunicatorTests.cs" />
-    <Compile Include="EventLogicTests.cs" />
-    <Compile Include="EventStateControllerTests.cs" />
-    <Compile Include="LifecycleLogicTests.cs" />
+    <Compile Include="LogicTests\EventLogicTests.cs" />
+    <Compile Include="ControllersTests\EventStateControllerTests.cs" />
+    <Compile Include="LogicTests\LifecycleLogicTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StateLogicTests.cs" />
+    <Compile Include="LogicTests\StateLogicTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Tests", "Server.Tests\Server.Tests.csproj", "{AD0D4617-00A1-4C36-B903-9A437A9EDB7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Event.tests", "Event.tests\Event.tests.csproj", "{B6D4B206-E143-4931-B429-7E0340408DEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Event.Tests", "Event.Tests\Event.Tests.csproj", "{B6D4B206-E143-4931-B429-7E0340408DEE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Tests", "Client.Tests\Client.Tests.csproj", "{19468B6D-29A8-4FDA-BFBD-AD2FE247DE8B}"
 EndProject

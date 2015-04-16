@@ -18,7 +18,7 @@ namespace Event.Logic
 
         /// <summary>
         /// Runtime Constructor.
-        /// Uses default implementations of IEventStorage, ILockingLogic, IAuthLogic.
+        /// Uses default implementations of IEventStorage, ILockingLogic, IAuthLogic and IEventFromEvent.
         /// </summary>
         public StateLogic()
         {
