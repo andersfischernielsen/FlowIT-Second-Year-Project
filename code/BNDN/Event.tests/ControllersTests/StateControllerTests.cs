@@ -22,7 +22,7 @@ namespace Event.Tests.ControllersTests
         {
             _stateLogicMock = new Mock<IStateLogic>();
 
-            _stateController = new StateController(_stateLogicMock.Object);
+            _stateController = new StateController(_stateLogicMock.Object) {Request = new HttpRequestMessage()};
         }
 
         #region GetExecuted
@@ -59,8 +59,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
 
@@ -74,8 +72,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
@@ -93,8 +89,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
 
@@ -108,8 +102,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
@@ -155,8 +147,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
 
@@ -170,8 +160,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
@@ -189,8 +177,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
 
@@ -204,8 +190,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
@@ -268,8 +252,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
 
@@ -283,8 +265,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
@@ -302,8 +282,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
 
@@ -317,8 +295,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
@@ -358,8 +334,6 @@ namespace Event.Tests.ControllersTests
             _stateController.ModelState.AddModelError("eventAddressDto",
                 "Could not be deserialised into an EventAddressDto");
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("eventId", true, null));
 
@@ -373,8 +347,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateController.ModelState.AddModelError("eventAddressDto",
                 "Could not be deserialised into an EventAddressDto");
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("eventId", true, null));
@@ -391,8 +363,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate =
                 new TestDelegate(
@@ -408,8 +378,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate =
@@ -428,8 +396,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate =
                 new TestDelegate(
@@ -445,8 +411,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate =
@@ -487,8 +451,6 @@ namespace Event.Tests.ControllersTests
             _stateController.ModelState.AddModelError("eventAddressDto",
                 "Could not be deserialised into an EventAddressDto");
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("eventId", true, null));
 
@@ -502,8 +464,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateController.ModelState.AddModelError("eventAddressDto",
                 "Could not be deserialised into an EventAddressDto");
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("eventId", true, null));
@@ -520,8 +480,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate =
                 new TestDelegate(
@@ -537,8 +495,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate =
@@ -557,8 +513,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate =
                 new TestDelegate(
@@ -574,8 +528,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate =
@@ -596,8 +548,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateController.ModelState.AddModelError("roleDto", "RoleDto is empty");
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -610,8 +560,6 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateController.ModelState.AddModelError("roleDto", "RoleDto is empty");
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -628,8 +576,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotAuthorizedException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -643,8 +589,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotAuthorizedException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -661,8 +605,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new LockedException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -676,8 +618,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new LockedException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -694,8 +634,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotFoundException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -709,8 +647,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotFoundException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -727,8 +663,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotExecutableException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -742,8 +676,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotExecutableException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -760,8 +692,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToLockOtherEventException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -775,8 +705,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToLockOtherEventException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -793,8 +721,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUnlockOtherEventException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -808,8 +734,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUnlockOtherEventException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -826,8 +750,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -841,8 +763,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
@@ -859,8 +779,6 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
 
-            _stateController.Request = new HttpRequestMessage();
-
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
 
@@ -874,8 +792,6 @@ namespace Event.Tests.ControllersTests
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
-
-            _stateController.Request = new HttpRequestMessage();
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
