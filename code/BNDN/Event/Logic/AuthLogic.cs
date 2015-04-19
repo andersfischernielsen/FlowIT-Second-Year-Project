@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Event.Exceptions;
 using Event.Interfaces;
 
 namespace Event.Logic
@@ -16,7 +17,11 @@ namespace Event.Logic
 
         public async Task<bool> IsAuthorized(string eventId, IEnumerable<string> roles)
         {
-            return (await _storage.GetRoles(eventId)).Intersect(roles).Any();
+            var eventRoles = await _storage.GetRoles(eventId);
+
+            if (eventRoles == null) throw new NotFoundException();
+
+            return eventRoles.Intersect(roles).Any();
         }
 
         public void Dispose()
