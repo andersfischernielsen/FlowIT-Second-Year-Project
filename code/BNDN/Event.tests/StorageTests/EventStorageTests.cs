@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
-using Event.Models.UriClasses;
 using Event.Storage;
 using Moq;
 using NUnit.Framework;
@@ -39,12 +38,7 @@ namespace Event.Tests.StorageTests
                         EventId = "eventId",
                         Role = "Student"
                     }
-                },
-                ConditionUris = new List<ConditionUri>(),
-                ResponseUris = new List<ResponseUri>(),
-                ExclusionUris = new List<ExclusionUri>(),
-                InclusionUris = new List<InclusionUri>(),
-                LockDto = null
+                }
             };
 
             _esm = new EventStateModel
@@ -213,6 +207,29 @@ namespace Event.Tests.StorageTests
         {
             // Act
             var testDelegate = new TestDelegate(async () => await _eventStorage.GetName("wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+        #endregion
+        #region GetRoles
+
+        [Test]
+        public async Task GetRoles_Returns_List()
+        {
+            // Act
+            var result = (await _eventStorage.GetRoles("eventId")).ToList();
+
+            // Assert
+            Assert.IsNotEmpty(result);
+            Assert.IsTrue(result.Contains("Student"));
+        }
+
+        [Test]
+        public void GetRoles_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetRoles("wrongEventId"));
 
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
