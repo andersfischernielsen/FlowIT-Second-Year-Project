@@ -24,8 +24,9 @@ namespace Event.Tests.LogicTests
             _logic = new AuthLogic(_storageMock.Object);
         }
 
-        [Test]
-        public async Task IsAuthorized_Returns_True()
+        [TestCase("Student")]
+        [TestCase("Teacher")]
+        public async Task IsAuthorized_Returns_True(string role)
         {
             // Arrange
             _storageMock.Setup(s => s.GetRoles(It.IsAny<string>())).ReturnsAsync(new HashSet<string>
@@ -35,14 +36,15 @@ namespace Event.Tests.LogicTests
             });
             
             // Act
-            var result = await _logic.IsAuthorized("eventId", new List<string> { "Student" });
+            var result = await _logic.IsAuthorized("eventId", new List<string> { role });
 
             // Assert
             Assert.IsTrue(result);
         }
 
-        [Test]
-        public async Task IsAuthorized_Returns_False()
+        [TestCase("Miner")]
+        [TestCase("GasStationOwner")]
+        public async Task IsAuthorized_Returns_False(string role)
         {
             // Arrange
             _storageMock.Setup(s => s.GetRoles(It.IsAny<string>())).ReturnsAsync(new HashSet<string>
@@ -52,7 +54,7 @@ namespace Event.Tests.LogicTests
             });
 
             // Act
-            var result = await _logic.IsAuthorized("eventId", new List<string> { "Miner" });
+            var result = await _logic.IsAuthorized("eventId", new List<string> { role });
 
             // Assert
             Assert.IsFalse(result);
