@@ -24,6 +24,7 @@ namespace Event.Storage
 
         public async Task InitializeNewEvent(InitialEventState initialEventState)
         {
+            // Todo: Merge EventIdentification and EventState and use Exists(eventId) instead.
             if (await _context.EventIdentification.AnyAsync(model => model.Id == initialEventState.EventId))
             {
                 throw new InvalidOperationException("The EventId is already existing");
@@ -63,7 +64,7 @@ namespace Event.Storage
 
         #region Properties
 
-        public async  Task<bool> Exists(string eventId)
+        public async Task<bool> Exists(string eventId)
         {
             return await _context.EventIdentification.AnyAsync(ei => ei.Id == eventId);
         }
