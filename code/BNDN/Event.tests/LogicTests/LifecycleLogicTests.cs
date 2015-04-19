@@ -47,7 +47,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             ILifecycleLogic lifecycleLogic = new LifecycleLogic();
-            var eventDto = new EventDto()
+            var eventDto = new EventDto
             {
                 Conditions = new List<EventAddressDto>(),
                 EventId = "Check in",
@@ -67,7 +67,7 @@ namespace Event.Tests.LogicTests
         }
 
         [Test]
-        public void CreateEvent_WithIdAlreadyInDatabase()
+        public async Task CreateEvent_WithIdAlreadyInDatabase()
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
@@ -78,11 +78,11 @@ namespace Event.Tests.LogicTests
             var mockLockingLogic = new Mock<ILockingLogic>();
 
             ILifecycleLogic logic = new LifecycleLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventStorageForReset) mockResetStorage.Object, 
-                (ILockingLogic) mockLockingLogic.Object);
+                mockStorage.Object,
+                mockResetStorage.Object, 
+                mockLockingLogic.Object);
 
-            var eventDto = new EventDto()
+            var eventDto = new EventDto
             {
                 Conditions = new List<EventAddressDto>(),
                 EventId = "theAwesomeEventId",
@@ -100,11 +100,15 @@ namespace Event.Tests.LogicTests
             var uri = new Uri("http://www.dr.dk");
 
             // Act
-            var createTask = logic.CreateEvent(eventDto, uri);
-            var exception = createTask.Exception.InnerException;
-
-            // Assert
-            Assert.IsInstanceOf<ApplicationException>(exception);
+            try
+            {
+                await logic.CreateEvent(eventDto, uri);
+            }
+            catch (Exception e)
+            {
+                // Assert
+                Assert.IsInstanceOf<ApplicationException>(e);
+            }
         }
 
         /*public void CreateEvent_CreatesEventOnStorage()
@@ -137,7 +141,7 @@ namespace Event.Tests.LogicTests
             var mockStorage = new Mock<IEventStorage>();
             var mockResetStorage = new Mock<IEventStorageForReset>();
             var mockLockingLogic = new Mock<ILockingLogic>();
-            ILifecycleLogic logic = new LifecycleLogic((IEventStorage)mockStorage.Object,(IEventStorageForReset)mockResetStorage.Object,(ILockingLogic) mockLockingLogic.Object);
+            ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object, mockResetStorage.Object, mockLockingLogic.Object);
 
             // If this method should throw an exception, the unit test will fail, hence no need to assert
             logic.DeleteEvent("nonexistingId");
@@ -148,7 +152,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>())).Returns(Task.Run(() => new LockDto()
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>())).Returns(Task.Run(() => new LockDto
             {
                 LockOwner = "AnotherEventWhoLockedMeId",
                 EventIdentificationModel = new EventIdentificationModel(),
@@ -158,14 +162,14 @@ namespace Event.Tests.LogicTests
             var mockResetStorage = new Mock<IEventStorageForReset>();
             var mockLockingLogic = new Mock<ILockingLogic>();
 
-            ILifecycleLogic logic = new LifecycleLogic((IEventStorage) mockStorage.Object,(IEventStorageForReset) mockResetStorage.Object,(ILockingLogic) mockLockingLogic.Object);
+            ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object,mockResetStorage.Object,mockLockingLogic.Object);
 
-            var deleteEventTask = logic.DeleteEvent("Check patient");
+            // Act
+            var testDelegate = new TestDelegate(async () => await logic.DeleteEvent("Check patient"));
 
-            var exception = deleteEventTask.Exception.InnerException;
 
             // Aseert
-            Assert.IsInstanceOf<LockedException>(exception);
+            Assert.Throws<LockedException>(testDelegate);
         }
         #endregion
 
@@ -183,7 +187,7 @@ namespace Event.Tests.LogicTests
             var mockResetStorage = new Mock<IEventStorageForReset>();
             var mockLockLogic = new Mock<ILockingLogic>();
 
-            ILifecycleLogic logic = new LifecycleLogic((IEventStorage) mockStorage.Object,(IEventStorageForReset) mockResetStorage.Object,(ILockingLogic) mockLockLogic.Object);
+            ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object,mockResetStorage.Object,mockLockLogic.Object);
 
             // Act
             var getEvent = logic.GetEventDto("someEvent").Result;
@@ -202,20 +206,15 @@ namespace Event.Tests.LogicTests
             var mockLockLogic = new Mock<ILockingLogic>();
 
             ILifecycleLogic logic = new LifecycleLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventStorageForReset) mockResetStorage.Object,
-                (ILockingLogic) mockLockLogic.Object);
+                mockStorage.Object,
+                mockResetStorage.Object,
+                mockLockLogic.Object);
 
             // Act
-            var task = logic.GetEventDto(null);
+            var testDelegate = new TestDelegate(async () => await logic.GetEventDto(null));
 
             // Assert
-            if (task.Exception == null)
-            {
-                Assert.Fail("task was expected to return an exception");
-            }
-
-            Assert.IsInstanceOf<ArgumentNullException>(task.Exception.InnerException);
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         #endregion

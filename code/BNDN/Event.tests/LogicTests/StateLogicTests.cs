@@ -51,6 +51,7 @@ namespace Event.Tests.LogicTests
             _stateLogic = new StateLogic(_eventStorageMock.Object, _lockingLogicMock.Object, _authLogicMock.Object, _eventCommunicatorMock.Object);
         }
 
+        #region IsExecuted
         [Test]
         public async Task IsExecuted_ReturnsTrue()
         {
@@ -93,7 +94,10 @@ namespace Event.Tests.LogicTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+        #endregion
 
+        #region IsIncluded
+        [Test]
         public async Task IsIncluded_ReturnsTrue()
         {
             // Arrange
@@ -103,6 +107,7 @@ namespace Event.Tests.LogicTests
             Assert.IsTrue(await _stateLogic.IsIncluded("eventId", "senderId"));
         }
 
+        [Test]
         public async Task IsIncluded_ReturnsFalse()
         {
             // Arrange
@@ -112,6 +117,7 @@ namespace Event.Tests.LogicTests
             Assert.IsFalse(await _stateLogic.IsIncluded("eventId", "senderId"));
         }
 
+        [Test]
         public void IsIncluded_Throws_LockedException()
         {
             // Arrange
@@ -136,7 +142,9 @@ namespace Event.Tests.LogicTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+        #endregion
 
+        #region GetStateDto
         // Todo: Make tests on GetStateDto() that takes the loop in IsExecutable into account.
         [Test]
         public async Task GetStateDto_Returns_Executable_State()
@@ -214,7 +222,9 @@ namespace Event.Tests.LogicTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+        #endregion
 
+        #region Execute
         // Todo: Make tests that takes loops into account.
         [Test]
         public void Execute_Throws_LockedException_When_Another_Event_Has_Lock()
@@ -408,6 +418,6 @@ namespace Event.Tests.LogicTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+        #endregion
     }
-
 }

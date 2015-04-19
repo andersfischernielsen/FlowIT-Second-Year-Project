@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Common;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Models;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 
 namespace Event.Tests.LogicTests
 {
+    [TestFixture]
     class LockLogicTests
     {
 
@@ -50,8 +47,8 @@ namespace Event.Tests.LogicTests
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
             ILockingLogic logic = new LockingLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventFromEvent) mockEventCommunicator.Object);
+                mockStorage.Object,
+                mockEventCommunicator.Object);
 
             // Act
             var result = logic.IsAllowedToOperate("testA", "testB").Result;
@@ -65,7 +62,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            var lockDto = new LockDto()
+            var lockDto = new LockDto
             {
                 LockOwner = "EventA",
                 EventIdentificationModel = null,
@@ -76,8 +73,8 @@ namespace Event.Tests.LogicTests
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
             ILockingLogic logic = new LockingLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventFromEvent) mockEventCommunicator.Object);
+                mockStorage.Object,
+                mockEventCommunicator.Object);
 
             // Act
             var result = logic.IsAllowedToOperate("irrelevantToTestId", "EventA").Result;
@@ -91,7 +88,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            var lockDto = new LockDto()
+            var lockDto = new LockDto
             {
                 LockOwner = "EventA",       // Notice, EventA is locking!
                 EventIdentificationModel = null,
@@ -102,8 +99,8 @@ namespace Event.Tests.LogicTests
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
             ILockingLogic logic = new LockingLogic(
-                (IEventStorage)mockStorage.Object,
-                (IEventFromEvent)mockEventCommunicator.Object);
+                mockStorage.Object,
+                mockEventCommunicator.Object);
 
             // Act
             var result = logic.IsAllowedToOperate("irrelevantToTestId", "EventB").Result; // Notice EventB is used here
@@ -118,16 +115,10 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var task = logic.IsAllowedToOperate(null, "EventA");
+            var testDelegate = new TestDelegate(async () => await logic.IsAllowedToOperate(null, "EventA"));
             
             // Assert
-            if (task.Exception == null)
-            {
-                Assert.Fail("Task should have raised an exception");
-            }
-            var innerException = task.Exception.InnerException;
-
-            Assert.IsInstanceOf<ArgumentNullException>(innerException);
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         [Test]
@@ -136,16 +127,10 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var task = logic.IsAllowedToOperate("someEvent", null);
+            var testDelegate = new TestDelegate(async () => await logic.IsAllowedToOperate("someEvent", null));
 
             // Assert
-            if (task.Exception == null)
-            {
-                Assert.Fail("Task should have raised an exception");
-            }
-            var innerException = task.Exception.InnerException;
-
-            Assert.IsInstanceOf<ArgumentNullException>(innerException);
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         #endregion 
@@ -182,14 +167,10 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act 
-            var task = logic.LockSelf("testA", null);
+            var testDelegate = new TestDelegate(async () => await logic.LockSelf("testA", null));
 
             // Assert
-            if (task.Exception == null)
-            {
-                Assert.Fail("Task should have thrown an exception");
-            }
-            Assert.IsInstanceOf<ArgumentNullException>(task.Exception.InnerException);
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         [Test]
@@ -198,7 +179,7 @@ namespace Event.Tests.LogicTests
             // Arrange
             ILockingLogic logic = SetupDefaultLockingLogic();
 
-            var lockDto = new LockDto()
+            var lockDto = new LockDto
             {
                 EventIdentificationModel = new EventIdentificationModel(),
                 Id = "DatabaseId",
@@ -206,14 +187,10 @@ namespace Event.Tests.LogicTests
             };
 
             // Act 
-            var task = logic.LockSelf(null,lockDto);
+            var testDelegate = new TestDelegate(async () => await logic.LockSelf(null,lockDto));
 
             // Assert
-            if (task.Exception == null)
-            {
-                Assert.Fail("Task should have thrown an exception");
-            }
-            Assert.IsInstanceOf<ArgumentNullException>(task.Exception.InnerException);
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
 

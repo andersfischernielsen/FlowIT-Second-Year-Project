@@ -51,8 +51,7 @@
   <ItemGroup>
     <Compile Include="ControllersTests\StateControllerTests.cs" />
     <Compile Include="EventCommunicatorTests.cs" />
-    <Compile Include="LogicTests\EventLogicTests.cs" />
-    <Compile Include="ControllersTests\EventStateControllerTests.cs" />
+    <Compile Include="LogicTests\AuthLogicTests.cs" />
     <Compile Include="LogicTests\LifecycleLogicTests.cs" />
     <Compile Include="LogicTests\LockLogicTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
