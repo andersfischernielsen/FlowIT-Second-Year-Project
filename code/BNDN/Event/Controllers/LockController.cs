@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Event.Communicators;
@@ -52,8 +53,15 @@ namespace Event.Controllers
                     "Lock could not be set. An empty (null) lock was provided. If your intent" +
                     " is to unlock the Event issue a DELETE request on  event/lock instead."));
             }
-
-            _lockLogic.LockSelf(eventId,lockDto);
+            try
+            {
+                _lockLogic.LockSelf(eventId, lockDto);
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
 
         /// <summary>
@@ -65,7 +73,15 @@ namespace Event.Controllers
         [HttpDelete]
         public void Unlock(string senderId, string eventId)
         {
-            _lockLogic.UnlockSelf(eventId,senderId);
+            try
+            {
+                _lockLogic.UnlockSelf(eventId, senderId);
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
     }
 }

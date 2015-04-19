@@ -27,6 +27,10 @@ namespace Event.Logic
             {
                 throw new ArgumentNullException("lockDto", "was null");
             }
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId", "was null");
+            }
 
             // Check if this Event is currently locked
             if (! await IsAllowedToOperate(eventId, lockDto.LockOwner))
@@ -143,6 +147,15 @@ namespace Event.Logic
 
         public async Task<bool> IsAllowedToOperate(string eventId, string callerId)
         {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId","eventId was null");
+            }
+            if (callerId == null)
+            {
+                throw new ArgumentNullException("callerId","caller id was null");
+            }
+
             var lockDto = await _storage.GetLockDto(eventId);
             if (lockDto == null)
             {   // No lock is set!

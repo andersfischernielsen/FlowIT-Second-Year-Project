@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -68,7 +69,11 @@ namespace Event.Controllers
                 await _logic.CreateEvent(eventDto, ownUri);
             }
             catch (ApplicationException)
-            {                
+            {
+                throw;
+            }
+            catch (ArgumentNullException e)
+            {
                 throw;
             }
 
@@ -83,7 +88,14 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task DeleteEvent(string eventId)
         {
-            await _logic.DeleteEvent(eventId);
+            try
+            {
+                await _logic.DeleteEvent(eventId);
+            }
+            catch (LockedException)
+            {
+                throw;
+            }
         }
 
 
@@ -98,7 +110,15 @@ namespace Event.Controllers
         [HttpPut]
         public async Task ResetEvent([FromBody] EventDto eventDto, string eventId)
         {
-            await _logic.ResetEvent(eventId);
+            try
+            {
+                await _logic.ResetEvent(eventId);
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
 
         /// <summary>
@@ -110,7 +130,14 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent(string eventId)
         {
-            return await _logic.GetEventDto(eventId);
+            try
+            {
+                return await _logic.GetEventDto(eventId);
+            }
+            catch (Exception)
+            {
+                throw new Exception();
+            }
         }
     }
 }

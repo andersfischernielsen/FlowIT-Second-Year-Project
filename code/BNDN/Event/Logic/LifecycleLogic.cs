@@ -135,6 +135,16 @@ namespace Event.Logic
 
         public async Task<EventDto> GetEventDto(string eventId)
         {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId","was null");
+            }
+
+            if (!await _storage.Exists(eventId))
+            {
+                return null;
+            }
+
             var returnValue =  new EventDto
             {
                 EventId = eventId,
@@ -155,21 +165,6 @@ namespace Event.Logic
         public void Dispose()
         {
             _storage.Dispose();
-        }
-
-        private async Task<bool> EventIdExists(string eventId)
-        {
-            try
-            {
-                var name = await _storage.GetName(eventId);
-                return name != null;
-
-                //return await _storage.GetName(eventId) != null;
-            }
-            catch (ApplicationException)
-            {
-                return false;
-            }
         }
     }
 }
