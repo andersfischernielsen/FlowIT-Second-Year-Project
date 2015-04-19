@@ -22,7 +22,7 @@ namespace Event.Tests
             
             try
             {
-                var result = eventCommunicator.IsExecuted(new Uri("http://test.dk/"), "TargetID", "SenderId").Result;
+                var result = eventCommunicator.IsExecuted(new Uri("http://test.dk/"), "targetWorkflowId", "TargetID", "SenderId").Result;
             }
             catch (Exception ex)
             {
@@ -37,7 +37,7 @@ namespace Event.Tests
             var eventCommunicator = new EventCommunicator();
             try
             {
-                var result = eventCommunicator.IsIncluded(new Uri("http://test.dk/"), "TargetID", "SenderId").Result;
+                var result = eventCommunicator.IsIncluded(new Uri("http://test.dk/"), "targetWorkflowId", "TargetID", "SenderId").Result;
             }
             catch (Exception ex)
             {

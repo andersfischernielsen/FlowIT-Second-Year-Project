@@ -30,10 +30,10 @@ namespace Event.Tests.ControllersTests
         public async Task GetExecuted_Returns_true()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
 
             // Act
-            var result = await _stateController.GetExecuted("eventId", "senderId");
+            var result = await _stateController.GetExecuted("workflowId", "eventId", "senderId");
 
             // Assert
             Assert.IsTrue(result);
@@ -43,10 +43,10 @@ namespace Event.Tests.ControllersTests
         public async Task GetExecuted_Returns_false()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
+            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var result = await _stateController.GetExecuted("eventId", "senderId");
+            var result = await _stateController.GetExecuted("workflowId", "eventId", "senderId");
 
             // Assert
             Assert.IsFalse(result);
@@ -56,11 +56,11 @@ namespace Event.Tests.ControllersTests
         public void GetExecuted_NotFound_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("workflowId", "eventId", "senderId"));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -70,11 +70,11 @@ namespace Event.Tests.ControllersTests
         public void GetExecuted_NotFound_Throws_404_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("workflowId", "eventId", "senderId"));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -86,11 +86,11 @@ namespace Event.Tests.ControllersTests
         public void GetExecuted_Locked_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("workflowId", "eventId", "senderId"));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -100,11 +100,11 @@ namespace Event.Tests.ControllersTests
         public void GetExecuted_Locked_Throws_409_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetExecuted("workflowId", "eventId", "senderId"));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -118,10 +118,10 @@ namespace Event.Tests.ControllersTests
         public async Task GetIncluded_Returns_true()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
 
             // Act
-            var result = await _stateController.GetIncluded("eventId", "senderId");
+            var result = await _stateController.GetIncluded("workflowId", "eventId", "senderId");
 
             // Assert
             Assert.IsTrue(result);
@@ -131,10 +131,10 @@ namespace Event.Tests.ControllersTests
         public async Task GetIncluded_Returns_false()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
+            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var result = await _stateController.GetIncluded("eventId", "senderId");
+            var result = await _stateController.GetIncluded("workflowId", "eventId", "senderId");
 
             // Assert
             Assert.IsFalse(result);
@@ -144,11 +144,11 @@ namespace Event.Tests.ControllersTests
         public void GetIncluded_NotFound_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("workflowId", "eventId", "senderId"));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -158,11 +158,11 @@ namespace Event.Tests.ControllersTests
         public void GetIncluded_NotFound_Throws_404_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("workflowId", "eventId", "senderId"));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -174,11 +174,11 @@ namespace Event.Tests.ControllersTests
         public void GetIncluded_Locked_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("workflowId", "eventId", "senderId"));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -188,11 +188,11 @@ namespace Event.Tests.ControllersTests
         public void GetIncluded_Locked_Throws_409_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetIncluded("workflowId", "eventId", "senderId"));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -222,8 +222,8 @@ namespace Event.Tests.ControllersTests
         public async Task GetState_Returns_Case(bool executable, bool executed, bool included, bool pending)
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(((string eventId, string senderId) => Task.Run(() => new EventStateDto
+            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(((string workflowId, string eventId, string senderId) => Task.Run(() => new EventStateDto
                 {
                     Id = eventId,
                     Name = eventId.ToUpper(),
@@ -234,7 +234,7 @@ namespace Event.Tests.ControllersTests
                 })));
 
             // Act
-            var result = await _stateController.GetState("eventId", "senderId");
+            var result = await _stateController.GetState("workflowId", "eventId", "senderId");
 
             // Assert
             Assert.AreEqual("eventId", result.Id);
@@ -249,11 +249,11 @@ namespace Event.Tests.ControllersTests
         public void GetState_NotFound_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetState("workflowId", "eventId", "senderId"));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -263,11 +263,11 @@ namespace Event.Tests.ControllersTests
         public void GetState_NotFound_Throws_404_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetState("workflowId", "eventId", "senderId"));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -279,11 +279,11 @@ namespace Event.Tests.ControllersTests
         public void GetState_Locked_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetState("workflowId", "eventId", "senderId"));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -293,11 +293,11 @@ namespace Event.Tests.ControllersTests
         public void GetState_Locked_Throws_409_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>()))
+            _stateLogicMock.Setup(sl => sl.GetStateDto(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.GetState("eventId", "senderId"));
+            var testDelegate = new TestDelegate(async () => await _stateController.GetState("workflowId", "eventId", "senderId"));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -316,12 +316,12 @@ namespace Event.Tests.ControllersTests
             // Arrange
             var logicIncluded = x;
 
-            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
-                .Returns((string eventId, string senderId, bool newIncluded) => Task.Run(() => logicIncluded = newIncluded));
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Returns((string workflowId, string eventId, string senderId, bool newIncluded) => Task.Run(() => logicIncluded = newIncluded));
 
             // Act
             // Update included:
-            await _stateController.UpdateIncluded("eventId", y, new EventAddressDto {Id = "senderId"});
+            await _stateController.UpdateIncluded("workflowId", "eventId", y, new EventAddressDto { Id = "senderId" });
 
             // Assert
             Assert.AreEqual(y, logicIncluded);
@@ -335,7 +335,7 @@ namespace Event.Tests.ControllersTests
                 "Could not be deserialised into an EventAddressDto");
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("eventId", true, null));
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("workflowId", "eventId", true, null));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -349,7 +349,7 @@ namespace Event.Tests.ControllersTests
                 "Could not be deserialised into an EventAddressDto");
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("eventId", true, null));
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdateIncluded("workflowId", "eventId", true, null));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -360,13 +360,13 @@ namespace Event.Tests.ControllersTests
         public void UpdateIncluded_NotFound_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdateIncluded("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -376,13 +376,13 @@ namespace Event.Tests.ControllersTests
         public void UpdateIncluded_NotFound_Throws_404_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdateIncluded("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -393,13 +393,13 @@ namespace Event.Tests.ControllersTests
         public void UpdateIncluded_Locked_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdateIncluded("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -409,13 +409,13 @@ namespace Event.Tests.ControllersTests
         public void UpdateIncluded_Locked_Throws_409_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdateIncluded("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdateIncluded("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -433,12 +433,12 @@ namespace Event.Tests.ControllersTests
             // Arrange
             var logicPending = x;
 
-            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
-                .Returns((string eventId, string senderId, bool newPending) => Task.Run(() => logicPending = newPending));
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Returns((string workflowId, string eventId, string senderId, bool newPending) => Task.Run(() => logicPending = newPending));
 
             // Act
             // Update pending:
-            await _stateController.UpdatePending("eventId", y, new EventAddressDto { Id = "senderId" });
+            await _stateController.UpdatePending("workflowId", "eventId", y, new EventAddressDto { Id = "senderId" });
 
             // Assert
             Assert.AreEqual(y, logicPending);
@@ -452,7 +452,7 @@ namespace Event.Tests.ControllersTests
                 "Could not be deserialised into an EventAddressDto");
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("eventId", true, null));
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("workflowId", "eventId", true, null));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -466,7 +466,7 @@ namespace Event.Tests.ControllersTests
                 "Could not be deserialised into an EventAddressDto");
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("eventId", true, null));
+            var testDelegate = new TestDelegate(async () => await _stateController.UpdatePending("workflowId", "eventId", true, null));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -477,13 +477,13 @@ namespace Event.Tests.ControllersTests
         public void UpdatePending_NotFound_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdatePending("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -493,13 +493,13 @@ namespace Event.Tests.ControllersTests
         public void UpdatePending_NotFound_Throws_404_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<NotFoundException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdatePending("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -510,13 +510,13 @@ namespace Event.Tests.ControllersTests
         public void UpdatePending_Locked_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdatePending("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -526,13 +526,13 @@ namespace Event.Tests.ControllersTests
         public void UpdatePending_Locked_Throws_409_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _stateLogicMock.Setup(sl => sl.SetPending(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<LockedException>();
 
             // Act
             var testDelegate =
                 new TestDelegate(
-                    async () => await _stateController.UpdatePending("eventId", true, new EventAddressDto()));
+                    async () => await _stateController.UpdatePending("workflowId", "eventId", true, new EventAddressDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -549,7 +549,7 @@ namespace Event.Tests.ControllersTests
             _stateController.ModelState.AddModelError("roleDto", "RoleDto is empty");
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -562,7 +562,7 @@ namespace Event.Tests.ControllersTests
             _stateController.ModelState.AddModelError("roleDto", "RoleDto is empty");
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -573,11 +573,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_Not_Authorized_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotAuthorizedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -587,11 +587,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_Not_Authorized_Throws_Unauthorized_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotAuthorizedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -602,11 +602,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_Locked_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -616,11 +616,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_Locked_Throws_Conflict_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new LockedException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -631,11 +631,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_NotFound_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -645,11 +645,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_NotFound_Throws_NotFound_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotFoundException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -660,11 +660,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_NotExecutable_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotExecutableException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -674,11 +674,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_NotExecutable_Throws_PreconditionFailed_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new NotExecutableException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -689,11 +689,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToLockOtherEvent_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToLockOtherEventException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -703,11 +703,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToLockOtherEvent_Throws_Conflict_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToLockOtherEventException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -718,11 +718,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToUnlockOtherEvent_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUnlockOtherEventException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -732,11 +732,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToUnlockOtherEvent_Throws_InternalServerError_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUnlockOtherEventException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -747,11 +747,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToUpdateState_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -761,11 +761,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToUpdateState_Throws_InternalServerError_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -776,11 +776,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToUpdateStateAtOtherEvent_Throws_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             Assert.Throws<HttpResponseException>(testDelegate);
@@ -790,11 +790,11 @@ namespace Event.Tests.ControllersTests
         public void Execute_FailedToUpdateStateAtOtherEvent_Throws_InternalServerError_HttpResponseException()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()))
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
                 .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _stateController.Execute("eventId", new RoleDto()));
+            var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
 
             // Assert
             var exception = Assert.Throws<HttpResponseException>(testDelegate);
@@ -805,13 +805,13 @@ namespace Event.Tests.ControllersTests
         public async Task Execute_Calls_Logic_Execute()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(true).Verifiable();
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(true).Verifiable();
 
             // Act
-            await _stateController.Execute("eventId", new RoleDto());
+            await _stateController.Execute("workflowId", "eventId", new RoleDto());
 
             // Assert
-            _stateLogicMock.Verify(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>()), Times.Once());
+            _stateLogicMock.Verify(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()), Times.Once());
         }
 
         [TestCase(true)]
@@ -819,10 +819,10 @@ namespace Event.Tests.ControllersTests
         public async Task Execute_Returns_x(bool x)
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(x);
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(x);
 
             // Act
-            var result = await _stateController.Execute("eventId", new RoleDto());
+            var result = await _stateController.Execute("workflowId", "eventId", new RoleDto());
 
             // Assert
             Assert.AreEqual(x, result);

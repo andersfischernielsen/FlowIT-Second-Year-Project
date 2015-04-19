@@ -1,7 +1,6 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
 using System.Threading.Tasks;
 using Event.Interfaces;
-using Event.Models;
 
 namespace Event.Storage
 {
@@ -14,38 +13,22 @@ namespace Event.Storage
             _context = context;
         }
 
-        public async Task ClearLock(string eventId)
+        public async Task ClearLock(string workflowId, string eventId)
         {
             // Clear any LockDto-element (should only exist a single)
-            foreach (var lockDto in _context.LockDto.Where(model => model.Id == eventId))
-            {
-                _context.LockDto.Remove(lockDto);
-            }
+            var @event = await _context.Events.SingleAsync(e => e.WorkflowId == workflowId && e.Id == eventId);
+
+            @event.LockOwner = null;
             await _context.SaveChangesAsync();
         }
 
-        public async Task ResetToInitialState(string eventId)
+        public async Task ResetToInitialState(string workflowId, string eventId)
         {
-            // Retrieve initial state
-            var initialState = _context.InitialEventState.Single(x => x.EventId == eventId);
-            
-            // Extract current state
-            var currentState = _context.EventState.Single(x => x.Id == eventId);
+            var @event = await _context.Events.SingleAsync(e => e.WorkflowId == workflowId && e.Id == eventId);
 
-            var replacingState = new EventStateModel
-            {
-                EventIdentificationModel = currentState.EventIdentificationModel,
-                Id = currentState.Id,
-                Executed = initialState.Executed,
-                Included = initialState.Included,
-                Pending = initialState.Pending
-            };
-
-            // Remove old
-            _context.EventState.Remove(currentState);
-
-            // Replace with new
-            _context.EventState.Add(replacingState);
+            @event.Executed = @event.InitialExecuted;
+            @event.Included = @event.InitialIncluded;
+            @event.Pending = @event.InitialPending;
 
             // Save changes
             await _context.SaveChangesAsync();

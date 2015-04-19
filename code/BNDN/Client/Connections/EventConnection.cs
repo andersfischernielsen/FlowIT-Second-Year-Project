@@ -38,12 +38,12 @@ namespace Client.Connections
         public async Task<EventStateDto> GetState()
         {
             var eventId = _eventDto.Id;
-            return await _httpClient.Read<EventStateDto>(String.Format("events/{0}/state/-1", eventId));   
+            return await _httpClient.Read<EventStateDto>(String.Format("events/{0}/{1}/state/-1", _workflowId, eventId));   
         }
         public async Task ResetEvent()
         {
             var eventId = _eventDto.Id;
-            await _httpClient.Update(String.Format("events/{0}/reset", eventId), new EventDto{Name = "ResetDTO - DO NOT USE"});
+            await _httpClient.Update(String.Format("events/{0}/{1}/reset", _workflowId, eventId), new EventDto{Name = "ResetDTO - DO NOT USE"});
         }
 
         public async Task Execute(bool b)
@@ -52,7 +52,7 @@ namespace Client.Connections
             LoginViewModel.RoleForWorkflow.TryGetValue(_workflowId, out roles);
 
             var eventId = _eventDto.Id;
-            await _httpClient.Update(String.Format("events/{0}/executed/", eventId), new RoleDto { Roles = roles });
+            await _httpClient.Update(String.Format("events/{0}/{1}/executed/", _workflowId, eventId), new RoleDto { Roles = roles });
         }
 
         public void Dispose()

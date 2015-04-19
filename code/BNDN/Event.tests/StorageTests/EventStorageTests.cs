@@ -15,8 +15,7 @@ namespace Event.Tests.StorageTests
     {
         private Mock<IEventContext> _contextMock;
         private EventStorage _eventStorage;
-        private EventIdentificationModel _eim;
-        private EventStateModel _esm;
+        private EventModel _em;
 
         [SetUp]
         public void SetUp()
@@ -25,7 +24,7 @@ namespace Event.Tests.StorageTests
             _contextMock.Setup(c => c.Dispose());
             _contextMock.SetupAllProperties();
 
-            _eim = new EventIdentificationModel
+            _em = new EventModel
             {
                 Id = "eventId",
                 Name = "Event",
@@ -38,26 +37,16 @@ namespace Event.Tests.StorageTests
                         EventId = "eventId",
                         Role = "Student"
                     }
-                }
-            };
-
-            _esm = new EventStateModel
-            {
-                Id = "eventId",
-                EventIdentificationModel = _eim,
+                },
                 Executed = false,
                 Included = true,
                 Pending = false
             };
 
             // Code to get all of the async stuff to work.
-            var eventStateModels = new List<EventStateModel>{_esm}.AsQueryable();
-            var eventStateMockSet = new FakeDbSet<EventStateModel>(eventStateModels);
-            _contextMock.Setup(c => c.EventState).Returns(eventStateMockSet.Object);
-
-            var eventIdentificationModels = new List<EventIdentificationModel>{_eim}.AsQueryable();
-            var eventIdentificationMockSet = new FakeDbSet<EventIdentificationModel>(eventIdentificationModels);
-            _contextMock.Setup(c => c.EventIdentification).Returns(eventIdentificationMockSet.Object); 
+            var eventModels = new List<EventModel>{_em}.AsQueryable();
+            var eventMockSet = new FakeDbSet<EventModel>(eventModels);
+            _contextMock.Setup(c => c.Events).Returns(eventMockSet.Object); 
 
             _eventStorage = new EventStorage(_contextMock.Object);
         }
@@ -67,10 +56,10 @@ namespace Event.Tests.StorageTests
         public async Task GetExecuted_Returns_True()
         {
             // Arrange
-            _esm.Executed = true;
+            _em.Executed = true;
 
             // Act
-            var result = await _eventStorage.GetExecuted("eventId");
+            var result = await _eventStorage.GetExecuted("workflowId", "eventId");
 
             // Assert
             Assert.IsTrue(result);
@@ -80,7 +69,7 @@ namespace Event.Tests.StorageTests
         public async Task GetExecuted_Returns_False()
         {
             // Act
-            var result = await _eventStorage.GetExecuted("eventId");
+            var result = await _eventStorage.GetExecuted("workflowId", "eventId");
 
             // Assert
             Assert.IsFalse(result);
@@ -90,7 +79,7 @@ namespace Event.Tests.StorageTests
         public void GetExecuted_Throws_NotFoundException()
         {
             // Act
-            var testDelegate = new TestDelegate(async () => await _eventStorage.GetExecuted("notEventId"));
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetExecuted("notWorkflowId", "notEventId"));
 
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
@@ -101,10 +90,10 @@ namespace Event.Tests.StorageTests
         public async Task GetPending_Returns_True()
         {
             // Arrange
-            _esm.Pending = true;
+            _em.Pending = true;
 
             // Act
-            var result = await _eventStorage.GetPending("eventId");
+            var result = await _eventStorage.GetPending("workflowId", "eventId");
 
             // Assert
             Assert.IsTrue(result);
@@ -116,7 +105,7 @@ namespace Event.Tests.StorageTests
             // Arrange
 
             // Act
-            var result = await _eventStorage.GetPending("eventId");
+            var result = await _eventStorage.GetPending("workflowId", "eventId");
 
             // Assert
             Assert.IsFalse(result);
@@ -126,7 +115,7 @@ namespace Event.Tests.StorageTests
         public void GetPending_Throws_NotFoundException()
         {
             // Act
-            var testDelegate = new TestDelegate(async () => await _eventStorage.GetPending("notEventId"));
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetPending("notWorkflowId", "notEventId"));
 
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
@@ -139,7 +128,7 @@ namespace Event.Tests.StorageTests
             // Arrange
 
             // Act
-            var result = await _eventStorage.GetIncluded("eventId");
+            var result = await _eventStorage.GetIncluded("workflowId", "eventId");
 
             // Assert
             Assert.IsTrue(result);
@@ -149,10 +138,10 @@ namespace Event.Tests.StorageTests
         public async Task GetIncluded_Returns_False()
         {
             // Arrange
-            _esm.Included = false;
+            _em.Included = false;
 
             // Act
-            var result = await _eventStorage.GetIncluded("eventId");
+            var result = await _eventStorage.GetIncluded("workflowId", "eventId");
 
             // Assert
             Assert.IsFalse(result);
@@ -162,7 +151,7 @@ namespace Event.Tests.StorageTests
         public void GetIncluded_Throws_NotFoundException()
         {
             // Act
-            var testDelegate = new TestDelegate(async () => await _eventStorage.GetIncluded("notEventId"));
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetIncluded("notWorkflowId", "notEventId"));
 
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
@@ -174,7 +163,7 @@ namespace Event.Tests.StorageTests
         public async Task Exists_Returns_True()
         {
             // Act
-            var result = await _eventStorage.Exists("eventId");
+            var result = await _eventStorage.Exists("workflowId", "eventId");
 
             // Assert
             Assert.IsTrue(result);
@@ -184,7 +173,7 @@ namespace Event.Tests.StorageTests
         public async Task Exists_Returns_False()
         {
             // Act
-            var result = await _eventStorage.Exists("notEventId");
+            var result = await _eventStorage.Exists("notWorkflowId", "notEventId");
 
             // Assert
             Assert.IsFalse(result);
@@ -196,7 +185,7 @@ namespace Event.Tests.StorageTests
         public async Task GetName_Returns_Event()
         {
             // Act
-            var result = await _eventStorage.GetName("eventId");
+            var result = await _eventStorage.GetName("workflowId", "eventId");
 
             // Assert
             Assert.AreEqual("Event", result);
@@ -206,7 +195,7 @@ namespace Event.Tests.StorageTests
         public void GetName_Throws_NotFoundException()
         {
             // Act
-            var testDelegate = new TestDelegate(async () => await _eventStorage.GetName("wrongEventId"));
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetName("wrongWorkflowId", "wrongEventId"));
 
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
@@ -218,7 +207,7 @@ namespace Event.Tests.StorageTests
         public async Task GetRoles_Returns_List()
         {
             // Act
-            var result = (await _eventStorage.GetRoles("eventId")).ToList();
+            var result = (await _eventStorage.GetRoles("workflowId", "eventId")).ToList();
 
             // Assert
             Assert.IsNotEmpty(result);
@@ -229,7 +218,7 @@ namespace Event.Tests.StorageTests
         public void GetRoles_Throws_NotFoundException()
         {
             // Act
-            var testDelegate = new TestDelegate(async () => await _eventStorage.GetRoles("wrongEventId"));
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetRoles("wrongWorkflowId", "wrongEventId"));
 
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);

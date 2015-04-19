@@ -100,13 +100,12 @@
     <Compile Include="Logic\StateLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EventRoleModel.cs" />
-    <Compile Include="Models\InitialEventState.cs" />
     <Compile Include="Models\RelationToOtherEventModel.cs" />
     <Compile Include="Models\UriClasses\ConditionUri.cs" />
     <Compile Include="Models\UriClasses\ExclusionUri.cs" />
     <Compile Include="Models\UriClasses\InclusionUri.cs" />
     <Compile Include="Models\UriClasses\ResponseUri.cs" />
-    <Compile Include="Models\UriClasses\UriRepresentationName.cs" />
+    <Compile Include="Models\UriClasses\UriRepresentationBase.cs" />
     <Compile Include="Storage\EventContext.cs" />
     <Compile Include="LockDto.cs" />
     <Compile Include="Interfaces\IEventFromEvent.cs" />
@@ -115,8 +114,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\IEventStorage.cs" />
-    <Compile Include="Models\EventIdentificationModel.cs" />
-    <Compile Include="Models\EventStateModel.cs" />
+    <Compile Include="Models\EventModel.cs" />
     <Compile Include="Storage\EventStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerCommunicator.cs" />

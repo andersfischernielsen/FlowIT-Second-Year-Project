@@ -82,15 +82,16 @@ namespace Event.Controllers
         /// <summary>
         /// DeleteEvent will delete an Event
         /// </summary>
+        /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="eventId">The id of the Event to be deleted</param>
         /// <returns></returns>
-        [Route("events/{eventId}")]
+        [Route("events/{workflowId}/{eventId}")]
         [HttpDelete]
-        public async Task DeleteEvent(string eventId)
+        public async Task DeleteEvent(string workflowId, string eventId)
         {
             try
             {
-                await _logic.DeleteEvent(eventId);
+                await _logic.DeleteEvent(workflowId, eventId);
             }
             catch (LockedException)
             {
@@ -103,16 +104,17 @@ namespace Event.Controllers
         /// This method resets an Event. Note, that this will reset the three bool-values of the Event
         /// to their initial values, and reset any locks!. 
         /// </summary>
+        /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="eventId">Id of the Event, that is to be reset</param>
         /// <param name="eventDto">Empty container</param>
         /// <returns></returns>
-        [Route("events/{eventId}/reset")]
+        [Route("events/{workflowId}/{eventId}/reset")]
         [HttpPut]
-        public async Task ResetEvent([FromBody] EventDto eventDto, string eventId)
+        public async Task ResetEvent(string workflowId, string eventId, [FromBody] EventDto eventDto)
         {
             try
             {
-                await _logic.ResetEvent(eventId);
+                await _logic.ResetEvent(workflowId, eventId);
             }
             catch (Exception)
             {
@@ -124,15 +126,16 @@ namespace Event.Controllers
         /// <summary>
         /// Get the entire Event, (namely rules and state for this Event)
         /// </summary>
+        /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="eventId">The id of the Event, that you wish to get an EventDto representation of</param>
         /// <returns>A task containing a single EventDto which represents the Events current state.</returns>
-        [Route("events/{eventId}")]
+        [Route("events/{workflowId}/{eventId}")]
         [HttpGet]
-        public async Task<EventDto> GetEvent(string eventId)
+        public async Task<EventDto> GetEvent(string workflowId, string eventId)
         {
             try
             {
-                return await _logic.GetEventDto(eventId);
+                return await _logic.GetEventDto(workflowId, eventId);
             }
             catch (Exception)
             {

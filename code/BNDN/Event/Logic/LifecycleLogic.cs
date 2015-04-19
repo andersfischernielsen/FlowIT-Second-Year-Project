@@ -6,6 +6,7 @@ using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
+using Event.Models.UriClasses;
 using Event.Storage;
 
 namespace Event.Logic
@@ -44,7 +45,7 @@ namespace Event.Logic
             {
                 throw new ArgumentNullException("ownUri", "Provided Uri was null");   
             }
-            if (await _storage.Exists(eventDto.EventId))
+            if (await _storage.Exists(eventDto.WorkflowId, eventDto.EventId))
             {
                 // TODO: Throw more relevant exception
                 throw new ApplicationException("An event with the Id already exists");
@@ -65,22 +66,32 @@ namespace Event.Logic
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://flowit.azurewebsites.net/", eventDto.EventId, eventDto.WorkflowId);
 #endif
             // TODO: try-catch here?
-            var otherEvents = await serverCommunicator.PostEventToServer(dto);
-
             // Todo: Do we need what this method returns or is it waste of data-transfer?
             await serverCommunicator.PostEventToServer(dto);
             try
             {
                 // Setup a new Event in own database.
-                var initialEventState = new InitialEventState()
+                var @event = new EventModel
                 {
-                    EventId = eventDto.EventId,
+                    Id = eventDto.EventId,
+                    WorkflowId = eventDto.WorkflowId,
+                    Name = eventDto.Name,
+                    Roles = eventDto.Roles.Select(role => new EventRoleModel {EventId = eventDto.EventId, Role = role}).ToList(),
+                    OwnUri = ownUri.AbsoluteUri,
                     Executed = eventDto.Executed,
                     Included = eventDto.Included,
-                    Pending = eventDto.Pending
+                    Pending = eventDto.Pending,
+                    ConditionUris = eventDto.Conditions.Select(condition => new ConditionUri{EventId = condition.Id, UriString = condition.Uri.AbsoluteUri}).ToList(),
+                    ResponseUris = eventDto.Responses.Select(response => new ResponseUri{EventId = response.Id, UriString = response.Uri.AbsoluteUri}).ToList(),
+                    InclusionUris = eventDto.Responses.Select(inclusion => new InclusionUri{EventId = inclusion.Id, UriString = inclusion.Uri.AbsoluteUri}).ToList(),
+                    ExclusionUris = eventDto.Responses.Select(exclusion => new ExclusionUri{EventId = exclusion.Id, UriString = exclusion.Uri.AbsoluteUri}).ToList(),
+                    LockDto = null,
+                    InitialExecuted = eventDto.Executed,
+                    InitialIncluded = eventDto.Included,
+                    InitialPending = eventDto.Pending
                 };
 
-                await _storage.InitializeNewEvent(initialEventState);
+                await _storage.InitializeNewEvent(@event);
             }
             catch (Exception)
             {
@@ -90,23 +101,20 @@ namespace Event.Logic
             }
         }
 
-        public async Task DeleteEvent(string eventId)
+        public async Task DeleteEvent(string workflowId, string eventId)
         {
             // Notice that the following check will (should) fail, if this Event is locked by another Event
-            if (! await _lockLogic.IsAllowedToOperate(eventId, eventId))
+            if (! await _lockLogic.IsAllowedToOperate(workflowId, eventId, eventId))
             {
                 throw new LockedException();
             }
 
             // Check if Event exists here
-            if (!await _storage.Exists(eventId))
+            if (!await _storage.Exists(workflowId, eventId))
             {
                 // No need to do more, event already does not exist
                 return;
             }
-
-            // Attempt to delete Event from Server
-            string workflowId = await _storage.GetWorkflowId(eventId);
 
             // Todo: Check that this works correcly when deployed!
 #if DEBUG
@@ -117,30 +125,35 @@ namespace Event.Logic
             await serverCommunicator.DeleteEventFromServer();
 
             // Delete Event from own Storage
-            await _storage.DeleteEvent(eventId);
+            await _storage.DeleteEvent(workflowId, eventId);
         }
 
         /// <summary>
         /// ResetEvent will bruteforce reset this Event, regardless of whether it is currently locked
         /// </summary>
+        /// <param name="workflowId"></param>
         /// <param name="eventId"></param>
-        public async Task ResetEvent(string eventId)
+        public async Task ResetEvent(string workflowId, string eventId)
         {
             // Clear lock
-            await _resetStorage.ClearLock(eventId);
+            await _resetStorage.ClearLock(workflowId, eventId);
 
             // Reset to initial state
-            await _resetStorage.ResetToInitialState(eventId);
+            await _resetStorage.ResetToInitialState(workflowId, eventId);
         }
 
-        public async Task<EventDto> GetEventDto(string eventId)
+        public async Task<EventDto> GetEventDto(string workflowId, string eventId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException("workflowId");
+            }
             if (eventId == null)
             {
                 throw new ArgumentNullException("eventId","was null");
             }
 
-            if (!await _storage.Exists(eventId))
+            if (!await _storage.Exists(workflowId, eventId))
             {
                 return null;
             }
@@ -148,16 +161,16 @@ namespace Event.Logic
             var returnValue =  new EventDto
             {
                 EventId = eventId,
-                WorkflowId = await _storage.GetWorkflowId(eventId),
-                Name = await _storage.GetName(eventId),
-                Roles = await _storage.GetRoles(eventId),
-                Pending = await _storage.GetPending(eventId),
-                Executed = await _storage.GetExecuted(eventId),
-                Included = await _storage.GetIncluded(eventId),
-                Conditions = _storage.GetConditions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
-                Exclusions = _storage.GetExclusions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
-                Responses = _storage.GetResponses(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri }),
-                Inclusions = _storage.GetInclusions(eventId).Select(model => new EventAddressDto { Id = model.EventID, Uri = model.Uri })
+                WorkflowId = workflowId,
+                Name = await _storage.GetName(workflowId, eventId),
+                Roles = await _storage.GetRoles(workflowId, eventId),
+                Pending = await _storage.GetPending(workflowId, eventId),
+                Executed = await _storage.GetExecuted(workflowId, eventId),
+                Included = await _storage.GetIncluded(workflowId, eventId),
+                Conditions = _storage.GetConditions(workflowId, eventId).Select(model => new EventAddressDto { WorkflowId = model.WorkflowId, Id = model.EventId, Uri = model.Uri }),
+                Exclusions = _storage.GetExclusions(workflowId, eventId).Select(model => new EventAddressDto { WorkflowId = model.WorkflowId, Id = model.EventId, Uri = model.Uri }),
+                Responses = _storage.GetResponses(workflowId, eventId).Select(model => new EventAddressDto { WorkflowId = model.WorkflowId, Id = model.EventId, Uri = model.Uri }),
+                Inclusions = _storage.GetInclusions(workflowId, eventId).Select(model => new EventAddressDto { WorkflowId = model.WorkflowId, Id = model.EventId, Uri = model.Uri })
             };
             return returnValue;
         }

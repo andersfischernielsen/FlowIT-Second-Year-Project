@@ -12,7 +12,7 @@ namespace Event.Models
         [Key, Column(Order = 0)]
         public string EventId { get; set; }
         [ForeignKey("EventId")]
-        public EventIdentificationModel Event { get; set; }
+        public EventModel Event { get; set; }
         [Key, Column(Order = 1)]
         public string Role { get; set; }
     }

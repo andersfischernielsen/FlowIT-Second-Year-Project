@@ -5,7 +5,6 @@ using Common;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
-using Event.Models;
 using Moq;
 using NUnit.Framework;
 
@@ -71,7 +70,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            mockStorage.Setup(m => m.Exists(It.IsAny<string>())).Returns(() => Task.Run(() => true));
+            mockStorage.Setup(m => m.Exists(It.IsAny<string>(), It.IsAny<string>())).Returns(() => Task.Run(() => true));
            
             var mockResetStorage = new Mock<IEventStorageForReset>();
 
@@ -144,7 +143,7 @@ namespace Event.Tests.LogicTests
             ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object, mockResetStorage.Object, mockLockingLogic.Object);
 
             // If this method should throw an exception, the unit test will fail, hence no need to assert
-            logic.DeleteEvent("nonexistingId");
+            logic.DeleteEvent("notWorkflowId", "nonexistingId");
         }
 
         [Test]
@@ -152,10 +151,10 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>())).Returns(Task.Run(() => new LockDto
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() => new LockDto
             {
                 LockOwner = "AnotherEventWhoLockedMeId",
-                EventIdentificationModel = new EventIdentificationModel(),
+                WorkflowId = "workflowId", 
                 Id = "AnotherEventWhoLockedMeId"
             }));
 
@@ -165,7 +164,7 @@ namespace Event.Tests.LogicTests
             ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object,mockResetStorage.Object,mockLockingLogic.Object);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await logic.DeleteEvent("Check patient"));
+            var testDelegate = new TestDelegate(async () => await logic.DeleteEvent("workflowId", "Check patient"));
 
 
             // Aseert
@@ -183,14 +182,14 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            mockStorage.Setup(m => m.Exists(It.IsAny<string>())).Returns(() => Task.Run(() => false));
+            mockStorage.Setup(m => m.Exists(It.IsAny<string>(), It.IsAny<string>())).Returns(() => Task.Run(() => false));
             var mockResetStorage = new Mock<IEventStorageForReset>();
             var mockLockLogic = new Mock<ILockingLogic>();
 
             ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object,mockResetStorage.Object,mockLockLogic.Object);
 
             // Act
-            var getEvent = logic.GetEventDto("someEvent").Result;
+            var getEvent = logic.GetEventDto("workflowId", "someEvent").Result;
 
             // Assert
             Assert.IsNull(getEvent);
@@ -211,7 +210,7 @@ namespace Event.Tests.LogicTests
                 mockLockLogic.Object);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await logic.GetEventDto(null));
+            var testDelegate = new TestDelegate(async () => await logic.GetEventDto(null, null));
 
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);

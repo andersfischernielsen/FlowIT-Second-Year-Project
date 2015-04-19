@@ -28,9 +28,9 @@ namespace Event.Tests.LogicTests
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
             ILockingLogic logic = new LockingLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventFromEvent) mockEventCommunicator.Object);
-
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+            
             return logic;
         }
         #endregion
@@ -43,7 +43,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>())).Returns(() => Task.Run(() => (LockDto)null));
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>())).Returns(() => Task.Run(() => (LockDto)null));
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
             ILockingLogic logic = new LockingLogic(
@@ -51,7 +51,7 @@ namespace Event.Tests.LogicTests
                 mockEventCommunicator.Object);
 
             // Act
-            var result = logic.IsAllowedToOperate("testA", "testB").Result;
+            var result = logic.IsAllowedToOperate("workflowId", "testA", "testB").Result;
 
             // Assert
             Assert.IsTrue(result);
@@ -65,10 +65,10 @@ namespace Event.Tests.LogicTests
             var lockDto = new LockDto
             {
                 LockOwner = "EventA",
-                EventIdentificationModel = null,
+                WorkflowId = "workflowId",
                 Id = "DatabaseRelevantId"
             };
-            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>())).Returns(Task.Run(() => lockDto));
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() => lockDto));
 
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
@@ -77,7 +77,7 @@ namespace Event.Tests.LogicTests
                 mockEventCommunicator.Object);
 
             // Act
-            var result = logic.IsAllowedToOperate("irrelevantToTestId", "EventA").Result;
+            var result = logic.IsAllowedToOperate("workflowId", "irrelevantToTestId", "EventA").Result;
 
             // Assert
             Assert.IsTrue(result);
@@ -91,10 +91,10 @@ namespace Event.Tests.LogicTests
             var lockDto = new LockDto
             {
                 LockOwner = "EventA",       // Notice, EventA is locking!
-                EventIdentificationModel = null,
+                WorkflowId = "workflowId", 
                 Id = "DatabaseRelevantId"
             };
-            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>())).Returns(Task.Run(() => lockDto));
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() => lockDto));
 
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
@@ -103,7 +103,7 @@ namespace Event.Tests.LogicTests
                 mockEventCommunicator.Object);
 
             // Act
-            var result = logic.IsAllowedToOperate("irrelevantToTestId", "EventB").Result; // Notice EventB is used here
+            var result = logic.IsAllowedToOperate("workflowId", "irrelevantToTestId", "EventB").Result; // Notice EventB is used here
 
             // Assert
             Assert.IsFalse(result);
@@ -115,7 +115,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var testDelegate = new TestDelegate(async () => await logic.IsAllowedToOperate(null, "EventA"));
+            var testDelegate = new TestDelegate(async () => await logic.IsAllowedToOperate(null, null, "EventA"));
             
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
@@ -127,7 +127,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var testDelegate = new TestDelegate(async () => await logic.IsAllowedToOperate("someEvent", null));
+            var testDelegate = new TestDelegate(async () => await logic.IsAllowedToOperate("workflowId", "someEvent", null));
 
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
@@ -145,7 +145,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var lockAllTask = logic.LockAll(null);
+            var lockAllTask = logic.LockAll(null, null);
 
             // Assert
             if (lockAllTask.Exception == null)
@@ -167,7 +167,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act 
-            var testDelegate = new TestDelegate(async () => await logic.LockSelf("testA", null));
+            var testDelegate = new TestDelegate(async () => await logic.LockSelf("workflowId", "testA", null));
 
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
@@ -181,13 +181,13 @@ namespace Event.Tests.LogicTests
 
             var lockDto = new LockDto
             {
-                EventIdentificationModel = new EventIdentificationModel(),
+                WorkflowId = "workflowId", 
                 Id = "DatabaseId",
                 LockOwner = "whatever"
             };
 
             // Act 
-            var testDelegate = new TestDelegate(async () => await logic.LockSelf(null,lockDto));
+            var testDelegate = new TestDelegate(async () => await logic.LockSelf(null, null,lockDto));
 
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
@@ -207,7 +207,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var unlockAllTask = logic.UnlockAll(null);
+            var unlockAllTask = logic.UnlockAll(null, null);
 
             // Assert
             if (unlockAllTask.Exception == null)
@@ -222,17 +222,17 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>()))
+            mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(() => (HashSet<RelationToOtherEventModel>) null);
 
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
             ILockingLogic logic = new LockingLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventFromEvent) mockEventCommunicator.Object);
+                mockStorage.Object,
+                mockEventCommunicator.Object);
 
             // Act
-            var unlockAllTask = logic.UnlockAll("someEvent");
+            var unlockAllTask = logic.UnlockAll("workflowId", "someEvent");
 
             // Assert
             if (unlockAllTask.Exception == null)
@@ -252,7 +252,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var unlockSelfTask = logic.UnlockSelf(null, "someEvent");
+            var unlockSelfTask = logic.UnlockSelf(null, null, "someEvent");
 
             // Assert
             if (unlockSelfTask.Exception == null)
@@ -268,7 +268,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var unlockSelfTask = logic.UnlockSelf("someEvent", null);
+            var unlockSelfTask = logic.UnlockSelf("workflowId", "someEvent", null);
 
             // Assert
             if (unlockSelfTask.Exception == null)
@@ -283,31 +283,27 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            var lockDtoToReturnFromStorage = new LockDto()
+            var lockDtoToReturnFromStorage = new LockDto
             {
-                EventIdentificationModel = new EventIdentificationModel(),
+                WorkflowId = "workflowId", 
                 Id = "databaseRelevantId",
                 LockOwner = "Johannes"          // Notice, Johannes will be the lockOwner according to Storage!
             };
 
-            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>()))
-                .Returns(() => Task.Run(() => lockDtoToReturnFromStorage));
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(lockDtoToReturnFromStorage);
 
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 
             ILockingLogic logic = new LockingLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventFromEvent) mockEventCommunicator.Object);
+                mockStorage.Object,
+                mockEventCommunicator.Object);
 
             // Act
-            var unlockSelfTask = logic.UnlockSelf("irrelevantId", "Per"); // Notice, we're trying to let Per unlock
+            var testDelegate = new TestDelegate(async () => await logic.UnlockSelf("workflowId", "irrelevantId", "Per")); // Notice, we're trying to let Per unlock
 
             // Assert
-            if (unlockSelfTask.Exception == null)
-            {
-                Assert.Fail("Task should have thrown an exception");
-            }
-            Assert.IsInstanceOf<LockedException>(unlockSelfTask.Exception.InnerException);
+            Assert.Throws<LockedException>(testDelegate);
         }
 
         #endregion

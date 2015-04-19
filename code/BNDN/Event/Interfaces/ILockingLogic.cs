@@ -9,11 +9,11 @@ namespace Event.Interfaces
 {
     public interface ILockingLogic : IDisposable
     {
-        Task LockSelf(string eventId, LockDto lockDto);
-        Task UnlockSelf(string eventId, string callerId);
-        Task<bool> LockAll(string eventId);
+        Task LockSelf(string workflowId, string eventId, LockDto lockDto);
+        Task UnlockSelf(string workflowId, string eventId, string callerId);
+        Task<bool> LockAll(string workflowId, string eventId);
 
-        Task<bool> UnlockAll(string eventId);
-        Task<bool> IsAllowedToOperate(string eventId, string callerId);
+        Task<bool> UnlockAll(string workflowId, string eventId);
+        Task<bool> IsAllowedToOperate(string workflowId, string eventId, string callerId);
     }
 }

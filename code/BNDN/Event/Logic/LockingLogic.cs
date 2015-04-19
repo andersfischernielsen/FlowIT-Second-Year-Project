@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
@@ -20,9 +19,13 @@ namespace Event.Logic
             _eventCommunicator = eventCommunicator;
         }
 
-        public async Task LockSelf(string eventId, LockDto lockDto)
+        public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
         {
             // Check input
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException("workflowId");
+            }
             if (lockDto == null)
             {
                 throw new ArgumentNullException("lockDto", "was null");
@@ -33,7 +36,7 @@ namespace Event.Logic
             }
 
             // Check if this Event is currently locked
-            if (! await IsAllowedToOperate(eventId, lockDto.LockOwner))
+            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
                 // TODO: Throw more relevant exception
                 throw new ApplicationException();
@@ -47,11 +50,15 @@ namespace Event.Logic
             }
 
             lockDto.Id = eventId;
-            await _storage.SetLockDto(eventId, lockDto);
+            await _storage.SetLockDto(workflowId, eventId, lockDto);
         }
 
-        public async Task UnlockSelf(string eventId, string callerId)
+        public async Task UnlockSelf(string workflowId, string eventId, string callerId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException("workflowId");
+            }
             if (eventId == null)
             {
                 throw new ArgumentNullException("callerId","callerId was null");
@@ -60,18 +67,22 @@ namespace Event.Logic
             {
                 throw new ArgumentNullException("eventId","eventId was null");
             }
-            if (!await IsAllowedToOperate(eventId, callerId))
+            if (!await IsAllowedToOperate(workflowId, eventId, callerId))
             {
                 throw new LockedException();
             }
-            await _storage.ClearLock(eventId);
+            await _storage.ClearLock(workflowId, eventId);
         }
 
-        public async Task<bool> LockAll(string eventId)
+        public async Task<bool> LockAll(string workflowId, string eventId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException("workflowId");
+            }
             if (eventId == null)
             {
-                throw  new ArgumentNullException("eventId","eventId was null");
+                throw  new ArgumentNullException("eventId");
             }
 
             var eventsToBeLocked = new List<RelationToOtherEventModel>();
@@ -84,23 +95,23 @@ namespace Event.Logic
             var lockDto = new LockDto {LockOwner = eventId, Id = eventId};
 
             // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
-            await _storage.SetLockDto(eventId, lockDto);
+            await _storage.SetLockDto(workflowId, eventId, lockDto);
 
 
             // Get dependent events
-            var resp = _storage.GetResponses(eventId);
-            var incl = _storage.GetInclusions(eventId);
-            var excl = _storage.GetExclusions(eventId);
+            var resp = _storage.GetResponses(workflowId, eventId);
+            var incl = _storage.GetInclusions(workflowId, eventId);
+            var excl = _storage.GetExclusions(workflowId, eventId);
             var eventsToBelocked = resp.Concat(incl.Concat(excl));
 
             // For every related, dependent Event, attempt to lock it
             foreach (var relation in eventsToBelocked)
             {
-                var toLock = new LockDto {LockOwner = eventId, Id = relation.EventID};
+                var toLock = new LockDto {LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId};
 
                 try
                 {
-                    await _eventCommunicator.Lock(relation.Uri, toLock, relation.EventID);
+                    await _eventCommunicator.Lock(relation.Uri, toLock, relation.WorkflowId, relation.EventId);
                     lockedEvents.Add(relation);
                 }
                 catch (Exception)
@@ -113,7 +124,7 @@ namespace Event.Logic
             if (eventsToBeLocked.Count != lockedEvents.Count)
             {
                 // TODO: May be an error here, if one list contains this Event itself, while the other does not. 
-                UnlockSome(eventId,lockedEvents).Wait();
+                await UnlockSome(workflowId, eventId, lockedEvents);
 
                 return false;
             }
@@ -123,19 +134,24 @@ namespace Event.Logic
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="workflowId"></param>
         /// <param name="eventId"></param>
         /// <returns>False if it fails to unlock other Events</returns>
-        public async Task<bool> UnlockAll(string eventId)
+        public async Task<bool> UnlockAll(string workflowId, string eventId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException("workflowId");
+            }
             if (eventId == null)
             {
                 throw new ArgumentNullException("eventId","provided eventId was null");
             }
 
             // Gather dependent events
-            var resp = _storage.GetResponses(eventId);          // TODO: What if any (or all) of these return null?
-            var incl = _storage.GetInclusions(eventId);
-            var excl = _storage.GetExclusions(eventId);
+            var resp = _storage.GetResponses(workflowId, eventId);          // TODO: What if any (or all) of these return null?
+            var incl = _storage.GetInclusions(workflowId, eventId);
+            var excl = _storage.GetExclusions(workflowId, eventId);
             if (resp == null || incl == null || excl == null)
             {
                 throw new NullReferenceException("At least one of response-,inclusions or exclusions-relations retrieved from storage was null");
@@ -155,7 +171,7 @@ namespace Event.Logic
             {
                 try
                 {
-                    await _eventCommunicator.Unlock(relation.Uri, relation.EventID, eventId);
+                    await _eventCommunicator.Unlock(relation.Uri, relation.WorkflowId, relation.EventId, eventId);
                 }
                 catch (Exception)
                 {
@@ -167,8 +183,12 @@ namespace Event.Logic
             return everyEventIsUnlocked;
         }
 
-        public async Task<bool> IsAllowedToOperate(string eventId, string callerId)
+        public async Task<bool> IsAllowedToOperate(string workflowId, string eventId, string callerId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException("workflowId");
+            }
             if (eventId == null)
             {
                 throw new ArgumentNullException("eventId","eventId was null");
@@ -178,7 +198,7 @@ namespace Event.Logic
                 throw new ArgumentNullException("callerId","caller id was null");
             }
 
-            var lockDto = await _storage.GetLockDto(eventId);
+            var lockDto = await _storage.GetLockDto(workflowId, eventId);
             if (lockDto == null)
             {   // No lock is set!
                 return true;
@@ -193,8 +213,12 @@ namespace Event.Logic
             _eventCommunicator.Dispose();
         }
 
-        private async Task UnlockSome(string eventId, List<RelationToOtherEventModel> eventsToBeUnlocked)
+        private async Task UnlockSome(string workflowId, string eventId, List<RelationToOtherEventModel> eventsToBeUnlocked)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException("workflowId");
+            }
             if (eventId == null)
             {
                 throw new ArgumentNullException("eventId","eventId was null");
@@ -209,7 +233,7 @@ namespace Event.Logic
             {
                 try
                 {
-                    await _eventCommunicator.Unlock(relation.Uri, relation.EventID, eventId);
+                    await _eventCommunicator.Unlock(relation.Uri, relation.WorkflowId, relation.EventId, eventId);
                 }
                 catch (Exception)
                 {

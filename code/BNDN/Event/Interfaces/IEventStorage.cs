@@ -9,55 +9,52 @@ namespace Event.Interfaces
     {
         #region Ids
 
-        Task<bool> Exists(string eventId);
+        Task<bool> Exists(string workflowId, string eventId);
 
         //For notifying server about this event. Is fetched when receiving EventDto on creation!
-        Task<Uri> GetUri(string eventId);
-        Task SetUri(string eventId, Uri value);
+        Task<Uri> GetUri(string workflowId, string eventId);
+        Task SetUri(string workflowId, string eventId, Uri value);
 
-        Task<string> GetWorkflowId(string eventId);
-        Task SetWorkflowId(string eventId, string value);
+        Task<string> GetName(string workflowId, string eventId);
+        Task SetName(string workflowId, string eventId, string value);
 
-        Task<string> GetName(string eventId);
-        Task SetName(string eventId, string value);
-
-        Task<IEnumerable<string>> GetRoles(string eventId);
-        Task SetRoles(string eventId, IEnumerable<string> value);
+        Task<IEnumerable<string>> GetRoles(string workflowId, string eventId);
+        Task SetRoles(string workflowId, string eventId, IEnumerable<string> value);
         #endregion
 
-        Task InitializeNewEvent(InitialEventState initialEventState);
-        Task DeleteEvent(string eventId);
+        Task InitializeNewEvent(EventModel eventModel);
+        Task DeleteEvent(string workflowId, string eventId);
 
         #region State
-        Task<bool> GetExecuted(string eventId);
-        Task SetExecuted(string eventId, bool value);
+        Task<bool> GetExecuted(string workflowId, string eventId);
+        Task SetExecuted(string workflowId, string eventId, bool value);
 
-        Task<bool> GetIncluded(string eventId);
-        Task SetIncluded(string eventId, bool value);
+        Task<bool> GetIncluded(string workflowId, string eventId);
+        Task SetIncluded(string workflowId, string eventId, bool value);
 
-        Task<bool> GetPending(string eventId);
-        Task SetPending(string eventId, bool value);
+        Task<bool> GetPending(string workflowId, string eventId);
+        Task SetPending(string workflowId, string eventId, bool value);
         #endregion
 
         #region Locking
-        Task<LockDto> GetLockDto(string eventId);
-        Task SetLockDto(string eventId, LockDto value);
+        Task<LockDto> GetLockDto(string workflowId, string eventId);
+        Task SetLockDto(string workflowId, string eventId, LockDto value);
 
-        Task ClearLock(string eventId);
+        Task ClearLock(string workflowId, string eventId);
         #endregion
 
         #region Rules
-        HashSet<RelationToOtherEventModel> GetConditions(string eventId);
-        Task SetConditions(string eventId, HashSet<RelationToOtherEventModel> value);
+        HashSet<RelationToOtherEventModel> GetConditions(string workflowId, string eventId);
+        Task SetConditions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
-        HashSet<RelationToOtherEventModel> GetResponses(string eventId);
-        Task SetResponses(string eventId, HashSet<RelationToOtherEventModel> value);
+        HashSet<RelationToOtherEventModel> GetResponses(string workflowId, string eventId);
+        Task SetResponses(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
-        HashSet<RelationToOtherEventModel> GetExclusions(string eventId);
-        Task SetExclusions(string eventId, HashSet<RelationToOtherEventModel> value);
+        HashSet<RelationToOtherEventModel> GetExclusions(string workflowId, string eventId);
+        Task SetExclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
-        HashSet<RelationToOtherEventModel> GetInclusions(string eventId);
-        Task SetInclusions(string eventId, HashSet<RelationToOtherEventModel> value);
+        HashSet<RelationToOtherEventModel> GetInclusions(string workflowId, string eventId);
+        Task SetInclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
         #endregion
     }
 }

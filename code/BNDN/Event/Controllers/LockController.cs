@@ -13,20 +13,17 @@ namespace Event.Controllers
     public class LockController : ApiController
     {
         private readonly ILockingLogic _lockLogic;
-        private readonly IEventStorage _storage;
 
         // Default controller used by framework
         public LockController()
         {
-            _storage = new EventStorage(new EventContext());
-            _lockLogic = new LockingLogic(_storage, new EventCommunicator());
+            _lockLogic = new LockingLogic(new EventStorage(new EventContext()), new EventCommunicator());
         }
 
         // Controller used to dependency-inject during testing
-        public LockController(ILockingLogic lockLogic, IEventStorage storage)
+        public LockController(ILockingLogic lockLogic)
         {
             _lockLogic = lockLogic;
-            _storage = storage;
         }
 
         /// <summary>
@@ -34,11 +31,12 @@ namespace Event.Controllers
         /// This POST call should be received either a) from the Event itself (when it is about to execute) or when
         /// b) another Event (that has this Event in it's dependencies) asks it to lock.
         /// </summary>
+        /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="lockDto">Contents should represent caller</param>
         /// <param name="eventId">The id of the Event, that caller wants to lock</param>
-        [Route("Events/{eventId}/lock")]
+        [Route("events/{workflowId}/{eventId}/lock")]
         [HttpPost]
-        public void Lock([FromBody] LockDto lockDto, string eventId)
+        public void Lock(string workflowId, string eventId, [FromBody] LockDto lockDto)
         {
             if (!ModelState.IsValid)
             {
@@ -56,7 +54,7 @@ namespace Event.Controllers
             }
             try
             {
-                _lockLogic.LockSelf(eventId, lockDto);
+                _lockLogic.LockSelf(workflowId, eventId, lockDto);
             }
             catch (Exception)
             {
@@ -68,15 +66,16 @@ namespace Event.Controllers
         /// <summary>
         /// Unlock will (attempt to) unlock this Event. May fail if Event is already locked
         /// </summary>
+        /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="senderId">Should represent caller</param>
         /// <param name="eventId">The id of the Event, that caller seeks to unlock</param>
         [Route("Events/{eventId}/lock/{senderId}")]
         [HttpDelete]
-        public void Unlock(string senderId, string eventId)
+        public void Unlock(string workflowId, string eventId, string senderId)
         {
             try
             {
-                _lockLogic.UnlockSelf(eventId, senderId);
+                _lockLogic.UnlockSelf(workflowId, eventId, senderId);
             }
             catch (ArgumentNullException)
             {
