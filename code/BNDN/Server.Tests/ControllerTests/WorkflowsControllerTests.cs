@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Moq;
@@ -16,12 +18,15 @@ namespace Server.Tests.ControllerTests
     class WorkflowsControllerTests
     {
         private Mock<IServerLogic> _mock;
+        private WorkflowsController _controller;
 
         [SetUp]
         public void SetUp()
         {
             _mock = new Mock<IServerLogic>();
             _mock.Setup(logic => logic.Dispose());
+
+            _controller = new WorkflowsController(_mock.Object) { Request = new HttpRequestMessage()};
         }
 
         #region GET Workflows
@@ -31,10 +36,8 @@ namespace Server.Tests.ControllerTests
             // Arrange
             _mock.Setup(logic => logic.GetAllWorkflows()).Returns(new List<WorkflowDto>());
 
-            var controller = new WorkflowsController(_mock.Object);
-
             // Act
-            var result = controller.Get();
+            var result = _controller.Get();
 
             // Assert
             Assert.IsEmpty(result);
@@ -45,10 +48,8 @@ namespace Server.Tests.ControllerTests
         {
             _mock.Setup(logic => logic.GetAllWorkflows()).Returns(new List<WorkflowDto>{ new WorkflowDto { Id = "testWorkflow", Name = "Test Workflow"}});
 
-            var controller = new WorkflowsController(_mock.Object);
-
             // Act
-            var result = controller.Get().ToList();
+            var result = _controller.Get().ToList();
 
             // Assert
             Assert.AreEqual(1, result.Count());
@@ -69,10 +70,8 @@ namespace Server.Tests.ControllerTests
 
             _mock.Setup(logic => logic.GetAllWorkflows()).Returns(workflowDtos);
 
-            var controller = new WorkflowsController(_mock.Object);
-
             // Act
-            var result = controller.Get();
+            var result = _controller.Get();
 
             // Assert
             Assert.AreEqual(10, result.Count());
@@ -87,16 +86,14 @@ namespace Server.Tests.ControllerTests
             var list = new List<WorkflowDto>();
             // Arrange
             _mock.Setup(logic => logic.AddNewWorkflow(It.IsAny<WorkflowDto>()))
-                .Returns(async (WorkflowDto workflowDto) => list.Add(workflowDto));
+                .Returns((WorkflowDto workflowDto) => Task.Run(() => list.Add(workflowDto)));
 
             var workflow = new WorkflowDto {Id = "id", Name = "name"};
-
-            var controller = new WorkflowsController(_mock.Object);
 
             Assert.IsEmpty(list);
 
             // Act
-            await controller.PostWorkFlow(workflow);
+            await _controller.PostWorkFlow(workflow);
 
             // Assert
             Assert.IsNotEmpty(list);
@@ -112,15 +109,13 @@ namespace Server.Tests.ControllerTests
         {
             var list = new List<ServerWorkflowModel>();
             _mock.Setup((logic => logic.AddNewWorkflow(It.IsAny<WorkflowDto>())))
-                .Returns(async (WorkflowDto incoming) => list.Add(new ServerWorkflowModel {Id = incoming.Id, Name = incoming.Id}));
+                .Returns((WorkflowDto incoming) => Task.Run(() => list.Add(new ServerWorkflowModel {Id = incoming.Id, Name = incoming.Id})));
 
             // Arrange
             var dto = new WorkflowDto {Id = workflowId, Name = "Workflow Name"};
 
-            var controller = new WorkflowsController(_mock.Object);
-
             // Act
-            await controller.PostWorkFlow(dto);
+            await _controller.PostWorkFlow(dto);
 
             // Assert
             Assert.IsNotEmpty(list);
@@ -139,10 +134,8 @@ namespace Server.Tests.ControllerTests
 
             _mock.Setup(logic => logic.AddNewWorkflow(dto)).Throws<Exception>();
 
-            var controller = new WorkflowsController(_mock.Object);
-
             try {
-                await controller.PostWorkFlow(dto);
+                await _controller.PostWorkFlow(dto);
             }
             catch (Exception e) {
                 Assert.IsInstanceOf<HttpResponseException>(e);
@@ -154,16 +147,14 @@ namespace Server.Tests.ControllerTests
         [Test]
         [TestCase("AWorkflowId")]
         [TestCase(null)]
-        public void PostWorkflow_with_id_and_null_workflow(string workflowId)
+        public async Task PostWorkflow_with_id_and_null_workflow(string workflowId)
         {
             // Arrange
             _mock.Setup(logic => logic.AddNewWorkflow(null)).Throws<ArgumentNullException>();
 
-            var controller = new WorkflowsController(_mock.Object);
-
             try {
                 // Act
-                var testDelegate = new TestDelegate(() => controller.PostWorkFlow(null));
+                await _controller.PostWorkFlow(null);
             }
             catch (Exception ex) {
                 // Assert
@@ -184,12 +175,11 @@ namespace Server.Tests.ControllerTests
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesExist", Name = "This is a test..."} };
 
             _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
-                .Callback(async (WorkflowDto incoming) => list.Remove(list.Find(w => w.Id == incoming.Id)));
+                .Callback((WorkflowDto incoming) => Task.Run(() => list.Remove(list.Find(w => w.Id == incoming.Id))));
 
             var dto = new WorkflowDto { Id = "DoesExist", Name = "lol"};
-            var controller = new WorkflowsController(_mock.Object);
 
-            Assert.DoesNotThrow(async () => controller.DeleteWorkflow(dto.Id));
+            Assert.DoesNotThrow(async () => await _controller.DeleteWorkflow(dto.Id));
             Assert.IsEmpty(list.Where(w => w.Id == workflowId));
         }
 
@@ -200,17 +190,16 @@ namespace Server.Tests.ControllerTests
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesNotExist", Name = "This is a test..." } };
 
             _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
-                .Callback(async (WorkflowDto incoming) =>
+                .Callback((WorkflowDto incoming) => Task.Run(() =>
                 {
                     if (list.Count(w => w.Id == incoming.Id) != 0) return;
 
                     list.Remove(list.Find(w => w.Id == incoming.Id));
-                });
+                }));
 
             var dto = new WorkflowDto { Id = "SomeDto", Name = "lol" };
-            var controller = new WorkflowsController(_mock.Object);
 
-            Assert.DoesNotThrow(async () => controller.DeleteWorkflow(dto.Id));
+            Assert.DoesNotThrow(async () => await _controller.DeleteWorkflow(dto.Id));
             Assert.IsNotEmpty(list.Where(w => w.Id == workflowId));
         }
 
@@ -233,10 +222,8 @@ namespace Server.Tests.ControllerTests
 
             _mock.Setup(logic => logic.GetEventsOnWorkflow(workflowId)).Returns(list);
 
-            var controller = new WorkflowsController(_mock.Object);
-
             // Act
-            var result = controller.Get(workflowId);
+            var result = _controller.Get(workflowId);
 
             // Assert
             Assert.IsInstanceOf<IEnumerable<EventAddressDto>>(result);
@@ -254,10 +241,9 @@ namespace Server.Tests.ControllerTests
                 new EventAddressDto { Id = "id1", Uri = null },
                 new EventAddressDto { Id = "id2", Uri = null }
             });
-            var controller = new WorkflowsController(_mock.Object);
 
             // Act
-            var result = controller.Get("id1");
+            var result = _controller.Get("id1");
 
             // Assert
             Assert.AreEqual(1, result.Count());
@@ -282,20 +268,18 @@ namespace Server.Tests.ControllerTests
 
         #region POST Event
         [Test]
-        public void PostEventToWorkflowAddsEventToWorkflow()
+        public async Task PostEventToWorkflowAddsEventToWorkflow()
         {
             var list = new List<EventAddressDto>();
             // Arrange
             _mock.Setup(logic => logic.AddEventToWorkflow(It.IsAny<string>(), It.IsAny<EventAddressDto>()))
-                .Callback(((string s, EventAddressDto eventDto) => list.Add(eventDto)));
+                .Returns(((string s, EventAddressDto eventDto) => Task.Run(() => list.Add(eventDto))));
             _mock.Setup(logic => logic.GetEventsOnWorkflow(It.IsAny<string>())).Returns(list);
 
-            var eventAddressDto = new EventAddressDto() { Id = "id", Uri = new Uri("http://www.contoso.com/") };
-
-            var controller = new WorkflowsController(_mock.Object);
+            var eventAddressDto = new EventAddressDto { Id = "id", Uri = new Uri("http://www.contoso.com/") };
 
             // Act
-            controller.PostEventToWorkFlow("workflow", eventAddressDto);
+            await _controller.PostEventToWorkFlow("workflow", eventAddressDto);
 
             // Assert
             Assert.AreEqual(eventAddressDto, list.First());
