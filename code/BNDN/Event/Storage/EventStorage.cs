@@ -253,6 +253,13 @@ namespace Event.Storage
             }
             await _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// GetResponses returns a HashSet containing the response relations for the provided event.
+        /// Notice, that this method will not return null, but may return an empty set.
+        /// </summary>
+        /// <param name="eventId">Id of the Event, for which you wish to retrieve response-relations</param>
+        /// <returns></returns>
         public HashSet<RelationToOtherEventModel> GetResponses(string eventId)
         {
             var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == eventId);
@@ -321,6 +328,14 @@ namespace Event.Storage
             }
             await _context.SaveChangesAsync();
         }
+
+
+        /// <summary>
+        /// GetResponses returns a HashSet containing the inclusion relations for the provided event.
+        /// Notice, that this method will not return null, but may return an empty set.
+        /// </summary>
+        /// <param name="eventId">Id of the Event, for which you wish to retrieve inclusion-relations</param>
+        /// <returns></returns>
         public HashSet<RelationToOtherEventModel> GetInclusions(string eventId)
         {
             var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == eventId);

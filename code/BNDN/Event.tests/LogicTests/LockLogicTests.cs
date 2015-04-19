@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common;
+using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Models;
@@ -15,6 +16,27 @@ namespace Event.Tests.LogicTests
 {
     class LockLogicTests
     {
+
+        #region Setup
+
+        /// <summary>
+        /// This method returns a ILockingLogic instance, that was initialized using dependency-injection.
+        /// The injected (mocked) modules are not configured; this method should not be used, if you intend on testing
+        /// some interaction with either EventCommunicator or EventStorage. 
+        /// </summary>
+        /// <returns></returns>
+        public ILockingLogic SetupDefaultLockingLogic()
+        {
+            var mockStorage = new Mock<IEventStorage>();
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+
+            ILockingLogic logic = new LockingLogic(
+                (IEventStorage) mockStorage.Object,
+                (IEventFromEvent) mockEventCommunicator.Object);
+
+            return logic;
+        }
+        #endregion
 
 
         #region IsAllowedToOperate tests
@@ -93,12 +115,7 @@ namespace Event.Tests.LogicTests
         [Test]
         public void IsAllowedToOperate_RaisesExceptionIfProvidedNullEventId()
         {
-            var mockStorage = new Mock<IEventStorage>();
-            var mockEventCommunicator = new Mock<IEventFromEvent>();
-
-            var logic = new LockingLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventFromEvent) mockEventCommunicator.Object);
+            ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
             var task = logic.IsAllowedToOperate(null, "EventA");
@@ -116,12 +133,7 @@ namespace Event.Tests.LogicTests
         [Test]
         public void IsAllowedToOperate_RaisesExceptionIfProvidedNullCallerId()
         {
-            var mockStorage = new Mock<IEventStorage>();
-            var mockEventCommunicator = new Mock<IEventFromEvent>();
-
-            var logic = new LockingLogic(
-                (IEventStorage)mockStorage.Object,
-                (IEventFromEvent)mockEventCommunicator.Object);
+            ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
             var task = logic.IsAllowedToOperate("someEvent", null);
@@ -139,6 +151,27 @@ namespace Event.Tests.LogicTests
         #endregion 
 
         #region LockAll tests
+        // TODO: How do we test this?
+
+        [Test]
+        public void LockAll_WillRaiseExceptionIfEventIdIsNull()
+        {
+            // Arrange
+            ILockingLogic logic = SetupDefaultLockingLogic();
+
+            // Act
+            var lockAllTask = logic.LockAll(null);
+
+            // Assert
+            if (lockAllTask.Exception == null)
+            {
+                Assert.Fail("lockAllTask was expected to contain a non-null Exception-property");
+            }
+
+            var innerException = lockAllTask.Exception.InnerException;
+
+            Assert.IsInstanceOf<ArgumentNullException>(innerException);
+        }
         #endregion
 
         #region LockSelf tests
@@ -146,13 +179,7 @@ namespace Event.Tests.LogicTests
         public void LockSelf_WillRaiseExceptionIfLockDtoIsNull()
         {
             // Arrange
-            var mockStorage = new Mock<IEventStorage>();
-            var mockEventCommunicator = new Mock<IEventFromEvent>();
-
-            ILockingLogic logic = new LockingLogic(
-                (IEventStorage) mockStorage.Object,
-                (IEventFromEvent) mockEventCommunicator.Object);
-
+            ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act 
             var task = logic.LockSelf("testA", null);
@@ -169,12 +196,7 @@ namespace Event.Tests.LogicTests
         public void LockSelf_WillRaiseExceptionIfEventIdIsNull()
         {
             // Arrange
-            var mockStorage = new Mock<IEventStorage>();
-            var mockEventCommunicator = new Mock<IEventFromEvent>();
-
-            ILockingLogic logic = new LockingLogic(
-                (IEventStorage)mockStorage.Object,
-                (IEventFromEvent)mockEventCommunicator.Object);
+            ILockingLogic logic = SetupDefaultLockingLogic();
 
             var lockDto = new LockDto()
             {
@@ -199,15 +221,122 @@ namespace Event.Tests.LogicTests
         #endregion
 
         #region UnlockAll tests
+        // TODO: How do we do this?
 
+        [Test]
+        public void UnlockAll_WillRaiseExceptionIfEventIdWasNull()
+        {
+            // Arrange
+            ILockingLogic logic = SetupDefaultLockingLogic();
+
+            // Act
+            var unlockAllTask = logic.UnlockAll(null);
+
+            // Assert
+            if (unlockAllTask.Exception == null)
+            {
+                Assert.Fail("Task should have thrown an exception");
+            }
+            Assert.IsInstanceOf<ArgumentNullException>(unlockAllTask.Exception.InnerException);
+        }
+
+        [Test]
+        public void UnlockAll_WillRaiseExceptionIfStorageReturnsNullRelationsSets()
+        {
+            // Arrange
+            var mockStorage = new Mock<IEventStorage>();
+            mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>()))
+                .Returns(() => (HashSet<RelationToOtherEventModel>) null);
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+
+            ILockingLogic logic = new LockingLogic(
+                (IEventStorage) mockStorage.Object,
+                (IEventFromEvent) mockEventCommunicator.Object);
+
+            // Act
+            var unlockAllTask = logic.UnlockAll("someEvent");
+
+            // Assert
+            if (unlockAllTask.Exception == null)
+            {
+                Assert.Fail("Task should have thrown an exception");
+            }
+            Assert.IsInstanceOf<NullReferenceException>(unlockAllTask.Exception.InnerException);
+        }
         #endregion
 
         #region UnlockSelf tests
 
+        [Test]
+        public void UnlockSelf_WillRaiseExceptionIfCalledWithNullEventId()
+        {
+            // Arrange
+            ILockingLogic logic = SetupDefaultLockingLogic();
+
+            // Act
+            var unlockSelfTask = logic.UnlockSelf(null, "someEvent");
+
+            // Assert
+            if (unlockSelfTask.Exception == null)
+            {
+                Assert.Fail("Task should have thrown an exception");
+            }
+            Assert.IsInstanceOf<ArgumentNullException>(unlockSelfTask.Exception.InnerException);
+        }
+
+        [Test]
+        public void UnlockSelf_WillRaiseExceptionIfCalledWithNullCallerId()
+        {
+            ILockingLogic logic = SetupDefaultLockingLogic();
+
+            // Act
+            var unlockSelfTask = logic.UnlockSelf("someEvent", null);
+
+            // Assert
+            if (unlockSelfTask.Exception == null)
+            {
+                Assert.Fail("Task should have thrown an exception");
+            }
+            Assert.IsInstanceOf<ArgumentNullException>(unlockSelfTask.Exception.InnerException);
+        }
+
+        [Test]
+        public void UnlockSelf_WillRaiseExceptionIfEventIsLockedBySomeoneElse()
+        {
+            // Arrange
+            var mockStorage = new Mock<IEventStorage>();
+            var lockDtoToReturnFromStorage = new LockDto()
+            {
+                EventIdentificationModel = new EventIdentificationModel(),
+                Id = "databaseRelevantId",
+                LockOwner = "Johannes"          // Notice, Johannes will be the lockOwner according to Storage!
+            };
+
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>()))
+                .Returns(() => Task.Run(() => lockDtoToReturnFromStorage));
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+
+            ILockingLogic logic = new LockingLogic(
+                (IEventStorage) mockStorage.Object,
+                (IEventFromEvent) mockEventCommunicator.Object);
+
+            // Act
+            var unlockSelfTask = logic.UnlockSelf("irrelevantId", "Per"); // Notice, we're trying to let Per unlock
+
+            // Assert
+            if (unlockSelfTask.Exception == null)
+            {
+                Assert.Fail("Task should have thrown an exception");
+            }
+            Assert.IsInstanceOf<LockedException>(unlockSelfTask.Exception.InnerException);
+        }
+
         #endregion
 
         #region UnlockSome tests
-
+        // TODO: What to do? This is a private method? How to test? 
         #endregion
 
     }

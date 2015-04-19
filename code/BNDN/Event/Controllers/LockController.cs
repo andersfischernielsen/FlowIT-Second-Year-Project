@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Event.Communicators;
+using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Storage;
@@ -77,10 +78,15 @@ namespace Event.Controllers
             {
                 _lockLogic.UnlockSelf(eventId, senderId);
             }
-            catch (Exception)
+            catch (ArgumentNullException)
             {
-                
-                throw;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Could not unlock: One or more of the provided arguments was null"));
+            }
+            catch (LockedException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                    "Could not unlock: Event is locked by someone else"));
             }
         }
     }

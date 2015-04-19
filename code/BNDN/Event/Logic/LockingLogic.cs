@@ -52,6 +52,14 @@ namespace Event.Logic
 
         public async Task UnlockSelf(string eventId, string callerId)
         {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("callerId","callerId was null");
+            }
+            if (callerId == null)
+            {
+                throw new ArgumentNullException("eventId","eventId was null");
+            }
             if (!await IsAllowedToOperate(eventId, callerId))
             {
                 throw new LockedException();
@@ -61,6 +69,11 @@ namespace Event.Logic
 
         public async Task<bool> LockAll(string eventId)
         {
+            if (eventId == null)
+            {
+                throw  new ArgumentNullException("eventId","eventId was null");
+            }
+
             var eventsToBeLocked = new List<RelationToOtherEventModel>();
             var lockedEvents = new List<RelationToOtherEventModel>();
 
@@ -114,10 +127,19 @@ namespace Event.Logic
         /// <returns>False if it fails to unlock other Events</returns>
         public async Task<bool> UnlockAll(string eventId)
         {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId","provided eventId was null");
+            }
+
             // Gather dependent events
-            var resp = _storage.GetResponses(eventId);
+            var resp = _storage.GetResponses(eventId);          // TODO: What if any (or all) of these return null?
             var incl = _storage.GetInclusions(eventId);
             var excl = _storage.GetExclusions(eventId);
+            if (resp == null || incl == null || excl == null)
+            {
+                throw new NullReferenceException("At least one of response-,inclusions or exclusions-relations retrieved from storage was null");
+            }
             var eventsToBelocked = resp.Concat(incl.Concat(excl));
 
             if (eventsToBelocked == null)
@@ -173,6 +195,15 @@ namespace Event.Logic
 
         private async Task UnlockSome(string eventId, List<RelationToOtherEventModel> eventsToBeUnlocked)
         {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId","eventId was null");
+            }
+            if (eventsToBeUnlocked == null)
+            {
+                throw new ArgumentNullException("eventsToBeUnlocked", "eventsToBeUnlocked was null");
+            }
+
             // Unlock the other Events. 
             foreach (var relation in eventsToBeUnlocked)
             {
