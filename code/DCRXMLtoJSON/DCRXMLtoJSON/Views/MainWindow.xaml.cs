@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 
-namespace DcrParserGraphic
+namespace DcrParserGraphic.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -12,11 +12,5 @@ namespace DcrParserGraphic
         {
             InitializeComponent();
         }
-
-        private void hiddenbutton_onclick(object sender, RoutedEventArgs e)
-        {
-            Process.Start(@"http://www.staggeringbeauty.com/");
-        }
-
     }
 }
