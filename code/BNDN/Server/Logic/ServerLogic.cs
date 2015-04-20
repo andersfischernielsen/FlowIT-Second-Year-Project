@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Server.Exceptions;
 using Server.Models;
 using Server.Storage;
 
@@ -148,6 +149,11 @@ namespace Server.Logic
 
         public async Task AddNewWorkflow(WorkflowDto workflow)
         {
+            if (await _storage.WorkflowExists(workflow.Id))
+            {
+                throw new WorkflowAlreadyExistsException();
+            }
+
             await _storage.AddNewWorkflow(new ServerWorkflowModel
             {
                 Id = workflow.Id,

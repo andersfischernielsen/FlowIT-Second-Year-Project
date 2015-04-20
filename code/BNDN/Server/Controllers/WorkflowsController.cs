@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Server.Exceptions;
 using Server.Logic;
 using Server.Storage;
 
@@ -72,10 +73,21 @@ namespace Server.Controllers
                     "Provided input could not be mapped onto an instance of WorkflowDto."));
             }
 
+            if (workflowDto == null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Data was not provided"));
+            }
+
             try
             {
                 // Add this Event to the specified workflow
                 await _logic.AddNewWorkflow(workflowDto);
+            }
+            catch (WorkflowAlreadyExistsException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                    "A workflow with that id exists!"));
             }
             catch (Exception ex)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
@@ -76,7 +77,13 @@ namespace Event.Storage
 
         public async Task<string> GetName(string workflowId, string eventId)
         {
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
             await EventIsInALegalState(workflowId, eventId);
+
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Name;
         }
 
@@ -90,6 +97,11 @@ namespace Event.Storage
 
         public async Task<IEnumerable<string>> GetRoles(string workflowId, string eventId)
         {
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
             await EventIsInALegalState(workflowId, eventId);
 
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles.Select(role => role.Role);
@@ -105,8 +117,13 @@ namespace Event.Storage
 
         public async Task<bool> GetExecuted(string workflowId, string eventId)
         {
-            await EventIsInALegalState(workflowId, eventId);
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
 
+            await EventIsInALegalState(workflowId, eventId);
+            
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Executed;
         }
 
@@ -120,6 +137,11 @@ namespace Event.Storage
 
         public async Task<bool> GetIncluded(string workflowId, string eventId)
         {
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
             await EventIsInALegalState(workflowId, eventId);
 
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Included;
@@ -134,6 +156,11 @@ namespace Event.Storage
 
         public async Task<bool> GetPending(string workflowId, string eventId)
         {
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
             await EventIsInALegalState(workflowId, eventId);
 
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Pending;

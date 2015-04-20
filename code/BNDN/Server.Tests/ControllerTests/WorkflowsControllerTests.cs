@@ -9,6 +9,7 @@ using Common;
 using Moq;
 using NUnit.Framework;
 using Server.Controllers;
+using Server.Exceptions;
 using Server.Logic;
 using Server.Models;
 
@@ -128,11 +129,10 @@ namespace Server.Tests.ControllerTests
         [TestCase(null)]
         public async void PostWorkflow_id_already_exists(string workflowId)
         {
-            //TODO: Michael?
             // Arrange
             var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
 
-            _mock.Setup(logic => logic.AddNewWorkflow(dto)).Throws<Exception>();
+            _mock.Setup(logic => logic.AddNewWorkflow(dto)).Throws<WorkflowAlreadyExistsException>();
 
             try {
                 await _controller.PostWorkFlow(dto);

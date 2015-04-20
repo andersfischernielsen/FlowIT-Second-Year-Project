@@ -129,6 +129,11 @@ namespace Server.Storage
             return await workflows.ToListAsync();
         }
 
+        public async Task<bool> WorkflowExists(string workflowId)
+        {
+            return await _db.Workflows.AnyAsync(workflow => workflow.Id == workflowId);
+        }
+
         public async Task<ServerWorkflowModel> GetWorkflow(string workflowId)
         {
             var workflows = from w in _db.Workflows

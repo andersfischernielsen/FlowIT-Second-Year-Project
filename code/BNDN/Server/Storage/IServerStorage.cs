@@ -50,6 +50,8 @@ namespace Server.Storage
         /// <returns></returns>
         Task<ICollection<ServerWorkflowModel>> GetAllWorkflows();
 
+        Task<bool> WorkflowExists(string workflowId);
+
         Task<ServerWorkflowModel> GetWorkflow(string workflowId);
 
         /// <summary>
