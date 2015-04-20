@@ -215,7 +215,7 @@ namespace Server.Tests.LogicTests
         {
             Assert.AreEqual(1, _list.Count(x => x.Id == "1"));
             
-            await _toTest.RemoveWorkflow(new WorkflowDto { Id = "1", Name = "w1" });
+            await _toTest.RemoveWorkflow("1");
 
             Assert.AreEqual(0, _list.Count(x => x.Id == "1"));
         }

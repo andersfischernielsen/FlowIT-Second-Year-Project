@@ -169,38 +169,38 @@ namespace Server.Tests.ControllerTests
         #region DELETE Workflow
 
         [Test]
-        public void Delete_Workflow_That_Does_Exist(string workflowId)
+        public void Delete_Workflow_That_Does_Exist()
         {
             //TODO: Make this test not return a weird reflection exception.
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesExist", Name = "This is a test..."} };
 
-            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
-                .Callback((WorkflowDto incoming) => Task.Run(() => list.Remove(list.Find(w => w.Id == incoming.Id))));
+            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<string>())))
+                .Returns((string incomingId) => Task.Run(() => list.Remove(list.Find(w => w.Id == incomingId))));
 
             var dto = new WorkflowDto { Id = "DoesExist", Name = "lol"};
 
             Assert.DoesNotThrow(async () => await _controller.DeleteWorkflow(dto.Id));
-            Assert.IsEmpty(list.Where(w => w.Id == workflowId));
+            Assert.IsEmpty(list.Where(w => w.Id == "DoesExist"));
         }
 
         [Test]
-        public void Delete_Workflow_That_Does_Not_Exist(string workflowId)
+        public void Delete_Workflow_That_Does_Not_Exist()
         {
             //TODO: Make this test not return a weird reflection exception.
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesNotExist", Name = "This is a test..." } };
 
-            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
-                .Callback((WorkflowDto incoming) => Task.Run(() =>
+            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<string>())))
+                .Returns((string incomingId) => Task.Run(() =>
                 {
-                    if (list.Count(w => w.Id == incoming.Id) != 0) return;
+                    if (list.Count(w => w.Id == incomingId) != 0) return;
 
-                    list.Remove(list.Find(w => w.Id == incoming.Id));
+                    list.Remove(list.Find(w => w.Id == incomingId));
                 }));
 
             var dto = new WorkflowDto { Id = "SomeDto", Name = "lol" };
 
             Assert.DoesNotThrow(async () => await _controller.DeleteWorkflow(dto.Id));
-            Assert.IsNotEmpty(list.Where(w => w.Id == workflowId));
+            Assert.IsNotEmpty(list.Where(w => w.Id == "DoesNotExist"));
         }
 
         #endregion

@@ -72,7 +72,7 @@ namespace Server.Logic
         /// Adds a new workflow
         /// If a worksflot with the same ID exists, it will throw an exception
         /// </summary>
-        /// <param name="workflow"></param>
-        Task RemoveWorkflow(WorkflowDto workflow);
+        /// <param name="workflowId"></param>
+        Task RemoveWorkflow(string workflowId);
     }
 }

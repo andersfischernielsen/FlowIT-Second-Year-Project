@@ -170,13 +170,9 @@ namespace Server.Logic
             });
         }
 
-        public async Task RemoveWorkflow(WorkflowDto workflow)
+        public async Task RemoveWorkflow(string workflowId)
         {
-            await _storage.RemoveWorkflow(new ServerWorkflowModel
-            {
-                Id = workflow.Id,
-                Name = workflow.Name,
-            });
+            await _storage.RemoveWorkflow(await _storage.GetWorkflow(workflowId));
         }
 
         public void Dispose()

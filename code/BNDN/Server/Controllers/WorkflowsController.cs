@@ -174,7 +174,7 @@ namespace Server.Controllers
         {
             try
             {
-                await _logic.RemoveWorkflow(await _logic.GetWorkflow(workflowId));
+                await _logic.RemoveWorkflow(workflowId);
             }
             catch (Exception ex)
             {
