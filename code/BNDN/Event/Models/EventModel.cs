@@ -24,7 +24,6 @@ namespace Event.Models
         public bool Included { get; set; }
         public bool Pending { get; set; }
         public virtual ICollection<EventRoleModel> Roles { get; set; }
-        public virtual LockDto LockDto { get; set; }
         public ICollection<ResponseUri> ResponseUris { get; set; }
         public ICollection<InclusionUri> InclusionUris { get; set; }
         public ICollection<ExclusionUri> ExclusionUris { get; set; }
