@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Common.Exceptions;
 using Event.Communicators;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Storage;
@@ -37,7 +37,7 @@ namespace Event.Controllers
         /// <param name="eventId">The id of the Event, that caller wants to lock</param>
         [Route("events/{workflowId}/{eventId}/lock")]
         [HttpPost]
-        public void Lock(string workflowId, string eventId, [FromBody] LockDto lockDto)
+        public async Task Lock(string workflowId, string eventId, [FromBody] LockDto lockDto)
         {
             if (!ModelState.IsValid)
             {
@@ -53,15 +53,7 @@ namespace Event.Controllers
                     "Lock could not be set. An empty (null) lock was provided. If your intent" +
                     " is to unlock the Event issue a DELETE request on  event/lock instead."));
             }
-            try
-            {
-                _lockLogic.LockSelf(workflowId, eventId, lockDto);
-            }
-            catch (Exception)
-            {
-                
-                throw;
-            }
+            await _lockLogic.LockSelf(workflowId, eventId, lockDto);
         }
 
         /// <summary>
@@ -70,13 +62,13 @@ namespace Event.Controllers
         /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="senderId">Should represent caller</param>
         /// <param name="eventId">The id of the Event, that caller seeks to unlock</param>
-        [Route("Events/{eventId}/lock/{senderId}")]
+        [Route("events/{workflowId}/{eventId}/lock/{senderId}")]
         [HttpDelete]
-        public void Unlock(string workflowId, string eventId, string senderId)
+        public async Task Unlock(string workflowId, string eventId, string senderId)
         {
             try
             {
-                _lockLogic.UnlockSelf(workflowId, eventId, senderId);
+                await _lockLogic.UnlockSelf(workflowId, eventId, senderId);
             }
             catch (ArgumentNullException)
             {
