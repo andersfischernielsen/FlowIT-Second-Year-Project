@@ -53,12 +53,12 @@ namespace Server.Tests.LogicTests
             //Set up method for removing an event from a workflow. 
             //Finds the given workflow in the list, finds the event in the workflow and removes it.
             toSetup.Setup(m => m.RemoveEventFromWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<string>()))
-                .Callback((ServerWorkflowModel toRemoveFrom, string eventId) =>
+                .Returns((ServerWorkflowModel toRemoveFrom, string eventId) => Task.Run(() =>
                 {
                     var events = _list.Find(x => x.Id == toRemoveFrom.Id).ServerEventModels;
                     var toRemove = events.First(x => x.Id == eventId);
                     events.Remove(toRemove);
-                });
+                }));
 
             //Set up method for removing workflow. Removes the input workflow from the list. 
             toSetup.Setup(m => m.RemoveWorkflow(It.IsAny<ServerWorkflowModel>()))
