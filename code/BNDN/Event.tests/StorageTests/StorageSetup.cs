@@ -13,10 +13,9 @@ namespace Event.Tests.StorageTests
     {
         public DbSet<TEntity> Object { get; private set; }
 
-        public FakeDbSet(IEnumerable<TEntity> list)
+        public FakeDbSet(IQueryable<TEntity> queryable)
         {
             // Code to get all of the async stuff to work.
-            var queryable = list.AsQueryable();
 
             var eventStateMockSet = new Mock<DbSet<TEntity>>();
             eventStateMockSet.As<IDbAsyncEnumerable<TEntity>>()

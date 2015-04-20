@@ -54,6 +54,7 @@ namespace Event.Logic
             // #1. Make sure that server will accept our entry
             var dto = new EventAddressDto
             {
+                WorkflowId = eventDto.WorkflowId,
                 Id = eventDto.EventId,
                 Uri = ownUri,
                 Roles = eventDto.Roles
@@ -76,7 +77,7 @@ namespace Event.Logic
                     Id = eventDto.EventId,
                     WorkflowId = eventDto.WorkflowId,
                     Name = eventDto.Name,
-                    Roles = eventDto.Roles.Select(role => new EventRoleModel {EventId = eventDto.EventId, Role = role}).ToList(),
+                    Roles = eventDto.Roles.Select(role => new EventRoleModel {WorkflowId = eventDto.WorkflowId, EventId = eventDto.EventId, Role = role}).ToList(),
                     OwnUri = ownUri.AbsoluteUri,
                     Executed = eventDto.Executed,
                     Included = eventDto.Included,

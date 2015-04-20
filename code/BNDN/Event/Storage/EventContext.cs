@@ -1,5 +1,4 @@
 ﻿using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Configuration;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
@@ -15,7 +14,7 @@ namespace Event.Storage
             modelBuilder.Entity<EventModel>()
                 .HasMany(ei => ei.Roles)
                 .WithRequired(role => role.Event)
-                .HasForeignKey(role => role.EventId);
+                .HasForeignKey(role => new {role.EventId, role.WorkflowId});
         }
 
         public DbSet<EventModel> Events { get; set; }

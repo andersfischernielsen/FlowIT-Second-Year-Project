@@ -99,7 +99,7 @@ namespace Event.Storage
         {
             await EventIsInALegalState(workflowId, eventId);
 
-            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles = value.Select(role => new EventRoleModel { Role = role, EventId = eventId }).ToList();
+            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles = value.Select(role => new EventRoleModel { Role = role, WorkflowId = workflowId, EventId = eventId }).ToList();
             await _context.SaveChangesAsync();
         }
 

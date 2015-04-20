@@ -34,6 +34,7 @@ namespace Event.Tests.StorageTests
                 {
                     new EventRoleModel
                     {
+                        WorkflowId = "workflowId",
                         EventId = "eventId",
                         Role = "Student"
                     }
