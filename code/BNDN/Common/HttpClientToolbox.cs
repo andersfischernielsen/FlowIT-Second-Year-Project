@@ -92,13 +92,13 @@ namespace Common
         public virtual async Task Create<T>(string uri, T toCreate)
         {
             var response = await HttpClient.PostAsJsonAsync(uri, toCreate);
-            EnsureSuccessStatusCode(response);
+            await EnsureSuccessStatusCode(response);
         }
 
         public virtual async Task<TResult> Create<TArgument, TResult>(string uri, TArgument toPost)
         {
             var response = await HttpClient.PostAsJsonAsync(uri, toPost);
-            EnsureSuccessStatusCode(response);
+            await EnsureSuccessStatusCode(response);
 
             return await response.Content.ReadAsAsync<TResult>();
         }
@@ -113,7 +113,7 @@ namespace Common
         public virtual async Task<IList<T>> ReadList<T>(string uri)
         {
             var response = await HttpClient.GetAsync(uri);
-            EnsureSuccessStatusCode(response);
+            await EnsureSuccessStatusCode(response);
 
             var result = await response.Content.ReadAsAsync<T[]>();
             return result.ToList();
@@ -130,7 +130,7 @@ namespace Common
         public virtual async Task<T> Read<T>(string uri)
         {
             var response = await HttpClient.GetAsync(uri);
-            EnsureSuccessStatusCode(response);
+            await EnsureSuccessStatusCode(response);
 
             var result = await response.Content.ReadAsAsync<T>();
             return result;
@@ -146,7 +146,7 @@ namespace Common
         public virtual async Task Update<T>(string uri, T toUpdate)
         {
             var response = await HttpClient.PutAsJsonAsync(uri, toUpdate);
-            EnsureSuccessStatusCode(response);
+            await EnsureSuccessStatusCode(response);
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Common
         public virtual async Task Delete(string uri)
         {
             var response = await HttpClient.DeleteAsync(uri);
-            EnsureSuccessStatusCode(response);
+            await EnsureSuccessStatusCode(response);
         }
 
         public void Dispose()
@@ -164,7 +164,7 @@ namespace Common
             HttpClient.Dispose();
         }
 
-        private static void EnsureSuccessStatusCode(HttpResponseMessage response)
+        private static async Task EnsureSuccessStatusCode(HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode) return;
             switch (response.StatusCode)
@@ -179,7 +179,7 @@ namespace Common
                     throw new NotExecutableException();
             }
             // Will throw a generic HttpRequestException:
-            response.EnsureSuccessStatusCode();
+            throw new Exception(response.StatusCode + ": " + await response.Content.ReadAsStringAsync());
         }
     }
 }
