@@ -69,7 +69,7 @@ namespace Event.Logic
 #endif
             // TODO: try-catch here?
             // Todo: Do we need what this method returns or is it waste of data-transfer?
-            await serverCommunicator.PostEventToServer(dto);
+            var otherEvents = await serverCommunicator.PostEventToServer(dto);
             try
             {
                 // Setup a new Event in own database.
@@ -83,11 +83,11 @@ namespace Event.Logic
                     Executed = eventDto.Executed,
                     Included = eventDto.Included,
                     Pending = eventDto.Pending,
-                    ConditionUris = eventDto.Conditions.Select(condition => new ConditionUri{EventId = condition.Id, UriString = condition.Uri.AbsoluteUri}).ToList(),
-                    ResponseUris = eventDto.Responses.Select(response => new ResponseUri{EventId = response.Id, UriString = response.Uri.AbsoluteUri}).ToList(),
-                    InclusionUris = eventDto.Responses.Select(inclusion => new InclusionUri{EventId = inclusion.Id, UriString = inclusion.Uri.AbsoluteUri}).ToList(),
-                    ExclusionUris = eventDto.Responses.Select(exclusion => new ExclusionUri{EventId = exclusion.Id, UriString = exclusion.Uri.AbsoluteUri}).ToList(),
-                    LockDto = null,
+                    ConditionUris = eventDto.Conditions.Select(condition => new ConditionUri{WorkflowId = eventDto.WorkflowId, EventId = eventDto.EventId, ForeignEventId = condition.Id, UriString = condition.Uri.AbsoluteUri}).ToList(),
+                    ResponseUris = eventDto.Responses.Select(response => new ResponseUri { WorkflowId = eventDto.WorkflowId, EventId = eventDto.EventId, ForeignEventId = response.Id, UriString = response.Uri.AbsoluteUri }).ToList(),
+                    InclusionUris = eventDto.Inclusions.Select(inclusion => new InclusionUri { WorkflowId = eventDto.WorkflowId, EventId = eventDto.EventId, ForeignEventId = inclusion.Id, UriString = inclusion.Uri.AbsoluteUri }).ToList(),
+                    ExclusionUris = eventDto.Exclusions.Select(exclusion => new ExclusionUri { WorkflowId = eventDto.WorkflowId, EventId = eventDto.EventId, ForeignEventId = exclusion.Id, UriString = exclusion.Uri.AbsoluteUri }).ToList(),
+                    LockOwner = null,
                     InitialExecuted = eventDto.Executed,
                     InitialIncluded = eventDto.Included,
                     InitialPending = eventDto.Pending
@@ -157,7 +157,7 @@ namespace Event.Logic
 
             if (!await _storage.Exists(workflowId, eventId))
             {
-                return null;
+                throw new NotFoundException();
             }
 
             var returnValue =  new EventDto
