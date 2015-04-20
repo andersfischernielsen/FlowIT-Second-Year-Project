@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Net.Http;
+using Common.Exceptions;
 using Event.Communicators;
 using NUnit.Framework;
 
@@ -15,7 +15,7 @@ namespace Event.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpRequestException))]
+        [ExpectedException(typeof(NotFoundException))]
         public void IsExecuted_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator();
@@ -31,7 +31,7 @@ namespace Event.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpRequestException))]
+        [ExpectedException(typeof(NotFoundException))]
         public void IsIncluded_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator();
