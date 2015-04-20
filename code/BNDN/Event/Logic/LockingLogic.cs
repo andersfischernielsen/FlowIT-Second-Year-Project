@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Exceptions;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
 
@@ -47,11 +46,11 @@ namespace Event.Logic
             if (String.IsNullOrEmpty(lockDto.LockOwner) || String.IsNullOrWhiteSpace(lockDto.LockOwner))
             {
                 // Reject request on setting the lockDto
-                throw new ArgumentNullException("lockDto.lockOwner", "was null");
+                throw new ArgumentException("lockDto.lockOwner was null");
             }
 
             lockDto.Id = eventId;
-            await _storage.SetLockDto(workflowId, eventId, lockDto);
+            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
         }
 
         public async Task UnlockSelf(string workflowId, string eventId, string callerId)
@@ -86,7 +85,6 @@ namespace Event.Logic
                 throw  new ArgumentNullException("eventId");
             }
 
-            var eventsToBeLocked = new List<RelationToOtherEventModel>();
             var lockedEvents = new List<RelationToOtherEventModel>();
 
             // Attempt to lock down related, dependent Events down
@@ -96,17 +94,23 @@ namespace Event.Logic
             var lockDto = new LockDto {LockOwner = eventId, Id = eventId};
 
             // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
-            await _storage.SetLockDto(workflowId, eventId, lockDto);
+            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
 
 
             // Get dependent events
             var resp = _storage.GetResponses(workflowId, eventId);
             var incl = _storage.GetInclusions(workflowId, eventId);
             var excl = _storage.GetExclusions(workflowId, eventId);
-            var eventsToBelocked = resp.Concat(incl.Concat(excl));
+
+            // Put into Set to eliminate duplicates.
+            var eventsToBeLocked = new HashSet<RelationToOtherEventModel>(
+                resp.Concat(
+                    incl.Concat(
+                        excl))             // We have already locked ourselves, so no need to request that.
+                    .Where(relation => relation.WorkflowId != workflowId && relation.EventId != eventId));
 
             // For every related, dependent Event, attempt to lock it
-            foreach (var relation in eventsToBelocked)
+            foreach (var relation in eventsToBeLocked)
             {
                 var toLock = new LockDto {LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId};
 
@@ -180,6 +184,8 @@ namespace Event.Logic
                     everyEventIsUnlocked = false;
                 }
             }
+
+            await _storage.ClearLock(workflowId, eventId);
 
             return everyEventIsUnlocked;
         }
