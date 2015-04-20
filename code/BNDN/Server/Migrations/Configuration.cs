@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
 using Server.Models;
+using Server.Storage;
 
 namespace Server.Migrations
 {

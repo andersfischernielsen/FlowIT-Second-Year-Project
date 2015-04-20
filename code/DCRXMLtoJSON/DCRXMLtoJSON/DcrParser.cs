@@ -131,12 +131,13 @@ namespace DCRParserGraphic
             //Constraints general tag into variable
             var constraints = _xDoc.Descendants("constraints").ToList();
 
-            ExtractRules(constraints, "conditions", "condition", (eventDto => (HashSet<EventAddressDto>) eventDto.Conditions));
-            ExtractRules(constraints, "responses", "response", (eventDto => (HashSet<EventAddressDto>) eventDto.Responses));
-            ExtractRules(constraints, "excludes", "exclude", (eventDto => (HashSet<EventAddressDto>) eventDto.Exclusions));
+            ExtractRules(constraints, "conditions", "condition", (eventDto => (ICollection<EventAddressDto>) eventDto.Conditions));
+            ExtractRules(constraints, "responses", "response", (eventDto => (ICollection<EventAddressDto>) eventDto.Responses));
+            ExtractRules(constraints, "excludes", "exclude", (eventDto => (ICollection<EventAddressDto>) eventDto.Exclusions));
+            ExtractRules(constraints, "includes", "include", (eventDto => (ICollection<EventAddressDto>) eventDto.Inclusions));
         }
 
-        private void ExtractRules(IEnumerable<XElement> constraints, string descendantParent, string descendant, Func<EventDto, HashSet<EventAddressDto>> getPropertyFunc)
+        private void ExtractRules(IEnumerable<XElement> constraints, string descendantParent, string descendant, Func<EventDto, ICollection<EventAddressDto>> getPropertyFunc)
         {
             var rules = constraints.Descendants(descendantParent).Descendants(descendant);
 

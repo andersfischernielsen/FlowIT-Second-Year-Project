@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Common.Exceptions;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -64,19 +63,8 @@ namespace Event.Controllers
             var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
             var ownUri = new Uri(s);
 
-            // TODO: Now, call logic 
-            try
-            {
-                await _logic.CreateEvent(eventDto, ownUri);
-            }
-            catch (ApplicationException)
-            {
-                throw;
-            }
-            catch (ArgumentNullException e)
-            {
-                throw;
-            }
+            // TODO: Exception handling
+            await _logic.CreateEvent(eventDto, ownUri);
 
         }
 
@@ -95,6 +83,7 @@ namespace Event.Controllers
                 await _logic.DeleteEvent(workflowId, eventId);
             }
             catch (LockedException)
+                // Todo: Exception handling
             {
                 throw;
             }
@@ -117,9 +106,10 @@ namespace Event.Controllers
             {
                 await _logic.ResetEvent(workflowId, eventId);
             }
+                // Todo: Exception handling
             catch (Exception)
             {
-                
+
                 throw;
             }
         }
@@ -138,9 +128,14 @@ namespace Event.Controllers
             {
                 return await _logic.GetEventDto(workflowId, eventId);
             }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, workflowId + "." + eventId + " not found"));
+            }
+                // Todo: Exception handling.
             catch (Exception)
             {
-                throw new Exception();
+                throw;
             }
         }
     }
