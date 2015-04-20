@@ -24,9 +24,9 @@ namespace Event.Logic
         public StateLogic()
         {
             _storage = new EventStorage(new EventContext());
-            _lockingLogic = null; // Todo: Use actual implementation.
-            _authLogic = new AuthLogic(_storage);
             _eventCommunicator = new EventCommunicator();
+            _lockingLogic = new LockingLogic(_storage, _eventCommunicator);
+            _authLogic = new AuthLogic(_storage);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Event.Logic
             {
                 await _storage.SetExecuted(workflowId, eventId, true);
                 await _storage.SetPending(workflowId, eventId, false);
-                var addressDto = new EventAddressDto {Id = eventId, Uri = await _storage.GetUri(workflowId, eventId)};
+                var addressDto = new EventAddressDto {WorkflowId = workflowId, Id = eventId, Uri = await _storage.GetUri(workflowId, eventId)};
                 foreach (var pending in _storage.GetResponses(workflowId, eventId))
                 {
                     await _eventCommunicator.SendPending(pending.Uri, addressDto, pending.WorkflowId, pending.EventId);
