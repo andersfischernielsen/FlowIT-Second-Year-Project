@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
+using Common.Exceptions;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;

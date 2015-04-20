@@ -171,7 +171,6 @@ namespace Server.Tests.ControllerTests
         [Test]
         public void Delete_Workflow_That_Does_Exist()
         {
-            //TODO: Make this test not return a weird reflection exception.
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesExist", Name = "This is a test..."} };
 
             _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<string>())))
@@ -186,7 +185,6 @@ namespace Server.Tests.ControllerTests
         [Test]
         public void Delete_Workflow_That_Does_Not_Exist()
         {
-            //TODO: Make this test not return a weird reflection exception.
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesNotExist", Name = "This is a test..." } };
 
             _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<string>())))

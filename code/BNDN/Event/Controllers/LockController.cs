@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Common.Exceptions;
 using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;

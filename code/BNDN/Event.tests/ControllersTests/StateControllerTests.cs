@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.Exceptions;
 using Event.Controllers;
 using Event.Exceptions;
 using Event.Interfaces;
