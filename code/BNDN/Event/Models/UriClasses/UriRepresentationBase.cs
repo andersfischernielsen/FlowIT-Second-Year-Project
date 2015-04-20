@@ -17,8 +17,8 @@ namespace Event.Models.UriClasses
         public string EventId { get; set; }
 
         [Key, Column(Order = 2)]
-        public string ForeignWorkflowId { get; set; }
-        [Key, Column(Order = 3)]
         public string ForeignEventId { get; set; }
+
+        public virtual EventModel Event { get; set; }
     }
 }
