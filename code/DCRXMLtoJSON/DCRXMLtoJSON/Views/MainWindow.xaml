@@ -6,7 +6,7 @@
         xmlns:viewModels="clr-namespace:DcrParserGraphic.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
-        Title="MainWindow" Height="475" Width="450" MinHeight="475" MinWidth="440">
+        Title="DCR Graph Parser and Upload Tool" Height="475" Width="450" MinHeight="475" MinWidth="440">
     <Grid>
         <Grid.DataContext>
             <viewModels:ParsingViewModel/>
