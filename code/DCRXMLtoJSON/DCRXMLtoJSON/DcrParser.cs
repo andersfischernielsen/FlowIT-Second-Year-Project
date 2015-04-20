@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Common;
@@ -164,6 +162,7 @@ namespace DCRParserGraphic
 
                 var toAdd = new EventAddressDto
                 {
+                    WorkflowId = _map[target].WorkflowId,
                     Id = _map[target].EventId,
                     Roles = _map[target].Roles,
                     Uri = new Uri(uriString)
@@ -186,10 +185,10 @@ namespace DCRParserGraphic
             ExtractStates(state, "executed", "event", (eventDto => eventDto.Executed = true));
 
             //Included
-            ExtractStates(state, "included", "event", (eventDto => eventDto.Executed = true));
+            ExtractStates(state, "included", "event", (eventDto => eventDto.Included = true));
 
             //Pending
-            ExtractStates(state, "pendingResponses", "event", (eventDto => eventDto.Executed = true));
+            ExtractStates(state, "pendingResponses", "event", (eventDto => eventDto.Pending = true));
         }
 
         private void ExtractStates(IEnumerable<XElement> state, string descendantParent, string descendant, Func<EventDto, bool> setPropertyFunc)
