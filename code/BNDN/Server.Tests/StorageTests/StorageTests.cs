@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Common;
 using Moq;
 using NUnit.Framework;
 using Server.Models;
@@ -14,12 +11,12 @@ namespace Server.Tests.StorageTests
 {
     [TestFixture]
     class StorageTests {
-        private StorageContext _context;
+        private IServerContext _context;
 
         [SetUp]
         public void Setup()
         {
-            var context = new Mock<StorageContext>();
+            var context = new Mock<IServerContext>();
 
             //USERS:
             var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName" } };
@@ -64,10 +61,10 @@ namespace Server.Tests.StorageTests
         }
 
         [Test]
-        public void TestGetUser()
+        public async Task TestGetUser()
         {
             var toTest = new ServerStorage(_context);
-            var result = (toTest.GetUser("TestingName"));
+            var result = (await toTest.GetUser("TestingName"));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Id);
@@ -81,10 +78,10 @@ namespace Server.Tests.StorageTests
         }
 
         [Test]
-        public void TestGetEventsFromWorkflow()
+        public async Task TestGetEventsFromWorkflow()
         {
             var toTest = new ServerStorage(_context);
-            var result = (toTest.GetEventsFromWorkflow( new ServerWorkflowModel { Id = "1", Name = "TestingName" } )).First();
+            var result = (await toTest.GetEventsFromWorkflow(new ServerWorkflowModel { Id = "1", Name = "TestingName" })).First();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Id, "1");

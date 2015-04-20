@@ -12,7 +12,7 @@ namespace Server.Logic
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        RolesOnWorkflowsDto Login(string username);
+        Task<RolesOnWorkflowsDto> Login(string username);
 
         /// <summary>
         /// Add a new user.
@@ -25,7 +25,7 @@ namespace Server.Logic
         /// </summary>
         /// <param name="workflowId"></param>
         /// <returns></returns>
-        IEnumerable<EventAddressDto> GetEventsOnWorkflow(string workflowId);
+        Task<IEnumerable<EventAddressDto>> GetEventsOnWorkflow(string workflowId);
         /// <summary>
         /// Add event to a workflow
         /// </summary>
@@ -43,19 +43,19 @@ namespace Server.Logic
         /// </summary>
         /// <param name="workflowId"></param>
         /// <param name="eventId"></param>
-        void RemoveEventFromWorkflow(string workflowId, string eventId);
+        Task RemoveEventFromWorkflow(string workflowId, string eventId);
 
         /// <summary>
         /// Get all workflows
         /// </summary>
         /// <returns></returns>
-        IEnumerable<WorkflowDto> GetAllWorkflows();
+        Task<IEnumerable<WorkflowDto>> GetAllWorkflows();
         /// <summary>
         /// Get a workflows
         /// </summary>
         /// <param name="workflowId"></param>
         /// <returns></returns>
-        WorkflowDto GetWorkflow(string workflowId);
+        Task<WorkflowDto> GetWorkflow(string workflowId);
         /// <summary>
         /// Adds a new workflow
         /// If a worksflot with the same ID exists, it will throw an exception

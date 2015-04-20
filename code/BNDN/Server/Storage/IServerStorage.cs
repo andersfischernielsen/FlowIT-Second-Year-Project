@@ -8,16 +8,16 @@ namespace Server.Storage
 {
     public interface IServerStorage : IDisposable
     {
-        ServerUserModel GetUser(string username);
+        Task<ServerUserModel> GetUser(string username);
 
-        ICollection<ServerRoleModel> Login(ServerUserModel userModel);
+        Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel);
 
         /// <summary>
         /// Get all events from a workflow
         /// </summary>
         /// <param name="workflow"></param>
         /// <returns></returns>
-        IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow);
+        Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(ServerWorkflowModel workflow);
 
         Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
 
@@ -42,15 +42,15 @@ namespace Server.Storage
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="eventId"></param>
-        void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId);
+        Task RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId);
 
         /// <summary>
         /// Get all workflows
         /// </summary>
         /// <returns></returns>
-        ICollection<ServerWorkflowModel> GetAllWorkflows();
+        Task<ICollection<ServerWorkflowModel>> GetAllWorkflows();
 
-        ServerWorkflowModel GetWorkflow(string workflowId);
+        Task<ServerWorkflowModel> GetWorkflow(string workflowId);
 
         /// <summary>
         /// Adds a new workflow

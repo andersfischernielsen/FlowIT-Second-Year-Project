@@ -19,9 +19,9 @@ namespace Server.Logic
             _storage = storage;
         }
 
-        public IEnumerable<WorkflowDto> GetAllWorkflows()
+        public async Task<IEnumerable<WorkflowDto>> GetAllWorkflows()
         {
-            var workflows = _storage.GetAllWorkflows();
+            var workflows = await _storage.GetAllWorkflows();
 
             return workflows.Select(model => new WorkflowDto
             {
@@ -30,9 +30,9 @@ namespace Server.Logic
             });
         }
 
-        public WorkflowDto GetWorkflow(string workflowId)
+        public async Task<WorkflowDto> GetWorkflow(string workflowId)
         {
-            var workflow = _storage.GetWorkflow(workflowId);
+            var workflow = await _storage.GetWorkflow(workflowId);
 
             return new WorkflowDto
             {
@@ -41,16 +41,16 @@ namespace Server.Logic
             };
         }
 
-        public RolesOnWorkflowsDto Login(string username)
+        public async Task<RolesOnWorkflowsDto> Login(string username)
         {
-            var user = _storage.GetUser(username);
+            var user = await _storage.GetUser(username);
 
             if (user == null)
             {
                 throw new Exception("User was not found.");
             }
 
-            var rolesModels = _storage.Login(user);
+            var rolesModels = await _storage.Login(user);
             var rolesOnWorkflows = new Dictionary<string, IList<string>>();
 
             foreach (var roleModel in rolesModels)
@@ -93,15 +93,15 @@ namespace Server.Logic
             await _storage.AddUser(user);
         }
 
-        public IEnumerable<EventAddressDto> GetEventsOnWorkflow(string workflowId)
+        public async Task<IEnumerable<EventAddressDto>> GetEventsOnWorkflow(string workflowId)
         {
-            var workflow = _storage.GetWorkflow(workflowId);
+            var workflow = await _storage.GetWorkflow(workflowId);
 
             if (workflow == null) {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
 
-            return _storage.GetEventsFromWorkflow(workflow).Select(model => new EventAddressDto
+            return (await _storage.GetEventsFromWorkflow(workflow)).Select(model => new EventAddressDto
             {
                 Id = model.Id,
                 Uri = new Uri(model.Uri)
@@ -110,7 +110,7 @@ namespace Server.Logic
 
         public async Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
-            var workflow = _storage.GetWorkflow(workflowToAttachToId);
+            var workflow = await _storage.GetWorkflow(workflowToAttachToId);
 
             // Add roles to the current workflow if they do not exist (the storage method handles the if-part)
             await _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
@@ -130,7 +130,7 @@ namespace Server.Logic
 
         public async Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
-            var workflow = _storage.GetWorkflow(workflowToAttachToId);
+            var workflow = await _storage.GetWorkflow(workflowToAttachToId);
             await _storage.UpdateEventOnWorkflow(workflow, new ServerEventModel
             {
                 Id = eventToBeAddedDto.Id,
@@ -140,10 +140,10 @@ namespace Server.Logic
             });
         }
 
-        public void RemoveEventFromWorkflow(string workflowId, string eventId)
+        public async Task RemoveEventFromWorkflow(string workflowId, string eventId)
         {
-            var workflow = _storage.GetWorkflow(workflowId);
-            _storage.RemoveEventFromWorkflow(workflow, eventId);
+            var workflow = await _storage.GetWorkflow(workflowId);
+            await _storage.RemoveEventFromWorkflow(workflow, eventId);
         }
 
         public async Task AddNewWorkflow(WorkflowDto workflow)

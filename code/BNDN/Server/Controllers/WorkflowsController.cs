@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Security;
 using Common;
 using Server.Logic;
 using Server.Storage;
@@ -32,9 +30,9 @@ namespace Server.Controllers
         /// <returns>List of WorkflowDto</returns>
         // GET: /workflows
         [Route("workflows")]
-        public IEnumerable<WorkflowDto> Get()
+        public async Task<IEnumerable<WorkflowDto>> Get()
         {
-            return _logic.GetAllWorkflows();
+            return await _logic.GetAllWorkflows();
         }
 
 
@@ -46,11 +44,11 @@ namespace Server.Controllers
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("workflows/{workflowId}")]
         [HttpGet]
-        public IEnumerable<EventAddressDto> Get(string workflowId)
+        public async Task<IEnumerable<EventAddressDto>> Get(string workflowId)
         {
             try
             {
-                return _logic.GetEventsOnWorkflow(workflowId);
+                return await _logic.GetEventsOnWorkflow(workflowId);
             }
             catch (Exception ex)
             {
@@ -102,7 +100,7 @@ namespace Server.Controllers
 
                 // To caller, return a list of the other (excluding itself) Events on the workflow
                 return
-                    _logic.GetEventsOnWorkflow(workflowId)
+                    (await _logic.GetEventsOnWorkflow(workflowId))
                         .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
             }
             catch (Exception ex)
@@ -164,7 +162,7 @@ namespace Server.Controllers
         {
             try
             {
-                await _logic.RemoveWorkflow(_logic.GetWorkflow(workflowId));
+                await _logic.RemoveWorkflow(await _logic.GetWorkflow(workflowId));
             }
             catch (Exception ex)
             {
