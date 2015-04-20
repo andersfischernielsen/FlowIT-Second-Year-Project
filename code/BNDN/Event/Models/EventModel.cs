@@ -15,10 +15,10 @@ namespace Event.Models
             ConditionUris = new List<ConditionUri>();
         }
         [Key, Column(Order = 0)]
+        public string WorkflowId { get; set; }
+        [Key, Column(Order = 1)]
         public string Id { get; set; }
         public string OwnUri { get; set; }
-        [Key, Column(Order = 1)]
-        public string WorkflowId { get; set; }
         public string Name { get; set; }
         public bool Executed { get; set; }
         public bool Included { get; set; }

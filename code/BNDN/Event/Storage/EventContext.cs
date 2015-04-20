@@ -12,9 +12,9 @@ namespace Event.Storage
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<EventModel>()
-                .HasMany(ei => ei.Roles)
+                .HasMany(e => e.Roles)
                 .WithRequired(role => role.Event)
-                .HasForeignKey(role => new {role.EventId, role.WorkflowId});
+                .HasForeignKey(role => new { role.WorkflowId, role.EventId });
         }
 
         public DbSet<EventModel> Events { get; set; }
