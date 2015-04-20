@@ -4,7 +4,6 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Exceptions;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
@@ -17,7 +16,7 @@ namespace Event.Storage
     /// </summary>
     public class EventStorage : IEventStorage
     {
-        private IEventContext _context;
+        private readonly IEventContext _context;
 
         public EventStorage(IEventContext context)
         {
@@ -33,6 +32,7 @@ namespace Event.Storage
             }
 
             _context.Events.Add(eventModel);
+
             await _context.SaveChangesAsync();
         }
 
@@ -124,7 +124,7 @@ namespace Event.Storage
             }
 
             await EventIsInALegalState(workflowId, eventId);
-            
+
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Executed;
         }
 
@@ -193,12 +193,12 @@ namespace Event.Storage
                 LockOwner = @event.LockOwner
             };
         }
-        public async Task SetLockDto(string workflowId, string eventId, LockDto value)
+        public async Task SetLock(string workflowId, string eventId, string lockOwner)
         {
             await EventIsInALegalState(workflowId, eventId);
-            if (value == null)
+            if (lockOwner == null)
             {
-                throw new ArgumentNullException("value", "The provided LockDto was null. To unlock Event, " +
+                throw new ArgumentNullException("lockOwner", "The provided lockOwner was null. To unlock Event, " +
                                                         "see documentation");
             }
             var @event =
@@ -208,7 +208,7 @@ namespace Event.Storage
                 throw new ApplicationException("There already exists a lock on this event");
             }
 
-            @event.LockOwner = value.LockOwner;
+            @event.LockOwner = lockOwner;
 
             await _context.SaveChangesAsync();
         }
@@ -233,14 +233,19 @@ namespace Event.Storage
 
         public HashSet<RelationToOtherEventModel> GetConditions(string workflowId, string eventId)
         {
-            var conditions = _context.Conditions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId);
+            var dbset = _context.Conditions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId);
+            var hashSet = new HashSet<RelationToOtherEventModel>();
 
-            return new HashSet<RelationToOtherEventModel>(conditions.Select(element => new RelationToOtherEventModel
+            foreach (var element in dbset)
             {
-                Uri = new Uri(element.UriString),
-                EventId = element.ForeignEventId,
-                WorkflowId = element.ForeignWorkflowId
-            }));
+                hashSet.Add(new RelationToOtherEventModel
+                {
+                    Uri = new Uri(element.UriString),
+                    EventId = element.ForeignEventId,
+                    WorkflowId = element.WorkflowId
+                });
+            }
+            return hashSet;
         }
         public async Task SetConditions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
         {
@@ -255,9 +260,8 @@ namespace Event.Storage
                 {
                     UriString = element.Uri.AbsoluteUri,
                     ForeignEventId = element.EventId,
-                    ForeignWorkflowId = element.WorkflowId,
+                    WorkflowId = element.WorkflowId,
                     EventId = eventId,
-                    WorkflowId = workflowId
                 };
                 _context.Conditions.Add(uriToAdd);
             }
@@ -282,7 +286,7 @@ namespace Event.Storage
                 {
                     Uri = new Uri(element.UriString),
                     EventId = element.ForeignEventId,
-                    WorkflowId = element.ForeignWorkflowId
+                    WorkflowId = element.WorkflowId
                 });
             }
 
@@ -298,9 +302,8 @@ namespace Event.Storage
             foreach (var uriToAdd in value.Select(element => new ResponseUri
             {
                 UriString = element.Uri.AbsoluteUri,
-                ForeignWorkflowId = element.WorkflowId,
+                WorkflowId = element.WorkflowId,
                 ForeignEventId = element.EventId,
-                WorkflowId = workflowId,
                 EventId = eventId
             }))
             {
@@ -319,7 +322,7 @@ namespace Event.Storage
                 {
                     Uri = new Uri(element.UriString),
                     EventId = element.ForeignEventId,
-                    WorkflowId = element.ForeignWorkflowId
+                    WorkflowId = element.WorkflowId
                 });
             }
 
@@ -335,9 +338,8 @@ namespace Event.Storage
             foreach (var uriToAdd in value.Select(element => new ExclusionUri
             {
                 UriString = element.Uri.AbsoluteUri,
-                ForeignWorkflowId = element.WorkflowId,
+                WorkflowId = element.WorkflowId,
                 ForeignEventId = element.EventId,
-                WorkflowId = workflowId,
                 EventId = eventId
             }))
             {
@@ -365,7 +367,7 @@ namespace Event.Storage
                 {
                     Uri = new Uri(element.UriString),
                     EventId = element.ForeignEventId,
-                    WorkflowId = element.ForeignWorkflowId
+                    WorkflowId = element.WorkflowId
                 });
             }
 
@@ -381,9 +383,8 @@ namespace Event.Storage
             foreach (var uriToAdd in value.Select(element => new InclusionUri
             {
                 UriString = element.Uri.AbsoluteUri,
-                ForeignWorkflowId = element.WorkflowId,
+                WorkflowId = element.WorkflowId,
                 ForeignEventId = element.EventId,
-                WorkflowId = workflowId,
                 EventId = eventId
             }))
             {
@@ -403,7 +404,6 @@ namespace Event.Storage
         public void Dispose()
         {
             _context.Dispose();
-            _context = null;
         }
 
         #endregion

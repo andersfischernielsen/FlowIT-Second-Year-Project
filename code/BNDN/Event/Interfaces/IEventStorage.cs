@@ -38,7 +38,7 @@ namespace Event.Interfaces
 
         #region Locking
         Task<LockDto> GetLockDto(string workflowId, string eventId);
-        Task SetLockDto(string workflowId, string eventId, LockDto value);
+        Task SetLock(string workflowId, string eventId, string lockOwner);
 
         Task ClearLock(string workflowId, string eventId);
         #endregion
