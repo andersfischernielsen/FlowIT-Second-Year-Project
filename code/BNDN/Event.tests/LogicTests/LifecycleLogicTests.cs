@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Common.Exceptions;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Moq;
@@ -179,7 +178,7 @@ namespace Event.Tests.LogicTests
 
         #region GetEvent tests
         [Test]
-        public void GetEvent_WillReturnNullIfNoMatchingEventExists()
+        public async Task GetEvent_WillReturnNullIfNoMatchingEventExists()
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
@@ -190,7 +189,7 @@ namespace Event.Tests.LogicTests
             ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object,mockResetStorage.Object,mockLockLogic.Object);
 
             // Act
-            var getEvent = logic.GetEventDto("workflowId", "someEvent").Result;
+            var getEvent = await logic.GetEventDto("workflowId", "someEvent");
 
             // Assert
             Assert.IsNull(getEvent);
