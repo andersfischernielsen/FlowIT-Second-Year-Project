@@ -113,7 +113,7 @@ namespace Server.Controllers
                 // To caller, return a list of the other (excluding itself) Events on the workflow
                 return
                     (await _logic.GetEventsOnWorkflow(workflowId))
-                        .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
+                        .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id).ToList();
             }
             catch (Exception ex)
             {
