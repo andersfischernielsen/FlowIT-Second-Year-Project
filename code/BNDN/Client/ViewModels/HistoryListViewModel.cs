@@ -20,13 +20,6 @@ namespace Client.ViewModels
 
             var settings = Settings.LoadSettings();
             _serverAddress = new Uri(settings.ServerAddress);
-           
-
-            // test data
-            // todo: remove
-            WorkflowId = "workflowID";
-            HistoryViewModelList.Add(new HistoryViewModel(new HistoryDto(new HistoryModel{ EventId = "EventId1", Message = "Message1"})));
-            HistoryViewModelList.Add(new HistoryViewModel(new HistoryDto(new HistoryModel { EventId = "EventId2", Message = "Message2" })));
         }
 
         public HistoryListViewModel(string workflowId)

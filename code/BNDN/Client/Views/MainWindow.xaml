@@ -82,6 +82,13 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Button>
+            <Button Content="History" HorizontalAlignment="Right" Margin="0,0,10,10" Grid.Row="1" VerticalAlignment="Bottom" Width="145" Style="{DynamicResource ButtonDefaultStyle}" DataContext="{Binding SelectedWorkflowViewModel}">
+            	<i:Interaction.Triggers>
+            		<i:EventTrigger EventName="Click">
+            			<ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetHistory"/>
+            		</i:EventTrigger>
+            	</i:Interaction.Triggers>
+            </Button>
         </Grid>
     </Grid>
 </Window>
