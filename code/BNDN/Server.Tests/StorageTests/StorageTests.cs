@@ -19,7 +19,7 @@ namespace Server.Tests.StorageTests
             context.SetupAllProperties();
 
             //USERS:
-            var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName" } };
+            var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName", Password = "TestingPassword" } };
             context.Object.Users = new FakeDbSet<ServerUserModel>(users.AsQueryable()).Object;
 
             //WORKFLOWS:
@@ -42,11 +42,12 @@ namespace Server.Tests.StorageTests
         public async Task TestGetUser()
         {
             var toTest = new ServerStorage(_context);
-            var result = (await toTest.GetUser("TestingName"));
+            var result = (await toTest.GetUser("TestingName", "TestingPassword"));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Id);
             Assert.AreEqual("TestingName", result.Name);
+            Assert.AreEqual("TestingPassword", result.Password);
         }
 
         [Test]
