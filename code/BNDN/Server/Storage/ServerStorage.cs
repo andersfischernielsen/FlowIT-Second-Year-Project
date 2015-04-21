@@ -4,11 +4,12 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.History;
 using Server.Models;
 
 namespace Server.Storage
 {
-    public class ServerStorage : IServerStorage
+    public class ServerStorage : IServerStorage, IServerHistoryStorage
     {
         private readonly IServerContext _db;
 
@@ -180,6 +181,21 @@ namespace Server.Storage
         public void Dispose()
         {
             _db.Dispose();
+        }
+
+        public async Task<IQueryable<HistoryModel>> GetHistoryForWorkflow(string workflowId)
+        {
+            if (!await Exists(workflowId))
+            {
+                throw new InvalidOperationException("The EventId does not exist");
+            }
+
+            return _db.History.Where(h => h.WorkflowId == workflowId);
+        }
+
+        private async Task<bool> Exists(string workflowId)
+        {
+            return await _db.Workflows.AnyAsync(w => w.Id == workflowId);
         }
     }
 }

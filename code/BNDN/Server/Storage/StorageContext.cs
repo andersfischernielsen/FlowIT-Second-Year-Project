@@ -1,5 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using Common.History;
 using Server.Models;
 
 namespace Server.Storage
@@ -38,5 +39,6 @@ namespace Server.Storage
         public DbSet<ServerWorkflowModel> Workflows { get; set; }
         public DbSet<ServerUserModel> Users { get; set; }
         public DbSet<ServerRoleModel> Roles { get; set; }
+        public DbSet<HistoryModel> History { get; set; }
     }
 }
