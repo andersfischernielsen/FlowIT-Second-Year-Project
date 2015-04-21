@@ -68,8 +68,8 @@ namespace Event.Controllers
             }
 
             // Prepare for method-call: Gets own URI (i.e. http://address)
-            var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
-            var ownUri = new Uri(s);
+            var uri = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
+            var ownUri = new Uri(uri);
 
             // TODO: Exception handling
             await _logic.CreateEvent(eventDto, ownUri);
@@ -135,24 +135,24 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent(string workflowId, string eventId)
         {
-            EventDto toReturn;
-
             try
             {
-                 toReturn = await _logic.GetEventDto(workflowId, eventId);
+                 var toReturn = await _logic.GetEventDto(workflowId, eventId);
+                 await _historyLogic.SaveSuccesfullCall("GET", "GetEvent", eventId, workflowId);
+
+                 return toReturn;
             }
             catch (NotFoundException ex) {
-                _historyLogic.SaveException(ex, "GET", "GetEvent", eventId, workflowId);
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, workflowId + "." + eventId + " not found"));
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, workflowId + "." + eventId + " not found"));
+                _historyLogic.SaveException(toThrow, "GET", "GetEvent", eventId, workflowId);
+
+                throw toThrow;
             }
                 // Todo: Exception handling.
             catch (Exception ex) {
                 _historyLogic.SaveException(ex, "GET", "GetEvent", eventId, workflowId);
                 throw;
             }
-
-            await _historyLogic.SaveSuccesfullCall("GET", "GetEvent", eventId, workflowId);
-            return toReturn;
         }
     }
 }
