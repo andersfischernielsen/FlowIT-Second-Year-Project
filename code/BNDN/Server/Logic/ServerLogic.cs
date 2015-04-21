@@ -47,7 +47,7 @@ namespace Server.Logic
 
             if (user == null)
             {
-                throw new Exception("User was not found.");
+                throw new InvalidOperationException("User was not found.");
             }
 
             var rolesModels = _storage.Login(user);

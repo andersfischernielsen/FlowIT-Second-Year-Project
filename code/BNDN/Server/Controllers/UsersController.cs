@@ -34,7 +34,7 @@ namespace Server.Controllers
             {
                 return _logic.Login(username);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, ex));
             }
