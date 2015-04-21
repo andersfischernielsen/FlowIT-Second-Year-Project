@@ -26,13 +26,13 @@ namespace Server.Controllers
         /// </summary>
         /// <param name="username">Id of the requested workflow.</param>
         /// <returns></returns>
-        [Route("login/{username}")]
-        [HttpGet]
-        public async Task<RolesOnWorkflowsDto> Login(string username)
+        [Route("login")]
+        [HttpPost]
+        public async Task<RolesOnWorkflowsDto> Login([FromBody] LoginDto loginDto)
         {
             try
             {
-                return await _logic.Login(username);
+                return await _logic.Login(loginDto);
             }
             catch (Exception ex)
             {
