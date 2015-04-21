@@ -23,7 +23,7 @@ namespace Event.Logic
         /// </summary>
         public StateLogic()
         {
-            _storage = new EventStorage(new EventContext());
+            _storage = new EventStorage();
             _eventCommunicator = new EventCommunicator();
             _lockingLogic = new LockingLogic(_storage, _eventCommunicator);
             _authLogic = new AuthLogic(_storage);

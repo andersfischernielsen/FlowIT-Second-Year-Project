@@ -18,6 +18,10 @@ namespace Event.Storage
     {
         private readonly IEventContext _context;
 
+        public EventStorage()
+        {
+            _context = new EventContext();
+        }
         public EventStorage(IEventContext context)
         {
             _context = context;
