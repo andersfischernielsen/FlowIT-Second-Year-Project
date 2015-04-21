@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using Client.Connections;
+using Client.Views;
 using Common;
 
 namespace Client.ViewModels
@@ -78,6 +80,18 @@ namespace Client.ViewModels
             
             NotifyPropertyChanged("");
         }
+
+        /// <summary>
+        /// Creates a new window with the log of the 
+        /// </summary>
+        public async void GetHistory()
+        {
+            if (EventList != null && EventList.Count != 0)
+            {
+                
+            }
+        }
+
         /// <summary>
         /// This method resets all the events on the workflow by deleting them and adding them again.
         /// This Method ONLY EXISTS FOR TESTING!
