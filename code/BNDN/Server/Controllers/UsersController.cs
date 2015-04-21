@@ -22,7 +22,7 @@ namespace Server.Controllers
             _logic = logic;
         }
 
-        // GET: /Logins
+        // POST: /login loginDto
         /// <summary>
         /// Returns the users roles on all workflows.
         /// </summary>
