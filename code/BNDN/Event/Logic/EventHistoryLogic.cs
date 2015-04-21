@@ -65,5 +65,10 @@ namespace Event.Logic
 
             await _storage.SaveHistory(toSave);
         }
+
+        public void Dispose()
+        {
+            _storage.Dispose();
+        }
     }
 }
