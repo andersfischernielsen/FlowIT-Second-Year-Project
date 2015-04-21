@@ -10,6 +10,7 @@ using Moq;
 using NUnit.Framework;
 using Server.Controllers;
 using Server.Exceptions;
+using Server.Interfaces;
 using Server.Logic;
 using Server.Models;
 
