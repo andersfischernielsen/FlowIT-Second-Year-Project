@@ -85,7 +85,7 @@ namespace Client.ViewModels
             });
 
             // order them by timestamp
-            var orderedHistory = history.ToList().OrderByDescending(model => model.TimeSpamp).ToList();
+            var orderedHistory = history.ToList().OrderByDescending(model => model.TimeSpamp);
 
             // move the list into the observable collection.
             HistoryViewModelList = new ObservableCollection<HistoryViewModel>(orderedHistory);
