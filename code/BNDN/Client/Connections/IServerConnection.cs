@@ -7,7 +7,7 @@ namespace Client.Connections
 {
     public interface IServerConnection : IDisposable
     {
-        Task<RolesOnWorkflowsDto> Login(string username);
+        Task<RolesOnWorkflowsDto> Login(string username, string password);
         Task<IList<WorkflowDto>> GetWorkflows();
         Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow);
     }
