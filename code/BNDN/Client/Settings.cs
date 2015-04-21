@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Newtonsoft.Json;
 
 namespace Client
@@ -12,6 +7,8 @@ namespace Client
     {
         public string ServerAddress { get; set; }
         public string Username { get; set; }
+
+        public string Password { get; set; }
 
         public static Settings LoadSettings()
         {
@@ -22,11 +19,12 @@ namespace Client
                 settings =  JsonConvert.DeserializeObject<Settings>(settingsjson);
 
                 settings.Username = settings.Username ?? "Enter role";
+                settings.Password = settings.Password ?? "Password";
                 settings.ServerAddress = settings.ServerAddress ?? "http://flowit.azurewebsites.net/";
             }
             else
             {
-                settings = new Settings { Username = "Enter role", ServerAddress = "http://flowit.azurewebsites.net/" };
+                settings = new Settings { Username = "Enter role", Password = "Password", ServerAddress = "http://flowit.azurewebsites.net/" };
             }
             return settings;
         }
