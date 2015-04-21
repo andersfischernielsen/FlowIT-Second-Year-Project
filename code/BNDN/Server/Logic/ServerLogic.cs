@@ -74,7 +74,7 @@ namespace Server.Logic
 
         public async Task AddUser(UserDto dto)
         {
-            var user = new ServerUserModel {Name = dto.Name};
+            var user = new ServerUserModel {Name = dto.Name, Password = dto.Password};
             var roles = new List<ServerRoleModel>();
 
             foreach (var role in dto.Roles)
