@@ -24,10 +24,10 @@ namespace Event.Models
         public bool Included { get; set; }
         public bool Pending { get; set; }
         public virtual ICollection<EventRoleModel> Roles { get; set; }
-        public ICollection<ResponseUri> ResponseUris { get; set; }
-        public ICollection<InclusionUri> InclusionUris { get; set; }
-        public ICollection<ExclusionUri> ExclusionUris { get; set; }
-        public ICollection<ConditionUri> ConditionUris { get; set; }
+        public virtual ICollection<ResponseUri> ResponseUris { get; set; }
+        public virtual ICollection<InclusionUri> InclusionUris { get; set; }
+        public virtual ICollection<ExclusionUri> ExclusionUris { get; set; }
+        public virtual ICollection<ConditionUri> ConditionUris { get; set; }
         public string LockOwner { get; set; }
 
         public bool InitialPending { get; set; }
