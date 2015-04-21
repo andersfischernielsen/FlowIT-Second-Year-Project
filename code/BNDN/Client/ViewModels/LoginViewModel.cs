@@ -72,7 +72,7 @@ namespace Client.ViewModels
             IServerConnection connection = new ServerConnection(_serverAddress);
             try
             {
-                var roles = await connection.Login(Username);
+                var roles = await connection.Login(Username, Password);
                 Status = "Login successful";
                 RoleForWorkflow = roles.RolesOnWorkflows;
 
@@ -81,7 +81,8 @@ namespace Client.ViewModels
                 var settings = new Settings
                 {
                     ServerAddress = _serverAddress.AbsoluteUri,
-                    Username = _username
+                    Username = _username,
+                    Password = _password
                 };
                 File.WriteAllText("settings.json", JsonConvert.SerializeObject(settings, Formatting.Indented));
                 // Save settings end.
