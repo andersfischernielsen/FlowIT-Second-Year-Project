@@ -8,6 +8,8 @@ namespace Common
         [Required]
         public string Name { get; set; }
         [Required]
+        public string Password { get; set; }
+        [Required]
         public ICollection<WorkflowRole> Roles { get; set; }
     }
 }
