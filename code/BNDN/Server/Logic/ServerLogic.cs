@@ -102,11 +102,27 @@ namespace Server.Logic
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
 
-            return (await _storage.GetEventsFromWorkflow(workflow)).Select(model => new EventAddressDto
+            var dbList = await _storage.GetEventsFromWorkflow(workflow);
+            var final = new List<EventAddressDto>();
+            foreach (var dbItem in dbList)
             {
-                Id = model.Id,
-                Uri = new Uri(model.Uri)
-            });
+                var e = new EventAddressDto();
+                var roles = new List<string>();
+                var workflowModel = dbItem.ServerRolesModels;
+
+                //Extracts the roles to an event from the servereventmodel
+                foreach (var w in workflowModel)
+                {
+                    roles.AddRange(w.ServerUserModels.Select(u => u.Name));
+                }
+
+                e.Id = dbItem.Id;
+                e.Uri = new Uri(dbItem.Uri);
+                e.WorkflowId = workflowId;
+                e.Roles = roles;
+                final.Add(e);
+            }
+            return final;
         }
 
         public async Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
