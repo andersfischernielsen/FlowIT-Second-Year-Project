@@ -29,34 +29,34 @@ namespace Event.Communicators
             _httpClient = toolbox;
         }
 
-        public async Task<bool> IsExecuted(Uri targetEventUri, string targetId, string ownId)
+        public async Task<bool> IsExecuted(Uri targetEventUri, string targetWorkflowId, string targetId, string ownId)
         {
             _httpClient.SetBaseAddress(targetEventUri);
-            return await _httpClient.Read<bool>(String.Format("events/{0}/executed/{1}", targetId, ownId));
+            return await _httpClient.Read<bool>(String.Format("events/{0}/{1}/executed/{2}", targetWorkflowId, targetId, ownId));
         }
 
-        public async Task<bool> IsIncluded(Uri targetEventUri, string targetId, string ownId)
+        public async Task<bool> IsIncluded(Uri targetEventUri, string targetWorkflowId, string targetId, string ownId)
         {
             _httpClient.SetBaseAddress(targetEventUri);
-            return await _httpClient.Read<bool>(String.Format("events/{0}/included/{1}", targetId, ownId));
+            return await _httpClient.Read<bool>(String.Format("events/{0}/{1}/included/{2}", targetWorkflowId, targetId, ownId));
         }
 
-        public async Task SendPending(Uri targetEventUri, EventAddressDto lockDto, string targetId)
+        public async Task SendPending(Uri targetEventUri, EventAddressDto lockDto, string targetWorkflowId, string targetId)
         {
             _httpClient.SetBaseAddress(targetEventUri);
-            await _httpClient.Update(String.Format("events/{0}/pending/true", targetId), lockDto);
+            await _httpClient.Update(String.Format("events/{0}/{1}/pending/true", targetWorkflowId, targetId), lockDto);
         }
 
-        public async Task SendIncluded(Uri targetEventUri, EventAddressDto lockDto, string targetId)
+        public async Task SendIncluded(Uri targetEventUri, EventAddressDto lockDto, string targetWorkflowId, string targetId)
         {
             _httpClient.SetBaseAddress(targetEventUri);
-            await _httpClient.Update(String.Format("events/{0}/included/true", targetId), lockDto);
+            await _httpClient.Update(String.Format("events/{0}/{1}/included/true", targetWorkflowId, targetId), lockDto);
         }
 
-        public async Task SendExcluded(Uri targetEventUri, EventAddressDto lockDto, string targetId)
+        public async Task SendExcluded(Uri targetEventUri, EventAddressDto lockDto, string targetWorkflowId, string targetId)
         {
             _httpClient.SetBaseAddress(targetEventUri);
-            await _httpClient.Update(string.Format("events/{0}/included/false", targetId), lockDto);
+            await _httpClient.Update(string.Format("events/{0}/{1}/included/false", targetWorkflowId, targetId), lockDto);
         }
 
         /// <summary>
@@ -64,22 +64,23 @@ namespace Event.Communicators
         /// </summary>
         /// <param name="targetEventUri"></param>
         /// <param name="lockDto"></param>
+        /// <param name="targetWorkflowId"></param>
         /// <param name="targetId"></param>
         /// <returns></returns>
-        public async Task Lock(Uri targetEventUri, LockDto lockDto, string targetId)
+        public async Task Lock(Uri targetEventUri, LockDto lockDto, string targetWorkflowId, string targetId)
         {
             _httpClient.SetBaseAddress(targetEventUri);
-            await _httpClient.Create(String.Format("events/{0}/lock",targetId), lockDto);
+            await _httpClient.Create(String.Format("events/{0}/{1}/lock",targetWorkflowId, targetId), lockDto);
         }
 
         /// <summary>
         /// Attempts on unlocking the target Event
         /// </summary>
         /// <returns></returns>
-        public async Task Unlock(Uri targetEventUri, string targetId, string unlockId)
+        public async Task Unlock(Uri targetEventUri, string targetWorkflowId, string targetId, string unlockId)
         {
             _httpClient.SetBaseAddress(targetEventUri);
-            await _httpClient.Delete(String.Format("events/{0}/lock/{1}", targetId, unlockId));
+            await _httpClient.Delete(String.Format("events/{0}/{1}/lock/{2}", targetWorkflowId, targetId, unlockId));
         }
 
         public void Dispose()

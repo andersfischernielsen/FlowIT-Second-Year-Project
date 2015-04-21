@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Event.Exceptions
+namespace Common.Exceptions
 {
     public class LockedException : Exception
     {

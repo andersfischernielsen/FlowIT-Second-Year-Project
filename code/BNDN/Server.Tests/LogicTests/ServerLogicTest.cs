@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Common;
 using Moq;
 using NUnit.Framework;
@@ -27,50 +28,50 @@ namespace Server.Tests.LogicTests
 
             //Set up method for adding events to workflows. The callback adds the input parameters to the list.
             toSetup.Setup(m => m.AddEventToWorkflow(It.IsAny<ServerEventModel>()))
-                .Returns(async (ServerEventModel eventToAdd) =>
+                .Returns((ServerEventModel eventToAdd) => Task.Run(() =>
                 {
                     var eventModel = _list.Find(workflow => workflow.Id == eventToAdd.ServerWorkflowModelId).ServerEventModels;
                     eventModel.Add(eventToAdd);
-                });
+                }));
 
             //Set up method for adding a new workflow. The callback adds the input parameter to the list.
             toSetup.Setup(m => m.AddNewWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Returns(async (ServerWorkflowModel toAdd) => _list.Add(toAdd));
+                .Returns((ServerWorkflowModel toAdd) => Task.Run(() => _list.Add(toAdd)));
 
             //Set up method for getting all workflows. Simply returns the dummy list.
             toSetup.Setup(m => m.GetAllWorkflows())
-                .Returns(_list);
+                .ReturnsAsync(_list);
 
             //Set up method for getting all events in a workflow. Gets the list of events on the given workflow.
             toSetup.Setup(m => m.GetEventsFromWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Returns((ServerWorkflowModel toGet) => toGet.ServerEventModels);
+                .Returns((ServerWorkflowModel toGet) => Task.FromResult(toGet.ServerEventModels.AsEnumerable()));
 
             //Set up method for getting a specific workflow. Finds the given workflow in the list.
             toSetup.Setup(m => m.GetWorkflow(It.IsAny<string>()))
-                .Returns((string workflowId) => _list.Find(x => x.Id == (workflowId)));
+                .Returns((string workflowId) => Task.FromResult(_list.Find(x => x.Id == (workflowId))));
 
             //Set up method for removing an event from a workflow. 
             //Finds the given workflow in the list, finds the event in the workflow and removes it.
             toSetup.Setup(m => m.RemoveEventFromWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<string>()))
-                .Callback((ServerWorkflowModel toRemoveFrom, string eventId) =>
+                .Returns((ServerWorkflowModel toRemoveFrom, string eventId) => Task.Run(() =>
                 {
                     var events = _list.Find(x => x.Id == toRemoveFrom.Id).ServerEventModels;
                     var toRemove = events.First(x => x.Id == eventId);
                     events.Remove(toRemove);
-                });
+                }));
 
             //Set up method for removing workflow. Removes the input workflow from the list. 
             toSetup.Setup(m => m.RemoveWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Returns(async (ServerWorkflowModel dtoToRemove) =>
+                .Returns((ServerWorkflowModel dtoToRemove) => Task.Run(() =>
                 {
                     var toRemove = _list.Find(x => x.Id == dtoToRemove.Id);
                     _list.Remove(toRemove);
-                });
+                }));
 
             //Set up method for updating an event in a workflow.
             //Finds the workflow in the list, finds the event in the workflow and replaces it with the new event.
             toSetup.Setup(m => m.UpdateEventOnWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<ServerEventModel>()))
-                .Returns(async (ServerWorkflowModel toUpdateOn, ServerEventModel eventToUpdate) =>
+                .Returns((ServerWorkflowModel toUpdateOn, ServerEventModel eventToUpdate) => Task.Run(() =>
                 {
                     var events = _list.Find(x => x.Id == toUpdateOn.Id).ServerEventModels;
                     var toReplace = events.First(x => x.Id == eventToUpdate.Id);
@@ -78,17 +79,17 @@ namespace Server.Tests.LogicTests
                     var index = asList.IndexOf(toReplace);
                     asList[index] = eventToUpdate;
                     _list.Find(x => x.Id == toUpdateOn.Id).ServerEventModels = asList;
-                });
+                }));
 
             //Set up method for updating a workflow.
             //Finds the workflow to update in the list, then replaces it with the new workflow.
             toSetup.Setup(m => m.UpdateWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Returns(async (ServerWorkflowModel toUpdate) =>
+                .Returns((ServerWorkflowModel toUpdate) => Task.Run(() =>
                 {
                     var oldWorkflow = _list.Find(x => x.Id == toUpdate.Id);
                     var index = _list.IndexOf(oldWorkflow);
                     _list.Insert(index, toUpdate);
-                });
+                }));
 
             //Assigns the mock to the global variable. 
             //Mock.Setup() is not supported if the variable is already global.
@@ -162,9 +163,9 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public void TestGetAllWorkflows()
+        public async Task TestGetAllWorkflows()
         {
-            var expected = _toTest.GetAllWorkflows().ToList();
+            var expected = (await _toTest.GetAllWorkflows()).ToList();
 
             var w1 = new WorkflowDto {Id = "1", Name = "w1"};
             var w2 = new WorkflowDto {Id = "2", Name = "w2"};
@@ -179,9 +180,9 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public void TestGetEventsOnWorkflow()
+        public async Task TestGetEventsOnWorkflow()
         {
-            var result = _toTest.GetEventsOnWorkflow("1").ToList();
+            var result = (await _toTest.GetEventsOnWorkflow("1")).ToList();
             var expectedEvent = result.First(x => x.Id == "1");
 
             Assert.IsNotNull(expectedEvent);
@@ -191,9 +192,9 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public void TestGetWorkflow()
+        public async Task TestGetWorkflow()
         {
-            var result = _toTest.GetWorkflow("1");
+            var result = await _toTest.GetWorkflow("1");
             var actual = _list.First(x => x.Id == "1");
 
             Assert.AreEqual(actual.Id, result.Id);
@@ -201,9 +202,9 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public void TestRemoveEventFromWorkflow()
+        public async Task TestRemoveEventFromWorkflow()
         {
-            _toTest.RemoveEventFromWorkflow("1", "1");
+            await _toTest.RemoveEventFromWorkflow("1", "1");
 
             Assert.IsNotNull(_list.Find(x => x.Id == "1"));
             Assert.IsEmpty(_list.Find(x => x.Id == "1").ServerEventModels);
@@ -214,7 +215,7 @@ namespace Server.Tests.LogicTests
         {
             Assert.AreEqual(1, _list.Count(x => x.Id == "1"));
             
-            await _toTest.RemoveWorkflow(new WorkflowDto { Id = "1", Name = "w1" });
+            await _toTest.RemoveWorkflow("1");
 
             Assert.AreEqual(0, _list.Count(x => x.Id == "1"));
         }

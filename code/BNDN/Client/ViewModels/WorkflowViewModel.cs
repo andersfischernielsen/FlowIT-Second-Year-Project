@@ -59,7 +59,7 @@ namespace Client.ViewModels
             SelectedEventViewModel = null;
             EventList.Clear();
 
-            IServerConnection connection = new ServerConnection(new Uri(@"http://flowit.azurewebsites.net/"));
+            IServerConnection connection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
 
             var test = (await connection.GetEventsFromWorkflow(_workflowDto))
                 .AsParallel()
@@ -88,7 +88,7 @@ namespace Client.ViewModels
             if (_resetEventRuns) return;
             _resetEventRuns = true;
             
-            IServerConnection serverConnection = new ServerConnection(new Uri(@"http://flowit.azurewebsites.net/"));
+            IServerConnection serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
 
             var adminEventList = (await serverConnection.GetEventsFromWorkflow(_workflowDto))
                 .AsParallel()

@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 
-namespace Event.Tests.StorageTests
+namespace Server.Tests.StorageTests
 {
     internal class FakeDbSet<TEntity> where TEntity : class
     {

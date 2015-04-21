@@ -4,7 +4,7 @@ using Server.Models;
 
 namespace Server.Storage
 {
-    public class StorageContext : DbContext
+    public class StorageContext : DbContext, IServerContext
     {
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

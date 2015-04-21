@@ -7,16 +7,18 @@ namespace Event.Models.UriClasses
     {
         // This Id should be used for internal Entity Framework representation only
         // TODO: Consider making property private
-        [Key]
-        public int Id { get; set; }
 
         [Required]
         public string UriString { get; set; }
-        [Required]
+
+        [Key, Column(Order = 0)]
+        public string WorkflowId { get; set; }
+        [Key, Column(Order = 1)]
         public string EventId { get; set; }
 
+        [Key, Column(Order = 2)]
+        public string ForeignEventId { get; set; }
 
-        public string EventIdentificationModelId { get; set; }
-        public virtual EventIdentificationModel EventIdentificationModel { get; set; }
+        public virtual EventModel Event { get; set; }
     }
 }

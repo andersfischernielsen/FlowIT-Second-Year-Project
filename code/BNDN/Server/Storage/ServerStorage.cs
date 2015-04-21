@@ -10,32 +10,32 @@ namespace Server.Storage
 {
     public class ServerStorage : IServerStorage
     {
-        private readonly StorageContext _db;
+        private readonly IServerContext _db;
 
-        public ServerStorage(StorageContext context = null)
+        public ServerStorage(IServerContext context = null)
         {
             _db = context ?? new StorageContext();
         }
 
-        public ServerUserModel GetUser(string username)
+        public async Task<ServerUserModel> GetUser(string username)
         {
-            return _db.Users.SingleOrDefault(user => string.Equals(user.Name, username));
+            return await _db.Users.SingleOrDefaultAsync(user => string.Equals(user.Name, username));
         }
 
-        public ICollection<ServerRoleModel> Login(ServerUserModel userModel)
+        public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
         {
             if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;
 
-            var user = _db.Users.Find(userModel.Id);
+            var user = await _db.Users.FindAsync(userModel.Id);
             return user != null ? user.ServerRolesModels : null;
         }
 
-        public IEnumerable<ServerEventModel> GetEventsFromWorkflow(ServerWorkflowModel workflow)
+        public async Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
             var events = from e in _db.Events
                          where workflow.Id == e.ServerWorkflowModelId
                          select e;
-            return events.ToList();
+            return await events.ToListAsync();
         }
 
         public async Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
@@ -105,13 +105,13 @@ namespace Server.Storage
             await _db.SaveChangesAsync();
         }
 
-        public void RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
+        public async Task RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
             var events = from e in _db.Events
                          where e.Id == eventId
                          select e;
 
-            var eventToRemove = events.SingleOrDefault();
+            var eventToRemove = await events.SingleOrDefaultAsync();
             if (eventToRemove == null)
             {
                 // Event was already deleted
@@ -119,23 +119,28 @@ namespace Server.Storage
             }
 
             _db.Events.Remove(eventToRemove);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public ICollection<ServerWorkflowModel> GetAllWorkflows()
+        public async Task<ICollection<ServerWorkflowModel>> GetAllWorkflows()
         {
             var workflows = from w in _db.Workflows select w;
 
-            return workflows.ToList();
+            return await workflows.ToListAsync();
         }
 
-        public ServerWorkflowModel GetWorkflow(string workflowId)
+        public async Task<bool> WorkflowExists(string workflowId)
+        {
+            return await _db.Workflows.AnyAsync(workflow => workflow.Id == workflowId);
+        }
+
+        public async Task<ServerWorkflowModel> GetWorkflow(string workflowId)
         {
             var workflows = from w in _db.Workflows
                             where w.Id == workflowId
                             select w;
 
-            return workflows.Single();
+            return await workflows.SingleAsync();
         }
 
         public async Task AddNewWorkflow(ServerWorkflowModel workflow)
@@ -168,7 +173,7 @@ namespace Server.Storage
                 throw new IOException("The workflow contains events");
             }
 
-            _db.Workflows.Remove(workflows.Single());
+            _db.Workflows.Remove(await workflows.SingleAsync());
             await _db.SaveChangesAsync();
         }
 

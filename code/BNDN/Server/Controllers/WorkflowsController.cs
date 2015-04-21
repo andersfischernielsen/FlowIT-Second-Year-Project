@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Security;
 using Common;
+using Server.Exceptions;
 using Server.Logic;
 using Server.Storage;
 
@@ -32,9 +31,9 @@ namespace Server.Controllers
         /// <returns>List of WorkflowDto</returns>
         // GET: /workflows
         [Route("workflows")]
-        public IEnumerable<WorkflowDto> Get()
+        public async Task<IEnumerable<WorkflowDto>> Get()
         {
-            return _logic.GetAllWorkflows();
+            return await _logic.GetAllWorkflows();
         }
 
 
@@ -46,11 +45,11 @@ namespace Server.Controllers
         /// <returns>IEnumerable of EventAddressDto</returns>
         [Route("workflows/{workflowId}")]
         [HttpGet]
-        public IEnumerable<EventAddressDto> Get(string workflowId)
+        public async Task<IEnumerable<EventAddressDto>> Get(string workflowId)
         {
             try
             {
-                return _logic.GetEventsOnWorkflow(workflowId);
+                return await _logic.GetEventsOnWorkflow(workflowId);
             }
             catch (Exception ex)
             {
@@ -74,10 +73,21 @@ namespace Server.Controllers
                     "Provided input could not be mapped onto an instance of WorkflowDto."));
             }
 
+            if (workflowDto == null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Data was not provided"));
+            }
+
             try
             {
                 // Add this Event to the specified workflow
                 await _logic.AddNewWorkflow(workflowDto);
+            }
+            catch (WorkflowAlreadyExistsException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                    "A workflow with that id exists!"));
             }
             catch (Exception ex)
             {
@@ -102,8 +112,8 @@ namespace Server.Controllers
 
                 // To caller, return a list of the other (excluding itself) Events on the workflow
                 return
-                    _logic.GetEventsOnWorkflow(workflowId)
-                        .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id);
+                    (await _logic.GetEventsOnWorkflow(workflowId))
+                        .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id).ToList();
             }
             catch (Exception ex)
             {
@@ -164,7 +174,7 @@ namespace Server.Controllers
         {
             try
             {
-                await _logic.RemoveWorkflow(_logic.GetWorkflow(workflowId));
+                await _logic.RemoveWorkflow(workflowId);
             }
             catch (Exception ex)
             {

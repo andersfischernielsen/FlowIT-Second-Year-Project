@@ -6,6 +6,6 @@ namespace Event.Interfaces
 {
     public interface IAuthLogic : IDisposable
     {
-        Task<bool> IsAuthorized(string eventId, IEnumerable<string> roles);
+        Task<bool> IsAuthorized(string workflowId, string eventId, IEnumerable<string> roles);
     }
 }

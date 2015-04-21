@@ -28,11 +28,11 @@ namespace Server.Controllers
         /// <returns></returns>
         [Route("login/{username}")]
         [HttpGet]
-        public RolesOnWorkflowsDto Login(string username)
+        public async Task<RolesOnWorkflowsDto> Login(string username)
         {
             try
             {
-                return _logic.Login(username);
+                return await _logic.Login(username);
             }
             catch (InvalidOperationException ex)
             {

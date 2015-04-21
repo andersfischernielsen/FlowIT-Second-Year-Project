@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Common.Exceptions;
 
 namespace Common
 {
@@ -90,13 +92,13 @@ namespace Common
         public virtual async Task Create<T>(string uri, T toCreate)
         {
             var response = await HttpClient.PostAsJsonAsync(uri, toCreate);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessStatusCode(response);
         }
 
         public virtual async Task<TResult> Create<TArgument, TResult>(string uri, TArgument toPost)
         {
             var response = await HttpClient.PostAsJsonAsync(uri, toPost);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessStatusCode(response);
 
             return await response.Content.ReadAsAsync<TResult>();
         }
@@ -111,7 +113,7 @@ namespace Common
         public virtual async Task<IList<T>> ReadList<T>(string uri)
         {
             var response = await HttpClient.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessStatusCode(response);
 
             var result = await response.Content.ReadAsAsync<T[]>();
             return result.ToList();
@@ -128,7 +130,7 @@ namespace Common
         public virtual async Task<T> Read<T>(string uri)
         {
             var response = await HttpClient.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessStatusCode(response);
 
             var result = await response.Content.ReadAsAsync<T>();
             return result;
@@ -144,7 +146,7 @@ namespace Common
         public virtual async Task Update<T>(string uri, T toUpdate)
         {
             var response = await HttpClient.PutAsJsonAsync(uri, toUpdate);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessStatusCode(response);
         }
 
         /// <summary>
@@ -154,12 +156,30 @@ namespace Common
         public virtual async Task Delete(string uri)
         {
             var response = await HttpClient.DeleteAsync(uri);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessStatusCode(response);
         }
 
         public void Dispose()
         {
             HttpClient.Dispose();
+        }
+
+        private static async Task EnsureSuccessStatusCode(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode) return;
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    throw new NotFoundException();
+                case HttpStatusCode.Unauthorized:
+                    throw new NotAuthorizedException();
+                case HttpStatusCode.Conflict:
+                    throw new LockedException();
+                case HttpStatusCode.PreconditionFailed:
+                    throw new NotExecutableException();
+            }
+            // Will throw a generic HttpRequestException:
+            throw new Exception(response.StatusCode + ": " + await response.Content.ReadAsStringAsync());
         }
     }
 }

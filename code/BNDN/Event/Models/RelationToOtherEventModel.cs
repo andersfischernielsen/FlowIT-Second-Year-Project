@@ -10,7 +10,8 @@ namespace Event.Models
     /// </summary>
     public class RelationToOtherEventModel
     {
-        public string EventID { get; set; }
+        public string WorkflowId { get; set; }
+        public string EventId { get; set; }
         public Uri Uri { get; set; }
     }
 }

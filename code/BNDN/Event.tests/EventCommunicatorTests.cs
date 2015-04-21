@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Net.Http;
+using Common.Exceptions;
 using Event.Communicators;
 using NUnit.Framework;
 
@@ -15,14 +15,14 @@ namespace Event.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpRequestException))]
+        [ExpectedException(typeof(NotFoundException))]
         public void IsExecuted_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator();
             
             try
             {
-                var result = eventCommunicator.IsExecuted(new Uri("http://test.dk/"), "TargetID", "SenderId").Result;
+                var result = eventCommunicator.IsExecuted(new Uri("http://test.dk/"), "targetWorkflowId", "TargetID", "SenderId").Result;
             }
             catch (Exception ex)
             {
@@ -31,13 +31,13 @@ namespace Event.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(HttpRequestException))]
+        [ExpectedException(typeof(NotFoundException))]
         public void IsIncluded_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator();
             try
             {
-                var result = eventCommunicator.IsIncluded(new Uri("http://test.dk/"), "TargetID", "SenderId").Result;
+                var result = eventCommunicator.IsIncluded(new Uri("http://test.dk/"), "targetWorkflowId", "TargetID", "SenderId").Result;
             }
             catch (Exception ex)
             {

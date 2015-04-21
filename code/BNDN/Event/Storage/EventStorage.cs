@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
@@ -15,48 +16,43 @@ namespace Event.Storage
     /// </summary>
     public class EventStorage : IEventStorage
     {
-        private IEventContext _context;
+        private readonly IEventContext _context;
 
+        public EventStorage()
+        {
+            _context = new EventContext();
+        }
         public EventStorage(IEventContext context)
         {
             _context = context;
         }
 
-        public async Task InitializeNewEvent(InitialEventState initialEventState)
+        public async Task InitializeNewEvent(EventModel eventModel)
         {
             // Todo: Merge EventIdentification and EventState and use Exists(eventId) instead.
-            if (await _context.EventIdentification.AnyAsync(model => model.Id == initialEventState.EventId))
+            if (await Exists(eventModel.WorkflowId, eventModel.Id))
             {
                 throw new InvalidOperationException("The EventId is already existing");
             }
-            if (await _context.EventState.AnyAsync(model => model.Id == initialEventState.EventId))
-            {
-                throw new InvalidOperationException("The EventId is already existing");
-            }
-            _context.EventIdentification.Add(new EventIdentificationModel { Id = initialEventState.EventId, Roles = new List<EventRoleModel>() });
-            _context.EventState.Add(new EventStateModel { Id = initialEventState.EventId });
-            _context.InitialEventState.Add(initialEventState);
+
+            _context.Events.Add(eventModel);
+
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteEvent(string eventId)
+        public async Task DeleteEvent(string workflowId, string eventId)
         {
-            if (!await _context.EventIdentification.AnyAsync(model => model.Id == eventId))
-            {
-                throw new InvalidOperationException("The EventId does not exist");
-            }
-            if (!await _context.EventState.AnyAsync(model => model.Id == eventId))
+            if (!await Exists(workflowId, eventId))
             {
                 throw new InvalidOperationException("The EventId does not exist");
             }
 
-            _context.Conditions.RemoveRange(_context.Conditions.Where(ei => ei.EventIdentificationModelId == eventId));
-            _context.Exclusions.RemoveRange(_context.Exclusions.Where(ei => ei.EventIdentificationModelId == eventId));
-            _context.Inclusions.RemoveRange(_context.Inclusions.Where(ei => ei.EventIdentificationModelId == eventId));
-            _context.Responses.RemoveRange(_context.Responses.Where(ei => ei.EventIdentificationModelId == eventId));
+            _context.Conditions.RemoveRange(_context.Conditions.Where(c => c.WorkflowId == workflowId && c.EventId == eventId));
+            _context.Exclusions.RemoveRange(_context.Exclusions.Where(e => e.WorkflowId == workflowId && e.EventId == eventId));
+            _context.Inclusions.RemoveRange(_context.Inclusions.Where(i => i.WorkflowId == workflowId && i.EventId == eventId));
+            _context.Responses.RemoveRange(_context.Responses.Where(r => r.WorkflowId == workflowId && r.EventId == eventId));
 
-            _context.EventState.Remove(_context.EventState.Single(ei => ei.Id == eventId));
-            _context.EventIdentification.Remove(_context.EventIdentification.Single(ei => ei.Id == eventId));
+            _context.Events.Remove(_context.Events.Single(e => e.WorkflowId == workflowId && e.Id == eventId));
 
             await _context.SaveChangesAsync();
         }
@@ -64,109 +60,121 @@ namespace Event.Storage
 
         #region Properties
 
-        public async Task<bool> Exists(string eventId)
+        public async Task<bool> Exists(string workflowId, string eventId)
         {
-            return await _context.EventIdentification.AnyAsync(ei => ei.Id == eventId);
+            return await _context.Events.AnyAsync(e => e.WorkflowId == workflowId && e.Id == eventId);
         }
 
-        public async Task<Uri> GetUri(string eventId)
+        public async Task<Uri> GetUri(string workflowId, string eventId)
         {
-            await EventIdentificationIsInALegalState(eventId);
-            return new Uri((await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).OwnUri);
+            await EventIsInALegalState(workflowId, eventId);
+            return new Uri((await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).OwnUri);
         }
 
-        public async Task SetUri(string eventId, Uri value)
+        public async Task SetUri(string workflowId, string eventId, Uri value)
         {
-            await EventIdentificationIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
 
             // Add replacing value
-            _context.EventIdentification.Single(model => model.Id == eventId).OwnUri = value.AbsoluteUri;
+            _context.Events.Single(model => model.WorkflowId == workflowId && model.Id == eventId).OwnUri = value.AbsoluteUri;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<string> GetWorkflowId(string eventId)
+        public async Task<string> GetName(string workflowId, string eventId)
         {
-            await EventIdentificationIsInALegalState(eventId);
-            return (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).WorkflowId;
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
+            await EventIsInALegalState(workflowId, eventId);
+
+            return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Name;
         }
 
-        public async Task SetWorkflowId(string eventId, string value)
+        public async Task SetName(string workflowId, string eventId, string value)
         {
-            await EventIdentificationIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
 
-            (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).WorkflowId = value;
+            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Name = value;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<string> GetName(string eventId)
+        public async Task<IEnumerable<string>> GetRoles(string workflowId, string eventId)
         {
-            await EventIdentificationIsInALegalState(eventId);
-            return (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Name;
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
+            await EventIsInALegalState(workflowId, eventId);
+
+            return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles.Select(role => role.Role);
         }
 
-        public async Task SetName(string eventId, string value)
+        public async Task SetRoles(string workflowId, string eventId, IEnumerable<string> value)
         {
-            await EventIdentificationIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
 
-            (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Name = value;
+            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles = value.Select(role => new EventRoleModel { Role = role, WorkflowId = workflowId, EventId = eventId }).ToList();
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<string>> GetRoles(string eventId)
+        public async Task<bool> GetExecuted(string workflowId, string eventId)
         {
-            await EventIdentificationIsInALegalState(eventId);
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
 
-            return (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Roles.Select(role => role.Role);
+            await EventIsInALegalState(workflowId, eventId);
+
+            return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Executed;
         }
 
-        public async Task SetRoles(string eventId, IEnumerable<string> value)
+        public async Task SetExecuted(string workflowId, string eventId, bool value)
         {
-            await EventIdentificationIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
 
-            (await _context.EventIdentification.SingleAsync(model => model.Id == eventId)).Roles = value.Select(role => new EventRoleModel { Role = role, EventId = eventId }).ToList();
+            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Executed = value;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> GetExecuted(string eventId)
+        public async Task<bool> GetIncluded(string workflowId, string eventId)
         {
-            await EventStateIsInALegalState(eventId);
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
 
-            return (await _context.EventState.SingleAsync(model => model.Id == eventId)).Executed;
+            await EventIsInALegalState(workflowId, eventId);
+
+            return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Included;
         }
-
-        public async Task SetExecuted(string eventId, bool value)
+        public async Task SetIncluded(string workflowId, string eventId, bool value)
         {
-            await EventStateIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
 
-            (await _context.EventState.SingleAsync(model => model.Id == eventId)).Executed = value;
+            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Included = value;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> GetIncluded(string eventId)
+        public async Task<bool> GetPending(string workflowId, string eventId)
         {
-            await EventStateIsInALegalState(eventId);
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
 
-            return (await _context.EventState.SingleAsync(model => model.Id == eventId)).Included;
+            await EventIsInALegalState(workflowId, eventId);
+
+            return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Pending;
         }
-        public async Task SetIncluded(string eventId, bool value)
+        public async Task SetPending(string workflowId, string eventId, bool value)
         {
-            await EventStateIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
 
-            (await _context.EventState.SingleAsync(model => model.Id == eventId)).Included = value;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<bool> GetPending(string eventId)
-        {
-            await EventStateIsInALegalState(eventId);
-
-            return (await _context.EventState.SingleAsync(model => model.Id == eventId)).Pending;
-        }
-        public async Task SetPending(string eventId, bool value)
-        {
-            await EventStateIsInALegalState(eventId);
-
-            (await _context.EventState.SingleAsync(model => model.Id == eventId)).Pending = value;
+            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Pending = value;
             await _context.SaveChangesAsync();
         }
 
@@ -174,36 +182,38 @@ namespace Event.Storage
         /// The setter for this property should not be used to unlock the Event. If setter is provided with a null-value
         /// an ArgumentNullException will be raised. Instead, use ClearLock()-method to remove any Lock on this Event.  
         /// </summary>
-        public async Task<LockDto> GetLockDto(string eventId)
+        public async Task<LockDto> GetLockDto(string workflowId, string eventId)
         {
-            await EventLockIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
             // SingleOrDeafult will return either null or the actual single element in set. 
-            return await _context.LockDto.SingleOrDefaultAsync(model => model.Id == eventId);
+            var @event =
+                await
+                    _context.Events.SingleOrDefaultAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
+            if (@event.LockOwner == null) return null;
+            return new LockDto
+            {
+                WorkflowId = @event.WorkflowId,
+                Id = @event.Id,
+                LockOwner = @event.LockOwner
+            };
         }
-        public async Task SetLockDto(string eventId, LockDto value)
+        public async Task SetLock(string workflowId, string eventId, string lockOwner)
         {
-            await EventLockIsInALegalState(eventId);
-            if (await _context.LockDto.AnyAsync(model => model.Id == eventId))
+            await EventIsInALegalState(workflowId, eventId);
+            if (lockOwner == null)
+            {
+                throw new ArgumentNullException("lockOwner", "The provided lockOwner was null. To unlock Event, " +
+                                                        "see documentation");
+            }
+            var @event =
+                await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
+            if (@event.LockOwner != null)
             {
                 throw new ApplicationException("There already exists a lock on this event");
             }
-            if (value == null)
-            {
-                throw new ArgumentNullException("value", "The provided LockDto was null. To unlock Event, " +
-                                                        "see documentation");
-            }
 
-            // Remove current LockDto (should be either only a single element or no element at all
-            // Should not be neccesary.
-            foreach (var element in _context.LockDto.Where(model => model.Id == eventId))
-            {
-                _context.LockDto.Remove(element);
-            }
-            //Todo: Maybe this should not be done here - but this is the safest way.
-            var theLock = value;
-            theLock.Id = eventId;
+            @event.LockOwner = lockOwner;
 
-            _context.LockDto.Add(theLock);
             await _context.SaveChangesAsync();
         }
 
@@ -213,42 +223,49 @@ namespace Event.Storage
         /// (Setter for LockDto will raise an ArgumentNullException if provided a null-value)
         /// The method simply removes all (should be either 1 or 0) LockDto element(s) held in database. 
         /// </summary>
-        public async Task ClearLock(string eventId)
+        public async Task ClearLock(string workflowId, string eventId)
         {
-            await EventLockIsInALegalState(eventId);
+            await EventIsInALegalState(workflowId, eventId);
 
-            // Clear the single LockDto-element 
-            foreach (var lockDto in _context.LockDto.Where(model => model.Id == eventId))
-            {
-                _context.LockDto.Remove(lockDto);
-            }
+            var @event =
+                await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
+
+            @event.LockOwner = null;
+
             await _context.SaveChangesAsync();
         }
 
-        public HashSet<RelationToOtherEventModel> GetConditions(string eventId)
+        public HashSet<RelationToOtherEventModel> GetConditions(string workflowId, string eventId)
         {
-            var dbset = _context.Conditions.Where(model => model.EventIdentificationModelId == eventId);
+            var dbset = _context.Conditions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId);
+            var hashSet = new HashSet<RelationToOtherEventModel>();
 
-            return new HashSet<RelationToOtherEventModel>(dbset.Select(element => new RelationToOtherEventModel
+            foreach (var element in dbset)
             {
-                Uri = new Uri(element.UriString),
-                EventID = element.EventId
-            }));
+                hashSet.Add(new RelationToOtherEventModel
+                {
+                    Uri = new Uri(element.UriString),
+                    EventId = element.ForeignEventId,
+                    WorkflowId = element.WorkflowId
+                });
+            }
+            return hashSet;
         }
-        public async Task SetConditions(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetConditions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
         {
-            foreach (var uri in _context.Conditions.Where(model => model.EventIdentificationModelId == eventId))
+            foreach (var uri in _context.Conditions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
             {
                 _context.Conditions.Remove(uri);
             }
 
             foreach (var element in value)
             {
-                var uriToAdd = new ConditionUri()
+                var uriToAdd = new ConditionUri
                 {
                     UriString = element.Uri.AbsoluteUri,
-                    EventId = element.EventID,
-                    EventIdentificationModelId = eventId
+                    ForeignEventId = element.EventId,
+                    WorkflowId = element.WorkflowId,
+                    EventId = eventId,
                 };
                 _context.Conditions.Add(uriToAdd);
             }
@@ -259,11 +276,12 @@ namespace Event.Storage
         /// GetResponses returns a HashSet containing the response relations for the provided event.
         /// Notice, that this method will not return null, but may return an empty set.
         /// </summary>
+        /// <param name="workflowId"></param>
         /// <param name="eventId">Id of the Event, for which you wish to retrieve response-relations</param>
         /// <returns></returns>
-        public HashSet<RelationToOtherEventModel> GetResponses(string eventId)
+        public HashSet<RelationToOtherEventModel> GetResponses(string workflowId, string eventId)
         {
-            var dbset = _context.Responses.Where(model => model.EventIdentificationModelId == eventId);
+            var dbset = _context.Responses.Where(model => model.WorkflowId == workflowId && model.EventId == eventId);
             var hashSet = new HashSet<RelationToOtherEventModel>();
 
             foreach (var element in dbset)
@@ -271,15 +289,16 @@ namespace Event.Storage
                 hashSet.Add(new RelationToOtherEventModel
                 {
                     Uri = new Uri(element.UriString),
-                    EventID = element.EventId
+                    EventId = element.ForeignEventId,
+                    WorkflowId = element.WorkflowId
                 });
             }
 
             return hashSet;
         }
-        public async Task SetResponses(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetResponses(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
         {
-            foreach (var uri in _context.Responses.Where(model => model.EventIdentificationModelId == eventId))
+            foreach (var uri in _context.Responses.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
             {
                 _context.Responses.Remove(uri);
             }
@@ -287,17 +306,18 @@ namespace Event.Storage
             foreach (var uriToAdd in value.Select(element => new ResponseUri
             {
                 UriString = element.Uri.AbsoluteUri,
-                EventId = element.EventID,
-                EventIdentificationModelId = eventId
+                WorkflowId = element.WorkflowId,
+                ForeignEventId = element.EventId,
+                EventId = eventId
             }))
             {
                 _context.Responses.Add(uriToAdd);
             }
             await _context.SaveChangesAsync();
         }
-        public HashSet<RelationToOtherEventModel> GetExclusions(string eventId)
+        public HashSet<RelationToOtherEventModel> GetExclusions(string workflowId, string eventId)
         {
-            var dbset = _context.Exclusions.Where(model => model.EventIdentificationModelId == eventId);
+            var dbset = _context.Exclusions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId);
             var hashSet = new HashSet<RelationToOtherEventModel>();
 
             foreach (var element in dbset)
@@ -305,15 +325,16 @@ namespace Event.Storage
                 hashSet.Add(new RelationToOtherEventModel
                 {
                     Uri = new Uri(element.UriString),
-                    EventID = element.EventId
+                    EventId = element.ForeignEventId,
+                    WorkflowId = element.WorkflowId
                 });
             }
 
             return hashSet;
         }
-        public async Task SetExclusions(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetExclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
         {
-            foreach (var uri in _context.Exclusions.Where(model => model.EventIdentificationModelId == eventId))
+            foreach (var uri in _context.Exclusions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
             {
                 _context.Exclusions.Remove(uri);
             }
@@ -321,8 +342,9 @@ namespace Event.Storage
             foreach (var uriToAdd in value.Select(element => new ExclusionUri
             {
                 UriString = element.Uri.AbsoluteUri,
-                EventId = element.EventID,
-                EventIdentificationModelId = eventId
+                WorkflowId = element.WorkflowId,
+                ForeignEventId = element.EventId,
+                EventId = eventId
             }))
             {
                 _context.Exclusions.Add(uriToAdd);
@@ -335,11 +357,12 @@ namespace Event.Storage
         /// GetResponses returns a HashSet containing the inclusion relations for the provided event.
         /// Notice, that this method will not return null, but may return an empty set.
         /// </summary>
+        /// <param name="workflowId"></param>
         /// <param name="eventId">Id of the Event, for which you wish to retrieve inclusion-relations</param>
         /// <returns></returns>
-        public HashSet<RelationToOtherEventModel> GetInclusions(string eventId)
+        public HashSet<RelationToOtherEventModel> GetInclusions(string workflowId, string eventId)
         {
-            var dbset = _context.Inclusions.Where(model => model.EventIdentificationModelId == eventId);
+            var dbset = _context.Inclusions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId);
             var hashSet = new HashSet<RelationToOtherEventModel>();
 
             foreach (var element in dbset)
@@ -347,15 +370,16 @@ namespace Event.Storage
                 hashSet.Add(new RelationToOtherEventModel
                 {
                     Uri = new Uri(element.UriString),
-                    EventID = element.EventId
+                    EventId = element.ForeignEventId,
+                    WorkflowId = element.WorkflowId
                 });
             }
 
             return hashSet;
         }
-        public async Task SetInclusions(string eventId, HashSet<RelationToOtherEventModel> value)
+        public async Task SetInclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
         {
-            foreach (var uri in _context.Inclusions.Where(model => model.EventIdentificationModelId == eventId))
+            foreach (var uri in _context.Inclusions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
             {
                 _context.Inclusions.Remove(uri);
             }
@@ -363,8 +387,9 @@ namespace Event.Storage
             foreach (var uriToAdd in value.Select(element => new InclusionUri
             {
                 UriString = element.Uri.AbsoluteUri,
-                EventId = element.EventID,
-                EventIdentificationModelId = eventId
+                WorkflowId = element.WorkflowId,
+                ForeignEventId = element.EventId,
+                EventId = eventId
             }))
             {
                 _context.Inclusions.Add(uriToAdd);
@@ -383,7 +408,6 @@ namespace Event.Storage
         public void Dispose()
         {
             _context.Dispose();
-            _context = null;
         }
 
         #endregion
@@ -394,51 +418,20 @@ namespace Event.Storage
         /// EventIdentificationIsInALegalState makes two checks on EventIdentification-set,
         /// that when combined ensures that EventIdentification only has a single element. 
         /// </summary>
-        private async Task EventIdentificationIsInALegalState(string eventId)
+        private async Task EventIsInALegalState(string workflowId, string eventId)
         {
             // Check that there's currently only a single element in database
-            if (await _context.EventIdentification.CountAsync(model => model.Id == eventId) > 1)
+            if (await _context.Events.CountAsync(model => model.WorkflowId == workflowId && model.Id == eventId) > 1)
             {
                 throw new ApplicationException(
                     "More than a single EventIdentification element in database-set in Event");
             }
 
 
-            if (!await _context.EventIdentification.AnyAsync(model => model.Id == eventId))
+            if (!await _context.Events.AnyAsync(model => model.WorkflowId == workflowId && model.Id == eventId))
             {
                 throw new ApplicationException("EventIdentification was not initialized in Event." +
                                                "Count was zero");
-            }
-        }
-
-        /// <summary>
-        /// EventLockIsInALegalState makes two checks on LockDto-set,
-        /// that when combined ensures that LockDto only has a single element. 
-        /// </summary>
-        private async Task EventLockIsInALegalState(string eventId)
-        {
-            // Check that there's currently only a single element in database
-            if (await _context.LockDto.CountAsync(model => model.Id == eventId) > 1)
-            {
-                throw new ApplicationException(
-                    "More than a single Lock element in database-set in Event");
-            }
-        }
-
-        /// <summary>
-        /// EventStateIsInALegalState makes two checks on EventState-set,
-        /// that when combined ensures that EventState only has a single element. 
-        /// </summary>
-        private async Task EventStateIsInALegalState(string eventId)
-        {
-            // Check that there is no more than a single element in EventState
-            if (await _context.EventState.CountAsync(model => model.Id == eventId) > 1)
-            {
-                throw new ApplicationException("More than a single element in EventState set");
-            }
-            if (!await _context.EventState.AnyAsync(model => model.Id == eventId))
-            {
-                throw new ApplicationException("EventState was not initialized in Event");
             }
         }
         #endregion

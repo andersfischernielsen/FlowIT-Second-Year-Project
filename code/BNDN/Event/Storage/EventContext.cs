@@ -11,20 +11,36 @@ namespace Event.Storage
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<EventIdentificationModel>()
-                .HasMany(ei => ei.Roles)
+            modelBuilder.Entity<EventModel>()
+                .HasMany(e => e.Roles)
                 .WithRequired(role => role.Event)
-                .HasForeignKey(role => role.EventId);
+                .HasForeignKey(role => new { role.WorkflowId, role.EventId });
+
+            modelBuilder.Entity<ConditionUri>()
+                .HasRequired(c => c.Event)
+                .WithMany(e => e.ConditionUris)
+                .HasForeignKey(c => new { c.WorkflowId, c.EventId });
+
+            modelBuilder.Entity<ResponseUri>()
+                .HasRequired(c => c.Event)
+                .WithMany(e => e.ResponseUris)
+                .HasForeignKey(c => new { c.WorkflowId, c.EventId });
+
+            modelBuilder.Entity<InclusionUri>()
+                .HasRequired(c => c.Event)
+                .WithMany(e => e.InclusionUris)
+                .HasForeignKey(c => new { c.WorkflowId, c.EventId });
+
+            modelBuilder.Entity<ExclusionUri>()
+                .HasRequired(c => c.Event)
+                .WithMany(e => e.ExclusionUris)
+                .HasForeignKey(c => new { c.WorkflowId, c.EventId });
         }
 
-        public DbSet<EventIdentificationModel> EventIdentification { get; set; }
-        public DbSet<EventStateModel> EventState { get; set; }
+        public DbSet<EventModel> Events { get; set; }
         public DbSet<ConditionUri> Conditions { get; set; }
         public DbSet<ResponseUri> Responses { get; set; }
-        public DbSet<InitialEventState> InitialEventState { get; set; }
         public DbSet<InclusionUri> Inclusions { get; set; }
         public DbSet<ExclusionUri> Exclusions { get; set; }
-        // LockDto has been extracted out of EventState as it would become a class within a class (and as such would need workaround)
-        public DbSet<LockDto> LockDto { get; set; }
     }
 }

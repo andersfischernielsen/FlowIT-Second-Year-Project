@@ -9,6 +9,7 @@ using Common;
 using Moq;
 using NUnit.Framework;
 using Server.Controllers;
+using Server.Exceptions;
 using Server.Logic;
 using Server.Models;
 
@@ -31,25 +32,25 @@ namespace Server.Tests.ControllerTests
 
         #region GET Workflows
         [Test]
-        public void GetWorkflows_0_elements()
+        public async Task GetWorkflows_0_elements()
         {
             // Arrange
-            _mock.Setup(logic => logic.GetAllWorkflows()).Returns(new List<WorkflowDto>());
+            _mock.Setup(logic => logic.GetAllWorkflows()).ReturnsAsync(new List<WorkflowDto>());
 
             // Act
-            var result = _controller.Get();
+            var result = await _controller.Get();
 
             // Assert
             Assert.IsEmpty(result);
         }
 
         [Test]
-        public void GetWorkflows_1_element()
+        public async Task GetWorkflows_1_element()
         {
-            _mock.Setup(logic => logic.GetAllWorkflows()).Returns(new List<WorkflowDto>{ new WorkflowDto { Id = "testWorkflow", Name = "Test Workflow"}});
+            _mock.Setup(logic => logic.GetAllWorkflows()).ReturnsAsync(new List<WorkflowDto>{ new WorkflowDto { Id = "testWorkflow", Name = "Test Workflow"}});
 
             // Act
-            var result = _controller.Get().ToList();
+            var result = (await _controller.Get()).ToList();
 
             // Assert
             Assert.AreEqual(1, result.Count());
@@ -59,7 +60,7 @@ namespace Server.Tests.ControllerTests
         }
 
         [Test]
-        public void GetWorkflows_10_elements()
+        public async Task GetWorkflows_10_elements()
         {
             // Arrange
             var workflowDtos = new List<WorkflowDto>();
@@ -68,10 +69,10 @@ namespace Server.Tests.ControllerTests
                 workflowDtos.Add(new WorkflowDto { Id = string.Format("testWorkflow{0}", i), Name = string.Format("Test Workflow {0}", i)});
             }
 
-            _mock.Setup(logic => logic.GetAllWorkflows()).Returns(workflowDtos);
+            _mock.Setup(logic => logic.GetAllWorkflows()).ReturnsAsync(workflowDtos);
 
             // Act
-            var result = _controller.Get();
+            var result = await _controller.Get();
 
             // Assert
             Assert.AreEqual(10, result.Count());
@@ -128,11 +129,10 @@ namespace Server.Tests.ControllerTests
         [TestCase(null)]
         public async void PostWorkflow_id_already_exists(string workflowId)
         {
-            //TODO: Michael?
             // Arrange
             var dto = new WorkflowDto { Id = workflowId, Name = "Workflow Name" };
 
-            _mock.Setup(logic => logic.AddNewWorkflow(dto)).Throws<Exception>();
+            _mock.Setup(logic => logic.AddNewWorkflow(dto)).Throws<WorkflowAlreadyExistsException>();
 
             try {
                 await _controller.PostWorkFlow(dto);
@@ -169,38 +169,36 @@ namespace Server.Tests.ControllerTests
         #region DELETE Workflow
 
         [Test]
-        public void Delete_Workflow_That_Does_Exist(string workflowId)
+        public void Delete_Workflow_That_Does_Exist()
         {
-            //TODO: Make this test not return a weird reflection exception.
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesExist", Name = "This is a test..."} };
 
-            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
-                .Callback((WorkflowDto incoming) => Task.Run(() => list.Remove(list.Find(w => w.Id == incoming.Id))));
+            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<string>())))
+                .Returns((string incomingId) => Task.Run(() => list.Remove(list.Find(w => w.Id == incomingId))));
 
             var dto = new WorkflowDto { Id = "DoesExist", Name = "lol"};
 
             Assert.DoesNotThrow(async () => await _controller.DeleteWorkflow(dto.Id));
-            Assert.IsEmpty(list.Where(w => w.Id == workflowId));
+            Assert.IsEmpty(list.Where(w => w.Id == "DoesExist"));
         }
 
         [Test]
-        public void Delete_Workflow_That_Does_Not_Exist(string workflowId)
+        public void Delete_Workflow_That_Does_Not_Exist()
         {
-            //TODO: Make this test not return a weird reflection exception.
             var list = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "DoesNotExist", Name = "This is a test..." } };
 
-            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<WorkflowDto>())))
-                .Callback((WorkflowDto incoming) => Task.Run(() =>
+            _mock.Setup((logic => logic.RemoveWorkflow(It.IsAny<string>())))
+                .Returns((string incomingId) => Task.Run(() =>
                 {
-                    if (list.Count(w => w.Id == incoming.Id) != 0) return;
+                    if (list.Count(w => w.Id == incomingId) != 0) return;
 
-                    list.Remove(list.Find(w => w.Id == incoming.Id));
+                    list.Remove(list.Find(w => w.Id == incomingId));
                 }));
 
             var dto = new WorkflowDto { Id = "SomeDto", Name = "lol" };
 
             Assert.DoesNotThrow(async () => await _controller.DeleteWorkflow(dto.Id));
-            Assert.IsNotEmpty(list.Where(w => w.Id == workflowId));
+            Assert.IsNotEmpty(list.Where(w => w.Id == "DoesNotExist"));
         }
 
         #endregion
@@ -210,7 +208,7 @@ namespace Server.Tests.ControllerTests
         [TestCase("workflowId1", 0)]
         [TestCase("workflowId1", 1)]
         [TestCase("workflowId1", 35)]
-        public void Get_workflow_returns_list_of_EventAddressDto(string workflowId, int numberOfEvents)
+        public async Task Get_workflow_returns_list_of_EventAddressDto(string workflowId, int numberOfEvents)
         {
             // Arrange
             var list = new List<EventAddressDto>();
@@ -220,10 +218,10 @@ namespace Server.Tests.ControllerTests
                 list.Add(new EventAddressDto { Id = string.Format("event{0}", i), Uri = new Uri(string.Format("http://www.example.com/test{0}", i)) });
             }
 
-            _mock.Setup(logic => logic.GetEventsOnWorkflow(workflowId)).Returns(list);
+            _mock.Setup(logic => logic.GetEventsOnWorkflow(workflowId)).ReturnsAsync(list);
 
             // Act
-            var result = _controller.Get(workflowId);
+            var result = await _controller.Get(workflowId);
 
             // Assert
             Assert.IsInstanceOf<IEnumerable<EventAddressDto>>(result);
@@ -232,18 +230,18 @@ namespace Server.Tests.ControllerTests
         }
 
         [Test]
-        public void GetWorkflow_right_list_when_multiple_workflows_exists()
+        public async Task GetWorkflow_right_list_when_multiple_workflows_exists()
         {
             // Arrange
-            _mock.Setup(logic => logic.GetEventsOnWorkflow("id1")).Returns(new List<EventAddressDto> { new EventAddressDto { Id = "id1", Uri = null }});
-            _mock.Setup(logic => logic.GetEventsOnWorkflow("id2")).Returns(new List<EventAddressDto>
+            _mock.Setup(logic => logic.GetEventsOnWorkflow("id1")).ReturnsAsync(new List<EventAddressDto> { new EventAddressDto { Id = "id1", Uri = null }});
+            _mock.Setup(logic => logic.GetEventsOnWorkflow("id2")).ReturnsAsync(new List<EventAddressDto>
             {
                 new EventAddressDto { Id = "id1", Uri = null },
                 new EventAddressDto { Id = "id2", Uri = null }
             });
 
             // Act
-            var result = _controller.Get("id1");
+            var result = await _controller.Get("id1");
 
             // Assert
             Assert.AreEqual(1, result.Count());
@@ -274,7 +272,7 @@ namespace Server.Tests.ControllerTests
             // Arrange
             _mock.Setup(logic => logic.AddEventToWorkflow(It.IsAny<string>(), It.IsAny<EventAddressDto>()))
                 .Returns(((string s, EventAddressDto eventDto) => Task.Run(() => list.Add(eventDto))));
-            _mock.Setup(logic => logic.GetEventsOnWorkflow(It.IsAny<string>())).Returns(list);
+            _mock.Setup(logic => logic.GetEventsOnWorkflow(It.IsAny<string>())).ReturnsAsync(list);
 
             var eventAddressDto = new EventAddressDto { Id = "id", Uri = new Uri("http://www.contoso.com/") };
 

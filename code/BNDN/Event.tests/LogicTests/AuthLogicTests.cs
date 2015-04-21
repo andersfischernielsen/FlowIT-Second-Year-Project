@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
@@ -29,14 +30,14 @@ namespace Event.Tests.LogicTests
         public async Task IsAuthorized_Returns_True(string role)
         {
             // Arrange
-            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>())).ReturnsAsync(new HashSet<string>
+            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new HashSet<string>
             {
                 "Student",
                 "Teacher"
             });
             
             // Act
-            var result = await _logic.IsAuthorized("eventId", new List<string> { role });
+            var result = await _logic.IsAuthorized("workflowId", "eventId", new List<string> { role });
 
             // Assert
             Assert.IsTrue(result);
@@ -47,14 +48,14 @@ namespace Event.Tests.LogicTests
         public async Task IsAuthorized_Returns_False(string role)
         {
             // Arrange
-            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>())).ReturnsAsync(new HashSet<string>
+            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new HashSet<string>
             {
                 "Student",
                 "Teacher"
             });
 
             // Act
-            var result = await _logic.IsAuthorized("eventId", new List<string> { role });
+            var result = await _logic.IsAuthorized("workflowId", "eventId", new List<string> { role });
 
             // Assert
             Assert.IsFalse(result);
@@ -64,14 +65,14 @@ namespace Event.Tests.LogicTests
         public void IsAuthorized_Throws_ArgumentNullException_When_Passed_Roles_Is_NULL()
         {
             // Arrange
-            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>())).ReturnsAsync(new HashSet<string>
+            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new HashSet<string>
             {
                 "Student",
                 "Teacher"
             });
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _logic.IsAuthorized("eventId", null));
+            var testDelegate = new TestDelegate(async () => await _logic.IsAuthorized("workflowId", "eventId", null));
 
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
@@ -81,10 +82,10 @@ namespace Event.Tests.LogicTests
         public void IsAuthorized_Throws_NotFoundException_When_EventId_Is_Not_Found()
         {
             // Arrange
-            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>())).ReturnsAsync(null);
+            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(null);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await _logic.IsAuthorized("eventId", new HashSet<string>
+            var testDelegate = new TestDelegate(async () => await _logic.IsAuthorized("workflowId", "eventId", new HashSet<string>
             {
                 "Student",
                 "Teacher"
