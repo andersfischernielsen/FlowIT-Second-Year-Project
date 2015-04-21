@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
 
-namespace Event
+namespace Event.Communicators
 {
     /// <summary>
     /// ServerCommunicator is the module through which Event has its outgoing communication with Server 
