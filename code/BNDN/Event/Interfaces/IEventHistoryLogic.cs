@@ -6,7 +6,7 @@ using Common.History;
 
 namespace Event.Interfaces
 {
-    public interface IEventHistoryLogic 
+    public interface IEventHistoryLogic : IDisposable
     {
         Task SaveHistory(HistoryModel toSave);
 
@@ -15,6 +15,5 @@ namespace Event.Interfaces
         Task SaveException(Exception ex, string requestType, string method, string eventId = "", string workflowId = "");
 
         Task SaveSuccesfullCall(string requestType, string method, string eventId = "", string workflowId = "");
-
     }
 }
