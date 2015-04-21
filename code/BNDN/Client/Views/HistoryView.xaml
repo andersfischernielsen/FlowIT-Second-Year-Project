@@ -3,16 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ViewModels="clr-namespace:Client.ViewModels" x:Class="Client.Views.HistoryView"
         Title="HistoryView" Height="400" Width="550">
+    <Window.DataContext>
+        <ViewModels:HistoryListViewModel/>
+    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="61"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid.DataContext>
-            <ViewModels:HistoryListViewModel/>
-        </Grid.DataContext>
         <Label Style="{StaticResource TextLabelStyle}" Content="History of workflow: " HorizontalAlignment="Left" VerticalAlignment="Top" Height="41" Width="213" FontSize="24" Margin="10,10,0,0" FontFamily="Segoe UI Light"/>
-        <Label Style="{StaticResource TextLabelStyle}" Content="{Binding WorkflowId}" Margin="228,10,10,0" VerticalAlignment="Top" Height="41" FontSize="24" FontFamily="Segoe UI Light"/>
+        <Label Grid.Row="0" Style="{StaticResource TextLabelStyle}" Content="{Binding WorkflowId}" Margin="228,10,10,0" VerticalAlignment="Top" Height="41" FontSize="24" FontFamily="Segoe UI Light"/>
         <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding HistoryViewModelList}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
