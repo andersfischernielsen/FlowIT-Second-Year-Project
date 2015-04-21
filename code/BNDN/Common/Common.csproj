@@ -50,6 +50,8 @@
     <Compile Include="Exceptions\NotAuthorizedException.cs" />
     <Compile Include="Exceptions\NotExecutableException.cs" />
     <Compile Include="Exceptions\NotFoundException.cs" />
+    <Compile Include="History\HistoryDto.cs" />
+    <Compile Include="History\HistoryModel.cs" />
     <Compile Include="RoleDto.cs" />
     <Compile Include="HttpClientToolbox.cs" />
     <Compile Include="EventAddressDto.cs" />
