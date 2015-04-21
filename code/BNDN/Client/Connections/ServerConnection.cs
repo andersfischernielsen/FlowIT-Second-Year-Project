@@ -72,9 +72,9 @@ namespace Client.Connections
             }
         }
 
-        public Task<HistoryDto> GetHistory(string workflowId)
+        public Task<IList<HistoryDto>> GetHistory(string workflowId)
         {
-            return _http.Read<HistoryDto>(String.Format("history/{0}", workflowId));
+            return _http.ReadList<HistoryDto>(String.Format("history/{0}", workflowId));
         }
 
         public void Dispose()

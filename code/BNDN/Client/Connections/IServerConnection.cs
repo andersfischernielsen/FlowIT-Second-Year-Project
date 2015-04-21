@@ -16,6 +16,6 @@ namespace Client.Connections
         /// Returns the history of the event.
         /// </summary>
         /// <returns></returns>
-        Task<HistoryDto> GetHistory(string workflowId);
+        Task<IList<HistoryDto>> GetHistory(string workflowId);
     }
 }
