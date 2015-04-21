@@ -9,6 +9,7 @@
     <system:String x:Key="WorkflowName">Workflow Name</system:String>
     <system:String x:Key="ServerUrl">Server Base-URL</system:String>
     <system:String x:Key="EventUrls">Event Base-URLs</system:String>
+    <system:String x:Key="Password">Password for users</system:String>
 
     <system:String x:Key="CreateWorkflow">Create Workflow at Server</system:String>
     <system:String x:Key="CreateUsers">Upload users to server</system:String>
