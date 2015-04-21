@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Common.Exceptions;
+using Common.History;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -14,11 +15,13 @@ namespace Event.Controllers
     public class LifecycleController : ApiController
     {
         private readonly ILifecycleLogic _logic;
+        private readonly IEventHistoryLogic _historyLogic;
 
         // Constructor used by framework
         public LifecycleController()
         {
             _logic = new LifecycleLogic();
+            _historyLogic = new EventHistoryLogic();
         }
 
         // Constructor used for dependency-injection
@@ -48,15 +51,20 @@ namespace Event.Controllers
                         conflictElements.Append(key + ", ");
                     }
                 }
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                                                 "Provided input could not be mapped onto an instance of EventDto " +
                                                 conflictElements));
+
+                await _historyLogic.SaveException(toThrow, eventDto.EventId, eventDto.WorkflowId);
+                throw toThrow;
             }
 
             if (eventDto == null)
             {
                 // TODO: Provide nicer description / error message
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+                var toThrow = new HttpResponseException(HttpStatusCode.BadRequest);
+                await _historyLogic.SaveException(toThrow, "POST", "CreateEvent");
             }
 
             // Prepare for method-call: Gets own URI (i.e. http://address)
@@ -65,7 +73,7 @@ namespace Event.Controllers
 
             // TODO: Exception handling
             await _logic.CreateEvent(eventDto, ownUri);
-
+            await _historyLogic.SaveSuccesfullCall("POST", "CreateEvent", eventDto.EventId, eventDto.WorkflowId);
         }
 
         /// <summary>
@@ -81,10 +89,12 @@ namespace Event.Controllers
             try
             {
                 await _logic.DeleteEvent(workflowId, eventId);
+                await _historyLogic.SaveSuccesfullCall("DELETE", "DeleteEvent", eventId, workflowId);
             }
-            catch (LockedException)
+            catch (LockedException ex)
                 // Todo: Exception handling
             {
+                _historyLogic.SaveException(ex, "DELETE", "DeleteEvent", eventId, workflowId);
                 throw;
             }
         }
@@ -105,11 +115,12 @@ namespace Event.Controllers
             try
             {
                 await _logic.ResetEvent(workflowId, eventId);
+                await _historyLogic.SaveSuccesfullCall("PUT", "ResetEvent", eventId, workflowId);
+
             }
                 // Todo: Exception handling
-            catch (Exception)
-            {
-
+            catch (Exception ex) {
+                _historyLogic.SaveException(ex, "PUT", "ResetEvent", eventId, workflowId);
                 throw;
             }
         }
@@ -124,19 +135,24 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent(string workflowId, string eventId)
         {
+            EventDto toReturn;
+
             try
             {
-                return await _logic.GetEventDto(workflowId, eventId);
+                 toReturn = await _logic.GetEventDto(workflowId, eventId);
             }
-            catch (NotFoundException)
-            {
+            catch (NotFoundException ex) {
+                _historyLogic.SaveException(ex, "GET", "GetEvent", eventId, workflowId);
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, workflowId + "." + eventId + " not found"));
             }
                 // Todo: Exception handling.
-            catch (Exception)
-            {
+            catch (Exception ex) {
+                _historyLogic.SaveException(ex, "GET", "GetEvent", eventId, workflowId);
                 throw;
             }
+
+            await _historyLogic.SaveSuccesfullCall("GET", "GetEvent", eventId, workflowId);
+            return toReturn;
         }
     }
 }
