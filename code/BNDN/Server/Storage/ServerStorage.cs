@@ -9,7 +9,7 @@ using Server.Models;
 
 namespace Server.Storage
 {
-    public class ServerStorage : IServerStorage, IServerHistoryStorage
+    public class ServerStorage : IServerStorage
     {
         private readonly IServerContext _db;
 
@@ -183,11 +183,21 @@ namespace Server.Storage
             _db.Dispose();
         }
 
+        public async Task SaveHistory(HistoryModel toSave)
+        {
+            if (!await Exists(toSave.WorkflowId))
+            {
+                throw new InvalidOperationException("The workflowId does not exist");
+            }
+            _db.History.Add(toSave);
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<IQueryable<HistoryModel>> GetHistoryForWorkflow(string workflowId)
         {
             if (!await Exists(workflowId))
             {
-                throw new InvalidOperationException("The EventId does not exist");
+                throw new InvalidOperationException("The workflowId does not exist");
             }
 
             return _db.History.Where(h => h.WorkflowId == workflowId);

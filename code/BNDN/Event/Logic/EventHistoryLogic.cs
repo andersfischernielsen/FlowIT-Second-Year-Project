@@ -46,9 +46,10 @@ namespace Event.Logic
             await _storage.SaveHistory(toSave);
         }
 
-        public async Task<IQueryable<HistoryModel>> GetHistoryForEvent(string workflowId, string eventId)
+        public async Task<IQueryable<HistoryDto>> GetHistoryForEvent(string workflowId, string eventId)
         {
-            return await _storage.GetHistoryForEvent(workflowId, eventId);
+            var models = await _storage.GetHistoryForEvent(workflowId, eventId);
+            return models.Select(model => new HistoryDto(model));
         }
 
         public async Task SaveSuccesfullCall(string requestType, string method, string eventId = "", string workflowId = "")

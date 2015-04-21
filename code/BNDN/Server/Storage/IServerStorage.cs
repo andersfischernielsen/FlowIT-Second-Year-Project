@@ -6,7 +6,7 @@ using Server.Models;
 
 namespace Server.Storage
 {
-    public interface IServerStorage : IDisposable
+    public interface IServerStorage : IDisposable, IServerHistoryStorage
     {
         Task<ServerUserModel> GetUser(string username);
 

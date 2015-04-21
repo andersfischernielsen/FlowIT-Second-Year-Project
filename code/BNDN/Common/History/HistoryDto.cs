@@ -11,6 +11,10 @@ namespace Common.History
         public string MethodCalledOnSender { get; set; }
         public string Message { get; set; }
 
+        public HistoryDto()
+        {
+            
+        }
         public HistoryDto(HistoryModel model)
         {
             TimeStamp = model.TimeStamp;
