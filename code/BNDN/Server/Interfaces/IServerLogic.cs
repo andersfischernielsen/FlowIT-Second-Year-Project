@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 
-namespace Server.Logic
+namespace Server.Interfaces
 {
     public interface IServerLogic : IDisposable
     {

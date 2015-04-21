@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Server.Models;
 
-namespace Server.Storage
+namespace Server.Interfaces
 {
     public interface IServerContext : IDisposable
     {
