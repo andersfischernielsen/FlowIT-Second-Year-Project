@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 using System.Web;
 using Common.History;
 using Event.Interfaces;
+using Event.Storage;
 
 namespace Event.Logic
 {
     public class EventHistoryLogic : IEventHistoryLogic {
         private readonly IEventStorage _storage;
 
-        public EventHistoryLogic(IEventStorage storage)
+        public EventHistoryLogic()
         {
-            _storage = storage;
+            _storage = new EventStorage();
         }
 
         public Task SaveHistory(HistoryModel toSave)
@@ -31,9 +32,37 @@ namespace Event.Logic
             return _storage.SaveHistory(asDto);
         }
 
+        public async Task SaveException(Exception ex, string requestType, string method, string eventId = "", string workflowId = "")
+        {
+            var toSave = new HistoryModel
+            {
+                EventId = eventId,
+                HttpRequestType = requestType,
+                Message = "Threw: " + ex.GetType(),
+                MethodCalledOnSender = method,
+                WorkflowId = workflowId
+            };
+
+            await _storage.SaveHistory(toSave);
+        }
+
         public async Task<IQueryable<HistoryModel>> GetHistoryForEvent(string workflowId, string eventId)
         {
             return await _storage.GetHistoryForEvent(workflowId, eventId);
+        }
+
+        public async Task SaveSuccesfullCall(string requestType, string method, string eventId = "", string workflowId = "")
+        {
+            var toSave = new HistoryModel
+            {
+                EventId = eventId,
+                HttpRequestType = requestType,
+                Message = "Succesfully called: " + method,
+                MethodCalledOnSender = method,
+                WorkflowId = workflowId
+            };
+
+            await _storage.SaveHistory(toSave);
         }
     }
 }
