@@ -252,7 +252,7 @@ namespace Event.Tests.LogicTests
             var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("workflowId", "eventId", new RoleDto { Roles = new List<string> { "WrongRole" } }));
 
             // Assert
-            Assert.Throws<NotAuthorizedException>(testDelegate);
+            Assert.Throws<UnauthorizedException>(testDelegate);
         }
 
         [Test]

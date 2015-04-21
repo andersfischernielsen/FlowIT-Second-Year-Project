@@ -165,7 +165,7 @@ namespace Event.Logic
             // Check that caller claims the right role for executing this Event
             if (!await _authLogic.IsAuthorized(workflowId, eventId, executeDto.Roles))
             {
-                throw new NotAuthorizedException();
+                throw new UnauthorizedException();
             }
 
             // Check if Event is currently locked

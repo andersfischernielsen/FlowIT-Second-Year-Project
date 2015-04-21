@@ -575,7 +575,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotAuthorizedException());
+                .ThrowsAsync(new UnauthorizedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -589,7 +589,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotAuthorizedException());
+                .ThrowsAsync(new UnauthorizedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));

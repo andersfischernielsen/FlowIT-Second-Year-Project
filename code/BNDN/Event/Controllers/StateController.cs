@@ -201,7 +201,7 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
             }
-            catch (NotAuthorizedException)
+            catch (UnauthorizedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
                     "You do not have permission to execute this event"));
