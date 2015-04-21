@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
+using Common.History;
 
 namespace Client.Connections
 {
@@ -69,6 +70,11 @@ namespace Client.Connections
                 }
                 throw new ServerNotFoundException(ex);
             }
+        }
+
+        public Task<HistoryDto> GetHistory(string workflowId)
+        {
+            return _http.Read<HistoryDto>(String.Format("history/{0}", workflowId));
         }
 
         public void Dispose()
