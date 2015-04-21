@@ -88,7 +88,8 @@ namespace Client.ViewModels
         {
             if (EventList != null && EventList.Count != 0)
             {
-                
+                var historyView = new HistoryView(new HistoryListViewModel(WorkflowId));
+                historyView.Show();
             }
         }
 

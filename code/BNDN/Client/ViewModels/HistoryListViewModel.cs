@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Client.Connections;
+using Common;
 using Common.History;
 
 namespace Client.ViewModels
@@ -18,8 +20,11 @@ namespace Client.ViewModels
 
             var settings = Settings.LoadSettings();
             _serverAddress = new Uri(settings.ServerAddress);
-            WorkflowId = "workflowID";
+           
 
+            // test data
+            // todo: remove
+            WorkflowId = "workflowID";
             HistoryViewModelList.Add(new HistoryViewModel(new HistoryDto(new HistoryModel{ EventId = "EventId1", Message = "Message1"})));
             HistoryViewModelList.Add(new HistoryViewModel(new HistoryDto(new HistoryModel { EventId = "EventId2", Message = "Message2" })));
         }
@@ -31,6 +36,8 @@ namespace Client.ViewModels
 
             var settings = Settings.LoadSettings();
             _serverAddress = new Uri(settings.ServerAddress);
+
+            GetHistory();
         }
 
         #region DataBindings
@@ -54,9 +61,40 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public Task GetHistory()
+        /// <summary>
+        /// Gets the history of the workflow and the events on it. 
+        /// orders the list by timestamp
+        /// </summary>
+        /// <returns></returns>
+        public async Task GetHistory()
         {
-            throw new NotImplementedException();
+            HistoryViewModelList.Clear();
+
+            // create a server connection
+            IServerConnection serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
+
+            // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
+            var evenAddresses = (await serverConnection.GetEventsFromWorkflow(new WorkflowDto { Id = WorkflowId }))
+                .AsParallel()
+                .ToList();
+
+            // add the history of the server
+            var history = new List<HistoryViewModel>
+            {
+                new HistoryViewModel(await serverConnection.GetHistory(WorkflowId))
+            };
+
+            // add the history of all the events
+            foreach (var eventAddress in evenAddresses)
+            {
+                IEventConnection eventConnection = new EventConnection(eventAddress, WorkflowId);
+                history.Add(new HistoryViewModel(await eventConnection.GetHistory()));
+            }
+            // order them by timestamp
+            history = history.OrderByDescending(model => model.TimeSpamp).ToList();
+
+            // move the list into the observable collection.
+            HistoryViewModelList = new ObservableCollection<HistoryViewModel>(history);
         }
         #endregion
     }
