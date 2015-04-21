@@ -67,11 +67,8 @@ namespace Server.Storage
             {
                 throw new ArgumentException("User already exists", "user");
             }
-            var uu = _db.Users.Create();
-            uu.Name = user.Name;
-            uu.ServerRolesModels = user.ServerRolesModels;
 
-            _db.Users.Add(uu);
+            _db.Users.Add(user);
 
             await _db.SaveChangesAsync();
         }
