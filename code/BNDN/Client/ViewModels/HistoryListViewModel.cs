@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Client.Connections;
 using Common;
 using Common.History;
@@ -72,22 +74,21 @@ namespace Client.ViewModels
                 .ToList();
 
             // add the history of the server
-            var history = new List<HistoryViewModel>
-            {
-                new HistoryViewModel(await serverConnection.GetHistory(WorkflowId))
-            };
+            ConcurrentBag<HistoryViewModel> history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto)));
 
-            // add the history of all the events
-            foreach (var eventAddress in evenAddresses)
+            // add all the histories of the events.
+            Parallel.ForEach(evenAddresses, async dto =>
             {
-                IEventConnection eventConnection = new EventConnection(eventAddress, WorkflowId);
-                history.Add(new HistoryViewModel(await eventConnection.GetHistory()));
-            }
+                IEventConnection eventConnection = new EventConnection(dto, WorkflowId);
+                var list = (await eventConnection.GetHistory()).Select(historyDto => new HistoryViewModel(historyDto));
+                list.ToList().ForEach(model => history.Add(model));
+            });
+
             // order them by timestamp
-            history = history.OrderByDescending(model => model.TimeSpamp).ToList();
+            var orderedHistory = history.ToList().OrderByDescending(model => model.TimeSpamp).ToList();
 
             // move the list into the observable collection.
-            HistoryViewModelList = new ObservableCollection<HistoryViewModel>(history);
+            HistoryViewModelList = new ObservableCollection<HistoryViewModel>(orderedHistory);
         }
         #endregion
     }
