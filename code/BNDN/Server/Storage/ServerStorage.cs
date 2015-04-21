@@ -17,9 +17,9 @@ namespace Server.Storage
             _db = context ?? new StorageContext();
         }
 
-        public async Task<ServerUserModel> GetUser(string username)
+        public async Task<ServerUserModel> GetUser(string username, string password)
         {
-            return await _db.Users.SingleOrDefaultAsync(user => string.Equals(user.Name, username));
+            return await _db.Users.SingleOrDefaultAsync(user => string.Equals(user.Name, username) && string.Equals(user.Password, password));
         }
 
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
