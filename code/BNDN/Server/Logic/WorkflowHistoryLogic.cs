@@ -12,15 +12,17 @@ namespace Server.Logic
 {
     public class WorkflowHistoryLogic : IWorkflowHistoryLogic
     {
-        private IServerStorage _storage;
+        private readonly IServerStorage _storage;
+
         public WorkflowHistoryLogic()
         {
             _storage = new ServerStorage();
         }
+
         public async Task<IQueryable<HistoryDto>> GetHistoryForWorkflow(string workflowId)
         {
             var models = await _storage.GetHistoryForWorkflow(workflowId);
-            return models.Select(model => new HistoryDto(model));;
+            return models.Select(model => new HistoryDto(model));
         }
 
         public async Task SaveHistory(HistoryModel toSave)
