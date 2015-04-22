@@ -7,6 +7,7 @@ using Common.Exceptions;
 using Event.Controllers;
 using Event.Exceptions;
 using Event.Interfaces;
+using Event.Logic;
 using Moq;
 using NUnit.Framework;
 
@@ -23,8 +24,40 @@ namespace Event.Tests.ControllersTests
         {
             _stateLogicMock = new Mock<IStateLogic>();
 
-            _stateController = new StateController(_stateLogicMock.Object) {Request = new HttpRequestMessage()};
+            _stateController = new StateController(_stateLogicMock.Object) { Request = new HttpRequestMessage() };
         }
+
+        #region Constructor & Dispose
+
+        [Test]
+        public void StateControllerTests_Constructor_Runs()
+        {
+            new StateController();
+        }
+
+        [Test]
+        public void StateControllerTests_Constructor_Runs_With_Argument()
+        {
+            new StateController(new StateLogic());
+        }
+
+        [Test]
+        public void Dispose_Test()
+        {
+            // Arrange
+            _stateLogicMock.Setup(l => l.Dispose()).Verifiable();
+
+            // Act
+            using (_stateController)
+            {
+                // Do nothing
+            }
+
+            // Assert
+            _stateLogicMock.Verify(l => l.Dispose(), Times.Once);
+        }
+
+        #endregion
 
         #region GetExecuted
         [Test]
