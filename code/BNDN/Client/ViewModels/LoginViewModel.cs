@@ -76,16 +76,18 @@ namespace Client.ViewModels
                 Status = "Login successful";
                 RoleForWorkflow = roles.RolesOnWorkflows;
 
-
                 // Save settings
                 var settings = new Settings
                 {
                     ServerAddress = _serverAddress.AbsoluteUri,
                     Username = _username,
-                    Password = _password
                 };
-                File.WriteAllText("settings.json", JsonConvert.SerializeObject(settings, Formatting.Indented));
+                
+                
+                settings.SaveSettings();
                 // Save settings end.
+
+                
 
                 var window = new MainWindow();
                 window.Show();

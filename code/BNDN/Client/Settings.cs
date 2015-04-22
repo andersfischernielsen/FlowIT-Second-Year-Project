@@ -8,25 +8,23 @@ namespace Client
         public string ServerAddress { get; set; }
         public string Username { get; set; }
 
-        public string Password { get; set; }
-
         public static Settings LoadSettings()
         {
-            Settings settings;
-            if (File.Exists("settings.json"))
+            if (!File.Exists("settings.json"))
             {
-                var settingsjson = File.ReadAllText("settings.json");
-                settings =  JsonConvert.DeserializeObject<Settings>(settingsjson);
+                return new Settings { Username = "Enter role", ServerAddress = "http://flowit.azurewebsites.net/" };
+            }
 
-                settings.Username = settings.Username ?? "Enter role";
-                settings.Password = settings.Password ?? "Password";
-                settings.ServerAddress = settings.ServerAddress ?? "http://flowit.azurewebsites.net/";
-            }
-            else
-            {
-                settings = new Settings { Username = "Enter role", Password = "Password", ServerAddress = "http://flowit.azurewebsites.net/" };
-            }
+            var settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
+
+            settings.Username = settings.Username ?? "Enter Role";
+            settings.ServerAddress = settings.ServerAddress ?? "http://flowit.azurewebsites.net/";
             return settings;
+        }
+
+        public void SaveSettings()
+        {
+            File.WriteAllText("settings.json", JsonConvert.SerializeObject(this, Formatting.Indented));
         }
     }
 }
