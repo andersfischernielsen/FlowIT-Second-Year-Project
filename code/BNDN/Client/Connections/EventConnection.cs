@@ -42,7 +42,7 @@ namespace Client.Connections
             return await _httpClient.Read<EventStateDto>(String.Format("events/{0}/{1}/state/-1", _workflowId, eventId));   
         }
 
-        public Task<IList<HistoryDto>> GetHistory()
+        public Task<IEnumerable<HistoryDto>> GetHistory()
         {
             var eventId = _eventDto.Id;
             return _httpClient.ReadList<HistoryDto>(String.Format("history/{0}/{1}", _workflowId, eventId));

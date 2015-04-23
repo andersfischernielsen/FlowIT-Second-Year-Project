@@ -21,7 +21,7 @@ namespace Client.Connections
         /// Returns the history of the event.
         /// </summary>
         /// <returns></returns>
-        Task<IList<HistoryDto>> GetHistory();
+        Task<IEnumerable<HistoryDto>> GetHistory();
 
         /// <summary>
         /// Delete an event. Only to be used for testing!
