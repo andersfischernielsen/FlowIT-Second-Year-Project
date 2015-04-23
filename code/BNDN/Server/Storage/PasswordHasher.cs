@@ -10,7 +10,7 @@ namespace Server.Storage
     {
         private static readonly int SaltValueSize = 4;
         private static readonly UnicodeEncoding Unicode = new UnicodeEncoding();
-        private static readonly HashAlgorithm Hash = new SHA256Managed();
+        private static readonly HashAlgorithm Hash = new SHA512Managed();
         public static string GenerateSaltValue()
         {
             // Create a random number object seeded from the value
@@ -20,17 +20,22 @@ namespace Server.Storage
             var random = new Random(unchecked((int)DateTime.Now.Ticks));
 
             // Create an array of random values.
-            var saltValue = new byte[SaltValueSize * UnicodeEncoding.CharSize];
+            var saltValue = new byte[SaltValueSize];
 
             random.NextBytes(saltValue);
 
             // Convert the salt value to a string. Note that the resulting string
             // will still be an array of binary values and not a printable string. 
             // Also it does not convert each byte to a double byte.
-            var saltValueString = Unicode.GetString(saltValue);
+            var salt = new StringBuilder();
+
+            foreach (var hexdigit in saltValue)
+            {
+                salt.Append(hexdigit.ToString("X2", CultureInfo.InvariantCulture.NumberFormat));
+            }
 
             // Return the salt value as a string.
-            return saltValueString;
+            return salt.ToString();
         }
 
         public static string HashPassword(string clearData, string saltValue = null)
@@ -83,7 +88,7 @@ namespace Server.Storage
 
         public static bool VerifyHashedPassword(string password, string profilePassword)
         {
-            var saltLength = SaltValueSize;
+            var saltLength = SaltValueSize * UnicodeEncoding.CharSize;
 
             if (string.IsNullOrEmpty(profilePassword) ||
                 string.IsNullOrEmpty(password) ||

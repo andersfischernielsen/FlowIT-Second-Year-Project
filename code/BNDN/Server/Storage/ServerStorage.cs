@@ -44,16 +44,23 @@ namespace Server.Storage
             return await events.ToListAsync();
         }
 
-        public async Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
+        public async Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
         {
+            var result = new List<ServerRoleModel>();
             foreach (var role in roles)
             {
                 if (!await RoleExists(role))
                 {
-                    _db.Roles.Add(role);
+                    result.Add(_db.Roles.Add(role));
+                }
+                else
+                {
+                    var roleId = role.Id;
+                    result.Add(await _db.Roles.SingleAsync(r => r.Id == roleId));
                 }
             }
             await _db.SaveChangesAsync();
+            return result;
         }
 
         public async Task<ServerRoleModel> GetRole(string id, string workflowId)
