@@ -20,7 +20,11 @@ namespace Server.Storage
 
         public async Task<ServerUserModel> GetUser(string username, string password)
         {
-            return await _db.Users.SingleOrDefaultAsync(user => string.Equals(user.Name, username) && string.Equals(user.Password, password));
+            var user = await _db.Users.SingleOrDefaultAsync(u => string.Equals(u.Name, username));
+
+            if (user == null) return null;
+
+            return PasswordHasher.VerifyHashedPassword(password, user.Password) ? user : null;
         }
 
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
@@ -68,6 +72,8 @@ namespace Server.Storage
             {
                 throw new ArgumentException("User already exists", "user");
             }
+
+            user.Password = PasswordHasher.HashPassword(user.Password);
 
             _db.Users.Add(user);
 
