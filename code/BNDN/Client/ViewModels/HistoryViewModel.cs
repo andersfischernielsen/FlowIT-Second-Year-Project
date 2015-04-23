@@ -63,6 +63,7 @@ namespace Client.ViewModels
         public DateTime TimeStamp
         {
             get { return _historyDto.TimeStamp; }
+            set { NotifyPropertyChanged("TimeStamp"); }
         }
         
         #endregion
