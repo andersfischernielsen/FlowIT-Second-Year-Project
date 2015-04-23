@@ -14,6 +14,13 @@ namespace Server.Controllers {
             _historyLogic = new WorkflowHistoryLogic();
         }
 
+        public HistoryController(IWorkflowHistoryLogic historyLogic)
+        {
+            _historyLogic = historyLogic;
+        }
+
+        
+
         /// <summary>
         /// Get the entire History for a given Workflow.
         /// </summary>

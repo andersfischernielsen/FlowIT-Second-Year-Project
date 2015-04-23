@@ -25,9 +25,10 @@ namespace Event.Controllers
         }
 
         // Constructor used for dependency-injection
-        public LifecycleController(ILifecycleLogic logic)
+        public LifecycleController(ILifecycleLogic logic, IEventHistoryLogic historyLogic)
         {
             _logic = logic;
+            _historyLogic = historyLogic;
         }
 
         /// <summary>

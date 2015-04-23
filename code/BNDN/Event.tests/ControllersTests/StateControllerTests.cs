@@ -16,14 +16,18 @@ namespace Event.Tests.ControllersTests
     class StateControllerTests
     {
         private Mock<IStateLogic> _stateLogicMock;
+        private Mock<IEventHistoryLogic> _historyLogicMock;
         private StateController _stateController;
 
         [SetUp]
         public void SetUp()
         {
             _stateLogicMock = new Mock<IStateLogic>(MockBehavior.Strict);
+            _stateLogicMock.Setup(l => l.Dispose());
 
-            _stateController = new StateController(_stateLogicMock.Object) { Request = new HttpRequestMessage() };
+            _historyLogicMock = new Mock<IEventHistoryLogic>();
+
+            _stateController = new StateController(_stateLogicMock.Object, _historyLogicMock.Object) { Request = new HttpRequestMessage() };
         }
 
         #region Constructor & Dispose
@@ -37,7 +41,7 @@ namespace Event.Tests.ControllersTests
         [Test]
         public void StateControllerTests_Constructor_Runs_With_Argument()
         {
-            new StateController(_stateLogicMock.Object);
+            new StateController(_stateLogicMock.Object, _historyLogicMock.Object);
         }
 
         [Test]

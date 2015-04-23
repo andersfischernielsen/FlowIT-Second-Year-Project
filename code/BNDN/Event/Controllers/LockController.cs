@@ -24,9 +24,10 @@ namespace Event.Controllers
         }
 
         // Controller used to dependency-inject during testing
-        public LockController(ILockingLogic lockLogic)
+        public LockController(ILockingLogic lockLogic, IEventHistoryLogic historyLogic)
         {
             _lockLogic = lockLogic;
+            _historyLogic = historyLogic;
         }
 
         /// <summary>

@@ -29,9 +29,10 @@ namespace Event.Controllers
         /// Constructor used for Dependency injection.
         /// </summary>
         /// <param name="logic">An implementation of IStateLogic.</param>
-        public StateController(IStateLogic logic)
+        public StateController(IStateLogic logic, IEventHistoryLogic historyLogic)
         {
             _logic = logic;
+            _historyLogic = historyLogic;
         }
 
         /// <summary>

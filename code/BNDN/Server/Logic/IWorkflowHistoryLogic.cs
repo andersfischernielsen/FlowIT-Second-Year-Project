@@ -5,7 +5,7 @@ using Common.History;
 
 namespace Server.Logic
 {
-    interface IWorkflowHistoryLogic
+    public interface IWorkflowHistoryLogic
     {
         Task<IQueryable<HistoryDto>> GetHistoryForWorkflow(string workflowId);
         Task SaveHistory(HistoryModel toSave);
