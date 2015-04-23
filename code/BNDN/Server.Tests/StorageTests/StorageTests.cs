@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
@@ -12,15 +13,15 @@ namespace Server.Tests.StorageTests
     [TestFixture]
     class StorageTests {
         private IServerContext _context;
-
+        
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
             var context = new Mock<IServerContext>();
             context.SetupAllProperties();
 
             //USERS:
-            var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName", Password = "TestingPassword" } };
+            var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName", Password = PasswordHasher.HashPassword("TestingPassword") } };
             context.Object.Users = new FakeDbSet<ServerUserModel>(users.AsQueryable()).Object;
 
             //WORKFLOWS:
@@ -48,7 +49,8 @@ namespace Server.Tests.StorageTests
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Id);
             Assert.AreEqual("TestingName", result.Name);
-            Assert.AreEqual("TestingPassword", result.Password);
+
+            Assert.IsTrue(PasswordHasher.VerifyHashedPassword("TestingPassword", result.Password));
         }
 
         [Test]
