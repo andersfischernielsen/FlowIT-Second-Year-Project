@@ -95,15 +95,8 @@ namespace Client.ViewModels
             }
             catch (Exception ex)
             {
-                if (ex is LoginFailedException || ex is ServerNotFoundException)
-                {
-                    _loginStarted = false;
-                    Status = ex.Message;
-                }
-                else
-                {
-                    throw;
-                }
+                _loginStarted = false;
+                Status = ex.Message;
             }
             
         }
