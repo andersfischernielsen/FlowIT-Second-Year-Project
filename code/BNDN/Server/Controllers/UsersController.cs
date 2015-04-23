@@ -42,12 +42,11 @@ namespace Server.Controllers
             try
             {
                 var toReturn = await _logic.Login(loginDto);
-                await _historyLogic.SaveHistory(new HistoryModel
+                await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
                     Message = "Called: Login with username: " + loginDto.Username,
                     MethodCalledOnSender = "Login",
-                    WorkflowId = loginDto.Username
                 });
 
                 return toReturn;
@@ -56,11 +55,11 @@ namespace Server.Controllers
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
                     "Username or password does not correspond to a user."));
-                _historyLogic.SaveHistory(new HistoryModel
+                _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
                     Message = "Threw: " + toThrow.GetType(),
-                    MethodCalledOnSender = "Login"
+                    MethodCalledOnSender = "Login",
                 });
 
                 throw toThrow;
@@ -68,11 +67,11 @@ namespace Server.Controllers
             catch (Exception ex)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
-                _historyLogic.SaveHistory(new HistoryModel
+                _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
                     Message = "Threw: " + toThrow.GetType(),
-                    MethodCalledOnSender = "Login"
+                    MethodCalledOnSender = "Login",
                 });
 
                 throw toThrow;
@@ -85,18 +84,18 @@ namespace Server.Controllers
             if (!ModelState.IsValid)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
-                await _historyLogic.SaveHistory(new HistoryModel
+                await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
                     Message = "Threw: " + toThrow.GetType(),
-                    MethodCalledOnSender = "CreateUser"
+                    MethodCalledOnSender = "CreateUser",
                 });
             }
 
             try
             {
                 await _logic.AddUser(dto);
-                await _historyLogic.SaveHistory(new HistoryModel
+                await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
                     Message = "Called: CreateUser with username: " + dto.Name,
@@ -107,11 +106,11 @@ namespace Server.Controllers
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
                     "One of the roles does not exist."));
-                _historyLogic.SaveHistory(new HistoryModel
+                _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
                     Message = "Threw: " + toThrow.GetType() + " with username: " + dto.Name,
-                    MethodCalledOnSender = "CreateUser"
+                    MethodCalledOnSender = "CreateUser",
                 });
 
                 throw toThrow;
@@ -124,11 +123,11 @@ namespace Server.Controllers
                     var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                         "A user with that username already exists."));
 
-                    _historyLogic.SaveHistory(new HistoryModel
+                    _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                     {
                         HttpRequestType = "POST",
                         Message = "Threw: " + toThrow.GetType() + " with username: " + dto.Name,
-                        MethodCalledOnSender = "CreateUser"
+                        MethodCalledOnSender = "CreateUser",
                     });
 
                     throw toThrow;
@@ -136,11 +135,11 @@ namespace Server.Controllers
                 else {
                     var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
 
-                    _historyLogic.SaveHistory(new HistoryModel
+                    _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                     {
                         HttpRequestType = "POST",
                         Message = "Threw: " + toThrow.GetType() + " with username: " + dto.Name,
-                        MethodCalledOnSender = "CreateUser"
+                        MethodCalledOnSender = "CreateUser",
                     });
 
                     throw toThrow;
@@ -150,11 +149,11 @@ namespace Server.Controllers
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
 
-                _historyLogic.SaveHistory(new HistoryModel
+                _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
                     Message = "Threw: " + toThrow.GetType(),
-                    MethodCalledOnSender = "CreateUser"
+                    MethodCalledOnSender = "CreateUser",
                 });
 
                 throw toThrow;

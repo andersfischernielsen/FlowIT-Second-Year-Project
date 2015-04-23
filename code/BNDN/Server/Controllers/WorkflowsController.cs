@@ -42,7 +42,7 @@ namespace Server.Controllers
         public async Task<IEnumerable<WorkflowDto>> Get()
         {
             var toReturn = await _logic.GetAllWorkflows();
-            await _historyLogic.SaveHistory(new HistoryModel
+            await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
             {
                 HttpRequestType = "GET",
                 Message = "Called: Get",

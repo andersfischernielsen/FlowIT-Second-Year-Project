@@ -204,6 +204,12 @@ namespace Server.Storage
             await _db.SaveChangesAsync();
         }
 
+        public async Task SaveNonWorkflowSpecificHistory(HistoryModel toSave)
+        {
+            _db.History.Add(toSave);
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<IQueryable<HistoryModel>> GetHistoryForWorkflow(string workflowId)
         {
             if (!await Exists(workflowId))

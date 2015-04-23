@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common.History;
+using Server.Interfaces;
 using Server.Logic;
 
 namespace Server.Controllers {

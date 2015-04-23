@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
-using Common;
 using Common.History;
 using Server.Interfaces;
 using Server.Storage;
@@ -29,6 +24,11 @@ namespace Server.Logic
         public async Task SaveHistory(HistoryModel toSave)
         {
             await _storage.SaveHistory(toSave);
+        }
+
+        public async Task SaveNoneWorkflowSpecificHistory(HistoryModel toSave)
+        {
+            await _storage.SaveNonWorkflowSpecificHistory(toSave);
         }
     }
 }
