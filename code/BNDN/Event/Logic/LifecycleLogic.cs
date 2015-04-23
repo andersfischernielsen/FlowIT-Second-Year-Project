@@ -68,7 +68,7 @@ namespace Event.Logic
 #endif
             // TODO: try-catch here?
             // Todo: Do we need what this method returns or is it waste of data-transfer?
-            var otherEvents = await serverCommunicator.PostEventToServer(dto);
+            await serverCommunicator.PostEventToServer(dto);
             try
             {
                 // Setup a new Event in own database.
