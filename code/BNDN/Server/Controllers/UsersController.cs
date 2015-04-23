@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Server.Interfaces;
 using Server.Logic;
 using Server.Storage;
 

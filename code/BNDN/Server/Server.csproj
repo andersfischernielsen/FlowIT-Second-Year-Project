@@ -80,7 +80,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Logic\IServerLogic.cs" />
+    <Compile Include="Interfaces\IServerLogic.cs" />
     <Compile Include="Logic\ServerLogic.cs" />
     <Compile Include="Exceptions\WorkflowAlreadyExistsException.cs" />
     <Compile Include="Migrations\Configuration.cs" />
@@ -88,10 +88,10 @@
     <Compile Include="Models\ServerRoleModel.cs" />
     <Compile Include="Models\ServerUserModel.cs" />
     <Compile Include="Models\ServerWorkflowModel.cs" />
-    <Compile Include="Storage\IServerContext.cs" />
+    <Compile Include="Interfaces\IServerContext.cs" />
     <Compile Include="Storage\ServerStorage.cs" />
     <Compile Include="Storage\StorageContext.cs" />
-    <Compile Include="Storage\IServerStorage.cs" />
+    <Compile Include="Interfaces\IServerStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
