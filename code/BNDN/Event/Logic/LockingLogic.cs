@@ -88,30 +88,51 @@ namespace Event.Logic
             var lockedEvents = new List<RelationToOtherEventModel>();
 
             // Attempt to lock down related, dependent Events down
-            
-            // Initiate the lockDto that is to be passed to the other Events
-            // identifing this Event as the lockowner
-            var lockDto = new LockDto {LockOwner = eventId, Id = eventId};
-
-            // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
-            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
-
 
             // Get dependent events
             var resp = _storage.GetResponses(workflowId, eventId);
             var incl = _storage.GetInclusions(workflowId, eventId);
             var excl = _storage.GetExclusions(workflowId, eventId);
 
-            // Put into Set to eliminate duplicates.
-            var eventsToBeLocked = new HashSet<RelationToOtherEventModel>(
-                resp.Concat(
-                    incl.Concat(
-                        excl))             // We have already locked ourselves, so no need to request that.
-                    .Where(relation => relation.WorkflowId != workflowId && relation.EventId != eventId));
+            var allDependentEventsSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+            // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
+            allDependentEventsSorted.Add(eventId.GetHashCode(), new RelationToOtherEventModel()
+            {
+                EventId = eventId,
+                WorkflowId = workflowId,
+                Uri = await _storage.GetUri(workflowId, eventId)
+            });
+
+            foreach (var res in resp)
+            {
+                if(!allDependentEventsSorted.ContainsKey(res.EventId.GetHashCode()))
+                {
+                    allDependentEventsSorted.Add(res.EventId.GetHashCode(), res);
+                }
+            }
+
+             foreach (var inc in incl)
+            {
+                if(!allDependentEventsSorted.ContainsKey(inc.EventId.GetHashCode()))
+                {
+                    allDependentEventsSorted.Add(inc.EventId.GetHashCode(), inc);
+                }
+            }
+
+             foreach (var exc in excl)
+            {
+                if(!allDependentEventsSorted.ContainsKey(exc.EventId.GetHashCode()))
+                {
+                    allDependentEventsSorted.Add(exc.EventId.GetHashCode(), exc);
+                }
+            }
+
+        
 
             // For every related, dependent Event, attempt to lock it
-            foreach (var relation in eventsToBeLocked)
+            foreach (var tuple in allDependentEventsSorted)
             {
+                var relation = tuple.Value;
                 var toLock = new LockDto {LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId};
 
                 try
@@ -121,12 +142,12 @@ namespace Event.Logic
                 }
                 catch (Exception)
                 {
-                    // Continue (we won't have added the relation, that failed to lock, to _lockedEvents)
+                    break;
                 }
 
             }
 
-            if (eventsToBeLocked.Count != lockedEvents.Count)
+            if (allDependentEventsSorted.Count != lockedEvents.Count)
             {
                 // TODO: May be an error here, if one list contains this Event itself, while the other does not. 
                 await UnlockSome(workflowId, eventId, lockedEvents);
@@ -161,9 +182,26 @@ namespace Event.Logic
             {
                 throw new NullReferenceException("At least one of response-,inclusions or exclusions-relations retrieved from storage was null");
             }
-            var eventsToBelocked = resp.Concat(incl.Concat(excl));
 
-            if (eventsToBelocked == null)
+            var eventsToBeUnlockedSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+
+            foreach (var res in resp)
+            {
+                if (!eventsToBeUnlockedSorted.ContainsKey(res.EventId.GetHashCode()))
+                {
+                    eventsToBeUnlockedSorted.Add(res.EventId.GetHashCode(), res);
+                }
+            }
+
+            foreach (var exc in excl)
+            {
+                if (!eventsToBeUnlockedSorted.ContainsKey(exc.EventId.GetHashCode()))
+                {
+                    eventsToBeUnlockedSorted.Add(exc.EventId.GetHashCode(), exc);
+                }
+            }
+
+            if (eventsToBeUnlockedSorted == null)
             {
                 throw new NullReferenceException("eventsToBelocked must not be null");
             }
@@ -172,8 +210,9 @@ namespace Event.Logic
             bool everyEventIsUnlocked = true;
 
             // Unlock the other Events. 
-            foreach (var relation in eventsToBelocked)
+            foreach (var tuple in eventsToBeUnlockedSorted)
             {
+                var relation = tuple.Value;
                 try
                 {
                     await _eventCommunicator.Unlock(relation.Uri, relation.WorkflowId, relation.EventId, eventId);
@@ -184,7 +223,7 @@ namespace Event.Logic
                     everyEventIsUnlocked = false;
                 }
             }
-
+            //unlock self
             await _storage.ClearLock(workflowId, eventId);
 
             return everyEventIsUnlocked;
