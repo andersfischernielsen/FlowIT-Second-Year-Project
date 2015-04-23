@@ -39,6 +39,21 @@ namespace Client.ViewModels
                 NotifyPropertyChanged("EventId");
             }
         }
+
+        private string _title = "";
+        public string Title
+        {
+            get
+            {
+                return _title;
+            }
+            set
+            {
+                _title = value;
+                NotifyPropertyChanged("Title");
+            }
+        }
+
         public string Message
         {
             get { return _historyDto.Message; }

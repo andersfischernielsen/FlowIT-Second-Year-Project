@@ -74,13 +74,13 @@ namespace Client.ViewModels
                 .ToList();
 
             // add the history of the server
-            ConcurrentBag<HistoryViewModel> history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto)));
+            ConcurrentBag<HistoryViewModel> history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto){Title = WorkflowId}));
 
             // add all the histories of the events.
             Parallel.ForEach(evenAddresses, async dto =>
             {
                 IEventConnection eventConnection = new EventConnection(dto, WorkflowId);
-                var list = (await eventConnection.GetHistory()).Select(historyDto => new HistoryViewModel(historyDto));
+                var list = (await eventConnection.GetHistory()).Select(historyDto => new HistoryViewModel(historyDto){Title = dto.Id});
                 list.ToList().ForEach(model => history.Add(model));
             });
 
