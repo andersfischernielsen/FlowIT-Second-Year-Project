@@ -159,7 +159,7 @@ namespace Event.Logic
                 throw new NotFoundException();
             }
 
-            var returnValue =  new EventDto
+            var returnValue = new EventDto
             {
                 EventId = eventId,
                 WorkflowId = workflowId,
