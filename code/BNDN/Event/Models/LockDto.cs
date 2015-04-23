@@ -1,4 +1,4 @@
-﻿namespace Event
+﻿namespace Event.Models
 {
     public class LockDto
     {
