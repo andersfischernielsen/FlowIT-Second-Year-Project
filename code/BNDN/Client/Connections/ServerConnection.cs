@@ -76,9 +76,9 @@ namespace Client.Connections
             }
         }
 
-        public Task<IEnumerable<HistoryDto>> GetHistory(string workflowId)
+        public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId)
         {
-            return _http.ReadList<HistoryDto>(String.Format("history/{0}", workflowId));
+            return await _http.ReadList<HistoryDto>(String.Format("history/{0}", workflowId));
         }
 
         public void Dispose()
