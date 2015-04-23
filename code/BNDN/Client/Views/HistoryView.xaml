@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ViewModels="clr-namespace:Client.ViewModels" x:Class="Client.Views.HistoryView"
         Title="HistoryView" Height="400" Width="550">
-    <Window.DataContext>
-        <ViewModels:HistoryListViewModel/>
-    </Window.DataContext>
-    <Grid>
+    <Grid x:Name="HistoryGrid">
+        <Grid.DataContext>
+            <ViewModels:HistoryListViewModel/>
+        </Grid.DataContext>
         <Grid.RowDefinitions>
             <RowDefinition Height="61"/>
             <RowDefinition/>
@@ -19,7 +19,7 @@
                     <UniformGrid Rows="1" Columns="3">
                         <Label Content="{Binding Title}" HorizontalAlignment="Stretch"/>
                         <Label Content="{Binding Message}" HorizontalAlignment="Stretch" />
-                        <Label Content="{Binding TimeSpamp}" HorizontalAlignment="Stretch" />
+                        <Label Content="{Binding TimeStamp}" HorizontalAlignment="Stretch" />
                     </UniformGrid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
