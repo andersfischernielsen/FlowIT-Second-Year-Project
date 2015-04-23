@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Common.History;
 using Event.Interfaces;
 using Event.Storage;
@@ -46,9 +44,9 @@ namespace Event.Logic
             await _storage.SaveHistory(toSave);
         }
 
-        public async Task<IQueryable<HistoryDto>> GetHistoryForEvent(string workflowId, string eventId)
+        public async Task<IEnumerable<HistoryDto>> GetHistoryForEvent(string workflowId, string eventId)
         {
-            var models = await _storage.GetHistoryForEvent(workflowId, eventId);
+            var models = (await _storage.GetHistoryForEvent(workflowId, eventId)).ToList();
             return models.Select(model => new HistoryDto(model));
         }
 

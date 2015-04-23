@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Common.History;
 using Server.Interfaces;
@@ -15,9 +16,9 @@ namespace Server.Logic
             _storage = new ServerStorage();
         }
 
-        public async Task<IQueryable<HistoryDto>> GetHistoryForWorkflow(string workflowId)
+        public async Task<IEnumerable<HistoryDto>> GetHistoryForWorkflow(string workflowId)
         {
-            var models = await _storage.GetHistoryForWorkflow(workflowId);
+            var models = (await _storage.GetHistoryForWorkflow(workflowId)).ToList();
             return models.Select(model => new HistoryDto(model));
         }
 

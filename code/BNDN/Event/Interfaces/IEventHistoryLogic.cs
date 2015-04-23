@@ -10,7 +10,7 @@ namespace Event.Interfaces
     {
         Task SaveHistory(HistoryModel toSave);
 
-        Task<IQueryable<HistoryDto>> GetHistoryForEvent(string workflowId, string eventId);
+        Task<IEnumerable<HistoryDto>> GetHistoryForEvent(string workflowId, string eventId);
 
         Task SaveException(Exception ex, string requestType, string method, string eventId = "", string workflowId = "");
 

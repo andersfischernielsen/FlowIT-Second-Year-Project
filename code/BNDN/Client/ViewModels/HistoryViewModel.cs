@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.History;
 
 namespace Client.ViewModels
 {
     public class HistoryViewModel : ViewModelBase
     {
-        private HistoryDto _historyDto;
+        private readonly HistoryDto _historyDto;
         public HistoryViewModel()
         {
             _historyDto = new HistoryDto();
@@ -64,7 +60,7 @@ namespace Client.ViewModels
             }
         }
 
-        public DateTime TimeSpamp
+        public DateTime TimeStamp
         {
             get { return _historyDto.TimeStamp; }
         }

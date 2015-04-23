@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using Client.Connections;
 using Client.Views;
-using Newtonsoft.Json;
 
 namespace Client.ViewModels
 {

@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using Client.Connections;
 using Common;
-using Common.History;
 
 namespace Client.ViewModels
 {
     public class HistoryListViewModel : ViewModelBase
     {
-        private Uri _serverAddress;
+        private readonly Uri _serverAddress;
         
         public HistoryListViewModel()
         {
@@ -61,12 +57,13 @@ namespace Client.ViewModels
         /// orders the list by timestamp
         /// </summary>
         /// <returns></returns>
-        public async Task GetHistory()
+        public async void GetHistory()
         {
             HistoryViewModelList.Clear();
+            NotifyPropertyChanged("");
 
             // create a server connection
-            IServerConnection serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
+            IServerConnection serverConnection = new ServerConnection(_serverAddress);
 
             // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
             var evenAddresses = (await serverConnection.GetEventsFromWorkflow(new WorkflowDto { Id = WorkflowId }))
@@ -77,18 +74,27 @@ namespace Client.ViewModels
             ConcurrentBag<HistoryViewModel> history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto){Title = WorkflowId}));
 
             // add all the histories of the events.
-            Parallel.ForEach(evenAddresses, async dto =>
+            var parallelLoopResult = Parallel.ForEach(evenAddresses, async dto =>
             {
                 IEventConnection eventConnection = new EventConnection(dto, WorkflowId);
                 var list = (await eventConnection.GetHistory()).Select(historyDto => new HistoryViewModel(historyDto){Title = dto.Id});
                 list.ToList().ForEach(model => history.Add(model));
             });
 
+            await Task.Run(() =>
+            {
+                while (!parallelLoopResult.IsCompleted)
+                {
+                    // Just you wait!
+                }
+            });
+
             // order them by timestamp
-            var orderedHistory = history.ToList().OrderByDescending(model => model.TimeSpamp);
+            var orderedHistory = history.ToList().OrderByDescending(model => model.TimeStamp);
 
             // move the list into the observable collection.
             HistoryViewModelList = new ObservableCollection<HistoryViewModel>(orderedHistory);
+            NotifyPropertyChanged("");
         }
         #endregion
     }
