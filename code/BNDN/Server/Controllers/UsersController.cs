@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.Exceptions;
 using Server.Interfaces;
 using Server.Logic;
 using Server.Storage;
@@ -21,27 +22,32 @@ namespace Server.Controllers
             _logic = logic;
         }
 
-        // GET: /Logins
+        // POST: /login loginDto
         /// <summary>
         /// Returns the users roles on all workflows.
         /// </summary>
-        /// <param name="username">Id of the requested workflow.</param>
+        /// <param name="loginDto"></param>
         /// <returns></returns>
-        [Route("login/{username}")]
-        [HttpGet]
-        public async Task<RolesOnWorkflowsDto> Login(string username)
+        [Route("login")]
+        [HttpPost]
+        public async Task<RolesOnWorkflowsDto> Login([FromBody] LoginDto loginDto)
         {
             try
             {
-                return await _logic.Login(username);
+                return await _logic.Login(loginDto);
             }
-            catch (InvalidOperationException ex)
+            catch (UnauthorizedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, ex));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
+                    "Username or password does not correspond to a user."));
+            }
+            catch (Exception ex)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
             }
         }
 
-        [Route("login"), HttpPost]
+        [Route("users"), HttpPost]
         public async Task CreateUser([FromBody] UserDto dto)
         {
             if (!ModelState.IsValid)

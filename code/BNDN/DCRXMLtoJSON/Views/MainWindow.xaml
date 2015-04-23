@@ -37,6 +37,10 @@
                 <TextBlock Text="{DynamicResource EventUrls}"/>
                 <TextBox x:Name="EventUrls" Text="{Binding EventUris}"/>
             </StackPanel>
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Password}"/>
+                <TextBox x:Name="Password" Text="{Binding DefaultPassword}"/>
+            </StackPanel>
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                 <CheckBox Content="{DynamicResource CreateWorkflow}" IsChecked="{Binding CreateWorkflow}" />
                 <CheckBox Content="{DynamicResource CreateUsers}" IsChecked="{Binding CreateUsers}" />

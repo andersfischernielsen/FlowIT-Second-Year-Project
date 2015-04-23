@@ -32,12 +32,13 @@ namespace DcrParserGraphic
             }
         }
         //THIS MUST HAPPEN after Upload()
-        public async Task UploadUsers(IEnumerable<string> roles)
+        public async Task UploadUsers(IEnumerable<string> roles, string password)
         {
             var tool = new HttpClientToolbox(_serverAddress);
             foreach (var user in roles.Select(r => new UserDto
             {
-                Name = r, 
+                Name = r,
+                Password = password,
                 Roles = new List<WorkflowRole>
                 {
                     new WorkflowRole
@@ -49,7 +50,7 @@ namespace DcrParserGraphic
                 
             }))
             {
-                await tool.Create("login", user);
+                await tool.Create("users", user);
             }
         }
     }

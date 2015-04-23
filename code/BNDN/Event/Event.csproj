@@ -119,7 +119,7 @@
     <Compile Include="Models\EventModel.cs" />
     <Compile Include="Storage\EventStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerCommunicator.cs" />
+    <Compile Include="Communicators\ServerCommunicator.cs" />
     <Compile Include="Storage\EventStorageForReset.cs" />
   </ItemGroup>
   <ItemGroup>

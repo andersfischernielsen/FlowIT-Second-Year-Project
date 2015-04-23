@@ -49,9 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\LockedException.cs" />
-    <Compile Include="Exceptions\NotAuthorizedException.cs" />
+    <Compile Include="Exceptions\UnauthorizedException.cs" />
     <Compile Include="Exceptions\NotExecutableException.cs" />
     <Compile Include="Exceptions\NotFoundException.cs" />
+    <Compile Include="LoginDto.cs" />
     <Compile Include="History\HistoryDto.cs" />
     <Compile Include="History\HistoryModel.cs" />
     <Compile Include="RoleDto.cs" />
@@ -76,7 +77,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

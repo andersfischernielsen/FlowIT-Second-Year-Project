@@ -267,7 +267,7 @@ namespace Event.Controllers
 
                 throw toThrow;
             }
-            catch (NotAuthorizedException)
+            catch (UnauthorizedException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
                     "You do not have permission to execute this event"));

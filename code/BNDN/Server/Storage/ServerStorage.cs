@@ -19,9 +19,13 @@ namespace Server.Storage
             _db = context ?? new StorageContext();
         }
 
-        public async Task<ServerUserModel> GetUser(string username)
+        public async Task<ServerUserModel> GetUser(string username, string password)
         {
-            return await _db.Users.SingleOrDefaultAsync(user => string.Equals(user.Name, username));
+            var user = await _db.Users.SingleOrDefaultAsync(u => string.Equals(u.Name, username));
+
+            if (user == null) return null;
+
+            return PasswordHasher.VerifyHashedPassword(password, user.Password) ? user : null;
         }
 
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
@@ -69,11 +73,10 @@ namespace Server.Storage
             {
                 throw new ArgumentException("User already exists", "user");
             }
-            var uu = _db.Users.Create();
-            uu.Name = user.Name;
-            uu.ServerRolesModels = user.ServerRolesModels;
 
-            _db.Users.Add(uu);
+            user.Password = PasswordHasher.HashPassword(user.Password);
+
+            _db.Users.Add(user);
 
             await _db.SaveChangesAsync();
         }

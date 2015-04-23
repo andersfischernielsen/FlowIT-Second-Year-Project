@@ -5,10 +5,10 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.Exceptions;
 using Server.Exceptions;
 using Server.Interfaces;
 using Server.Models;
-using Server.Storage;
 
 namespace Server.Logic
 {
@@ -43,13 +43,13 @@ namespace Server.Logic
             };
         }
 
-        public async Task<RolesOnWorkflowsDto> Login(string username)
+        public async Task<RolesOnWorkflowsDto> Login(LoginDto loginDto)
         {
-            var user = await _storage.GetUser(username);
+            var user = await _storage.GetUser(loginDto.Username, loginDto.Password);
 
             if (user == null)
             {
-                throw new InvalidOperationException("User was not found.");
+                throw new UnauthorizedException();
             }
 
             var rolesModels = await _storage.Login(user);
@@ -74,7 +74,7 @@ namespace Server.Logic
 
         public async Task AddUser(UserDto dto)
         {
-            var user = new ServerUserModel {Name = dto.Name};
+            var user = new ServerUserModel {Name = dto.Name, Password = dto.Password};
             var roles = new List<ServerRoleModel>();
 
             foreach (var role in dto.Roles)

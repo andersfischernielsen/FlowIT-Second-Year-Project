@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Common;
 using Event.Interfaces;
 
-namespace Event
+namespace Event.Communicators
 {
     /// <summary>
     /// ServerCommunicator is the module through which Event has its outgoing communication with Server 
@@ -29,7 +29,7 @@ namespace Event
         }
 
 
-        public async Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto addressDto)
+        public async Task PostEventToServer(EventAddressDto addressDto)
         {
             if (string.IsNullOrEmpty(_eventId)
                     || string.IsNullOrEmpty(_workflowId)
@@ -39,7 +39,7 @@ namespace Event
             }
 
             var path = string.Format("workflows/{0}", _workflowId);
-            return await _httpClient.Create<EventAddressDto, IEnumerable<EventAddressDto>>(path, addressDto);
+            await _httpClient.Create(path, addressDto);
         }
 
         public async Task DeleteEventFromServer()

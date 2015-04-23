@@ -26,7 +26,7 @@ namespace Event.Tests.LogicTests
         [SetUp]
         public void SetUp()
         {
-            _eventStorageMock = new Mock<IEventStorage>();
+            _eventStorageMock = new Mock<IEventStorage>(MockBehavior.Strict);
 
             _eventStorageMock.Setup(s => s.Exists(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
             _eventStorageMock.Setup(s => s.GetIncluded(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
@@ -35,19 +35,19 @@ namespace Event.Tests.LogicTests
             _eventStorageMock.Setup(s => s.GetInclusions(It.IsAny<string>(), It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
             _eventStorageMock.Setup(s => s.GetExclusions(It.IsAny<string>(), It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
 
-            _lockingLogicMock = new Mock<ILockingLogic>();
+            _lockingLogicMock = new Mock<ILockingLogic>(MockBehavior.Strict);
 
             // Make the Event unlocked unless other is specified.
             _lockingLogicMock.Setup(l => l.IsAllowedToOperate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
             _lockingLogicMock.Setup(l => l.LockAll(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
             _lockingLogicMock.Setup(l => l.UnlockAll(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
 
-            _authLogicMock = new Mock<IAuthLogic>();
+            _authLogicMock = new Mock<IAuthLogic>(MockBehavior.Strict);
 
             // Make the caller authorized
             _authLogicMock.Setup(a => a.IsAuthorized(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>())).ReturnsAsync(true);
 
-            _eventCommunicatorMock = new Mock<IEventFromEvent>();
+            _eventCommunicatorMock = new Mock<IEventFromEvent>(MockBehavior.Strict);
 
             _stateLogic = new StateLogic(_eventStorageMock.Object, _lockingLogicMock.Object, _authLogicMock.Object, _eventCommunicatorMock.Object);
         }
@@ -252,7 +252,7 @@ namespace Event.Tests.LogicTests
             var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("workflowId", "eventId", new RoleDto { Roles = new List<string> { "WrongRole" } }));
 
             // Assert
-            Assert.Throws<NotAuthorizedException>(testDelegate);
+            Assert.Throws<UnauthorizedException>(testDelegate);
         }
 
         [Test]

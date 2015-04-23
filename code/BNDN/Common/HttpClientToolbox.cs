@@ -172,7 +172,7 @@ namespace Common
                 case HttpStatusCode.NotFound:
                     throw new NotFoundException();
                 case HttpStatusCode.Unauthorized:
-                    throw new NotAuthorizedException();
+                    throw new UnauthorizedException();
                 case HttpStatusCode.Conflict:
                     throw new LockedException();
                 case HttpStatusCode.PreconditionFailed:

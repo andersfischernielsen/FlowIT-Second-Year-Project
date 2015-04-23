@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Common;
 using Common.Exceptions;
 using Event.Communicators;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
@@ -69,7 +68,7 @@ namespace Event.Logic
 #endif
             // TODO: try-catch here?
             // Todo: Do we need what this method returns or is it waste of data-transfer?
-            var otherEvents = await serverCommunicator.PostEventToServer(dto);
+            await serverCommunicator.PostEventToServer(dto);
             try
             {
                 // Setup a new Event in own database.

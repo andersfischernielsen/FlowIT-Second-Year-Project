@@ -8,7 +8,7 @@ namespace Server.Interfaces
 {
     public interface IServerStorage : IDisposable, IServerHistoryStorage
     {
-        Task<ServerUserModel> GetUser(string username);
+        Task<ServerUserModel> GetUser(string username, string password);
 
         Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel);
 
@@ -26,7 +26,6 @@ namespace Server.Interfaces
         /// <summary>
         /// Add event to a workflow
         /// </summary>
-        /// <param name="workflow"></param>
         /// <param name="eventToBeAddedDto"></param>
         Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
         
