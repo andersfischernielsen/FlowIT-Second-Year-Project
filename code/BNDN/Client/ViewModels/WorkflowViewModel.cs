@@ -63,8 +63,12 @@ namespace Client.ViewModels
 
             IServerConnection connection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
 
+            var settings = Settings.LoadSettings();
+            var username = settings.Username;
+
             var test = (await connection.GetEventsFromWorkflow(_workflowDto))
                 .AsParallel()
+                .Where(e => e.Roles.Any(r => r == username)) //Only selects the events, the current user can execute
                 .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
                 .ToList();
 
