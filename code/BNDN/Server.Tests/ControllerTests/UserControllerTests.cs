@@ -6,6 +6,7 @@ using Moq;
 using NUnit.Framework;
 using Server.Controllers;
 using Server.Interfaces;
+using Server.Logic;
 
 namespace Server.Tests.ControllerTests
 {
@@ -14,13 +15,15 @@ namespace Server.Tests.ControllerTests
     {
         private Mock<IServerLogic> _logicMock;
         private UsersController _usersController;
+        private Mock<IWorkflowHistoryLogic> _historyLogic;
 
         [SetUp]
         public void SetUp()
         {
             _logicMock = new Mock<IServerLogic>();
-
-            _usersController = new UsersController(_logicMock.Object) {Request = new HttpRequestMessage()};
+            _historyLogic = new Mock<IWorkflowHistoryLogic>();
+            
+            _usersController = new UsersController(_logicMock.Object, _historyLogic.Object) {Request = new HttpRequestMessage()};
         }
 
         [Test]

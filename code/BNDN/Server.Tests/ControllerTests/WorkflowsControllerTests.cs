@@ -21,14 +21,16 @@ namespace Server.Tests.ControllerTests
     {
         private Mock<IServerLogic> _mock;
         private WorkflowsController _controller;
+        private Mock<IWorkflowHistoryLogic> _historyLogic;
 
         [SetUp]
         public void SetUp()
         {
             _mock = new Mock<IServerLogic>();
+            _historyLogic = new Mock<IWorkflowHistoryLogic>();
             _mock.Setup(logic => logic.Dispose());
 
-            _controller = new WorkflowsController(_mock.Object) { Request = new HttpRequestMessage()};
+            _controller = new WorkflowsController(_mock.Object, _historyLogic.Object) { Request = new HttpRequestMessage() };
         }
 
         #region GET Workflows

@@ -17,7 +17,7 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <UniformGrid Rows="1" Columns="3">
-                        <Label Content="{Binding EventId}" HorizontalAlignment="Stretch"/>
+                        <Label Content="{Binding Title}" HorizontalAlignment="Stretch"/>
                         <Label Content="{Binding Message}" HorizontalAlignment="Stretch" />
                         <Label Content="{Binding TimeSpamp}" HorizontalAlignment="Stretch" />
                     </UniformGrid>

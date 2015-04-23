@@ -19,7 +19,7 @@ namespace Server.Interfaces
         /// <returns></returns>
         Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(ServerWorkflowModel workflow);
 
-        Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
+        Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
 
         Task AddUser(ServerUserModel user);
 

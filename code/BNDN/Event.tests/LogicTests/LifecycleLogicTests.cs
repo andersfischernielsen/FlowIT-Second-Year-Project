@@ -178,22 +178,22 @@ namespace Event.Tests.LogicTests
 
         #region GetEvent tests
         [Test]
-        public async Task GetEvent_WillReturnNullIfNoMatchingEventExists()
+        public void GetEvent_Will_Throw_NotFoundException_If_Ids_Does_Not_Exist()
         {
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
-            mockStorage.Setup(m => m.Exists(It.IsAny<string>(), It.IsAny<string>())).Returns(() => Task.Run(() => false));
+            mockStorage.Setup(m => m.Exists(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
             var mockResetStorage = new Mock<IEventStorageForReset>();
             var mockLockLogic = new Mock<ILockingLogic>();
 
             ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object,mockResetStorage.Object,mockLockLogic.Object);
 
             // Act
-            var getEvent = await logic.GetEventDto("workflowId", "someEvent");
+            var testdelegate = new TestDelegate(async () => await logic.GetEventDto("workflowId", "someEvent"));
 
             // Assert
-            Assert.IsNull(getEvent);
-
+            Assert.Throws<NotFoundException>(testdelegate);
+            
         }
 
         [Test]
