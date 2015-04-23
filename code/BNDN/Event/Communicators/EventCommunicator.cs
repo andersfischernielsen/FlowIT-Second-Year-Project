@@ -69,8 +69,11 @@ namespace Event.Communicators
         /// <returns></returns>
         public async Task Lock(Uri targetEventUri, LockDto lockDto, string targetWorkflowId, string targetId)
         {
+            long oldTimeout = _httpClient.HttpClient.Timeout.Ticks;
+            _httpClient.HttpClient.Timeout = new TimeSpan(0,0,10);
             _httpClient.SetBaseAddress(targetEventUri);
             await _httpClient.Create(String.Format("events/{0}/{1}/lock",targetWorkflowId, targetId), lockDto);
+            _httpClient.HttpClient.Timeout = new TimeSpan(oldTimeout);
         }
 
         /// <summary>

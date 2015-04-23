@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Exceptions;
@@ -23,27 +25,32 @@ namespace Event.Logic
 
         public static void AddToQueue(string workflowId, string eventId, LockDto lockDto)
         {
-            if (!_lockQueue.ContainsKey(workflowId))
-            {
-                _lockQueue.TryAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
-            }
-
-            ConcurrentDictionary<string, ConcurrentQueue<LockDto>> eventDictionary;
-            if (!_lockQueue.TryGetValue(workflowId, out eventDictionary))
-            {
-                if (!eventDictionary.ContainsKey(eventId))
-                {
-                    eventDictionary.TryAdd(eventId, new ConcurrentQueue<LockDto>());
-                }
-            }
-
-            ConcurrentQueue<LockDto> eventQueue;
-            if (!)
-            {
-                
-            }
-
+            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
+            queue.Enqueue(lockDto);
         }
+
+        public static LockDto Dequeue(string workflowId, string eventId, LockDto lockDto)
+        {
+            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
+            LockDto next;
+            queue.TryDequeue(out next);
+            return next;
+        }
+
+        public static bool AmINext(string workflowId, string eventId, LockDto lockDto)
+        {
+            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
+            LockDto next;
+            if (queue.TryPeek(out next))
+            {
+                return next.LockOwner == lockDto.LockOwner && next.WorkflowId == lockDto.WorkflowId;
+            }
+            return false;
+        }
+
 
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
         {
@@ -61,22 +68,36 @@ namespace Event.Logic
                 throw new ArgumentNullException("eventId", "was null");
             }
 
-            // Check if this Event is currently locked
-            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
-            {
-                // TODO: Throw more relevant exception
-                throw new ApplicationException();
-            }
-
             // Checks that the provided lockDto actually has sensible values for its fields.
             if (String.IsNullOrEmpty(lockDto.LockOwner) || String.IsNullOrWhiteSpace(lockDto.LockOwner))
             {
                 // Reject request on setting the lockDto
                 throw new ArgumentException("lockDto.lockOwner was null");
             }
-
+            //TODO: Why this guy?, Is ID null?
             lockDto.Id = eventId;
+
+
+            // Check if this Event is currently locked
+            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
+            {
+                AddToQueue(workflowId, eventId, lockDto);
+                var watch = new Stopwatch();
+                watch.Start();
+                //todo: ugly mayby?
+                while (!AmINext(workflowId, eventId, lockDto))
+                {
+                    if (watch.Elapsed.Seconds > 10)
+                    {
+                        throw new InvalidOperationException("Waited too long");
+                    }
+                    await Task.Delay(100);
+                }
+                Dequeue(workflowId, eventId, lockDto);
+            }
+
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
+
         }
 
         public async Task UnlockSelf(string workflowId, string eventId, string callerId)
@@ -87,11 +108,11 @@ namespace Event.Logic
             }
             if (eventId == null)
             {
-                throw new ArgumentNullException("callerId","callerId was null");
+                throw new ArgumentNullException("callerId", "callerId was null");
             }
             if (callerId == null)
             {
-                throw new ArgumentNullException("eventId","eventId was null");
+                throw new ArgumentNullException("eventId", "eventId was null");
             }
             if (!await IsAllowedToOperate(workflowId, eventId, callerId))
             {
@@ -108,7 +129,7 @@ namespace Event.Logic
             }
             if (eventId == null)
             {
-                throw  new ArgumentNullException("eventId");
+                throw new ArgumentNullException("eventId");
             }
 
             var lockedEvents = new List<RelationToOtherEventModel>();
@@ -131,35 +152,35 @@ namespace Event.Logic
 
             foreach (var res in resp)
             {
-                if(!allDependentEventsSorted.ContainsKey(res.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(res.EventId.GetHashCode()))
                 {
                     allDependentEventsSorted.Add(res.EventId.GetHashCode(), res);
                 }
             }
 
-             foreach (var inc in incl)
+            foreach (var inc in incl)
             {
-                if(!allDependentEventsSorted.ContainsKey(inc.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(inc.EventId.GetHashCode()))
                 {
                     allDependentEventsSorted.Add(inc.EventId.GetHashCode(), inc);
                 }
             }
 
-             foreach (var exc in excl)
+            foreach (var exc in excl)
             {
-                if(!allDependentEventsSorted.ContainsKey(exc.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(exc.EventId.GetHashCode()))
                 {
                     allDependentEventsSorted.Add(exc.EventId.GetHashCode(), exc);
                 }
             }
 
-        
+
 
             // For every related, dependent Event, attempt to lock it
             foreach (var tuple in allDependentEventsSorted)
             {
                 var relation = tuple.Value;
-                var toLock = new LockDto {LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId};
+                var toLock = new LockDto { LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId };
 
                 try
                 {
@@ -197,7 +218,7 @@ namespace Event.Logic
             }
             if (eventId == null)
             {
-                throw new ArgumentNullException("eventId","provided eventId was null");
+                throw new ArgumentNullException("eventId", "provided eventId was null");
             }
 
             // Gather dependent events
@@ -263,11 +284,11 @@ namespace Event.Logic
             }
             if (eventId == null)
             {
-                throw new ArgumentNullException("eventId","eventId was null");
+                throw new ArgumentNullException("eventId", "eventId was null");
             }
             if (callerId == null)
             {
-                throw new ArgumentNullException("callerId","caller id was null");
+                throw new ArgumentNullException("callerId", "caller id was null");
             }
 
             var lockDto = await _storage.GetLockDto(workflowId, eventId);
@@ -293,7 +314,7 @@ namespace Event.Logic
             }
             if (eventId == null)
             {
-                throw new ArgumentNullException("eventId","eventId was null");
+                throw new ArgumentNullException("eventId", "eventId was null");
             }
             if (eventsToBeUnlocked == null)
             {
