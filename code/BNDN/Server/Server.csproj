@@ -81,7 +81,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Logic\IWorkflowHistoryLogic.cs" />
+    <Compile Include="Interfaces\IWorkflowHistoryLogic.cs" />
     <Compile Include="Interfaces\IServerLogic.cs" />
     <Compile Include="Logic\ServerLogic.cs" />
     <Compile Include="Exceptions\WorkflowAlreadyExistsException.cs" />
@@ -91,7 +91,7 @@
     <Compile Include="Models\ServerRoleModel.cs" />
     <Compile Include="Models\ServerUserModel.cs" />
     <Compile Include="Models\ServerWorkflowModel.cs" />
-    <Compile Include="Storage\IServerHistoryStorage.cs" />
+    <Compile Include="Interfaces\IServerHistoryStorage.cs" />
     <Compile Include="Interfaces\IServerContext.cs" />
     <Compile Include="Storage\PasswordHasher.cs" />
     <Compile Include="Storage\ServerStorage.cs" />
