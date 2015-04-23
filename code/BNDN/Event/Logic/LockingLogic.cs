@@ -50,10 +50,9 @@ namespace Event.Logic
             }
 
             lockDto.Id = eventId;
-            
-            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);    
-        }
 
+            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner); 
+        }
 
         /// <summary>
         /// Tries to unlock the specified Event

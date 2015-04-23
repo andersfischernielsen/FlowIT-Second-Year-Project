@@ -58,21 +58,21 @@ namespace Event.Controllers
             catch (NotFoundException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
-                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (LockedException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
-                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (ArgumentNullException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "GetExecuted: Seems input was not satisfactory"));
+                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId).Wait();
+                throw toThrow;
             }
         }
 
@@ -96,21 +96,24 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
                     "GetIncluded: Not Found"));
+                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId).Wait();
+                throw toThrow;
             }
             catch (LockedException)
             {
-                var toThrow =
-                    new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                         "GetIncluded: Event is locked"));
-                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId);
+                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (ArgumentNullException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "GetIncluded: Seems input was not satisfactory"));
+                _historyLogic.SaveException(toThrow, "GET", "GetExecuted", eventId, workflowId).Wait();
+                throw toThrow;
             }
         }
 
@@ -136,20 +139,21 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "GetState: Seems input was not satisfactory"));
+                _historyLogic.SaveException(toThrow, "GET", "GetState", eventId, workflowId).Wait();
+                throw toThrow;
             }
             catch (NotFoundException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "GetState: Not Found"));
-                _historyLogic.SaveException(toThrow, "GET", "GetState", eventId, workflowId);
+                _historyLogic.SaveException(toThrow, "GET", "GetState", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (LockedException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "GetState: Event is locked"));
-                _historyLogic.SaveException(toThrow, "GET", "GetState", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "GET", "GetState", eventId, workflowId).Wait();
                 throw toThrow;
             }
         }
@@ -183,26 +187,28 @@ namespace Event.Controllers
             catch (NotFoundException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "UpdateIncluded: Not Found"));
-                _historyLogic.SaveException(toThrow, "PUT", "UpdateIncluded", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (ArgumentNullException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "UpdateIncluded: Provided input was null"));
+                _historyLogic.SaveException(toThrow, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
+                throw toThrow;
             }
             catch (LockedException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "UpdateIncluded: Event is locked"));
-                _historyLogic.SaveException(toThrow, "PUT", "UpdateIncluded", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (FailedToUpdateIncludedAtAnotherEventException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "UpdateIncluded: Failed to get Included from another Event"));
+                _historyLogic.SaveException(toThrow, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
+                throw toThrow;
             }
         }
 
@@ -234,27 +240,29 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "UpdatePending: Provided input was null"));
+                _historyLogic.SaveException(toThrow, "PUT", "UpdatePending", eventId, workflowId).Wait();
+                throw toThrow;
             }
             catch (NotFoundException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "UpdatePending: Not Found"));
-                _historyLogic.SaveException(toThrow, "PUT", "UpdatePending", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "UpdatePending", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (LockedException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "UpdatePending: Event is locked"));
-                _historyLogic.SaveException(toThrow, "PUT", "UpdatePending", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "UpdatePending", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (FailedToUpdatePendingAtAnotherEventException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "UpdatePending: Failed to update Pending at another Event"));
+                _historyLogic.SaveException(toThrow, "PUT", "UpdatePending", eventId, workflowId).Wait();
+                throw toThrow;
             }
         }
 
@@ -288,59 +296,54 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
                     "Execute: Not Found"));
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
+                throw toThrow;
             }
             catch (LockedException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
-                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (UnauthorizedException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
                     "You do not have permission to execute this event"));
-                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (NotExecutableException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed,
                     "Event is not executable."));
-                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (FailedToLockOtherEventException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Another event is locked"));
-                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (FailedToUnlockOtherEventException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Could not unlock other events."));
-                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (FailedToUpdateStateException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "State could not be saved!"));
-                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId);
-
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
                 throw toThrow;
             }
             catch (FailedToUpdateStateAtOtherEventException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Another event could not save state!"));
-                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId);
-
-                throw toThrow;
+                _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
+                throw toThrow; ;
             }
         }
 

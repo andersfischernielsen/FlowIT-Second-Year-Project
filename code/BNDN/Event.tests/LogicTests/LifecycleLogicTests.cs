@@ -6,6 +6,7 @@ using Common.Exceptions;
 using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
+using Event.Models;
 using Moq;
 using NUnit.Framework;
 

@@ -4,6 +4,7 @@ using Common;
 using Event.Exceptions;
 using Event.Exceptions.EventInteraction;
 using Event.Interfaces;
+using Event.Models;
 
 namespace Event.Communicators
 {

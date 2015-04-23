@@ -168,7 +168,8 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act 
-            var testDelegate = new TestDelegate(async () => await logic.LockSelf("workflowId", "testA", null));
+            LockDto nullLockDto = null;
+            var testDelegate = new TestDelegate(async () => await logic.LockSelf("workflowId", "testA", nullLockDto));
 
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
