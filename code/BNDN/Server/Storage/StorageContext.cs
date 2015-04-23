@@ -28,7 +28,6 @@ namespace Server.Storage
                     .MapLeftKey("EventRefId")
                     .MapRightKey("RoleRefId", "WorkflowRefId")
                     .ToTable("EventRoles"));
-            
 
             modelBuilder.Entity<ServerRoleModel>()
                 .HasRequired(role => role.ServerWorkflowModel)
