@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,11 +13,36 @@ namespace Event.Logic
     {
         private readonly IEventStorage _storage;
         private readonly IEventFromEvent _eventCommunicator;
-
+        //QUEUE is holding a dictionary of string (workflowid) , dictionary which holds string (eventid), the queue
+        private static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> _lockQueue = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>>();
         public LockingLogic(IEventStorage storage, IEventFromEvent eventCommunicator)
         {
             _storage = storage;
             _eventCommunicator = eventCommunicator;
+        }
+
+        public static void AddToQueue(string workflowId, string eventId, LockDto lockDto)
+        {
+            if (!_lockQueue.ContainsKey(workflowId))
+            {
+                _lockQueue.TryAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            }
+
+            ConcurrentDictionary<string, ConcurrentQueue<LockDto>> eventDictionary;
+            if (!_lockQueue.TryGetValue(workflowId, out eventDictionary))
+            {
+                if (!eventDictionary.ContainsKey(eventId))
+                {
+                    eventDictionary.TryAdd(eventId, new ConcurrentQueue<LockDto>());
+                }
+            }
+
+            ConcurrentQueue<LockDto> eventQueue;
+            if (!)
+            {
+                
+            }
+
         }
 
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
