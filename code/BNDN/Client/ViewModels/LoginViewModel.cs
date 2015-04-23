@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using Client.Connections;
 using Client.Views;
-using Newtonsoft.Json;
 
 namespace Client.ViewModels
 {
@@ -72,19 +70,22 @@ namespace Client.ViewModels
             IServerConnection connection = new ServerConnection(_serverAddress);
             try
             {
-                var roles = await connection.Login(Username);
+                var roles = await connection.Login(Username, Password);
                 Status = "Login successful";
                 RoleForWorkflow = roles.RolesOnWorkflows;
-
 
                 // Save settings
                 var settings = new Settings
                 {
                     ServerAddress = _serverAddress.AbsoluteUri,
-                    Username = _username
+                    Username = _username,
                 };
-                File.WriteAllText("settings.json", JsonConvert.SerializeObject(settings, Formatting.Indented));
+                
+                
+                settings.SaveSettings();
                 // Save settings end.
+
+                
 
                 var window = new MainWindow();
                 window.Show();
@@ -92,15 +93,8 @@ namespace Client.ViewModels
             }
             catch (Exception ex)
             {
-                if (ex is LoginFailedException || ex is ServerNotFoundException)
-                {
-                    _loginStarted = false;
-                    Status = ex.Message;
-                }
-                else
-                {
-                    throw;
-                }
+                _loginStarted = false;
+                Status = ex.Message;
             }
             
         }

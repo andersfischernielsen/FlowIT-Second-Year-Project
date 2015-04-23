@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="Views/LoginView.xaml">
     <Application.Resources>
-         <Style x:Key="FillTextBoxStyle" TargetType="TextBox">
+        <Style x:Key="FillTextBoxStyle" TargetType="TextBox">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="FontSize" Value="24"/>

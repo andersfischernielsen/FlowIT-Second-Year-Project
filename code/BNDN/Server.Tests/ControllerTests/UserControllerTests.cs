@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 using System.Web.Http;
 using Common;
+using Common.Exceptions;
 using Moq;
 using NUnit.Framework;
 using Server.Controllers;
@@ -18,16 +13,27 @@ namespace Server.Tests.ControllerTests
     [TestFixture]
     public class UserControllerTests
     {
+        private Mock<IServerLogic> _logicMock;
+        private UsersController _usersController;
+        private Mock<IWorkflowHistoryLogic> _historyLogic;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _logicMock = new Mock<IServerLogic>();
+            _historyLogic = new Mock<IWorkflowHistoryLogic>();
+            
+            _usersController = new UsersController(_logicMock.Object, _historyLogic.Object) {Request = new HttpRequestMessage()};
+        }
+
         [Test]
         public void LoginWithAUserThatDoesntExistThrowsException()
         {
-            //Assign
-            var mock = new Mock<IServerLogic>();
-            mock.Setup(t => t.Login(It.IsAny<string>())).Throws(new InvalidOperationException());
-            var control = new UsersController(mock.Object);
+            //Arrange
+            _logicMock.Setup(t => t.Login(It.IsAny<LoginDto>())).ThrowsAsync(new UnauthorizedException());
             
             //Action
-            var testDel = new TestDelegate(() => control.Login("doesntexist"));
+            var testDel = new TestDelegate(async () => await _usersController.Login(new LoginDto{Username = "doesntexist", Password = "yay"}));
 
             //Assert
             Assert.Throws<HttpResponseException>(testDel);

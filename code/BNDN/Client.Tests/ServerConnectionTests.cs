@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Client.Connections;
 using Common;
+using Common.Exceptions;
 using Moq;
 using NUnit.Framework;
 
@@ -96,13 +97,13 @@ namespace Client.Tests
                 RolesOnWorkflows = rolesOnWorkflows
             };
 
-            m.Setup(t => t.Read<RolesOnWorkflowsDto>(It.IsAny<string>()))
+            m.Setup(t => t.Create<LoginDto, RolesOnWorkflowsDto>(It.IsAny<string>(), It.IsAny<LoginDto>()))
                 .ReturnsAsync(rolesOnWorkflowDto);
 
             var serverConnection = new ServerConnection(m.Object);
 
             // Act
-            var rolesOnWorkflow = await serverConnection.Login("testy-testy");
+            var rolesOnWorkflow = await serverConnection.Login("testy-testy", "testy-password");
 
             // Assert
             Assert.IsNotNull(rolesOnWorkflow);
@@ -115,13 +116,13 @@ namespace Client.Tests
             // Arrange
             var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
 
-            m.Setup(t => t.Read<RolesOnWorkflowsDto>(It.IsAny<string>()))
-                .ThrowsAsync(new HttpRequestException("400 (Bad Request)"));
+            m.Setup(t => t.Create<LoginDto, RolesOnWorkflowsDto>(It.IsAny<string>(), It.IsAny<LoginDto>()))
+                .ThrowsAsync(new UnauthorizedException());
 
             var serverConnection = new ServerConnection(m.Object);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await serverConnection.Login("wrongUsername"));
+            var testDelegate = new TestDelegate(async () => await serverConnection.Login("wrongUsername", "wrongPassword"));
 
             // Assert
             Assert.Throws<LoginFailedException>(testDelegate);

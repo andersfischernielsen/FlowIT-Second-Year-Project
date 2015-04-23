@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.Exceptions;
 using Event.Exceptions;
+using Common.History;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
@@ -15,7 +16,7 @@ namespace Event.Storage
     /// EventStorage is the application-layer that rests on top of the actual storage-facility (a database)
     /// EventStorage implements IEventStorage-interface.
     /// </summary>
-    public class EventStorage : IEventStorage
+    public class EventStorage : IEventStorage, IEventHistoryStorage
     {
         private readonly IEventContext _context;
 
@@ -838,5 +839,26 @@ namespace Event.Storage
             }
         }
         #endregion
+
+        public async Task SaveHistory(HistoryModel toSave)
+        {
+            if (!await Exists(toSave.WorkflowId, toSave.EventId))
+            {
+                throw new InvalidOperationException("The EventId does not exist");
+            }
+
+            _context.History.Add(toSave);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IQueryable<HistoryModel>> GetHistoryForEvent(string workflowId, string eventId)
+        {
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new InvalidOperationException("The EventId does not exist");
+            }
+
+            return _context.History.Where(h => h.EventId == eventId && h.WorkflowId == workflowId);
+        }
     }
 }

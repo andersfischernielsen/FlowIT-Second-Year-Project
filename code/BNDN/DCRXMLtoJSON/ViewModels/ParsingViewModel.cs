@@ -15,6 +15,7 @@ namespace DcrParserGraphic.ViewModels
         private string _eventUris;
         private bool _createWorkflow;
         private bool _createUsers;
+        private string _defaultPassword;
 
         public string XmlFilePath
         {
@@ -53,6 +54,16 @@ namespace DcrParserGraphic.ViewModels
             {
                 _serverUri = value;
                 NotifyPropertyChanged("ServerUri");
+            }
+        }
+
+        public string DefaultPassword
+        {
+            get { return _defaultPassword; }
+            set
+            {
+                _defaultPassword = value;
+                NotifyPropertyChanged("DefaultPassword");
             }
         }
 
@@ -167,7 +178,7 @@ namespace DcrParserGraphic.ViewModels
                 {
                     try
                     {
-                        await uploader.UploadUsers(roles);
+                        await uploader.UploadUsers(roles, DefaultPassword);
                     }
                     catch (Exception e)
                     {

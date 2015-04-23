@@ -16,15 +16,51 @@ namespace Event.Tests.ControllersTests
     class StateControllerTests
     {
         private Mock<IStateLogic> _stateLogicMock;
+        private Mock<IEventHistoryLogic> _historyLogicMock;
         private StateController _stateController;
 
         [SetUp]
         public void SetUp()
         {
-            _stateLogicMock = new Mock<IStateLogic>();
+            _stateLogicMock = new Mock<IStateLogic>(MockBehavior.Strict);
+            _stateLogicMock.Setup(l => l.Dispose());
 
-            _stateController = new StateController(_stateLogicMock.Object) {Request = new HttpRequestMessage()};
+            _historyLogicMock = new Mock<IEventHistoryLogic>();
+
+            _stateController = new StateController(_stateLogicMock.Object, _historyLogicMock.Object) { Request = new HttpRequestMessage() };
         }
+
+        #region Constructor & Dispose
+
+        [Test]
+        public void StateControllerTests_Constructor_Runs()
+        {
+            new StateController();
+        }
+
+        [Test]
+        public void StateControllerTests_Constructor_Runs_With_Argument()
+        {
+            new StateController(_stateLogicMock.Object, _historyLogicMock.Object);
+        }
+
+        [Test]
+        public void Dispose_Test()
+        {
+            // Arrange
+            _stateLogicMock.Setup(l => l.Dispose()).Verifiable();
+
+            // Act
+            using (_stateController)
+            {
+                // Do nothing
+            }
+
+            // Assert
+            _stateLogicMock.Verify(l => l.Dispose(), Times.Once);
+        }
+
+        #endregion
 
         #region GetExecuted
         [Test]
@@ -575,7 +611,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotAuthorizedException());
+                .ThrowsAsync(new UnauthorizedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -589,7 +625,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotAuthorizedException());
+                .ThrowsAsync(new UnauthorizedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));

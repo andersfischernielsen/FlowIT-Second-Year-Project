@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.History;
 using Server.Interfaces;
 using Server.Models;
 
@@ -18,9 +19,13 @@ namespace Server.Storage
             _db = context ?? new StorageContext();
         }
 
-        public async Task<ServerUserModel> GetUser(string username)
+        public async Task<ServerUserModel> GetUser(string username, string password)
         {
-            return await _db.Users.SingleOrDefaultAsync(user => string.Equals(user.Name, username));
+            var user = await _db.Users.SingleOrDefaultAsync(u => string.Equals(u.Name, username));
+
+            if (user == null) return null;
+
+            return PasswordHasher.VerifyHashedPassword(password, user.Password) ? user : null;
         }
 
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
@@ -39,16 +44,23 @@ namespace Server.Storage
             return await events.ToListAsync();
         }
 
-        public async Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
+        public async Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
         {
+            var result = new List<ServerRoleModel>();
             foreach (var role in roles)
             {
                 if (!await RoleExists(role))
                 {
-                    _db.Roles.Add(role);
+                    result.Add(_db.Roles.Add(role));
+                }
+                else
+                {
+                    var roleId = role.Id;
+                    result.Add(await _db.Roles.SingleAsync(r => r.Id == roleId));
                 }
             }
             await _db.SaveChangesAsync();
+            return result;
         }
 
         public async Task<ServerRoleModel> GetRole(string id, string workflowId)
@@ -68,11 +80,10 @@ namespace Server.Storage
             {
                 throw new ArgumentException("User already exists", "user");
             }
-            var uu = _db.Users.Create();
-            uu.Name = user.Name;
-            uu.ServerRolesModels = user.ServerRolesModels;
 
-            _db.Users.Add(uu);
+            user.Password = PasswordHasher.HashPassword(user.Password);
+
+            _db.Users.Add(user);
 
             await _db.SaveChangesAsync();
         }
@@ -181,6 +192,37 @@ namespace Server.Storage
         public void Dispose()
         {
             _db.Dispose();
+        }
+
+        public async Task SaveHistory(HistoryModel toSave)
+        {
+            if (!await Exists(toSave.WorkflowId))
+            {
+                throw new InvalidOperationException("The workflowId does not exist");
+            }
+            _db.History.Add(toSave);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task SaveNonWorkflowSpecificHistory(HistoryModel toSave)
+        {
+            _db.History.Add(toSave);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<IQueryable<HistoryModel>> GetHistoryForWorkflow(string workflowId)
+        {
+            if (!await Exists(workflowId))
+            {
+                throw new InvalidOperationException("The workflowId does not exist");
+            }
+
+            return _db.History.Where(h => h.WorkflowId == workflowId);
+        }
+
+        private async Task<bool> Exists(string workflowId)
+        {
+            return await _db.Workflows.AnyAsync(w => w.Id == workflowId);
         }
     }
 }

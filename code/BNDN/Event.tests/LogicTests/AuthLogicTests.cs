@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Exceptions;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Moq;
@@ -19,10 +18,23 @@ namespace Event.Tests.LogicTests
         [SetUp]
         public void SetUp()
         {
-            _storageMock = new Mock<IEventStorage>();
+            _storageMock = new Mock<IEventStorage>(MockBehavior.Strict);
             _storageMock.Setup(s => s.Dispose());
 
             _logic = new AuthLogic(_storageMock.Object);
+        }
+
+        [Test]
+        public void Dispose_Test()
+        {
+            _storageMock.Setup(s => s.Dispose()).Verifiable();
+
+            using (_logic)
+            {
+                
+            }
+
+            _storageMock.Verify(s => s.Dispose(), Times.Once);
         }
 
         [TestCase("Student")]

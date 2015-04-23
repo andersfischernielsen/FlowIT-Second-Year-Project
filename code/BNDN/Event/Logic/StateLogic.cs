@@ -254,7 +254,7 @@ namespace Event.Logic
             await _storage.SetPending(workflowId, eventId, newPendingValue);
         }
 
-
+        // TODO: Discuss why is Execute() a Task<bool>?
         /// <summary>
         /// Execute attempts to Execute the specified Event. The process includes locking the other events, and updating their state. 
         /// </summary>
@@ -284,7 +284,7 @@ namespace Event.Logic
             // Check that caller claims the right role for executing this Event
             if (!await _authLogic.IsAuthorized(workflowId, eventId, executeDto.Roles))
             {
-                throw new NotAuthorizedException();
+                throw new UnauthorizedException();
             }
             
             // Check if Event is currently locked

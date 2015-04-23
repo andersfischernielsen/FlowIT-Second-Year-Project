@@ -19,6 +19,8 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -73,20 +75,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\WorkflowsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\IWorkflowHistoryLogic.cs" />
     <Compile Include="Interfaces\IServerLogic.cs" />
     <Compile Include="Logic\ServerLogic.cs" />
     <Compile Include="Exceptions\WorkflowAlreadyExistsException.cs" />
+    <Compile Include="Logic\WorkflowHistoryLogic.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ServerEventModel.cs" />
     <Compile Include="Models\ServerRoleModel.cs" />
     <Compile Include="Models\ServerUserModel.cs" />
     <Compile Include="Models\ServerWorkflowModel.cs" />
+    <Compile Include="Interfaces\IServerHistoryStorage.cs" />
     <Compile Include="Interfaces\IServerContext.cs" />
+    <Compile Include="Storage\PasswordHasher.cs" />
     <Compile Include="Storage\ServerStorage.cs" />
     <Compile Include="Storage\StorageContext.cs" />
     <Compile Include="Interfaces\IServerStorage.cs" />
@@ -94,7 +101,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
-    <None Include="Properties\PublishProfiles\flowIT %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\flowIT.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -137,6 +143,13 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

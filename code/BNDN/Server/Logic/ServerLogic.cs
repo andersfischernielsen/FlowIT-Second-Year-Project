@@ -5,10 +5,10 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.Exceptions;
 using Server.Exceptions;
 using Server.Interfaces;
 using Server.Models;
-using Server.Storage;
 
 namespace Server.Logic
 {
@@ -27,7 +27,7 @@ namespace Server.Logic
 
             return workflows.Select(model => new WorkflowDto
             {
-                Id = model.Id, 
+                Id = model.Id,
                 Name = model.Name
             });
         }
@@ -38,18 +38,18 @@ namespace Server.Logic
 
             return new WorkflowDto
             {
-                Id = workflow.Id, 
+                Id = workflow.Id,
                 Name = workflow.Name
             };
         }
 
-        public async Task<RolesOnWorkflowsDto> Login(string username)
+        public async Task<RolesOnWorkflowsDto> Login(LoginDto loginDto)
         {
-            var user = await _storage.GetUser(username);
+            var user = await _storage.GetUser(loginDto.Username, loginDto.Password);
 
             if (user == null)
             {
-                throw new InvalidOperationException("User was not found.");
+                throw new UnauthorizedException();
             }
 
             var rolesModels = await _storage.Login(user);
@@ -65,7 +65,7 @@ namespace Server.Logic
                 }
                 else
                 {
-                    rolesOnWorkflows.Add(roleModel.ServerWorkflowModelId, new List<string>{roleModel.Id});
+                    rolesOnWorkflows.Add(roleModel.ServerWorkflowModelId, new List<string> { roleModel.Id });
                 }
             }
 
@@ -74,7 +74,7 @@ namespace Server.Logic
 
         public async Task AddUser(UserDto dto)
         {
-            var user = new ServerUserModel {Name = dto.Name};
+            var user = new ServerUserModel { Name = dto.Name, Password = dto.Password };
             var roles = new List<ServerRoleModel>();
 
             foreach (var role in dto.Roles)
@@ -99,15 +99,23 @@ namespace Server.Logic
         {
             var workflow = await _storage.GetWorkflow(workflowId);
 
-            if (workflow == null) {
+            if (workflow == null)
+            {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
 
-            return (await _storage.GetEventsFromWorkflow(workflow)).Select(model => new EventAddressDto
-            {
-                Id = model.Id,
-                Uri = new Uri(model.Uri)
-            });
+            var dbList = await _storage.GetEventsFromWorkflow(workflow);
+
+            return
+                dbList.Select(
+                    ev =>
+                        new EventAddressDto
+                        {
+                            Id = ev.Id,
+                            Uri = new Uri(ev.Uri),
+                            WorkflowId = workflowId,
+                            Roles = ev.ServerRolesModels.Select(ro => ro.Id).ToList()
+                        });
         }
 
         public async Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
@@ -115,7 +123,7 @@ namespace Server.Logic
             var workflow = await _storage.GetWorkflow(workflowToAttachToId);
 
             // Add roles to the current workflow if they do not exist (the storage method handles the if-part)
-            await _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
+            var roles = await _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
             {
                 Id = role,
                 ServerWorkflowModelId = workflowToAttachToId
@@ -127,6 +135,7 @@ namespace Server.Logic
                 Uri = eventToBeAddedDto.Uri.ToString(),
                 ServerWorkflowModelId = workflowToAttachToId,
                 ServerWorkflowModel = workflow,
+                ServerRolesModels = roles
             });
         }
 

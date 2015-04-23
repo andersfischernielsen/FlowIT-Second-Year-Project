@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Server.Models;
+using Server.Storage;
 
 namespace Server.Interfaces
 {
-    public interface IServerStorage : IDisposable
+    public interface IServerStorage : IDisposable, IServerHistoryStorage
     {
-        Task<ServerUserModel> GetUser(string username);
+        Task<ServerUserModel> GetUser(string username, string password);
 
         Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel);
 
@@ -18,14 +19,13 @@ namespace Server.Interfaces
         /// <returns></returns>
         Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(ServerWorkflowModel workflow);
 
-        Task AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
+        Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
 
         Task AddUser(ServerUserModel user);
 
         /// <summary>
         /// Add event to a workflow
         /// </summary>
-        /// <param name="workflow"></param>
         /// <param name="eventToBeAddedDto"></param>
         Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
         

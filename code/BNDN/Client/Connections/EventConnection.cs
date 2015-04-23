@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Client.ViewModels;
 using Common;
+using Common.History;
 
 namespace Client.Connections
 {
@@ -40,6 +41,13 @@ namespace Client.Connections
             var eventId = _eventDto.Id;
             return await _httpClient.Read<EventStateDto>(String.Format("events/{0}/{1}/state/-1", _workflowId, eventId));   
         }
+
+        public async Task<IEnumerable<HistoryDto>> GetHistory()
+        {
+            var eventId = _eventDto.Id;
+            return await _httpClient.ReadList<HistoryDto>(String.Format("history/{0}/{1}", _workflowId, eventId));
+        }
+
         public async Task ResetEvent()
         {
             var eventId = _eventDto.Id;

@@ -7,6 +7,7 @@ using System.Web.Http;
 using Common;
 using Common.Exceptions;
 using Event.Exceptions;
+using Common.History;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -15,17 +16,20 @@ namespace Event.Controllers
     public class LifecycleController : ApiController
     {
         private readonly ILifecycleLogic _logic;
+        private readonly IEventHistoryLogic _historyLogic;
 
         // Constructor used by framework
         public LifecycleController()
         {
             _logic = new LifecycleLogic();
+            _historyLogic = new EventHistoryLogic();
         }
 
         // Constructor used for dependency-injection
-        public LifecycleController(ILifecycleLogic logic)
+        public LifecycleController(ILifecycleLogic logic, IEventHistoryLogic historyLogic)
         {
             _logic = logic;
+            _historyLogic = historyLogic;
         }
 
         /// <summary>
@@ -40,8 +44,19 @@ namespace Event.Controllers
             // Check that provided input can be mapped onto an instance of EventDto
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                                                "Provided input could not be mapped onto an instance of EventDto."));
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Provided input could not be mapped onto an instance of EventDto."));
+                await _historyLogic.SaveException(toThrow, eventDto.EventId, eventDto.WorkflowId);
+                throw toThrow;
+            }
+
+            if (eventDto == null)
+                // TODO: Check should be obsolete, as ModelState.IsValid checks that [Required] fields are present
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Provided EventDto was null"));
+                await _historyLogic.SaveException(toThrow, "POST", "CreateEvent");
+                throw toThrow;
             }
 
             // Prepare for method-call: Gets own URI
@@ -50,7 +65,8 @@ namespace Event.Controllers
 
             try
             {
-                await _logic.CreateEvent(eventDto, ownUri);
+                _logic.CreateEvent(eventDto, ownUri).Wait();
+                await _historyLogic.SaveSuccesfullCall("POST", "CreateEvent", eventDto.EventId, eventDto.WorkflowId);
             }
             catch (EventExistsException)
             {
@@ -100,6 +116,7 @@ namespace Event.Controllers
             try
             {
                 await _logic.DeleteEvent(workflowId, eventId);
+                await _historyLogic.SaveSuccesfullCall("DELETE", "DeleteEvent", eventId, workflowId);
             }
             catch (ArgumentNullException)
             {
@@ -108,19 +125,21 @@ namespace Event.Controllers
             }
             catch (LockedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                     "DeleteEvent: Event is currently locked by someone else"));
+                _historyLogic.SaveException(toThrow, "DELETE", "DeleteEvent", eventId, workflowId);
+                throw toThrow;
             }
             catch (NotFoundException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                   "DeleteEvent: Event does not exist"));
+                    "DeleteEvent: Event does not exist"));
             }
             catch (FailedToDeleteEventFromServerException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "DeleteEvent: Failed to delete Event from Server"));
-            }       
+            }
         }
 
 
@@ -150,6 +169,7 @@ namespace Event.Controllers
             try
             {
                 await _logic.ResetEvent(workflowId, eventId);
+                await _historyLogic.SaveSuccesfullCall("PUT", "ResetEvent", eventId, workflowId);
             }
             catch (ArgumentNullException)
             {
@@ -160,6 +180,12 @@ namespace Event.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "ResetEvent: Event seems not to exist"));
+            }
+            catch (Exception ex)
+            {
+                _historyLogic.SaveException(ex, "PUT", "ResetEvent", eventId, workflowId);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "ResetEvent: An unexpected exception occured"));
             }
         }
 
@@ -175,17 +201,27 @@ namespace Event.Controllers
         {
             try
             {
-                return await _logic.GetEventDto(workflowId, eventId);
+                var toReturn = await _logic.GetEventDto(workflowId, eventId);
+                await _historyLogic.SaveSuccesfullCall("GET", "GetEvent", eventId, workflowId);
+
+                return toReturn;
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    workflowId + "." + eventId + " not found"));
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                        workflowId + "." + eventId + " not found"));
+                _historyLogic.SaveException(toThrow, "GET", "GetEvent", eventId, workflowId);
+                throw toThrow;
             }
             catch (ArgumentNullException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Seems input was not satisfactory"));
+            }
+            catch (Exception ex)
+            {
+                _historyLogic.SaveException(ex, "GET", "GetEvent", eventId, workflowId);
+                throw;
             }
         }
     }

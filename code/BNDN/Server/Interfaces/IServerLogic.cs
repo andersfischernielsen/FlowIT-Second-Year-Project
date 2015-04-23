@@ -10,9 +10,9 @@ namespace Server.Interfaces
         /// <summary>
         /// Tries to log in / returns all the roles the user has on all workflows
         /// </summary>
-        /// <param name="username"></param>
+        /// <param name="loginDto"></param>
         /// <returns></returns>
-        Task<RolesOnWorkflowsDto> Login(string username);
+        Task<RolesOnWorkflowsDto> Login(LoginDto loginDto);
 
         /// <summary>
         /// Add a new user.

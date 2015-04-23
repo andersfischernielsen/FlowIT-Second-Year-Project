@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
+using Common.Exceptions;
+using Common.History;
 
 namespace Client.Connections
 {
@@ -26,19 +28,22 @@ namespace Client.Connections
             _http = toolbox;
         }
 
-        public async Task<RolesOnWorkflowsDto> Login(string username)
+        public async Task<RolesOnWorkflowsDto> Login(string username, string password)
         {
             try
             {
-                return await _http.Read<RolesOnWorkflowsDto>(string.Format("login/{0}", username));
+                return
+                    await
+                        _http.Create<LoginDto, RolesOnWorkflowsDto>("login",
+                            new LoginDto {Username = username, Password = password});
             }
-            catch (HttpRequestException ex)
+            catch (UnauthorizedException e)
             {
-                if (ex.Message.Contains("400 (Bad Request)"))
-                {
-                    throw new LoginFailedException(ex);
-                }
-                throw new ServerNotFoundException(ex);
+                throw new LoginFailedException(e);
+            }
+            catch (NotFoundException e)
+            {
+                throw new ServerNotFoundException(e);
             }
         }
 
@@ -52,7 +57,7 @@ namespace Client.Connections
             {
                 throw new ServerNotFoundException(ex);
             }
-            
+
         }
 
         public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)
@@ -69,6 +74,11 @@ namespace Client.Connections
                 }
                 throw new ServerNotFoundException(ex);
             }
+        }
+
+        public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId)
+        {
+            return await _http.ReadList<HistoryDto>(String.Format("history/{0}", workflowId));
         }
 
         public void Dispose()

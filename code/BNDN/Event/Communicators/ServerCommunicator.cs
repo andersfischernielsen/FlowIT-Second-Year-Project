@@ -40,12 +40,12 @@ namespace Event.Communicators
         /// <param name="addressDto">Contains the information about the Event</param>
         /// <returns></returns>
         /// <exception cref="FailedToPostEventAtServerException">Thrown if posting of Event at Server fails.</exception>
-        public async Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto addressDto)
+        public async Task PostEventToServer(EventAddressDto addressDto)
         {
             var path = string.Format("workflows/{0}", _workflowId);
             try
             {
-                return await _httpClient.Create<EventAddressDto, IEnumerable<EventAddressDto>>(path, addressDto);
+                await _httpClient.Create(path, addressDto);
             }
             catch (Exception)
             {
