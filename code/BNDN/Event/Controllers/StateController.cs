@@ -1,10 +1,12 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Common.Exceptions;
 using Event.Exceptions;
+using Event.Exceptions.EventInteraction;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -48,11 +50,16 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "GetExecuted: Not Found"));
             }
             catch (LockedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "GetExecuted: Event is locked"));
+            }
+            catch (ArgumentNullException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "GetExecuted: Seems input was not satisfactory"));
             }
         }
 
@@ -73,16 +80,21 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "GetIncluded: Not Found"));
             }
             catch (LockedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "GetIncluded: Event is locked"));
+            }
+            catch (ArgumentNullException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "GetIncluded: Seems input was not satisfactory"));
             }
         }
 
         /// <summary>
-        /// Returns the current state of the events.
+        /// Returns the current state of the event.
         /// </summary>
         /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="senderId">Content of this should represent caller</param>
@@ -98,13 +110,18 @@ namespace Event.Controllers
             {
                 return await _logic.GetStateDto(workflowId, eventId, senderId);
             }
+            catch (ArgumentNullException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "GetState: Seems input was not satisfactory"));
+            }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "GetState: Not Found"));
             }
             catch (LockedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "GetState: Event is locked"));
             }
         }
 
@@ -123,7 +140,7 @@ namespace Event.Controllers
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Provided input could not be mapped onto an instance of EventAddressDto"));
+                    "UpdateIncluded: Provided input could not be mapped onto an instance of EventAddressDto"));
             }
             try
             {
@@ -131,11 +148,21 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "UpdateIncluded: Not Found"));
+            }
+            catch (ArgumentNullException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "UpdateIncluded: Provided input was null"));
             }
             catch (LockedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "UpdateIncluded: Event is locked"));
+            }
+            catch (FailedToUpdateIncludedAtAnotherEventException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "UpdateIncluded: Failed to get Included from another Event"));
             }
         }
 
@@ -154,19 +181,29 @@ namespace Event.Controllers
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Provided input could not be mapped onto an instance of EventAddressDto"));
+                    "UpdatePending: Provided input could not be mapped onto an instance of EventAddressDto"));
             }
             try
             {
                 await _logic.SetPending(workflowId, eventId, eventAddressDto.Id, boolValueForPending);
             }
+            catch (ArgumentNullException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "UpdatePending: Provided input was null"));
+            }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "UpdatePending: Not Found"));
             }
             catch (LockedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "UpdatePending: Event is locked"));
+            }
+            catch (FailedToUpdatePendingAtAnotherEventException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "UpdatePending: Failed to update Pending at another Event"));
             }
 
         }
@@ -186,7 +223,7 @@ namespace Event.Controllers
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Provided input could not be mapped onto an instance of ExecuteDto; " +
+                    "Execute: Provided input could not be mapped onto an instance of ExecuteDto; " +
                     "No roles was provided"));
             }
             try
@@ -195,37 +232,43 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Not Found"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "Execute: Not Found"));
             }
             catch (LockedException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Event is locked"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                    "Execute: Event is locked"));
             }
             catch (NotAuthorizedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
-                    "You do not have permission to execute this event"));
+                    "Execute: You do not have permission to execute this event"));
             }
             catch (NotExecutableException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed,
-                    "Event is not executable."));
+                    "Execute: Event is not executable."));
             }
             catch (FailedToLockOtherEventException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict, "Another event is locked"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                    "Execute: Another event is locked"));
             }
             catch (FailedToUnlockOtherEventException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Could not unlock other events."));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "Execute: Could not unlock other events."));
             }
             catch (FailedToUpdateStateException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "State could not be saved!"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "Execute: Failed to update state internally."));
             }
             catch (FailedToUpdateStateAtOtherEventException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Another event could not save state!"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+                    "Execute: Failed to update state at another dependent Event"));
             }
         }
 

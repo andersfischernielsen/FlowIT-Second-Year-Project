@@ -224,7 +224,7 @@ namespace Event.Tests.LogicTests
             // Arrange
             var mockStorage = new Mock<IEventStorage>();
             mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(() => (HashSet<RelationToOtherEventModel>) null);
+                .Returns(Task.Run(() => (HashSet<RelationToOtherEventModel>) null));
 
             var mockEventCommunicator = new Mock<IEventFromEvent>();
 

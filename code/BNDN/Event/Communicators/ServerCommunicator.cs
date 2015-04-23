@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Event.Exceptions;
 using Event.Interfaces;
 
-namespace Event
+namespace Event.Communicators
 {
     /// <summary>
     /// ServerCommunicator is the module through which Event has its outgoing communication with Server 
@@ -22,30 +23,53 @@ namespace Event
 
         public ServerCommunicator(String baseAddress, string eventId, string workFlowId)
         {
+            if (baseAddress == null || eventId == null || workFlowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             _workflowId = workFlowId;
              _eventId = eventId;
             _serverBaseAddress = baseAddress;
             _httpClient = new HttpClientToolbox(_serverBaseAddress);
         }
 
-
+        /// <summary>
+        /// Attempts to Post an Event to Server
+        /// </summary>
+        /// <param name="addressDto">Contains the information about the Event</param>
+        /// <returns></returns>
+        /// <exception cref="FailedToPostEventAtServerException">Thrown if posting of Event at Server fails.</exception>
         public async Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto addressDto)
         {
-            if (string.IsNullOrEmpty(_eventId)
-                    || string.IsNullOrEmpty(_workflowId)
-                    || string.IsNullOrEmpty(_serverBaseAddress))
-            {
-                throw new InvalidOperationException("EventId, workflowId and serverBaseAddress must be non-null");
-            }
-
             var path = string.Format("workflows/{0}", _workflowId);
-            return await _httpClient.Create<EventAddressDto, IEnumerable<EventAddressDto>>(path, addressDto);
+            try
+            {
+                return await _httpClient.Create<EventAddressDto, IEnumerable<EventAddressDto>>(path, addressDto);
+            }
+            catch (Exception)
+            {
+                throw new FailedToPostEventAtServerException();
+            }
         }
 
+        /// <summary>
+        /// Attempts to Delete an Event from Server
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="FailedToDeleteEventFromServerException">Thrown if deletion of Event at Server fails</exception>
         public async Task DeleteEventFromServer()
         {
             var path = string.Format("workflows/{0}/{1}", _workflowId, _eventId);
-            await _httpClient.Delete(path);
+
+            try
+            {
+                await _httpClient.Delete(path);
+            }
+            catch (Exception)
+            {
+                throw new FailedToDeleteEventFromServerException();
+            }
         }
 
         public void Dispose()

@@ -80,9 +80,19 @@
     <Compile Include="Controllers\LifecycleController.cs" />
     <Compile Include="Controllers\LockController.cs" />
     <Compile Include="Controllers\StateController.cs" />
-    <Compile Include="Exceptions\FailedToLockOtherEventException.cs" />
-    <Compile Include="Exceptions\FailedToUnlockOtherEventException.cs" />
-    <Compile Include="Exceptions\FailedToUpdateStateAtOtherEventException.cs" />
+    <Compile Include="Exceptions\EventExistsException.cs" />
+    <Compile Include="Exceptions\FailedToCreateEventException.cs" />
+    <Compile Include="Exceptions\ServerInteraction\FailedToDeleteEventFromServerException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToGetExecutedFromAnotherEventException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToGetIncludedFromAnotherEventException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToLockOtherEventException.cs" />
+    <Compile Include="Exceptions\ServerInteraction\FailedToPostEventAtServerException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToUnlockOtherEventException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToUpdateExcludedAtAnotherEventException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToUpdateIncludedAtAnotherEventException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToUpdatePendingAtAnotherEventException.cs" />
+    <Compile Include="Exceptions\EventInteraction\FailedToUpdateStateAtOtherEventException.cs" />
+    <Compile Include="Exceptions\IllegalstorageStateException.cs" />
     <Compile Include="Interfaces\IAuthLogic.cs" />
     <Compile Include="Interfaces\IEventContext.cs" />
     <Compile Include="Interfaces\IEventStorageForReset.cs" />
@@ -113,7 +123,7 @@
     <Compile Include="Models\EventModel.cs" />
     <Compile Include="Storage\EventStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerCommunicator.cs" />
+    <Compile Include="Communicators\ServerCommunicator.cs" />
     <Compile Include="Storage\EventStorageForReset.cs" />
   </ItemGroup>
   <ItemGroup>

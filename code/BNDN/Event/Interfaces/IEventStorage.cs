@@ -44,16 +44,16 @@ namespace Event.Interfaces
         #endregion
 
         #region Rules
-        HashSet<RelationToOtherEventModel> GetConditions(string workflowId, string eventId);
+        Task<HashSet<RelationToOtherEventModel>> GetConditions(string workflowId, string eventId);
         Task SetConditions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
-        HashSet<RelationToOtherEventModel> GetResponses(string workflowId, string eventId);
+        Task<HashSet<RelationToOtherEventModel>> GetResponses(string workflowId, string eventId);
         Task SetResponses(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
-        HashSet<RelationToOtherEventModel> GetExclusions(string workflowId, string eventId);
+        Task<HashSet<RelationToOtherEventModel>> GetExclusions(string workflowId, string eventId);
         Task SetExclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
-        HashSet<RelationToOtherEventModel> GetInclusions(string workflowId, string eventId);
+        Task<HashSet<RelationToOtherEventModel>> GetInclusions(string workflowId, string eventId);
         Task SetInclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
         #endregion
     }

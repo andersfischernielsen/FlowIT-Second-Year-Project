@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Common.Exceptions;
+using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Moq;
@@ -106,7 +107,7 @@ namespace Event.Tests.LogicTests
             catch (Exception e)
             {
                 // Assert
-                Assert.IsInstanceOf<ApplicationException>(e);
+                Assert.IsInstanceOf<EventExistsException>(e);
             }
         }
 
@@ -189,10 +190,10 @@ namespace Event.Tests.LogicTests
             ILifecycleLogic logic = new LifecycleLogic(mockStorage.Object,mockResetStorage.Object,mockLockLogic.Object);
 
             // Act
-            var getEvent = await logic.GetEventDto("workflowId", "someEvent");
+            var testDelegate = new TestDelegate(async () => await logic.GetEventDto("workflowId", "someEvent"));
 
             // Assert
-            Assert.IsNull(getEvent);
+            Assert.Throws<NotFoundException>(testDelegate);
 
         }
 

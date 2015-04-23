@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Common.Exceptions;
+using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -39,33 +40,51 @@ namespace Event.Controllers
             // Check that provided input can be mapped onto an instance of EventDto
             if (!ModelState.IsValid)
             {
-                // For nicer debugging, a list of the conflicting mappings is provided
-                var conflictElements = new StringBuilder();
-                foreach (var key in ModelState.Keys)
-                {
-                    if (!ModelState.IsValidField(key))
-                    {
-                        conflictElements.Append(key + ", ");
-                    }
-                }
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                                                "Provided input could not be mapped onto an instance of EventDto " +
-                                                conflictElements));
+                                                "Provided input could not be mapped onto an instance of EventDto."));
             }
 
-            if (eventDto == null)
-            {
-                // TODO: Provide nicer description / error message
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            // Prepare for method-call: Gets own URI (i.e. http://address)
+            // Prepare for method-call: Gets own URI
             var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
             var ownUri = new Uri(s);
 
-            // TODO: Exception handling
-            await _logic.CreateEvent(eventDto, ownUri);
-
+            try
+            {
+                await _logic.CreateEvent(eventDto, ownUri);
+            }
+            catch (EventExistsException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "CreateEvent: Event already exists"));
+            }
+            catch (ArgumentNullException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "CreateEvent: Seems input was not satisfactory"));
+            }
+            catch (FailedToPostEventAtServerException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "CreateEvent: Failed to Post Event at Server"));
+            }
+            catch (FailedToDeleteEventFromServerException)
+            {
+                // Is thrown if we somehow fail to PostEventToServer
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "CreateEvent: Failed to delete Event from Server. " +
+                    "The deletion was attempted because, posting the Event to Server failed. "));
+            }
+            catch (FailedToCreateEventException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "CreateEvent: Failed to create Event locally "));
+            }
+            catch (Exception)
+            {
+                // Will catch any other Exception
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "Create Event: An un-expected exception arose"));
+            }
         }
 
         /// <summary>
@@ -82,11 +101,26 @@ namespace Event.Controllers
             {
                 await _logic.DeleteEvent(workflowId, eventId);
             }
-            catch (LockedException)
-                // Todo: Exception handling
+            catch (ArgumentNullException)
             {
-                throw;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "DeleteEvent: Seems input was not satisfactory"));
             }
+            catch (LockedException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                    "DeleteEvent: Event is currently locked by someone else"));
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                   "DeleteEvent: Event does not exist"));
+            }
+            catch (FailedToDeleteEventFromServerException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "DeleteEvent: Failed to delete Event from Server"));
+            }       
         }
 
 
@@ -102,15 +136,30 @@ namespace Event.Controllers
         [HttpPut]
         public async Task ResetEvent(string workflowId, string eventId, [FromBody] EventDto eventDto)
         {
+            if (workflowId == null || eventId == null)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "ResetEvent: Seems input was not satisfactory"));
+            }
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                                                "ResetEvent: Provided input could not be mapped onto an instance of EventDto."));
+            }
+
             try
             {
                 await _logic.ResetEvent(workflowId, eventId);
             }
-                // Todo: Exception handling
-            catch (Exception)
+            catch (ArgumentNullException)
             {
-
-                throw;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "ResetEvent: Seems input was not satisfactory"));
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "ResetEvent: Event seems not to exist"));
             }
         }
 
@@ -130,12 +179,13 @@ namespace Event.Controllers
             }
             catch (NotFoundException)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, workflowId + "." + eventId + " not found"));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    workflowId + "." + eventId + " not found"));
             }
-                // Todo: Exception handling.
-            catch (Exception)
+            catch (ArgumentNullException)
             {
-                throw;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
             }
         }
     }

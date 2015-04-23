@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common.Exceptions;
 using Event.Communicators;
+using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Storage;
@@ -42,18 +43,33 @@ namespace Event.Controllers
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Provided input could not be mapped onto an instance of LockDto"));
+                    "Lock: Provided input could not be mapped onto an instance of LockDto"));
             }
 
-            if (lockDto == null)
+            try
             {
-                // TODO: Discuss: With the above !ModelState.IsValid check this check should not necessary. Can we remove? 
-                // Caller provided a null LockDto
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Lock could not be set. An empty (null) lock was provided. If your intent" +
-                    " is to unlock the Event issue a DELETE request on  event/lock instead."));
+                await _lockLogic.LockSelf(workflowId, eventId, lockDto);
             }
-            await _lockLogic.LockSelf(workflowId, eventId, lockDto);
+            catch (ArgumentNullException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Lock: Seems input was not satisfactory"));
+            }
+            catch (LockedException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                    "Lock: Failed to lock: Event is currently locked by someone else"));
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Lock: Event seems not to exist"));
+            }
+            catch (IllegalStorageStateException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "Lock: Storage reported it is in a non-valid state"));
+            }   
         }
 
         /// <summary>
@@ -73,12 +89,22 @@ namespace Event.Controllers
             catch (ArgumentNullException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Could not unlock: One or more of the provided arguments was null"));
+                    "Unlock: Could not unlock: One or more of the provided arguments was null"));
             }
             catch (LockedException)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
-                    "Could not unlock: Event is locked by someone else"));
+                    "Unlock: Could not unlock: Event is locked by someone else"));
+            }
+            catch (NotFoundException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Unlock: Event seems not to exist"));
+            }
+            catch (IllegalStorageStateException)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "Unlock: Storage reported it is in a non-valid state"));
             }
         }
     }

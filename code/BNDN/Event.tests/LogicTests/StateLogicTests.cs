@@ -30,10 +30,10 @@ namespace Event.Tests.LogicTests
 
             _eventStorageMock.Setup(s => s.Exists(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
             _eventStorageMock.Setup(s => s.GetIncluded(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
-            _eventStorageMock.Setup(s => s.GetConditions(It.IsAny<string>(), It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
-            _eventStorageMock.Setup(s => s.GetResponses(It.IsAny<string>(), It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
-            _eventStorageMock.Setup(s => s.GetInclusions(It.IsAny<string>(), It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
-            _eventStorageMock.Setup(s => s.GetExclusions(It.IsAny<string>(), It.IsAny<string>())).Returns(new HashSet<RelationToOtherEventModel>());
+            _eventStorageMock.Setup(s => s.GetConditions(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>()));
+            _eventStorageMock.Setup(s => s.GetResponses(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>()));
+            _eventStorageMock.Setup(s => s.GetInclusions(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>()));
+            _eventStorageMock.Setup(s => s.GetExclusions(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>()));
 
             _lockingLogicMock = new Mock<ILockingLogic>();
 
@@ -155,7 +155,7 @@ namespace Event.Tests.LogicTests
             _eventStorageMock.Setup(s => s.GetIncluded("workflowId", "eventId")).ReturnsAsync(true);
             _eventStorageMock.Setup(s => s.GetPending("workflowId", "eventId")).ReturnsAsync(false);
             _eventStorageMock.Setup(s => s.GetName("workflowId", "eventId")).ReturnsAsync("Event Name");
-            _eventStorageMock.Setup(s => s.GetConditions("workflowId", "eventId")).Returns(new HashSet<RelationToOtherEventModel>());
+            _eventStorageMock.Setup(s => s.GetConditions("workflowId", "eventId")).Returns(Task.Run(() => new HashSet<RelationToOtherEventModel>()));
 
             // Act
             var result = await _stateLogic.GetStateDto("workflowId", "eventId", "senderId");
@@ -177,7 +177,7 @@ namespace Event.Tests.LogicTests
             _eventStorageMock.Setup(s => s.GetIncluded("workflowId", "eventId")).ReturnsAsync(false);
             _eventStorageMock.Setup(s => s.GetPending("workflowId", "eventId")).ReturnsAsync(false);
             _eventStorageMock.Setup(s => s.GetName("workflowId", "eventId")).ReturnsAsync("Event Name");
-            _eventStorageMock.Setup(s => s.GetConditions("workflowId", "eventId")).Returns(new HashSet<RelationToOtherEventModel>());
+            _eventStorageMock.Setup(s => s.GetConditions("workflowId", "eventId")).Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>()));
 
             // Act
             var result = await _stateLogic.GetStateDto("workflowId", "eventId", "senderId");
@@ -199,7 +199,7 @@ namespace Event.Tests.LogicTests
             _eventStorageMock.Setup(s => s.GetIncluded("workflowId", "eventId")).ReturnsAsync(true);
             _eventStorageMock.Setup(s => s.GetPending("workflowId", "eventId")).ReturnsAsync(false);
             _eventStorageMock.Setup(s => s.GetName("workflowId", "eventId")).ReturnsAsync("Event Name");
-            _eventStorageMock.Setup(s => s.GetConditions("workflowId", "eventId")).Returns(new HashSet<RelationToOtherEventModel>());
+            _eventStorageMock.Setup(s => s.GetConditions("workflowId", "eventId")).Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>()));
 
             // Make the event locked.
             _lockingLogicMock.Setup(l => l.IsAllowedToOperate("workflowId", "eventId", "senderId")).ReturnsAsync(false);
@@ -307,7 +307,7 @@ namespace Event.Tests.LogicTests
             var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("workflowId", "eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
-            Assert.Throws<FailedToUpdateStateException>(testDelegate);
+            Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
         }
 
         [Test]
@@ -320,7 +320,7 @@ namespace Event.Tests.LogicTests
             var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("workflowId", "eventId", new RoleDto { Roles = new List<string> { "RightRole" } }));
 
             // Assert
-            Assert.Throws<FailedToUpdateStateException>(testDelegate);
+            Assert.Throws<FailedToUpdateStateAtOtherEventException>(testDelegate);
         }
 
         [Test]
@@ -328,7 +328,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             _eventStorageMock.Setup(s => s.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(new HashSet<RelationToOtherEventModel>
+                .Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>
                 {
                     new RelationToOtherEventModel
                     {
@@ -336,7 +336,7 @@ namespace Event.Tests.LogicTests
                         EventId = "NonExistentEventId",
                         Uri = new Uri("http://localhost:65443/")
                     }
-                });
+                }));
 
             _eventCommunicatorMock.Setup(
                 c => c.SendPending(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>(), It.IsAny<string>()))
@@ -357,7 +357,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             _eventStorageMock.Setup(s => s.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(new HashSet<RelationToOtherEventModel>
+                .Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>
                 {
                     new RelationToOtherEventModel
                     {
@@ -365,7 +365,7 @@ namespace Event.Tests.LogicTests
                         EventId = "NonExistentEventId",
                         Uri = new Uri("http://localhost:65443/")
                     }
-                });
+                }));
 
             _eventCommunicatorMock.Setup(
                 c => c.SendIncluded(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>(), It.IsAny<string>()))
@@ -386,7 +386,7 @@ namespace Event.Tests.LogicTests
         {
             // Arrange
             _eventStorageMock.Setup(s => s.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(new HashSet<RelationToOtherEventModel>
+                .Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>
                 {
                     new RelationToOtherEventModel
                     {
@@ -394,7 +394,7 @@ namespace Event.Tests.LogicTests
                         EventId = "NonExistentEventId",
                         Uri = new Uri("http://localhost:65443/")
                     }
-                });
+                }));
 
             _eventCommunicatorMock.Setup(
                 c => c.SendExcluded(It.IsAny<Uri>(), It.IsAny<EventAddressDto>(), It.IsAny<string>(), It.IsAny<string>()))

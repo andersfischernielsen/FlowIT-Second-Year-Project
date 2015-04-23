@@ -19,27 +19,27 @@ namespace Event.Logic
             _eventCommunicator = eventCommunicator;
         }
 
+        /// <summary>
+        /// Attempt to lock the specified Event down
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="lockDto">Content should represent this Event</param>
+        /// <returns></returns>
+        /// <exception cref="LockedException">Thrown if the specified Event is already locked down</exception>
+        /// <exception cref="ArgumentException"></exception>
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
         {
             // Check input
-            if (workflowId == null)
+            if (workflowId == null || lockDto == null || eventId == null)
             {
-                throw new ArgumentNullException("workflowId");
-            }
-            if (lockDto == null)
-            {
-                throw new ArgumentNullException("lockDto", "was null");
-            }
-            if (eventId == null)
-            {
-                throw new ArgumentNullException("eventId", "was null");
+                throw new ArgumentNullException();
             }
 
             // Check if this Event is currently locked
             if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
-                // TODO: Throw more relevant exception
-                throw new ApplicationException();
+                throw new LockedException();
             }
 
             // Checks that the provided lockDto actually has sensible values for its fields.
@@ -50,39 +50,47 @@ namespace Event.Logic
             }
 
             lockDto.Id = eventId;
-            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
+            
+            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);    
         }
 
+
+        /// <summary>
+        /// Tries to unlock the specified Event
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="callerId">Represents caller</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if either of the input arguments are null</exception>
+        /// <exception cref="LockedException">Thrown if the Event is currently locked by someone else</exception>
         public async Task UnlockSelf(string workflowId, string eventId, string callerId)
         {
-            if (workflowId == null)
+            if (workflowId == null || eventId == null || callerId == null)
             {
                 throw new ArgumentNullException("workflowId");
             }
-            if (eventId == null)
-            {
-                throw new ArgumentNullException("callerId","callerId was null");
-            }
-            if (callerId == null)
-            {
-                throw new ArgumentNullException("eventId","eventId was null");
-            }
+
             if (!await IsAllowedToOperate(workflowId, eventId, callerId))
             {
                 throw new LockedException();
             }
+
             await _storage.ClearLock(workflowId, eventId);
         }
 
+        /// <summary>
+        /// LockAll attempts to lockall related Events for the specified Event
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> LockAll(string workflowId, string eventId)
         {
-            if (workflowId == null)
+            if (workflowId == null || eventId == null)
             {
-                throw new ArgumentNullException("workflowId");
-            }
-            if (eventId == null)
-            {
-                throw  new ArgumentNullException("eventId");
+                throw new ArgumentNullException();
             }
 
             var lockedEvents = new List<RelationToOtherEventModel>();
@@ -96,11 +104,10 @@ namespace Event.Logic
             // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
 
-
             // Get dependent events
-            var resp = _storage.GetResponses(workflowId, eventId);
-            var incl = _storage.GetInclusions(workflowId, eventId);
-            var excl = _storage.GetExclusions(workflowId, eventId);
+            var resp = await _storage.GetResponses(workflowId, eventId);
+            var incl = await _storage.GetInclusions(workflowId, eventId);
+            var excl = await _storage.GetExclusions(workflowId, eventId);            
 
             // Put into Set to eliminate duplicates.
             var eventsToBeLocked = new HashSet<RelationToOtherEventModel>(
@@ -137,26 +144,26 @@ namespace Event.Logic
         }
 
         /// <summary>
-        /// 
+        /// UnlockAll attempts to unlock all related events for the specified Event. 
         /// </summary>
-        /// <param name="workflowId"></param>
-        /// <param name="eventId"></param>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
         /// <returns>False if it fails to unlock other Events</returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
+        /// <exception cref="NullReferenceException">Thrown if Storage layer returns null-relations.</exception>
         public async Task<bool> UnlockAll(string workflowId, string eventId)
         {
-            if (workflowId == null)
+            if (workflowId == null || eventId == null)
             {
-                throw new ArgumentNullException("workflowId");
-            }
-            if (eventId == null)
-            {
-                throw new ArgumentNullException("eventId","provided eventId was null");
+                throw new ArgumentNullException();
             }
 
             // Gather dependent events
-            var resp = _storage.GetResponses(workflowId, eventId);          // TODO: What if any (or all) of these return null?
-            var incl = _storage.GetInclusions(workflowId, eventId);
-            var excl = _storage.GetExclusions(workflowId, eventId);
+            
+            var resp = await _storage.GetResponses(workflowId, eventId);          // TODO: What if any (or all) of these return null?
+            var incl = await _storage.GetInclusions(workflowId, eventId);
+            var excl = await _storage.GetExclusions(workflowId, eventId);
+            
             if (resp == null || incl == null || excl == null)
             {
                 throw new NullReferenceException("At least one of response-,inclusions or exclusions-relations retrieved from storage was null");
@@ -184,28 +191,32 @@ namespace Event.Logic
                     everyEventIsUnlocked = false;
                 }
             }
+            // TODO: Shouldn't 
+            // Unlock self
 
+            // TODO: Shouldn't we do a IsAllowedToOperate() call before doing this call?
             await _storage.ClearLock(workflowId, eventId);
-
+            
             return everyEventIsUnlocked;
         }
 
+        /// <summary>
+        /// Will determine, on basis of the provided arguments, if caller is allowed to operate on the target Event. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the target Event belongs to</param>
+        /// <param name="eventId">Id of the target Event</param>
+        /// <param name="callerId">Id of the Event, that wishes to operate on the target Event</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsAllowedToOperate(string workflowId, string eventId, string callerId)
         {
-            if (workflowId == null)
+            if (workflowId == null || eventId == null || callerId == null)
             {
-                throw new ArgumentNullException("workflowId");
-            }
-            if (eventId == null)
-            {
-                throw new ArgumentNullException("eventId","eventId was null");
-            }
-            if (callerId == null)
-            {
-                throw new ArgumentNullException("callerId","caller id was null");
+                throw new ArgumentNullException();
             }
 
             var lockDto = await _storage.GetLockDto(workflowId, eventId);
+            
             if (lockDto == null)
             {   // No lock is set!
                 return true;
@@ -220,19 +231,19 @@ namespace Event.Logic
             _eventCommunicator.Dispose();
         }
 
+        /// <summary>
+        /// Attempts to unlock the Events, that are provided in the argument list.  
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the target Event belongs to</param>
+        /// <param name="eventId">Id of the target Event</param>
+        /// <param name="eventsToBeUnlocked">List specifying which Events are to be unlocked</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         private async Task UnlockSome(string workflowId, string eventId, List<RelationToOtherEventModel> eventsToBeUnlocked)
         {
-            if (workflowId == null)
+            if (workflowId == null || eventId == null || eventsToBeUnlocked == null)
             {
-                throw new ArgumentNullException("workflowId");
-            }
-            if (eventId == null)
-            {
-                throw new ArgumentNullException("eventId","eventId was null");
-            }
-            if (eventsToBeUnlocked == null)
-            {
-                throw new ArgumentNullException("eventsToBeUnlocked", "eventsToBeUnlocked was null");
+                throw new ArgumentNullException();
             }
 
             // Unlock the other Events. 

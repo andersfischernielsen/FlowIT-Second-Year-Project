@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
@@ -6,6 +7,7 @@ using Common.Exceptions;
 using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
+using Event.Models;
 using Event.Storage;
 
 namespace Event.Logic
@@ -44,8 +46,23 @@ namespace Event.Logic
             _eventCommunicator = eventCommunicator;
         }
 
+        /// <summary>
+        /// IsExecuted returns the executed value for the specified Event. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
+        /// <exception cref="LockedException">Thrown if the Event is locked by someone else than caller</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsExecuted(string workflowId, string eventId, string senderId)
         {
+            if (workflowId == null || workflowId == null || senderId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (!await _storage.Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
@@ -56,11 +73,28 @@ namespace Event.Logic
             {
                 throw new LockedException();
             }
+
             return await _storage.GetExecuted(workflowId, eventId);
         }
 
+
+        /// <summary>
+        /// IsIncluded returns the included value for the specified Event. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
+        /// <exception cref="LockedException">Thrown if the Event is locked by someone else than caller</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsIncluded(string workflowId, string eventId, string senderId)
         {
+            if (workflowId == null || workflowId == null || senderId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (!await _storage.Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
@@ -71,11 +105,29 @@ namespace Event.Logic
             {
                 throw new LockedException();
             }
-            return await _storage.GetIncluded(workflowId, eventId);
+
+            return await _storage.GetIncluded(workflowId, eventId);   
         }
 
+        // TODO: Discuss: Should this not be moved into a method on EventStorage?
+        /// <summary>
+        /// GetStateDto returns an EventStateDto for the specified Event
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided arguments are null</exception>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
+        /// <exception cref="LockedException">Thrown if the Event is currently locked</exception>
         public async Task<EventStateDto> GetStateDto(string workflowId, string eventId, string senderId)
         {
+            // Input check
+            if (workflowId == null || workflowId == null || senderId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (!await _storage.Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
@@ -88,7 +140,7 @@ namespace Event.Logic
                 throw new LockedException();
             }
 
-            return new EventStateDto
+            var eventStateDto = new EventStateDto
             {
                 Id = eventId,
                 Name = await _storage.GetName(workflowId, eventId),
@@ -97,25 +149,37 @@ namespace Event.Logic
                 Pending = await _storage.GetPending(workflowId, eventId),
                 Executable = await IsExecutable(workflowId, eventId)
             };
+
+            return eventStateDto;
         }
 
+        /// <summary>
+        /// Determines whether an Event can be executed at the moment. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         private async Task<bool> IsExecutable(string workflowId, string eventId)
         {
-            if (!await _storage.Exists(workflowId, eventId))
+            if (workflowId == null || workflowId == null)
             {
-                throw new NotFoundException();
+                throw new ArgumentNullException();
             }
 
-            //If this event is excluded, return false.
             if (!await _storage.GetIncluded(workflowId, eventId))
             {
+                //If this event is excluded, return false.
                 return false;
             }
 
-            foreach (var condition in _storage.GetConditions(workflowId, eventId))
+            var conditionRelations = await _storage.GetConditions(workflowId, eventId);
+
+            foreach (var condition in conditionRelations)
             {
                 var executed = await _eventCommunicator.IsExecuted(condition.Uri, condition.WorkflowId, condition.EventId, eventId);
                 var included = await _eventCommunicator.IsIncluded(condition.Uri, condition.WorkflowId, condition.EventId, eventId);
+                
                 // If the condition-event is not executed and currently included.
                 if (included && !executed)
                 {
@@ -125,8 +189,24 @@ namespace Event.Logic
             return true; // If all conditions are executed or excluded.
         }
 
+        /// <summary>
+        /// SetIncluded sets the specified Event's Included value to the provided value. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="newIncludedValue">The value that the Event's Included value should be set to</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the string-type arguments are null</exception>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
+        /// <exception cref="LockedException">Thrown if the specified Event is currently locked</exception>
         public async Task SetIncluded(string workflowId, string eventId, string senderId, bool newIncludedValue)
         {
+            if (workflowId == null || eventId == null || senderId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (!await _storage.Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
@@ -137,11 +217,30 @@ namespace Event.Logic
             {
                 throw new LockedException();
             }
+            
             await _storage.SetIncluded(workflowId, eventId, newIncludedValue);
         }
 
+        /// <summary>
+        /// SetPending sets the specified Event's Pending value to the provided value. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="newPendingValue">The value that the Event's Included value should be set to</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the string-type arguments are null</exception>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
+        /// <exception cref="LockedException">Thrown if the specified Event is currently locked</exception>
+        /// <returns></returns>
         public async Task SetPending(string workflowId, string eventId, string senderId, bool newPendingValue)
         {
+            if (workflowId == null || eventId == null || senderId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+
             if (!await _storage.Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
@@ -155,8 +254,28 @@ namespace Event.Logic
             await _storage.SetPending(workflowId, eventId, newPendingValue);
         }
 
+
+        /// <summary>
+        /// Execute attempts to Execute the specified Event. The process includes locking the other events, and updating their state. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <param name="executeDto">Contains the roles, that caller has.</param>
+        /// <returns></returns>
+        /// <exception cref="LockedException">Thrown if the specified Event is currently locked by someone else</exception>
+        /// <exception cref="NotAuthorizedException">Thrown if caller does not have the neceassry roles to execute the specified Event</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
+        /// <exception cref="FailedToLockOtherEventException">Thrown if locking of an other (dependent) Event failed.</exception>
+        /// <exception cref="FailedToUpdateStateAtOtherEventException">Thrown if updating of another Event's state failed</exception>
+        /// <exception cref="FailedToUnlockOtherEventException">Thrown if unlocking of another Event fails.</exception>
         public async Task<bool> Execute(string workflowId, string eventId, RoleDto executeDto)
         {
+            if (workflowId == null || eventId == null || executeDto == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (!await _storage.Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
@@ -167,7 +286,7 @@ namespace Event.Logic
             {
                 throw new NotAuthorizedException();
             }
-
+            
             // Check if Event is currently locked
             if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, eventId))
             {
@@ -187,40 +306,46 @@ namespace Event.Logic
             }
 
             var allOk = true;
-            Exception exception = null;
+            FailedToUpdateStateAtOtherEventException exception = null;
             try
             {
                 await _storage.SetExecuted(workflowId, eventId, true);
                 await _storage.SetPending(workflowId, eventId, false);
-                var addressDto = new EventAddressDto {WorkflowId = workflowId, Id = eventId, Uri = await _storage.GetUri(workflowId, eventId)};
-                foreach (var pending in _storage.GetResponses(workflowId, eventId))
+                var addressDto = new EventAddressDto
+                {
+                    WorkflowId = workflowId,
+                    Id = eventId,
+                    Uri = await _storage.GetUri(workflowId, eventId)
+                };
+                foreach (var pending in await _storage.GetResponses(workflowId, eventId))
                 {
                     await _eventCommunicator.SendPending(pending.Uri, addressDto, pending.WorkflowId, pending.EventId);
                 }
-                foreach (var inclusion in _storage.GetInclusions(workflowId, eventId))
+                foreach (var inclusion in await _storage.GetInclusions(workflowId, eventId))
                 {
-                    await _eventCommunicator.SendIncluded(inclusion.Uri, addressDto, inclusion.WorkflowId, inclusion.EventId);
+                    await
+                        _eventCommunicator.SendIncluded(inclusion.Uri, addressDto, inclusion.WorkflowId,
+                            inclusion.EventId);
                 }
-                foreach (var exclusion in _storage.GetExclusions(workflowId, eventId))
+                foreach (var exclusion in await _storage.GetExclusions(workflowId, eventId))
                 {
-                    await _eventCommunicator.SendExcluded(exclusion.Uri, addressDto, exclusion.WorkflowId, exclusion.EventId);
+                    await
+                        _eventCommunicator.SendExcluded(exclusion.Uri, addressDto, exclusion.WorkflowId,
+                            exclusion.EventId);
                 }
-            }
-            catch (HttpRequestException)
-            {
-                allOk = false;
-                exception = new FailedToUpdateStateAtOtherEventException();
             }
             catch (Exception)
             {
+                /*  This will catch any of FailedToUpdate<Excluded|Pending|Executed>AtAnotherEventExceptions
+                 *  plus other unexpected thrown Exceptions */
                 allOk = false;
-                exception = new FailedToUpdateStateException();
+                exception = new FailedToUpdateStateAtOtherEventException();
             }
 
             if (!await _lockingLogic.UnlockAll(workflowId, eventId))
             {
-                throw new FailedToUnlockOtherEventException();
-                //Kunne ikke unlocke alt, hvad skal der ske?
+                // If we cannot even unlock, we give up!
+                throw new FailedToUnlockOtherEventException();      
             }
             if (allOk)
             {

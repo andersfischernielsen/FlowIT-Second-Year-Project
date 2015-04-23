@@ -11,5 +11,6 @@ namespace Event.Interfaces
     {
         Task ClearLock(string workflowId, string eventId);
         Task ResetToInitialState(string workflowId, string eventId);
+        Task<bool> Exists(string workflowId, string eventId);
     }
 }

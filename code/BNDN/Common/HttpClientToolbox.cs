@@ -16,7 +16,7 @@ namespace Common
     /// </summary>
     public class HttpClientToolbox : IDisposable
     {
-        public HttpClient HttpClient { get; set; }
+        private HttpClient HttpClient { get; set; }
 
         /// <summary>
         /// Get/set the authetication header to the given value. Used for API's which needs authentication.
@@ -177,9 +177,9 @@ namespace Common
                     throw new LockedException();
                 case HttpStatusCode.PreconditionFailed:
                     throw new NotExecutableException();
+                default:
+                    throw new Exception(response.StatusCode + ": " + await response.Content.ReadAsStringAsync());
             }
-            // Will throw a generic HttpRequestException:
-            throw new Exception(response.StatusCode + ": " + await response.Content.ReadAsStringAsync());
         }
     }
 }

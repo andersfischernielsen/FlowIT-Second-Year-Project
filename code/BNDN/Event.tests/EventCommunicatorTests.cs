@@ -1,6 +1,8 @@
 ﻿using System;
 using Common.Exceptions;
 using Event.Communicators;
+using Event.Exceptions;
+using Event.Exceptions.EventInteraction;
 using NUnit.Framework;
 
 namespace Event.Tests
@@ -15,7 +17,7 @@ namespace Event.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(NotFoundException))]
+        [ExpectedException(typeof(FailedToGetExecutedFromAnotherEventException))]
         public void IsExecuted_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator();
@@ -31,7 +33,7 @@ namespace Event.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(NotFoundException))]
+        [ExpectedException(typeof(FailedToGetIncludedFromAnotherEventException))]
         public void IsIncluded_FailsOnWrongUri()
         {
             var eventCommunicator = new EventCommunicator();
