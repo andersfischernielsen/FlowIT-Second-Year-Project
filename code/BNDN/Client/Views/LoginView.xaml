@@ -9,7 +9,7 @@
     <UniformGrid Rows="3" Margin="10,10,10,10">
         <StackPanel Orientation="Vertical" VerticalAlignment="Top">
             <TextBox Name="Username" Style="{StaticResource FillTextBoxStyle}" Margin="10,10,10,0" TextWrapping="Wrap" Text="{Binding Username}" />
-            <TextBox Name="Password" Style="{StaticResource FillTextBoxStyle}" Margin="10,10,10,0" TextWrapping="Wrap" Text="{Binding Password}" />
+            <TextBox Name="Password" Style="{StaticResource FillTextBoxStyle}" Margin="10,10,10,0" Text="{Binding Password}" />
         </StackPanel>
         <TextBlock VerticalAlignment="Center" TextWrapping="WrapWithOverflow" Style="{StaticResource HeaderTextBlockStyle}" FontStyle="Italic" FontSize="18" Text="{Binding Status}" Margin="10,0,10,0"/>
         <Button Style="{StaticResource ButtonDefaultStyle}"  Content="Login" Margin="10,10" VerticalAlignment="Bottom" Height="47">
