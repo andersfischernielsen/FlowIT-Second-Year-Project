@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Server.Interfaces;
 using Server.Logic;
 using Server.Storage;
 
@@ -34,7 +35,7 @@ namespace Server.Controllers
             {
                 return await _logic.Login(username);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, ex));
             }

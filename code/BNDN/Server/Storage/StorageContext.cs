@@ -1,6 +1,7 @@
 ﻿using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using Common.History;
+using Server.Interfaces;
 using Server.Models;
 
 namespace Server.Storage

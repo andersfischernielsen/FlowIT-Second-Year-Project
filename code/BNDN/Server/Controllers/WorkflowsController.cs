@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Server.Exceptions;
+using Server.Interfaces;
 using Server.Logic;
 using Server.Storage;
 

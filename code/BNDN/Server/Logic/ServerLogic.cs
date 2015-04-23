@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Server.Exceptions;
+using Server.Interfaces;
 using Server.Models;
 using Server.Storage;
 
@@ -48,7 +49,7 @@ namespace Server.Logic
 
             if (user == null)
             {
-                throw new Exception("User was not found.");
+                throw new InvalidOperationException("User was not found.");
             }
 
             var rolesModels = await _storage.Login(user);

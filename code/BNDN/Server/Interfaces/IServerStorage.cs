@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Common;
 using Server.Models;
 
-namespace Server.Storage
+namespace Server.Interfaces
 {
     public interface IServerStorage : IDisposable, IServerHistoryStorage
     {
