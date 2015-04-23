@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Common.Exceptions;
+using Common.History;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -14,11 +15,13 @@ namespace Event.Controllers
     public class LifecycleController : ApiController
     {
         private readonly ILifecycleLogic _logic;
+        private readonly IEventHistoryLogic _historyLogic;
 
         // Constructor used by framework
         public LifecycleController()
         {
             _logic = new LifecycleLogic();
+            _historyLogic = new EventHistoryLogic();
         }
 
         // Constructor used for dependency-injection
@@ -48,24 +51,29 @@ namespace Event.Controllers
                         conflictElements.Append(key + ", ");
                     }
                 }
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                                                 "Provided input could not be mapped onto an instance of EventDto " +
                                                 conflictElements));
+
+                await _historyLogic.SaveException(toThrow, eventDto.EventId, eventDto.WorkflowId);
+                throw toThrow;
             }
 
             if (eventDto == null)
             {
                 // TODO: Provide nicer description / error message
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+                var toThrow = new HttpResponseException(HttpStatusCode.BadRequest);
+                await _historyLogic.SaveException(toThrow, "POST", "CreateEvent");
             }
 
             // Prepare for method-call: Gets own URI (i.e. http://address)
-            var s = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
-            var ownUri = new Uri(s);
+            var uri = string.Format("{0}://{1}", Request.RequestUri.Scheme, Request.RequestUri.Authority);
+            var ownUri = new Uri(uri);
 
             // TODO: Exception handling
             await _logic.CreateEvent(eventDto, ownUri);
-
+            await _historyLogic.SaveSuccesfullCall("POST", "CreateEvent", eventDto.EventId, eventDto.WorkflowId);
         }
 
         /// <summary>
@@ -81,10 +89,12 @@ namespace Event.Controllers
             try
             {
                 await _logic.DeleteEvent(workflowId, eventId);
+                await _historyLogic.SaveSuccesfullCall("DELETE", "DeleteEvent", eventId, workflowId);
             }
-            catch (LockedException)
+            catch (LockedException ex)
                 // Todo: Exception handling
             {
+                _historyLogic.SaveException(ex, "DELETE", "DeleteEvent", eventId, workflowId);
                 throw;
             }
         }
@@ -105,11 +115,12 @@ namespace Event.Controllers
             try
             {
                 await _logic.ResetEvent(workflowId, eventId);
+                await _historyLogic.SaveSuccesfullCall("PUT", "ResetEvent", eventId, workflowId);
+
             }
                 // Todo: Exception handling
-            catch (Exception)
-            {
-
+            catch (Exception ex) {
+                _historyLogic.SaveException(ex, "PUT", "ResetEvent", eventId, workflowId);
                 throw;
             }
         }
@@ -126,15 +137,20 @@ namespace Event.Controllers
         {
             try
             {
-                return await _logic.GetEventDto(workflowId, eventId);
+                 var toReturn = await _logic.GetEventDto(workflowId, eventId);
+                 await _historyLogic.SaveSuccesfullCall("GET", "GetEvent", eventId, workflowId);
+
+                 return toReturn;
             }
-            catch (NotFoundException)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, workflowId + "." + eventId + " not found"));
+            catch (NotFoundException ex) {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, workflowId + "." + eventId + " not found"));
+                _historyLogic.SaveException(toThrow, "GET", "GetEvent", eventId, workflowId);
+
+                throw toThrow;
             }
                 // Todo: Exception handling.
-            catch (Exception)
-            {
+            catch (Exception ex) {
+                _historyLogic.SaveException(ex, "GET", "GetEvent", eventId, workflowId);
                 throw;
             }
         }

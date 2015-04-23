@@ -19,6 +19,8 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -77,6 +79,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Communicators\EventCommunicator.cs" />
+    <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\LifecycleController.cs" />
     <Compile Include="Controllers\LockController.cs" />
     <Compile Include="Controllers\StateController.cs" />
@@ -85,11 +88,14 @@
     <Compile Include="Exceptions\FailedToUpdateStateAtOtherEventException.cs" />
     <Compile Include="Interfaces\IAuthLogic.cs" />
     <Compile Include="Interfaces\IEventContext.cs" />
+    <Compile Include="Interfaces\IEventHistoryLogic.cs" />
+    <Compile Include="Interfaces\IEventHistoryStorage.cs" />
     <Compile Include="Interfaces\IEventStorageForReset.cs" />
     <Compile Include="Interfaces\ILifecycleLogic.cs" />
     <Compile Include="Interfaces\ILockingLogic.cs" />
     <Compile Include="Interfaces\IStateLogic.cs" />
     <Compile Include="Exceptions\FailedToUpdateStateException.cs" />
+    <Compile Include="Logic\EventHistoryLogic.cs" />
     <Compile Include="Logic\LifecycleLogic.cs" />
     <Compile Include="Logic\AuthLogic.cs" />
     <Compile Include="Logic\LockingLogic.cs" />
@@ -161,6 +167,13 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

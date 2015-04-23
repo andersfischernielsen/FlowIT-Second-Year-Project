@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.History;
 using Event.Models;
 using Event.Models.UriClasses;
 
@@ -20,6 +21,8 @@ namespace Event.Interfaces
         DbSet<ResponseUri> Responses { get; set; }
         DbSet<InclusionUri> Inclusions { get; set; }
         DbSet<ExclusionUri> Exclusions { get; set; }
+        DbSet<HistoryModel> History { get; set; }
+
         int SaveChanges();
         Task<int> SaveChangesAsync();
     }

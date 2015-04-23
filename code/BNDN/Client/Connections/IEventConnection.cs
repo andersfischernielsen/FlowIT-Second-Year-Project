@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Common.History;
 
 namespace Client.Connections
 {
@@ -14,6 +16,12 @@ namespace Client.Connections
         /// </summary>
         /// <returns></returns>
         Task<EventStateDto> GetState();
+
+        /// <summary>
+        /// Returns the history of the event.
+        /// </summary>
+        /// <returns></returns>
+        Task<IList<HistoryDto>> GetHistory();
 
         /// <summary>
         /// Delete an event. Only to be used for testing!

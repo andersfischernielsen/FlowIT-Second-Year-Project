@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Server.Models;
+using Server.Storage;
 
 namespace Server.Interfaces
 {
-    public interface IServerStorage : IDisposable
+    public interface IServerStorage : IDisposable, IServerHistoryStorage
     {
         Task<ServerUserModel> GetUser(string username, string password);
 
