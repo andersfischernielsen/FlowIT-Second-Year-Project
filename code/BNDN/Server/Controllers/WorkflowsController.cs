@@ -98,7 +98,7 @@ namespace Server.Controllers
 
         [Route("Workflows/{workflowId}")]
         [HttpPost]
-        public async Task<IEnumerable<EventAddressDto>> PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
+        public async Task PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
         {
             if (!ModelState.IsValid)
             {
@@ -110,11 +110,6 @@ namespace Server.Controllers
             {
                 // Add this Event to the specified workflow
                 await _logic.AddEventToWorkflow(workflowId, eventToAddDto);
-
-                // To caller, return a list of the other (excluding itself) Events on the workflow
-                return
-                    (await _logic.GetEventsOnWorkflow(workflowId))
-                        .Where(eventAddressDto => eventAddressDto.Id != eventToAddDto.Id).ToList();
             }
             catch (Exception ex)
             {
