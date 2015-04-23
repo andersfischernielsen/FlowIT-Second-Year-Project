@@ -87,6 +87,7 @@
     <Compile Include="Models\ServerUserModel.cs" />
     <Compile Include="Models\ServerWorkflowModel.cs" />
     <Compile Include="Interfaces\IServerContext.cs" />
+    <Compile Include="Storage\PasswordHasher.cs" />
     <Compile Include="Storage\ServerStorage.cs" />
     <Compile Include="Storage\StorageContext.cs" />
     <Compile Include="Interfaces\IServerStorage.cs" />
