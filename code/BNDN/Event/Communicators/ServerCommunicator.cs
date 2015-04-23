@@ -29,7 +29,7 @@ namespace Event.Communicators
         }
 
 
-        public async Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto addressDto)
+        public async Task PostEventToServer(EventAddressDto addressDto)
         {
             if (string.IsNullOrEmpty(_eventId)
                     || string.IsNullOrEmpty(_workflowId)
@@ -39,7 +39,7 @@ namespace Event.Communicators
             }
 
             var path = string.Format("workflows/{0}", _workflowId);
-            return await _httpClient.Create<EventAddressDto, IEnumerable<EventAddressDto>>(path, addressDto);
+            await _httpClient.Create(path, addressDto);
         }
 
         public async Task DeleteEventFromServer()
