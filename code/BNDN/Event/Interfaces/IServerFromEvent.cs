@@ -8,6 +8,6 @@ namespace Event.Interfaces
     interface IServerFromEvent : IDisposable
     {
         Task DeleteEventFromServer();
-        Task<IEnumerable<EventAddressDto>> PostEventToServer(EventAddressDto dto);
+        Task PostEventToServer(EventAddressDto dto);
     }
 }
