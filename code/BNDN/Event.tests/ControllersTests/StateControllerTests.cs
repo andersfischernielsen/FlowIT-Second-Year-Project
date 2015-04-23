@@ -7,7 +7,6 @@ using Common.Exceptions;
 using Event.Controllers;
 using Event.Exceptions;
 using Event.Interfaces;
-using Event.Logic;
 using Moq;
 using NUnit.Framework;
 
@@ -22,7 +21,7 @@ namespace Event.Tests.ControllersTests
         [SetUp]
         public void SetUp()
         {
-            _stateLogicMock = new Mock<IStateLogic>();
+            _stateLogicMock = new Mock<IStateLogic>(MockBehavior.Strict);
 
             _stateController = new StateController(_stateLogicMock.Object) { Request = new HttpRequestMessage() };
         }
@@ -38,7 +37,7 @@ namespace Event.Tests.ControllersTests
         [Test]
         public void StateControllerTests_Constructor_Runs_With_Argument()
         {
-            new StateController(new StateLogic());
+            new StateController(_stateLogicMock.Object);
         }
 
         [Test]
