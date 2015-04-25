@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Common.History;
 
 namespace Client.ViewModels
@@ -62,8 +63,11 @@ namespace Client.ViewModels
 
         public DateTime TimeStamp
         {
-            get { return _historyDto.TimeStamp; }
-            set { NotifyPropertyChanged("TimeStamp"); }
+            get { return DateTime.Parse(_historyDto.TimeStamp, new DateTimeFormatInfo()); }
+            set
+            {
+                _historyDto.TimeStamp = value.ToString(CultureInfo.InvariantCulture);
+                NotifyPropertyChanged("TimeStamp"); }
         }
         
         #endregion

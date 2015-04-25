@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Client.ViewModels
     public class HistoryListViewModel : ViewModelBase
     {
         private readonly Uri _serverAddress;
-        
+
         public HistoryListViewModel()
         {
             HistoryViewModelList = new ObservableCollection<HistoryViewModel>();
@@ -62,34 +63,37 @@ namespace Client.ViewModels
             HistoryViewModelList.Clear();
             NotifyPropertyChanged("");
 
+            List<EventAddressDto> eventAddresses;
+            ConcurrentBag<HistoryViewModel> history;
+
             // create a server connection
-            IServerConnection serverConnection = new ServerConnection(_serverAddress);
-
-            // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
-            var evenAddresses = (await serverConnection.GetEventsFromWorkflow(new WorkflowDto { Id = WorkflowId }))
-                .AsParallel()
-                .ToList();
-
-            // add the history of the server
-            ConcurrentBag<HistoryViewModel> history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto){Title = WorkflowId}));
-
-            // add all the histories of the events.
-            var parallelLoopResult = Parallel.ForEach(evenAddresses, async dto =>
+            using (IServerConnection serverConnection = new ServerConnection(_serverAddress))
             {
-                IEventConnection eventConnection = new EventConnection(dto, WorkflowId);
-                var list = (await eventConnection.GetHistory()).Select(historyDto => new HistoryViewModel(historyDto){Title = dto.Id});
-                list.ToList().ForEach(model => history.Add(model));
-            });
 
-            await Task.Run(() =>
+                // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
+                eventAddresses = (await serverConnection.GetEventsFromWorkflow(WorkflowId))
+                    .AsParallel()
+                    .ToList();
+
+                // add the history of the server
+                history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto) { Title = WorkflowId }));
+            }
+
+            var tasks = eventAddresses.Select(async dto =>
             {
-                while (!parallelLoopResult.IsCompleted)
+                using (IEventConnection eventConnection = new EventConnection(dto.Uri))
                 {
-                    // Just you wait!
+                    var list =
+                        (await eventConnection.GetHistory(WorkflowId, dto.Id)).Select(
+                            historyDto => new HistoryViewModel(historyDto) {Title = dto.Id});
+                    list.ToList().ForEach(model => history.Add(model));
                 }
             });
 
+            await Task.WhenAll(tasks);
+
             // order them by timestamp
+            // TODO: Currently, DateTimes are not parsed correctly.
             var orderedHistory = history.ToList().OrderByDescending(model => model.TimeStamp);
 
             // move the list into the observable collection.
