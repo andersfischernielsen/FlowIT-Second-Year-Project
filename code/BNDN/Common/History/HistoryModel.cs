@@ -4,8 +4,8 @@ namespace Common.History
 {
     public class HistoryModel
     {
-        public int Id { get; private set; }
-        public DateTime TimeStamp { get; private set; }
+        public int Id { get; set; }
+        public DateTime TimeStamp { get; set; }
         public string EventId { get; set; }
         public string WorkflowId { get; set; }
         public string HttpRequestType { get; set; }
