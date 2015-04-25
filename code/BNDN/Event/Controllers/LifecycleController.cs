@@ -260,5 +260,12 @@ namespace Event.Controllers
                 throw toThrow;
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            _historyLogic.Dispose();
+            _logic.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

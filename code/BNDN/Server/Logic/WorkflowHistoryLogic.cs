@@ -52,5 +52,10 @@ namespace Server.Logic
         {
             await _storage.SaveNonWorkflowSpecificHistory(toSave);
         }
+
+        public void Dispose()
+        {
+            _storage.Dispose();
+        }
     }
 }

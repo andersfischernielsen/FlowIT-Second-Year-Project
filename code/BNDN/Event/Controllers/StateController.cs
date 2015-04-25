@@ -346,7 +346,7 @@ namespace Event.Controllers
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Another event could not save state!"));
                 _historyLogic.SaveException(toThrow, "PUT", "Execute", eventId, workflowId).Wait();
-                throw toThrow; ;
+                throw toThrow;
             }
         }
 

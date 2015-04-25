@@ -53,10 +53,16 @@ namespace Server.Controllers
 
             catch (Exception e) 
             {
-                _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" }).Wait();
 
                 throw;
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _historyLogic.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

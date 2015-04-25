@@ -152,5 +152,12 @@ namespace Event.Controllers
 
             await _historyLogic.SaveSuccesfullCall("DELETE", "Unlock", eventId, workflowId);
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            _historyLogic.Dispose();
+            _lockLogic.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }
