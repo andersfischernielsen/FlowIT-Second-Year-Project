@@ -77,11 +77,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ClientExceptions.cs" />
+    <Compile Include="Exceptions\HostNotFoundException.cs" />
     <Compile Include="Connections\EventConnection.cs" />
     <Compile Include="Connections\IEventConnection.cs" />
     <Compile Include="Connections\IServerConnection.cs" />
     <Compile Include="Connections\ServerConnection.cs" />
+    <Compile Include="Exceptions\LoginFailedException.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\EventViewModel.cs" />
