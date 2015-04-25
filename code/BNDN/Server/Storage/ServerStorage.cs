@@ -10,6 +10,9 @@ using Server.Models;
 
 namespace Server.Storage
 {
+    /// <summary>
+    /// ServerStorage is the layer that rests on top of the actual database. 
+    /// </summary>
     public class ServerStorage : IServerStorage
     {
         private readonly IServerContext _db;
@@ -19,6 +22,13 @@ namespace Server.Storage
             _db = context ?? new StorageContext();
         }
 
+        /// <summary>
+        /// Returns the user, if he/she exists, and the provided password matches. 
+        /// Returns null if no user is found. 
+        /// </summary>
+        /// <param name="username">Username of the user</param>
+        /// <param name="password">Claimed password of the user</param>
+        /// <returns></returns>
         public async Task<ServerUserModel> GetUser(string username, string password)
         {
             var user = await _db.Users.SingleOrDefaultAsync(u => string.Equals(u.Name, username));
@@ -28,6 +38,11 @@ namespace Server.Storage
             return PasswordHasher.VerifyHashedPassword(password, user.Password) ? user : null;
         }
 
+        /// <summary>
+        /// Attempts to login using the provided ServerUserModel
+        /// </summary>
+        /// <param name="userModel">Represents the user</param>
+        /// <returns></returns>
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
         {
             if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;
@@ -36,6 +51,12 @@ namespace Server.Storage
             return user != null ? user.ServerRolesModels : null;
         }
 
+        // TODO: Discuss: Could this method not instead just be called with: string workflowId?
+        /// <summary>
+        /// Gets the Events within the specified workflow.
+        /// </summary>
+        /// <param name="workflow">Represents the workflow, whose Events are to be returned</param>
+        /// <returns></returns>
         public async Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(ServerWorkflowModel workflow)
         {
             var events = from e in _db.Events
@@ -43,6 +64,7 @@ namespace Server.Storage
                          select e;
             return await events.ToListAsync();
         }
+
 
         public async Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
         {
@@ -63,16 +85,20 @@ namespace Server.Storage
             return result;
         }
 
+
         public async Task<ServerRoleModel> GetRole(string id, string workflowId)
         {
             return await _db.Roles.SingleOrDefaultAsync(role => role.Id.Equals(id) && role.ServerWorkflowModelId.Equals(workflowId));
         }
+
+
 
         public async Task<bool> RoleExists(ServerRoleModel role)
         {
             return await _db.Roles.AnyAsync(rr => rr.Id.Equals(role.Id)
                 && rr.ServerWorkflowModelId.Equals(role.ServerWorkflowModelId));
         }
+
 
         public async Task AddUser(ServerUserModel user)
         {
@@ -88,6 +114,7 @@ namespace Server.Storage
             await _db.SaveChangesAsync();
         }
 
+
         public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
             var workflows = from w in _db.Workflows
@@ -96,12 +123,14 @@ namespace Server.Storage
 
             if (workflows.Count() != 1)
             {
+                // TODO: Throw IllegalstorageStateException instead (move from Event into Common)
                 throw new IOException("Multiple or no workflow with given ID.");
             }
 
             _db.Events.Add(eventToBeAddedDto);
             await _db.SaveChangesAsync();
         }
+
 
         public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
         {
@@ -116,6 +145,7 @@ namespace Server.Storage
 
             await _db.SaveChangesAsync();
         }
+
 
         public async Task RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
         {
@@ -134,6 +164,10 @@ namespace Server.Storage
             await _db.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Returns all workflows held in storage. 
+        /// </summary>
+        /// <returns></returns>
         public async Task<ICollection<ServerWorkflowModel>> GetAllWorkflows()
         {
             var workflows = from w in _db.Workflows select w;
@@ -141,22 +175,38 @@ namespace Server.Storage
             return await workflows.ToListAsync();
         }
 
+        /// <summary>
+        /// Determines whether a workflow exists in storage
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow</param>
+        /// <returns></returns>
         public async Task<bool> WorkflowExists(string workflowId)
         {
             return await _db.Workflows.AnyAsync(workflow => workflow.Id == workflowId);
         }
 
+        /// <summary>
+        /// Returns the specified workflow. 
+        /// </summary>
+        /// <param name="workflowId"></param>
+        /// <returns></returns>
         public async Task<ServerWorkflowModel> GetWorkflow(string workflowId)
         {
             var workflows = from w in _db.Workflows
                             where w.Id == workflowId
                             select w;
 
-            return await workflows.SingleAsync();
+            return await workflows.SingleOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Adds a new workflow. 
+        /// </summary>
+        /// <param name="workflow">Represents the workflow that is to be added</param>
+        /// <returns></returns>
         public async Task AddNewWorkflow(ServerWorkflowModel workflow)
         {
+            // TODO: What if that workflow already exists?
             _db.Workflows.Add(workflow);
             await _db.SaveChangesAsync();
         }
@@ -220,6 +270,11 @@ namespace Server.Storage
             return _db.History.Where(h => h.WorkflowId == workflowId);
         }
 
+        /// <summary>
+        /// Determines whether a workflow already exists
+        /// </summary>
+        /// <param name="workflowId">The workflow to test for existence</param>
+        /// <returns></returns>
         private async Task<bool> Exists(string workflowId)
         {
             return await _db.Workflows.AnyAsync(w => w.Id == workflowId);

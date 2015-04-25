@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.Exceptions;
 using Common.History;
 using Server.Exceptions;
 using Server.Interfaces;
@@ -14,18 +14,29 @@ using Server.Storage;
 
 namespace Server.Controllers
 {
-
+    /// <summary>
+    /// WorkflowsController handles HTTP-request regarding workflows on Server
+    /// </summary>
     public class WorkflowsController : ApiController
     {
         private readonly IServerLogic _logic;
         private readonly IWorkflowHistoryLogic _historyLogic;
 
+        /// <summary>
+        /// Default constructor used during runtime
+        /// </summary>
         public WorkflowsController()
         {
             _logic = new ServerLogic(new ServerStorage());
             _historyLogic = new WorkflowHistoryLogic();
         }
 
+        /// <summary>
+        /// Constructor used for dependency-injection udring testing
+        /// </summary>
+        /// <param name="logic">Logic that handles logic for workflows operations</param>
+        /// <param name="historyLogic">Logic that handles logic for history operations, i.e. recording successfull
+        /// or non-successfull operations happening at Server</param>
         public WorkflowsController(IServerLogic logic, IWorkflowHistoryLogic historyLogic)
         {
             _logic = logic;
@@ -37,8 +48,8 @@ namespace Server.Controllers
         /// Returns a list of all workflows currently held at this Server
         /// </summary>
         /// <returns>List of WorkflowDto</returns>
-        // GET: /workflows
         [Route("workflows")]
+        [HttpGet]
         public async Task<IEnumerable<WorkflowDto>> Get()
         {
             var toReturn = await _logic.GetAllWorkflows();
@@ -52,8 +63,6 @@ namespace Server.Controllers
             return toReturn;
         }
 
-
-        // GET: /Workflows/5
         /// <summary>
         /// Given an workflowId, this method returns all events within that workflow
         /// </summary>
@@ -76,6 +85,32 @@ namespace Server.Controllers
 
                 return toReturn;
             }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    WorkflowId = workflowId,
+                    Message = "Threw: " + toThrow.GetType(),
+                    HttpRequestType = "GET",
+                    MethodCalledOnSender = "GET(" + workflowId + ")"
+                });
+                throw toThrow;
+            }
+            catch (NotFoundException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "The specified workflow could not be found"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    WorkflowId = workflowId,
+                    Message = "Threw: " + toThrow.GetType(),
+                    HttpRequestType = "GET",
+                    MethodCalledOnSender = "Get(" + workflowId + ")"
+                });
+                throw toThrow;
+            }
             catch (Exception ex)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, ex.Message));
@@ -96,7 +131,7 @@ namespace Server.Controllers
         /// <summary>
         /// PostNewWorkFlow adds a new workflow.
         /// </summary>
-        /// <param name="workflowDto"></param>
+        /// <param name="workflowDto">Contains the information on the workflow, that is to be created at Server</param>
         [Route("Workflows")]
         [HttpPost]
         public async Task PostWorkFlow([FromBody] WorkflowDto workflowDto)
@@ -171,6 +206,12 @@ namespace Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Will add an Event to a workflow. 
+        /// </summary>
+        /// <param name="workflowId">The id of the workflow, that the Event is to be added to</param>
+        /// <param name="eventToAddDto">Contains information about the Event</param>
+        /// <returns></returns>
         [Route("Workflows/{workflowId}")]
         [HttpPost]
         public async Task PostEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToAddDto)
@@ -221,6 +262,7 @@ namespace Server.Controllers
         #endregion
 
         #region PUT requests
+        // TODO: Discuss: Is this method ever used? Should we not delete...? Or do we keep it to stay REST'ed...?
         /// <summary>
         /// UpdateEventToWorkFlow updates an Event in a workflow with the specified workflowid. 
         /// </summary>
@@ -272,6 +314,11 @@ namespace Server.Controllers
         #endregion
 
         #region DELETE requests
+        /// <summary>
+        /// Will delete a specified Event from a specified workflow
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event, that is to be deleted</param>
         [Route("Workflows/{workflowId}/{eventId}")]
         [HttpDelete]
         public void DeleteEventFromWorkflow(string workflowId, string eventId)
@@ -306,6 +353,11 @@ namespace Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes the specified workflow
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, that is to be deleted</param>
+        /// <returns></returns>
         [Route("Workflows/{workflowId}")]
         [HttpDelete]
         public async Task DeleteWorkflow(string workflowId)

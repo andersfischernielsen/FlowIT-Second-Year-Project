@@ -6,15 +6,27 @@ using Common.History;
 using Server.Interfaces;
 using Server.Logic;
 
-namespace Server.Controllers {
-    public class HistoryController : ApiController {
+namespace Server.Controllers 
+{
+    /// <summary>
+    /// HistoryController handles HTTP-request regarding History on Server
+    /// </summary>
+    public class HistoryController : ApiController 
+    {
         private readonly IWorkflowHistoryLogic _historyLogic;
 
+        /// <summary>
+        /// Default constructor used during runtime.
+        /// </summary>
         public HistoryController()
         {
             _historyLogic = new WorkflowHistoryLogic();
         }
 
+        /// <summary>
+        /// Used for dependency-injection
+        /// </summary>
+        /// <param name="historyLogic">Implementation of IWorkflowHistoryLogic</param>
         public HistoryController(IWorkflowHistoryLogic historyLogic)
         {
             _historyLogic = historyLogic;
@@ -31,14 +43,16 @@ namespace Server.Controllers {
         [HttpGet]
         public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId)
         {
-            try {
+            try 
+            {
                 var toReturn = await _historyLogic.GetHistoryForWorkflow(workflowId);
                 await _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", MethodCalledOnSender = "GetHistory", WorkflowId = workflowId, Message = "Called: GetHistory" });
 
                 return toReturn;
             }
 
-            catch (Exception e) {
+            catch (Exception e) 
+            {
                 _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
 
                 throw;
