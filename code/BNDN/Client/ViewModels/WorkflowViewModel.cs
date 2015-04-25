@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using Client.Connections;
 using Client.Views;
 using Common;
@@ -12,17 +11,21 @@ namespace Client.ViewModels
     public class WorkflowViewModel : ViewModelBase
     {
         private readonly WorkflowDto _workflowDto;
-        private bool _resetEventRuns = false;
+        private bool _resetEventRuns;
+        private readonly WorkflowListViewModel _parent;
+
         public string WorkflowId { get { return _workflowDto.Id; } }
 
-        public WorkflowViewModel()
+        public WorkflowViewModel(WorkflowListViewModel parent)
         {
+            _parent = parent;
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = new WorkflowDto();
         }
 
-        public WorkflowViewModel(WorkflowDto workflowDto)
+        public WorkflowViewModel(WorkflowListViewModel parent, WorkflowDto workflowDto)
         {
+            _parent = parent;
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = workflowDto;
         }
@@ -52,6 +55,16 @@ namespace Client.ViewModels
                 NotifyPropertyChanged("SelectedEventViewModel");
             }
         }
+
+        public string Status
+        {
+            get { return _parent.Status; }
+            set
+            {
+                _parent.Status = value;
+            }
+        }
+
         #endregion
 
         #region Actions
@@ -61,24 +74,20 @@ namespace Client.ViewModels
             SelectedEventViewModel = null;
             EventList.Clear();
 
-            IServerConnection connection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
-
             var settings = Settings.LoadSettings();
             var username = settings.Username;
 
-            var test = (await connection.GetEventsFromWorkflow(_workflowDto))
+            List<EventViewModel> events;
+            using (IServerConnection connection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress)))
+            {
+                events = (await connection.GetEventsFromWorkflow(WorkflowId))
                 .AsParallel()
                 .Where(e => e.Roles.Any(r => r == username)) //Only selects the events, the current user can execute
                 .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
                 .ToList();
-
-            // Use this for ordering the events.
-            //EventList = new ObservableCollection<EventViewModel>(test
-            //    .OrderByDescending(model => model.Executable)
-            //    .ThenByDescending(model => model.Pending)
-            //    .ThenBy(model => model.Name));
+            }
             
-            EventList = new ObservableCollection<EventViewModel>(test);
+            EventList = new ObservableCollection<EventViewModel>(events);
 
             SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
             
@@ -88,7 +97,7 @@ namespace Client.ViewModels
         /// <summary>
         /// Creates a new window with the log of the 
         /// </summary>
-        public async void GetHistory()
+        public void GetHistory()
         {
             if (EventList != null && EventList.Count != 0)
             {
@@ -106,18 +115,26 @@ namespace Client.ViewModels
         {
             if (_resetEventRuns) return;
             _resetEventRuns = true;
-            
-            IServerConnection serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
 
-            var adminEventList = (await serverConnection.GetEventsFromWorkflow(_workflowDto))
+            List<EventAddressDto> adminEventList;
+            using (
+                IServerConnection serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress))
+                )
+            {
+                adminEventList = (await serverConnection.GetEventsFromWorkflow(WorkflowId))
                 .AsParallel()
                 .ToList();
+            }
+
+            
 
             // Reset all the events.
             foreach (var eventViewModel in adminEventList)
             {
-                IEventConnection connection = new EventConnection(eventViewModel, WorkflowId);
-                await connection.ResetEvent();
+                using (IEventConnection connection = new EventConnection(eventViewModel.Uri))
+                {
+                    await connection.ResetEvent(WorkflowId, eventViewModel.Id);
+                }
             }
             NotifyPropertyChanged("");
             GetEvents();

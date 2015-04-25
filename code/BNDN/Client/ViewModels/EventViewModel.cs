@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Client.Connections;
+using Client.Exceptions;
 using Common;
+using Common.Exceptions;
 
 namespace Client.ViewModels
 {
@@ -133,21 +133,42 @@ namespace Client.ViewModels
             }
         }
 
+        public string Status
+        {
+            get { return _parent.Status; }
+            set { _parent.Status = value; }
+        }
+
         #endregion
 
         #region Actions
 
         public async void GetState()
         {
-            IEventConnection eventConnection = new EventConnection(_eventAddressDto, _parent.WorkflowId);
             try
             {
-                _eventStateDto = await eventConnection.GetState();
+                using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
+                {
+                    _eventStateDto = await eventConnection.GetState(_parent.WorkflowId, _eventAddressDto.Id);
+                }
                 NotifyPropertyChanged("");
+            }
+            catch (NotFoundException)
+            {
+                Status = "The event could not be found. Please refresh the workflow";
+            }
+            catch (LockedException)
+            {
+                Status = "The event is currently locked. Please try again later.";
+            }
+            catch (HostNotFoundException)
+            {
+                Status =
+                    "The host of the event was not found. Please refresh the workflow. If the problem persists, contact you Flow administrator";
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message + Environment.NewLine + e.GetType());
+                Status = e.Message;
             }
         }
 
@@ -158,13 +179,36 @@ namespace Client.ViewModels
         {
             try
             {
-                IEventConnection eventConnection = new EventConnection(_eventAddressDto, _parent.WorkflowId);
-                await eventConnection.Execute(true);
+                using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
+                {
+                    await eventConnection.Execute(_parent.WorkflowId, _eventAddressDto.Id);
+                }
                 _parent.GetEvents();
+            }
+            catch (NotFoundException)
+            {
+                Status = "The event could not be found. Please refresh the workflow";
+            }
+            catch (UnauthorizedException)
+            {
+                Status = "You do not have the rights to execute this event";
+            }
+            catch (LockedException)
+            {
+                Status = "The event is currently locked. Please try again later.";
+            }
+            catch (NotExecutableException)
+            {
+                Status = "The event is currently not executable. Please refresh the workflow";
+            }
+            catch (HostNotFoundException)
+            {
+                Status =
+                    "The host of the event was not found. Please refresh the workflow. If the problem persists, contact you Flow administrator";
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message + Environment.NewLine + e.GetType());
+                Status = e.Message;
             }
 
         }

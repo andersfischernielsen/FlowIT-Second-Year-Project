@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Common.History;
 
 namespace Server.Interfaces
 {
-    public interface IServerHistoryStorage
+    public interface IServerHistoryStorage : IDisposable
     {
         /// <summary>
         /// Save a given HistoryModel to storage.

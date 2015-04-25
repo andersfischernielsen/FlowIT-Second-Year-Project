@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Client.Exceptions;
 using Common;
 using Common.Exceptions;
 using Common.History;
@@ -14,9 +15,8 @@ namespace Client.Connections
 
 
         public ServerConnection(Uri uri)
-            : this(new HttpClientToolbox(uri))
         {
-
+            _http = new HttpClientToolbox(uri);
         }
 
         /// <summary>
@@ -28,6 +28,15 @@ namespace Client.Connections
             _http = toolbox;
         }
 
+        /// <summary>
+        /// Login to the Flow-system.
+        /// </summary>
+        /// <param name="username">The username of the chosen user to log in.</param>
+        /// <param name="password">The password that matches the username</param>
+        /// <returns>A dto containing relation between workflows and the roles the logged in user has access to.</returns>
+        /// <exception cref="LoginFailedException">If the username and password does not match a user</exception>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
         public async Task<RolesOnWorkflowsDto> Login(string username, string password)
         {
             try
@@ -41,12 +50,18 @@ namespace Client.Connections
             {
                 throw new LoginFailedException(e);
             }
-            catch (NotFoundException e)
+            catch (HttpRequestException e)
             {
-                throw new ServerNotFoundException(e);
+                throw new HostNotFoundException(e);
             }
         }
 
+        /// <summary>
+        /// Retrieve the Workflows currently held by the server.
+        /// </summary>
+        /// <returns>A list of information about workflows, which can be shown on the UI.</returns>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
         public async Task<IList<WorkflowDto>> GetWorkflows()
         {
             try
@@ -55,30 +70,49 @@ namespace Client.Connections
             }
             catch (HttpRequestException ex)
             {
-                throw new ServerNotFoundException(ex);
+                throw new HostNotFoundException(ex);
             }
 
         }
 
-        public Task<IList<EventAddressDto>> GetEventsFromWorkflow(WorkflowDto workflow)
+        /// <summary>
+        /// Retrieve the events of a workflow.
+        /// </summary>
+        /// <param name="workflowId">The Id of the workflow we want to retrieve events from.</param>
+        /// <returns>A list of information about how to contact the events in the given workflow.</returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        public Task<IList<EventAddressDto>> GetEventsFromWorkflow(string workflowId)
         {
             try
             {
-                return _http.ReadList<EventAddressDto>(string.Format("workflows/{0}", workflow.Id));
+                return _http.ReadList<EventAddressDto>(string.Format("workflows/{0}", workflowId));
             }
             catch (HttpRequestException ex)
             {
-                if (ex.Message.Contains("400 (Bad Request)"))
-                {
-                    throw new InvalidWorkflowIdException(ex);
-                }
-                throw new ServerNotFoundException(ex);
+                throw new HostNotFoundException(ex);
             }
         }
 
+        /// <summary>
+        /// Retrieve the worklfow history from the server.
+        /// </summary>
+        /// <param name="workflowId">The Id of the workflow we want to see the history of.</param>
+        /// <returns>A list of history-entries.</returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
         public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId)
         {
-            return await _http.ReadList<HistoryDto>(String.Format("history/{0}", workflowId));
+            try
+            {
+                return await _http.ReadList<HistoryDto>(string.Format("history/{0}", workflowId));
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new HostNotFoundException(ex);
+            }
         }
 
         public void Dispose()

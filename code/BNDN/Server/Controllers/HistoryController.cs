@@ -82,5 +82,11 @@ namespace Server.Controllers
                     "An unexpected error occured"));
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            _historyLogic.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }
