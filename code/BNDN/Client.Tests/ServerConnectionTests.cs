@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using Client.Connections;
+using Client.Exceptions;
 using Common;
 using Common.Exceptions;
 using Moq;
@@ -56,7 +58,7 @@ namespace Client.Tests
             var testDelegate = new TestDelegate(async () => await serverConnection.GetWorkflows());
 
             // Assert
-            Assert.Throws<ServerNotFoundException>(testDelegate);
+            Assert.Throws<HostNotFoundException>(testDelegate);
         }
 
         [Test]
@@ -107,7 +109,7 @@ namespace Client.Tests
 
             // Assert
             Assert.IsNotNull(rolesOnWorkflow);
-            Assert.AreEqual("student", rolesOnWorkflow.RolesOnWorkflows["course"][0]);
+            Assert.AreEqual("student", rolesOnWorkflow.RolesOnWorkflows["course"].First());
         }
 
         [Test]
@@ -158,11 +160,7 @@ namespace Client.Tests
             var serverConnection = new ServerConnection(m.Object);
 
             // Act
-            var result = await serverConnection.GetEventsFromWorkflow(new WorkflowDto
-            {
-                Id = "course",
-                Name = "Course workflow"
-            });
+            var result = await serverConnection.GetEventsFromWorkflow("course");
 
             // Assert
             Assert.IsNotNull(result);
@@ -180,11 +178,7 @@ namespace Client.Tests
             var serverConnection = new ServerConnection(m.Object);
 
             // Act
-            var result = await serverConnection.GetEventsFromWorkflow(new WorkflowDto
-            {
-                Id = "course",
-                Name = "Course workflow"
-            });
+            var result = await serverConnection.GetEventsFromWorkflow("course");
 
             // Assert
             Assert.IsNotNull(result);
@@ -198,19 +192,15 @@ namespace Client.Tests
             var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
 
             m.Setup(t => t.ReadList<EventAddressDto>(It.IsAny<string>()))
-                .Throws(new HttpRequestException()); //no message, we expect the ServerNotFoundException exception
+                .Throws(new HttpRequestException()); //no message, we expect the HostNotFoundException exception
 
             var serverConnection = new ServerConnection(m.Object);
 
             // Act
-            var testDelegate = new TestDelegate(async () => await serverConnection.GetEventsFromWorkflow(new WorkflowDto
-            {
-                Id = "course",
-                Name = "Course workflow"
-            }));
+            var testDelegate = new TestDelegate(async () => await serverConnection.GetEventsFromWorkflow("course"));
 
             // Assert
-            Assert.Throws<ServerNotFoundException>(testDelegate);
+            Assert.Throws<HostNotFoundException>(testDelegate);
         }
     }
 }

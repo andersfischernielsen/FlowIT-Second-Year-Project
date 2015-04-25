@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Client.Exceptions;
 using Client.ViewModels;
 using Common;
+using Common.Exceptions;
 using Common.History;
 
 namespace Client.Connections
@@ -10,19 +13,14 @@ namespace Client.Connections
     public class EventConnection : IEventConnection
     {
         private readonly HttpClientToolbox _httpClient;
-        private readonly EventAddressDto _eventDto;
-        private readonly string _workflowId;
 
         /// <summary>
         /// This constructor is used forwhen the connection should have knowlegde about roles.
         /// </summary>
-        /// <param name="eventDto"></param>
-        /// <param name="workflowId"></param>
-        public EventConnection(EventAddressDto eventDto, string workflowId)
-            : this(new HttpClientToolbox(eventDto.Uri))
+        /// <param name="eventUri"></param>
+        public EventConnection(Uri eventUri)
         {
-            _eventDto = eventDto;
-            _workflowId = workflowId;
+            _httpClient = new HttpClientToolbox(eventUri);
         }
 
 
@@ -36,31 +34,92 @@ namespace Client.Connections
         }
 
 
-        public async Task<EventStateDto> GetState()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        public async Task<EventStateDto> GetState(string workflowId, string eventId)
         {
-            var eventId = _eventDto.Id;
-            return await _httpClient.Read<EventStateDto>(String.Format("events/{0}/{1}/state/-1", _workflowId, eventId));   
+            try
+            {
+                return
+                    await _httpClient.Read<EventStateDto>(string.Format("events/{0}/{1}/state/-1", workflowId, eventId));
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HostNotFoundException(e);
+            }
         }
 
-        public async Task<IEnumerable<HistoryDto>> GetHistory()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId, string eventId)
         {
-            var eventId = _eventDto.Id;
-            return await _httpClient.ReadList<HistoryDto>(String.Format("history/{0}/{1}", _workflowId, eventId));
+            try
+            {
+                return await _httpClient.ReadList<HistoryDto>(string.Format("history/{0}/{1}", workflowId, eventId));
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HostNotFoundException(e);
+            }
+            
         }
 
-        public async Task ResetEvent()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        public async Task ResetEvent(string workflowId, string eventId)
         {
-            var eventId = _eventDto.Id;
-            await _httpClient.Update(String.Format("events/{0}/{1}/reset", _workflowId, eventId), new EventDto{Name = "ResetDTO - DO NOT USE"});
+            try
+            {
+                await
+                    _httpClient.Update(string.Format("events/{0}/{1}/reset", workflowId, eventId),
+                        new EventDto {Name = "ResetDTO - DO NOT USE"});
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HostNotFoundException(e);
+            }
         }
 
-        public async Task Execute(bool b)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        public async Task Execute(string workflowId, string eventId)
         {
             IList<string> roles;
-            LoginViewModel.RoleForWorkflow.TryGetValue(_workflowId, out roles);
-
-            var eventId = _eventDto.Id;
-            await _httpClient.Update(String.Format("events/{0}/{1}/executed/", _workflowId, eventId), new RoleDto { Roles = roles });
+            LoginViewModel.RoleForWorkflow.TryGetValue(workflowId, out roles);
+            try
+            {
+                await
+                    _httpClient.Update(string.Format("events/{0}/{1}/executed/", workflowId, eventId),
+                        new RoleDto {Roles = roles});
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HostNotFoundException(e);
+            }
         }
 
         public void Dispose()
