@@ -187,11 +187,13 @@ namespace Event.Controllers
                 _historyLogic.SaveException(toThrow, "PUT", "ResetEvent", eventId, workflowId).Wait();
                 throw toThrow;
             }
-            if (!ModelState.IsValid)
+            // TODO: ModelState.IsValid check is left out on purpose; the reason why is, we really don't need the EventDto
+            // TODO: and we cannot provide a legit instance from Client. The reason why, this method takes it, though, is to comply with PUT-semantics
+            /*if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                                                 "ResetEvent: Provided input could not be mapped onto an instance of EventDto."));
-            }
+            }*/
 
             try
             {
