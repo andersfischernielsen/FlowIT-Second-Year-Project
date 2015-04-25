@@ -95,7 +95,7 @@ namespace Server.Controllers
                     Message = "Threw: " + toThrow.GetType(),
                     HttpRequestType = "GET",
                     MethodCalledOnSender = "GET(" + workflowId + ")"
-                });
+                }).Wait();
                 throw toThrow;
             }
             catch (NotFoundException)
@@ -108,7 +108,7 @@ namespace Server.Controllers
                     Message = "Threw: " + toThrow.GetType(),
                     HttpRequestType = "GET",
                     MethodCalledOnSender = "Get(" + workflowId + ")"
-                });
+                }).Wait();
                 throw toThrow;
             }
             catch (Exception ex)
@@ -120,7 +120,7 @@ namespace Server.Controllers
                     Message = "Threw: " + toThrow.GetType(),
                     HttpRequestType = "GET",
                     MethodCalledOnSender = "Get(" + workflowId + ")"
-                });
+                }).Wait();
 
                 throw toThrow;
             }
@@ -149,10 +149,9 @@ namespace Server.Controllers
                 });
 
                 throw toThrow;
-
             }
 
-            if (workflowDto == null)
+            if (workflowDto == null)    // TODO: Should be obsolete now; because we already check ModelState.IsValid, workflowDto should not be able to be null
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Data was not provided"));
@@ -178,6 +177,19 @@ namespace Server.Controllers
                     WorkflowId = workflowDto.Id
                 });
             }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "PostWorkflow",
+                    WorkflowId = workflowDto.Id
+                }).Wait();
+                throw toThrow;
+            }
             catch (WorkflowAlreadyExistsException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
@@ -188,7 +200,7 @@ namespace Server.Controllers
                     Message = "Threw: " + toThrow.GetType(),
                     MethodCalledOnSender = "PostWorkflow",
                     WorkflowId = workflowDto.Id
-                });
+                }).Wait();
 
                 throw toThrow;
             }
@@ -200,8 +212,7 @@ namespace Server.Controllers
                     HttpRequestType = "POST",
                     Message = "Threw: " + toThrow.GetType(),
                     MethodCalledOnSender = "PostWorkflow",
-                });
-
+                }).Wait();
                 throw toThrow;
             }
         }
@@ -245,6 +256,57 @@ namespace Server.Controllers
                     WorkflowId = workflowId
                 });
             }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "PostEventWorkflow(" + workflowId + ")",
+                    WorkflowId = workflowId
+                }).Wait();
+                throw toThrow;
+            }
+            catch (NotFoundException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "The workflow was not found at Server"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "PostEventWorkflow(" + workflowId + ")",
+                    WorkflowId = workflowId
+                }).Wait();
+                throw toThrow;
+            }
+            catch (EventExistsException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "The event already exists at Server. You may wish to update the Event instead, using a PUT call"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "PostEventWorkflow(" + workflowId + ")",
+                    WorkflowId = workflowId
+                }).Wait();
+                throw toThrow;
+            }
+            catch (IllegalStorageStateException ex)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,ex));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "PostEventWorkflow(" + workflowId + ")",
+                    WorkflowId = workflowId
+                }).Wait();
+                throw toThrow;
+            }
             catch (Exception ex)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
@@ -254,8 +316,7 @@ namespace Server.Controllers
                     Message = "Threw: " + toThrow.GetType(),
                     MethodCalledOnSender = "PostEventWorkflow(" + workflowId + ")",
                     WorkflowId = workflowId
-                });
-
+                }).Wait();
                 throw toThrow;
             }
         }
@@ -299,6 +360,32 @@ namespace Server.Controllers
                     MethodCalledOnSender = "UpdateEventOnWorkFlow(" + workflowId + ")"
                 });
             }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "PostEventWorkflow",
+                    WorkflowId = workflowId
+                }).Wait();
+                throw toThrow;
+            }
+            catch (NotFoundException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "Either the Event or the workflow could not be found at Server"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "PostEventWorkflow",
+                    WorkflowId = workflowId
+                }).Wait();
+                throw toThrow;
+            }
             catch (Exception ex)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
@@ -308,7 +395,8 @@ namespace Server.Controllers
                     Message = "Threw: " + toThrow.GetType(),
                     MethodCalledOnSender = "PostEventWorkflow",
                     WorkflowId = workflowId
-                });
+                }).Wait();
+                throw toThrow;
             }
         }
         #endregion
@@ -335,6 +423,36 @@ namespace Server.Controllers
                     HttpRequestType = "DELETE",
                     MethodCalledOnSender = "DeleteEventFromWorkflow(" + workflowId + ", " + eventId + ")",
                 });
+            }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    EventId = eventId,
+                    WorkflowId = workflowId,
+                    Message = "Threw: " + toThrow.GetType(),
+                    HttpRequestType = "DELETE",
+                    MethodCalledOnSender = "DeleteEventFromWorkflow(" + workflowId + ", " + eventId + ")",
+                });
+
+                throw toThrow;
+            }
+            catch (NotFoundException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "Either the event or the workflow was not found at Server"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    EventId = eventId,
+                    WorkflowId = workflowId,
+                    Message = "Threw: " + toThrow.GetType(),
+                    HttpRequestType = "DELETE",
+                    MethodCalledOnSender = "DeleteEventFromWorkflow(" + workflowId + ", " + eventId + ")",
+                });
+
+                throw toThrow;
             }
             catch (Exception ex)
             {
@@ -373,6 +491,47 @@ namespace Server.Controllers
                     MethodCalledOnSender = "DeleteWorkflow(" + workflowId + ")",
                 });
             }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    WorkflowId = workflowId,
+                    Message = "Threw: " + toThrow.GetType(),
+                    HttpRequestType = "DELETE",
+                    MethodCalledOnSender = "DeleteWorkflow(" + workflowId + ")"
+                }).Wait();
+                throw toThrow;
+            }
+            catch (NotFoundException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "The workflow could not be found"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    WorkflowId = workflowId,
+                    Message = "Threw: " + toThrow.GetType(),
+                    HttpRequestType = "DELETE",
+                    MethodCalledOnSender = "DeleteWorkflow(" + workflowId + ")"
+                }).Wait();
+
+                throw toThrow;
+            }
+            catch (IllegalStorageStateException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "Server: Storage was found in an illegal state"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    WorkflowId = workflowId,
+                    Message = "Threw: " + toThrow.GetType(),
+                    HttpRequestType = "DELETE",
+                    MethodCalledOnSender = "DeleteWorkflow(" + workflowId + ")"
+                }).Wait();
+
+                throw toThrow;
+            }
             catch (Exception ex)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
@@ -383,7 +542,7 @@ namespace Server.Controllers
                     Message = "Threw: " + toThrow.GetType(),
                     HttpRequestType = "DELETE",
                     MethodCalledOnSender = "DeleteWorkflow(" + workflowId + ")"
-                });
+                }).Wait();
 
                 throw toThrow;
             }

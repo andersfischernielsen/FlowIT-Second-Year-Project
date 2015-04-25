@@ -48,6 +48,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\EventExistsException.cs" />
+    <Compile Include="Exceptions\IllegalstorageStateException.cs" />
     <Compile Include="Exceptions\LockedException.cs" />
     <Compile Include="Exceptions\UnauthorizedException.cs" />
     <Compile Include="Exceptions\NotExecutableException.cs" />

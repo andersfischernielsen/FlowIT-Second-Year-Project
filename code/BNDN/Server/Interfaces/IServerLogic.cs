@@ -18,7 +18,7 @@ namespace Server.Interfaces
         /// Add a new user.
         /// </summary>
         /// <param name="user">The UserDto to use for adding.</param>
-        Task AddUser(UserDto user);
+        Task AddUser(UserDto userDto);
         
         /// <summary>
         /// Get all events from a workflow
