@@ -63,7 +63,7 @@ namespace Server.Tests.StorageTests
         public async Task TestGetEventsFromWorkflow()
         {
             var toTest = new ServerStorage(_context);
-            var result = (await toTest.GetEventsFromWorkflow(new ServerWorkflowModel { Id = "1", Name = "TestingName" })).First();
+            var result = (await toTest.GetEventsFromWorkflow("1")).First();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Id, "1");

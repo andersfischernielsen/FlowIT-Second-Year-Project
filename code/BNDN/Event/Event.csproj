@@ -83,7 +83,6 @@
     <Compile Include="Controllers\LifecycleController.cs" />
     <Compile Include="Controllers\LockController.cs" />
     <Compile Include="Controllers\StateController.cs" />
-    <Compile Include="Exceptions\EventExistsException.cs" />
     <Compile Include="Exceptions\FailedToCreateEventException.cs" />
     <Compile Include="Exceptions\ServerInteraction\FailedToDeleteEventFromServerException.cs" />
     <Compile Include="Exceptions\EventInteraction\FailedToGetExecutedFromAnotherEventException.cs" />
@@ -95,7 +94,6 @@
     <Compile Include="Exceptions\EventInteraction\FailedToUpdateIncludedAtAnotherEventException.cs" />
     <Compile Include="Exceptions\EventInteraction\FailedToUpdatePendingAtAnotherEventException.cs" />
     <Compile Include="Exceptions\EventInteraction\FailedToUpdateStateAtOtherEventException.cs" />
-    <Compile Include="Exceptions\IllegalstorageStateException.cs" />
     <Compile Include="Interfaces\IAuthLogic.cs" />
     <Compile Include="Interfaces\IEventContext.cs" />
     <Compile Include="Interfaces\IEventHistoryLogic.cs" />

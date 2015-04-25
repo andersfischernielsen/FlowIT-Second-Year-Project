@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Common.Exceptions;
 using Common.History;
 using Server.Interfaces;
 using Server.Logic;
@@ -43,19 +46,40 @@ namespace Server.Controllers
         [HttpGet]
         public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId)
         {
-            try 
+            try
             {
                 var toReturn = await _historyLogic.GetHistoryForWorkflow(workflowId);
-                await _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", MethodCalledOnSender = "GetHistory", WorkflowId = workflowId, Message = "Called: GetHistory" });
+                await
+                    _historyLogic.SaveHistory(new HistoryModel
+                    {
+                        EventId = "",
+                        HttpRequestType = "GET",
+                        MethodCalledOnSender = "GetHistory",
+                        WorkflowId = workflowId,
+                        Message = "Called: GetHistory"
+                    });
 
                 return toReturn;
             }
-
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + toThrow.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                throw toThrow;
+            }
+            catch (NotFoundException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + toThrow.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                throw toThrow;
+            }
             catch (Exception e) 
             {
-                _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" }).Wait();
-
-                throw;
+                _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                    "An unexpected error occured"));
             }
         }
 
