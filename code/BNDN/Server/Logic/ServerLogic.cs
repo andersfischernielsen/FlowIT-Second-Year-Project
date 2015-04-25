@@ -12,15 +12,26 @@ using Server.Models;
 
 namespace Server.Logic
 {
+    /// <summary>
+    /// ServerLogic is a logic-layer that handles logic related to users-, login- and workflow operations.
+    /// </summary>
     public class ServerLogic : IServerLogic
     {
         private readonly IServerStorage _storage;
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="storage">The storage-layer that supports this class</param>
         public ServerLogic(IServerStorage storage)
         {
             _storage = storage;
         }
 
+        /// <summary>
+        /// Returns all workflows. 
+        /// </summary>
+        /// <returns></returns>
         public async Task<IEnumerable<WorkflowDto>> GetAllWorkflows()
         {
             var workflows = await _storage.GetAllWorkflows();
@@ -32,6 +43,11 @@ namespace Server.Logic
             });
         }
 
+        /// <summary>
+        /// Returns information about the specified workflow. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow</param>
+        /// <returns></returns>
         public async Task<WorkflowDto> GetWorkflow(string workflowId)
         {
             var workflow = await _storage.GetWorkflow(workflowId);
@@ -43,6 +59,11 @@ namespace Server.Logic
             };
         }
 
+        /// <summary>
+        /// Will the user's roles on all workflows. 
+        /// </summary>
+        /// <param name="loginDto">The provided login-information about the user</param>
+        /// <returns></returns>
         public async Task<RolesOnWorkflowsDto> Login(LoginDto loginDto)
         {
             var user = await _storage.GetUser(loginDto.Username, loginDto.Password);
@@ -72,6 +93,11 @@ namespace Server.Logic
             return new RolesOnWorkflowsDto { RolesOnWorkflows = rolesOnWorkflows };
         }
 
+        /// <summary>
+        /// Will add a user.
+        /// </summary>
+        /// <param name="dto">Contains information about the user</param>
+        /// <returns></returns>
         public async Task AddUser(UserDto dto)
         {
             var user = new ServerUserModel { Name = dto.Name, Password = dto.Password };
@@ -95,13 +121,24 @@ namespace Server.Logic
             await _storage.AddUser(user);
         }
 
+        /// <summary>
+        /// Returns a list of Events on the specified workflow.
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if workflowId is null</exception>
         public async Task<IEnumerable<EventAddressDto>> GetEventsOnWorkflow(string workflowId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             var workflow = await _storage.GetWorkflow(workflowId);
 
             if (workflow == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                throw new NotFoundException();
             }
 
             var dbList = await _storage.GetEventsFromWorkflow(workflow);
@@ -118,6 +155,12 @@ namespace Server.Logic
                         });
         }
 
+        /// <summary>
+        /// Adds an Event to the specified workflow
+        /// </summary>
+        /// <param name="workflowToAttachToId">Id of the workflow, that the Event should be added to</param>
+        /// <param name="eventToBeAddedDto">Contains information about the Event, that is to be added</param>
+        /// <returns></returns>
         public async Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = await _storage.GetWorkflow(workflowToAttachToId);
@@ -139,6 +182,13 @@ namespace Server.Logic
             });
         }
 
+        // TODO: Is this ever used? (Except by a Controller-route, that is never used itself?)
+        /// <summary>
+        /// Will update a specified Event on a specified workflow
+        /// </summary>
+        /// <param name="workflowToAttachToId">Id of the target workflow</param>
+        /// <param name="eventToBeAddedDto">Updated information about the Event</param>
+        /// <returns></returns>
         public async Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             var workflow = await _storage.GetWorkflow(workflowToAttachToId);
@@ -151,12 +201,23 @@ namespace Server.Logic
             });
         }
 
+        /// <summary>
+        /// Will delete an Event from a specified workflow. 
+        /// </summary>
+        /// <param name="workflowId">Id of the target workflow</param>
+        /// <param name="eventId">Id of the target Event</param>
+        /// <returns></returns>
         public async Task RemoveEventFromWorkflow(string workflowId, string eventId)
         {
             var workflow = await _storage.GetWorkflow(workflowId);
             await _storage.RemoveEventFromWorkflow(workflow, eventId);
         }
 
+        /// <summary>
+        /// Adds a new workflow
+        /// </summary>
+        /// <param name="workflow">Contains information about the workflow</param>
+        /// <returns></returns>
         public async Task AddNewWorkflow(WorkflowDto workflow)
         {
             if (await _storage.WorkflowExists(workflow.Id))
@@ -171,6 +232,12 @@ namespace Server.Logic
             });
         }
 
+        // TODO: Is this ever used? Delete?
+        /// <summary>
+        /// Updates the specified workflow
+        /// </summary>
+        /// <param name="workflow">Updated information about the workflow</param>
+        /// <returns></returns>
         public async Task UpdateWorkflow(WorkflowDto workflow)
         {
             await _storage.UpdateWorkflow(new ServerWorkflowModel
@@ -180,6 +247,12 @@ namespace Server.Logic
             });
         }
 
+
+        /// <summary>
+        /// Deletes the specified workflow
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow to be deleted</param>
+        /// <returns></returns>
         public async Task RemoveWorkflow(string workflowId)
         {
             await _storage.RemoveWorkflow(await _storage.GetWorkflow(workflowId));

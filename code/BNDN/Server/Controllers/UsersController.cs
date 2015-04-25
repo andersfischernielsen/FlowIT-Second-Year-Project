@@ -12,33 +12,52 @@ using Server.Storage;
 
 namespace Server.Controllers
 {
+    /// <summary>
+    /// UsersController handles HTTP-request regarding users on Server
+    /// </summary>
     public class UsersController : ApiController
     {
         private readonly IServerLogic _logic;
         private readonly IWorkflowHistoryLogic _historyLogic;
 
+        /// <summary>
+        /// Default constructor used during runtime
+        /// </summary>
         public UsersController()
         {
             _logic = new ServerLogic(new ServerStorage());
             _historyLogic = new WorkflowHistoryLogic();
         }
 
+        /// <summary>
+        /// Constructor used for dependency-injection during testing
+        /// </summary>
+        /// <param name="logic"></param>
+        /// <param name="historyLogic"></param>
         public UsersController(IServerLogic logic, IWorkflowHistoryLogic historyLogic)
         {
             _logic = logic;
             _historyLogic = historyLogic;
         }
 
-        // POST: /login loginDto
+ 
         /// <summary>
         /// Returns the users roles on all workflows.
         /// </summary>
-        /// <param name="loginDto"></param>
+        /// <param name="loginDto">Contains the login-information needed for login-attempt</param>
         /// <returns></returns>
         [Route("login")]
         [HttpPost]
         public async Task<RolesOnWorkflowsDto> Login([FromBody] LoginDto loginDto)
         {
+            // Check input
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "The provided input could not be mapped onto an instance of LoginDto"));
+                // TODO: Save to history...? Explain Morten how to do so precisely...!
+            }
+
             try
             {
                 var toReturn = await _logic.Login(loginDto);
@@ -78,7 +97,13 @@ namespace Server.Controllers
             }
         }
 
-        [Route("users"), HttpPost]
+        /// <summary>
+        /// CreateUser attempts to create a user given the provided UserDto
+        /// </summary>
+        /// <param name="dto">Contains login-information and given roles for the user</param>
+        /// <returns></returns>
+        [Route("users")] 
+        [HttpPost]
         public async Task CreateUser([FromBody] UserDto dto)
         {
             if (!ModelState.IsValid)

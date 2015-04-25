@@ -6,11 +6,19 @@ using System.Text;
 
 namespace Server.Storage
 {
+    /// <summary>
+    /// PasswordHasher provided mechanisms for verifying and hashing passwords.
+    /// </summary>
     public static class PasswordHasher
     {
         private static readonly int SaltValueSize = 4;
         private static readonly UnicodeEncoding Unicode = new UnicodeEncoding();
         private static readonly HashAlgorithm Hash = new SHA512Managed();
+        
+        /// <summary>
+        /// Generates a salt.
+        /// </summary>
+        /// <returns></returns>
         public static string GenerateSaltValue()
         {
             // Create a random number object seeded from the value
@@ -38,6 +46,12 @@ namespace Server.Storage
             return salt.ToString();
         }
 
+        /// <summary>
+        /// Hashes a password 
+        /// </summary>
+        /// <param name="clearData">String, that should be hashed</param>
+        /// <param name="saltValue">Saltvalue. If none is provided, a salt will be generated.</param>
+        /// <returns>Hash based on the string and salt</returns>
         public static string HashPassword(string clearData, string saltValue = null)
         {
             if (clearData == null || Hash == null) return null;
@@ -86,6 +100,12 @@ namespace Server.Storage
             return hashedPassword.ToString();
         }
 
+        /// <summary>
+        /// Will verify a password, given a claimed password and an actual password. 
+        /// </summary>
+        /// <param name="password">Claimed password</param>
+        /// <param name="profilePassword">Actual password, that claimed password should be tested against</param>
+        /// <returns></returns>
         public static bool VerifyHashedPassword(string password, string profilePassword)
         {
             var saltLength = SaltValueSize * UnicodeEncoding.CharSize;
