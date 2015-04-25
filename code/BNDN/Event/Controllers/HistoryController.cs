@@ -52,7 +52,7 @@ namespace Event.Controllers
             }
 
             catch (Exception e) {
-                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId);
+                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId).Wait();
 
                 throw;
             }
@@ -61,7 +61,7 @@ namespace Event.Controllers
         protected override void Dispose(bool disposing)
         {
             _historyLogic.Dispose();
-            base.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
