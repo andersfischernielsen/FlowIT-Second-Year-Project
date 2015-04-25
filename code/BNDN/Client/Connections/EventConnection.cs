@@ -87,8 +87,7 @@ namespace Client.Connections
             try
             {
                 await
-                    _httpClient.Update(string.Format("events/{0}/{1}/reset", workflowId, eventId),
-                        new EventDto {Name = "ResetDTO - DO NOT USE"});
+                    _httpClient.Update(string.Format("events/{0}/{1}/reset", workflowId, eventId), (object) null);
             }
             catch (HttpRequestException e)
             {

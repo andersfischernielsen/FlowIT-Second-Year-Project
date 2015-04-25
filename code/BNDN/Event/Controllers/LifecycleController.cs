@@ -174,11 +174,10 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="eventId">Id of the Event, that is to be reset</param>
-        /// <param name="eventDto">Empty container</param>
         /// <returns></returns>
         [Route("events/{workflowId}/{eventId}/reset")]
         [HttpPut]
-        public async Task ResetEvent(string workflowId, string eventId, [FromBody] EventDto eventDto)
+        public async Task ResetEvent(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
             {
