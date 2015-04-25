@@ -15,7 +15,13 @@ namespace DcrParserGraphic.ViewModels
         private string _eventUris;
         private bool _createWorkflow;
         private bool _createUsers;
+        private bool _uploadButtonActive;
         private string _defaultPassword;
+
+        public ParsingViewModel()
+        {
+            _uploadButtonActive = true;
+        }
 
         public string XmlFilePath
         {
@@ -97,6 +103,16 @@ namespace DcrParserGraphic.ViewModels
             }
         }
 
+        public bool UploadButtonActive
+        {
+            get { return _uploadButtonActive; }
+            set
+            {
+                _uploadButtonActive = value;
+                NotifyPropertyChanged("UploadButtonActive");
+            }
+        }
+
         public void Choose()
         {
             var openFileDialog1 = new OpenFileDialog { Filter = (string) Application.Current.FindResource("XmlFileType"), FilterIndex = 1 };
@@ -134,6 +150,7 @@ namespace DcrParserGraphic.ViewModels
 
         public async void Upload()
         {
+            UploadButtonActive = false;
             if (!string.IsNullOrEmpty(XmlFilePath) && !string.IsNullOrEmpty(EventUris) && !string.IsNullOrEmpty(WorkflowId))
             {
                 DcrParser parser;
@@ -147,6 +164,7 @@ namespace DcrParserGraphic.ViewModels
                 catch (Exception ex)
                 {
                     MessageBox.Show((string)Application.Current.FindResource("ParsingToJsonOk") + Environment.NewLine + ex);
+                    UploadButtonActive = true;
                     return;
                 }
                 var map = parser.GetMap();
@@ -162,6 +180,7 @@ namespace DcrParserGraphic.ViewModels
                     {
                         MessageBox.Show(Application.Current.FindResource("UploadWorkflowFailed") +
                                         Environment.NewLine + e);
+                        UploadButtonActive = true;
                         return;
                     }
                 }
@@ -172,6 +191,7 @@ namespace DcrParserGraphic.ViewModels
                 catch (Exception e)
                 {
                     MessageBox.Show(Application.Current.FindResource("UploadEventsFailed") + Environment.NewLine + e);
+                    UploadButtonActive = true;
                     return;
                 }
                 if (CreateUsers)
@@ -184,12 +204,14 @@ namespace DcrParserGraphic.ViewModels
                     {
                         MessageBox.Show(Application.Current.FindResource("UploadUsersFailed") + Environment.NewLine +
                                         e);
+                        UploadButtonActive = true;
                         return;
                     }
                 }
                 MessageBox.Show((string)Application.Current.FindResource("UploadOk"));
                 ClearFields();
             }
+            UploadButtonActive = true;
         }
 
         private void ClearFields()

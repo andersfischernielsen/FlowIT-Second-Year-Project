@@ -89,12 +89,32 @@ namespace Common
         /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
         /// <param name="toCreate"> The type of object to send to the API.</param>
         /// <returns>An object that was created at the API.</returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        /// <exception cref="HttpRequestException">If the host wasn't found.</exception>
         public virtual async Task Create<T>(string uri, T toCreate)
         {
             var response = await HttpClient.PostAsJsonAsync(uri, toCreate);
             await EnsureSuccessStatusCode(response);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TArgument"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="uri"></param>
+        /// <param name="toPost"></param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        /// <exception cref="HttpRequestException">If the host wasn't found.</exception>
         public virtual async Task<TResult> Create<TArgument, TResult>(string uri, TArgument toPost)
         {
             var response = await HttpClient.PostAsJsonAsync(uri, toPost);
@@ -110,6 +130,12 @@ namespace Common
         /// <typeparam name="T"> An object matching the expected object at the URL (base address + URI).</typeparam>
         /// <param name="uri">The URI of the API where objects of type T are stored.</param>
         /// <returns>All objects of type T at the API.</returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        /// <exception cref="HttpRequestException">If the host wasn't found.</exception>
         public virtual async Task<IList<T>> ReadList<T>(string uri)
         {
             var response = await HttpClient.GetAsync(uri);
@@ -127,6 +153,12 @@ namespace Common
         /// <typeparam name="T"> An object matching the expected object at the URL (base address + URI).</typeparam>
         /// <param name="uri">The URI of the API where an object of type T is stored.</param>
         /// <returns>An object of type T at the API.</returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        /// <exception cref="HttpRequestException">If the host wasn't found.</exception>
         public virtual async Task<T> Read<T>(string uri)
         {
             var response = await HttpClient.GetAsync(uri);
@@ -143,6 +175,12 @@ namespace Common
         /// <typeparam name="T"> An object matching the expected object at the address (baseaddress + URI)</typeparam>
         /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
         /// <param name="toUpdate"> The type of object to update at the API.</param>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        /// <exception cref="HttpRequestException">If the host wasn't found.</exception>
         public virtual async Task Update<T>(string uri, T toUpdate)
         {
             var response = await HttpClient.PutAsJsonAsync(uri, toUpdate);
@@ -153,6 +191,12 @@ namespace Common
         /// Sends a DELETE http request to the address (baseaddress + URI).
         /// </summary>
         /// <param name="uri">A URI to the API (baseaddress + uri) where objects of type T are stored.</param>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
+        /// <exception cref="HttpRequestException">If the host wasn't found.</exception>
         public virtual async Task Delete(string uri)
         {
             var response = await HttpClient.DeleteAsync(uri);
@@ -164,6 +208,17 @@ namespace Common
             HttpClient.Dispose();
         }
 
+        /// <summary>
+        /// Checks a HttpResponseMessage for whether the Request succeeded or not.
+        /// If the request succeeded nothing happens, otherwise an Exception is thrown.
+        /// </summary>
+        /// <param name="response">The response to check for error-messages.</param>
+        /// <returns>A Task which can be awaited.</returns>
+        /// <exception cref="NotFoundException">If the resource isn't found</exception>
+        /// <exception cref="UnauthorizedException">If the user does not have the right access rights</exception>
+        /// <exception cref="LockedException">If an event is locked</exception>
+        /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
+        /// <exception cref="Exception">If an unexpected error happened</exception>
         private static async Task EnsureSuccessStatusCode(HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode) return;
