@@ -8,10 +8,17 @@ using Event.Interfaces;
 
 namespace Event.Logic
 {
+    /// <summary>
+    /// AuthLogic is a logic-layer, that determines successfull authorization among roles and events.  
+    /// </summary>
     public class AuthLogic : IAuthLogic
     {
         private readonly IEventStorage _storage;
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="storage">An instance of an IEventStorage-implementation</param>
         public AuthLogic(IEventStorage storage)
         {
             _storage = storage;
@@ -35,7 +42,7 @@ namespace Event.Logic
 
            var eventRoles = await _storage.GetRoles(workflowId, eventId);
 
-            // This should be obsolete by now, right, because GetRoles will not return null, since it checks for Event-existence?
+            // TODO: This should be obsolete by now, right, because GetRoles will not return null, since it checks for Event-existence?
             if (eventRoles == null) throw new NotFoundException();
 
             return eventRoles.Intersect(roles).Any();

@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 using Common.Exceptions;
 using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
-using Event.Models;
 using Event.Storage;
 
 namespace Event.Logic
 {
+    /// <summary>
+    /// StateLogic is a logic-layer, that handles logic involved in operations on an Event's state. 
+    /// </summary>
     public class StateLogic : IStateLogic
     {
         private readonly IEventStorage _storage;
@@ -240,7 +240,6 @@ namespace Event.Logic
                 throw new ArgumentNullException();
             }
 
-
             if (!await _storage.Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
@@ -263,7 +262,6 @@ namespace Event.Logic
         /// <param name="executeDto">Contains the roles, that caller has.</param>
         /// <returns></returns>
         /// <exception cref="LockedException">Thrown if the specified Event is currently locked by someone else</exception>
-        /// <exception cref="NotAuthorizedException">Thrown if caller does not have the neceassry roles to execute the specified Event</exception>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         /// <exception cref="FailedToLockOtherEventException">Thrown if locking of an other (dependent) Event failed.</exception>

@@ -6,10 +6,18 @@ using Event.Interfaces;
 
 namespace Event.Storage
 {
+    /// <summary>
+    /// EventStorageForReset is the layer that rests on top of the database. It is used for resetting Events, and
+    /// hence features brute implementation, that disrespects locking on Events. 
+    /// </summary>
     public class EventStorageForReset : IEventStorageForReset
     {
         private readonly IEventContext _context;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="context">The database-context, with which this layer communicates with.</param>
         public EventStorageForReset(IEventContext context)
         {
             _context = context;
@@ -65,6 +73,13 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Determines whether a specified Event exists in the database. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the specified Event does not exist</exception>
         public async Task<bool> Exists(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)

@@ -12,13 +12,18 @@ using Event.Storage;
 
 namespace Event.Logic
 {
+    /// <summary>
+    /// LifecycleLogic is a logic-layer, that handles logic involved in Event-lifecycle operations. 
+    /// </summary>
     public class LifecycleLogic : ILifecycleLogic
     {
         private readonly IEventStorage _storage;
         private readonly IEventStorageForReset _resetStorage;
         private readonly ILockingLogic _lockLogic;
 
-        // Default constructor
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public LifecycleLogic()
         {
             var context = new EventContext();
@@ -27,7 +32,12 @@ namespace Event.Logic
             _lockLogic = new LockingLogic(_storage, new EventCommunicator());
         }
 
-        // Constructor to be used for dependency-injection
+        /// <summary>
+        /// Constructor to be used for dependency-injection
+        /// </summary>
+        /// <param name="storage">Storage-layer</param>
+        /// <param name="resetStorage">Storage-layer used for reset-operations.</param>
+        /// <param name="lockLogic">LockLogic-layer instance</param>
         public LifecycleLogic(IEventStorage storage, IEventStorageForReset resetStorage, ILockingLogic lockLogic)
         {
             _storage = storage;

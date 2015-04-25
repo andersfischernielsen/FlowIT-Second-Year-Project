@@ -6,15 +6,27 @@ using Common.History;
 using Event.Interfaces;
 using Event.Logic;
 
-namespace Event.Controllers {
-    public class HistoryController : ApiController {
+namespace Event.Controllers 
+{
+    /// <summary>
+    /// HistoryController handles HTTP-request regarding Event History
+    /// </summary>
+    public class HistoryController : ApiController 
+    {
         private readonly IEventHistoryLogic _historyLogic;
 
+        /// <summary>
+        /// Default constructor; should be used during runtime
+        /// </summary>
         public HistoryController()
         {
             _historyLogic = new EventHistoryLogic();
         }
 
+        /// <summary>
+        /// Constructor used for dependency-injection
+        /// </summary>
+        /// <param name="historyLogic">Logic-layer implementing the IEventHistory interface</param>
         public HistoryController(IEventHistoryLogic historyLogic)
         {
             _historyLogic = historyLogic;
@@ -44,6 +56,12 @@ namespace Event.Controllers {
 
                 throw;
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _historyLogic.Dispose();
+            base.Dispose();
         }
     }
 }

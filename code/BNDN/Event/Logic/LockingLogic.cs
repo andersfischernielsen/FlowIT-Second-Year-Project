@@ -8,11 +8,20 @@ using Event.Models;
 
 namespace Event.Logic
 {
+    /// <summary>
+    /// LockingLogic handles the logic involved in operations on Event locks. 
+    /// </summary>
     public class LockingLogic : ILockingLogic
     {
         private readonly IEventStorage _storage;
         private readonly IEventFromEvent _eventCommunicator;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="storage">Implementation of IEventStorage</param>
+        /// <param name="eventCommunicator">Instance of IEventFromEvent, that will be used for communication
+        /// to another Event.</param>
         public LockingLogic(IEventStorage storage, IEventFromEvent eventCommunicator)
         {
             _storage = storage;
@@ -27,7 +36,8 @@ namespace Event.Logic
         /// <param name="lockDto">Content should represent this Event</param>
         /// <returns></returns>
         /// <exception cref="LockedException">Thrown if the specified Event is already locked down</exception>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
+        /// <exception cref="ArgumentException">Thrown if the arguments are non-sensible</exception>
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
         {
             // Check input

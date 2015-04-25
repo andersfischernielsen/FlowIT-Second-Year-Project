@@ -1,31 +1,38 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
 using Common.Exceptions;
 using Event.Exceptions;
-using Common.History;
 using Event.Interfaces;
 using Event.Logic;
 
 namespace Event.Controllers
 {
+    /// <summary>
+    /// LifecycleController handles handles HTTP-request regarding Event lifecycle
+    /// </summary>
     public class LifecycleController : ApiController
     {
         private readonly ILifecycleLogic _logic;
         private readonly IEventHistoryLogic _historyLogic;
 
-        // Constructor used by framework
+        /// <summary>
+        /// Default constructor; should be used during runtime
+        /// </summary>
         public LifecycleController()
         {
             _logic = new LifecycleLogic();
             _historyLogic = new EventHistoryLogic();
         }
 
-        // Constructor used for dependency-injection
+        /// <summary>
+        /// Constructor used for dependency-injection
+        /// </summary>
+        /// <param name="logic">Logic-layer implementing the ILifecycleLogic interface</param>
+        /// <param name="historyLogic">Historylogic-layer implementing the IEventHistoryLogic interface</param>
         public LifecycleController(ILifecycleLogic logic, IEventHistoryLogic historyLogic)
         {
             _logic = logic;
@@ -33,9 +40,9 @@ namespace Event.Controllers
         }
 
         /// <summary>
-        /// Sets up an Event at this WebAPI
+        /// Sets up an Event at this WebAPI. It will attempt to post the (needed details of the) Event to Server.  
         /// </summary>
-        /// <param name="eventDto">The data (ruleset and initial state), this Event should be set to</param>
+        /// <param name="eventDto">Containts the data, this Event should be initially set to</param>
         /// <returns></returns>
         [Route("events")]
         [HttpPost]
@@ -116,7 +123,7 @@ namespace Event.Controllers
         }
 
         /// <summary>
-        /// DeleteEvent will delete an Event
+        /// DeleteEvent will delete an Event at this Event-machine, and attempt aswell to delete the Event from Server.
         /// </summary>
         /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="eventId">The id of the Event to be deleted</param>

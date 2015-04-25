@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Event.Exceptions;
@@ -8,7 +7,8 @@ using Event.Interfaces;
 namespace Event.Communicators
 {
     /// <summary>
-    /// ServerCommunicator is the module through which Event has its outgoing communication with Server 
+    /// ServerCommunicator is the module through which Event has its outgoing communication with Server.
+    /// Notice that a ServerCommunicator instance is 'per-event- specific. 
     /// ServerCommunicator implements the IServerFromEvent interface
     /// </summary>
     public class ServerCommunicator : IServerFromEvent
@@ -37,7 +37,7 @@ namespace Event.Communicators
         /// <summary>
         /// Attempts to Post an Event to Server
         /// </summary>
-        /// <param name="addressDto">Contains the information about the Event</param>
+        /// <param name="addressDto">Contains the information about the Event that is to be posted to Server</param>
         /// <returns></returns>
         /// <exception cref="FailedToPostEventAtServerException">Thrown if posting of Event at Server fails.</exception>
         public async Task PostEventToServer(EventAddressDto addressDto)

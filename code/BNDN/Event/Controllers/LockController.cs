@@ -13,19 +13,28 @@ using Event.Storage;
 
 namespace Event.Controllers
 {
+    /// <summary>
+    /// LockController handles HTTP-request regarding Event locks. 
+    /// </summary>
     public class LockController : ApiController
     {
         private readonly ILockingLogic _lockLogic;
         private readonly IEventHistoryLogic _historyLogic;
 
-        // Default controller used by framework
+        /// <summary>
+        /// Default controller used by framework during runtime
+        /// </summary>
         public LockController()
         {
             _lockLogic = new LockingLogic(new EventStorage(new EventContext()), new EventCommunicator());
             _historyLogic = new EventHistoryLogic();
         }
 
-        // Controller used to dependency-inject during testing
+        /// <summary>
+        /// Controller used to dependency-inject during testing
+        /// </summary>
+        /// <param name="lockLogic">LockLogic-layer implementing the ILockingLogic interface</param>
+        /// <param name="historyLogic">HistoryLogic-layer implementing the IEventHistoryLogic interface</param>
         public LockController(ILockingLogic lockLogic, IEventHistoryLogic historyLogic)
         {
             _lockLogic = lockLogic;

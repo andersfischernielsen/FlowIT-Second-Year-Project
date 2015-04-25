@@ -191,7 +191,7 @@ namespace Event.Storage
         }
 
         
-        // TODDO: Is this method ever used?
+        // TODO: Is this method ever used?
         public async Task SetName(string workflowId, string eventId, string name)
         {
             await EventIsInALegalState(workflowId, eventId);
@@ -840,22 +840,35 @@ namespace Event.Storage
         }
         #endregion
 
+        /// <summary>
+        /// Saves the given historyModel to storage.
+        /// </summary>
+        /// <param name="toSave">The history that is to be saved</param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         public async Task SaveHistory(HistoryModel toSave)
         {
             if (!await Exists(toSave.WorkflowId, toSave.EventId))
             {
-                throw new InvalidOperationException("The EventId does not exist");
+                throw new NotFoundException();
             }
 
             _context.History.Add(toSave);
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Retrieves the History for a specified Event
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event, whose history is to be retrieved</param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         public async Task<IQueryable<HistoryModel>> GetHistoryForEvent(string workflowId, string eventId)
         {
             if (!await Exists(workflowId, eventId))
             {
-                throw new InvalidOperationException("The EventId does not exist");
+                throw new NotFoundException();
             }
 
             return _context.History.Where(h => h.EventId == eventId && h.WorkflowId == workflowId);

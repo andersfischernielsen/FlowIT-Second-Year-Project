@@ -12,6 +12,9 @@ using Event.Logic;
 
 namespace Event.Controllers
 {
+    /// <summary>
+    /// StateController handles HTTP-requests regarding State on an Event. 
+    /// </summary>
     public class StateController : ApiController
     {
         private readonly IStateLogic _logic;
