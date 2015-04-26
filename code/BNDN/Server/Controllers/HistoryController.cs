@@ -61,19 +61,17 @@ namespace Server.Controllers
 
                 return toReturn;
             }
-            catch (ArgumentNullException)
+            catch (ArgumentNullException e)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Seems input was not satisfactory"));
-                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + toThrow.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
-                throw toThrow;
             }
-            catch (NotFoundException)
+            catch (NotFoundException e)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    "Seems input was not satisfactory"));
-                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + toThrow.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
-                throw toThrow;
+                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "Seems input was not satisfactory")); ;
             }
             catch (Exception e) 
             {
