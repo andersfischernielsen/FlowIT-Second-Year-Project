@@ -44,14 +44,16 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId, string eventId)
         {
-            try {
+            try 
+            {
                 var toReturn = await _historyLogic.GetHistoryForEvent(workflowId, eventId);
                 await _historyLogic.SaveSuccesfullCall("GET", "GetHistory", eventId, workflowId);
 
                 return toReturn;
             }
 
-            catch (Exception e) {
+            catch (Exception e) 
+            {
                 _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId).Wait();
 
                 throw;

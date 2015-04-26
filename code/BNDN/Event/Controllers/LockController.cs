@@ -52,58 +52,44 @@ namespace Event.Controllers
         [HttpPost]
         public async Task Lock(string workflowId, string eventId, [FromBody] LockDto lockDto)
         {
+            HttpResponseException toThrow;
             if (!ModelState.IsValid)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Provided input could not be mapped onto an instance of LockDto"));
                 await _historyLogic.SaveException(toThrow, "POST", "Lock", eventId, workflowId);
-                throw toThrow;
-            }
-            if (lockDto == null) // TODO: Discuss: With the above !ModelState.IsValid check this check should not necessary. Can we remove? 
-            {
-                // Caller provided a null LockDto
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Lock could not be set. An empty (null) lock was provided. If your intent" +
-                    " is to unlock the Event issue a DELETE request on  event/lock instead."));
-                await _historyLogic.SaveException(toThrow, "POST", "Lock", eventId, workflowId);
-
                 throw toThrow;
             }
 
             try
             {
                 await _lockLogic.LockSelf(workflowId, eventId, lockDto);
+                await _historyLogic.SaveSuccesfullCall("POST", "Lock", eventId, workflowId);
+                return;
             }
             catch (ArgumentNullException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Lock: Seems input was not satisfactory"));
-                _historyLogic.SaveException(toThrow, "POST", "Lock").Wait();
-                throw toThrow;
             }
             catch (LockedException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                     "Lock: Failed to lock: Event is currently locked by someone else"));
-                _historyLogic.SaveException(toThrow, "POST", "Lock").Wait();
-                throw toThrow;
             }
             catch (NotFoundException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Lock: Event seems not to exist"));
-                _historyLogic.SaveException(toThrow, "POST", "Lock").Wait();
-                throw toThrow;
             }
             catch (IllegalStorageStateException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "Lock: Storage reported it is in a non-valid state"));
-                _historyLogic.SaveException(toThrow, "POST", "Lock").Wait();
-                throw toThrow;
             }
 
-            await _historyLogic.SaveSuccesfullCall("POST", "Lock", eventId, workflowId);
+            _historyLogic.SaveException(toThrow, "POST", "Lock").Wait();
+            throw toThrow;
         }
 
         /// <summary>
@@ -116,40 +102,36 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task Unlock(string workflowId, string eventId, string senderId)
         {
+            HttpResponseException toThrow;
             try
             {
                 await _lockLogic.UnlockSelf(workflowId, eventId, senderId);
+                await _historyLogic.SaveSuccesfullCall("DELETE", "Unlock", eventId, workflowId);
+                return;
             }
             catch (ArgumentNullException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Unlock: Could not unlock: One or more of the provided arguments was null"));
-                _historyLogic.SaveException(toThrow, "DELETE", "Unlock").Wait();
-                throw toThrow;
             }
             catch (LockedException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                     "Unlock: Could not unlock: Event is locked by someone else"));
-                _historyLogic.SaveException(toThrow, "DELETE", "Unlock").Wait();
-                throw toThrow;
             }
             catch (NotFoundException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Unlock: Event seems not to exist"));
-                _historyLogic.SaveException(toThrow, "DELETE", "Unlock").Wait();
-                throw toThrow;
             }
             catch (IllegalStorageStateException)
             {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "Unlock: Storage reported it is in a non-valid state"));
-                _historyLogic.SaveException(toThrow, "DELETE", "Unlock").Wait();
-                throw toThrow;
             }
 
-            await _historyLogic.SaveSuccesfullCall("DELETE", "Unlock", eventId, workflowId);
+            _historyLogic.SaveException(toThrow, "DELETE", "Unlock").Wait();
+            throw toThrow;
         }
 
         protected override void Dispose(bool disposing)
