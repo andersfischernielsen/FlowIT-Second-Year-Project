@@ -96,7 +96,6 @@
     <Compile Include="Connections\IServerConnection.cs" />
     <Compile Include="Connections\ServerConnection.cs" />
     <Compile Include="Exceptions\LoginFailedException.cs" />
-    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\EventViewModel.cs" />
     <Compile Include="ViewModels\HistoryListViewModel.cs" />
