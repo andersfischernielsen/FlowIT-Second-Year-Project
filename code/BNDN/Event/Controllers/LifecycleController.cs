@@ -214,8 +214,7 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent(string workflowId, string eventId)
         {
-            Exception toLog;
-            Exception toThrow;
+            Exception toLog, toThrow;
 
             try
             {
@@ -243,7 +242,7 @@ namespace Event.Controllers
                     "An unexpected exception was thrown"));
             }
 
-            if (toLog != null) _historyLogic.SaveException(toLog, "GET", "GetEvent", eventId, workflowId);
+            if (toLog != null) await _historyLogic.SaveException(toLog, "GET", "GetEvent", eventId, workflowId);
             throw toThrow;
         }
 
