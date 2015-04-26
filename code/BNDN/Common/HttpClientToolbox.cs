@@ -16,7 +16,7 @@ namespace Common
     /// </summary>
     public class HttpClientToolbox : IDisposable
     {
-        public HttpClient HttpClient { get; private set; }
+        public IHttpClient HttpClient { get; private set; }
 
         /// <summary>
         /// Get/set the authetication header to the given value. Used for API's which needs authentication.
@@ -29,7 +29,7 @@ namespace Common
 
         public HttpClientToolbox()
         {
-            HttpClient = new HttpClient();
+            HttpClient = new HttpClientWrapper(new HttpClient());
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
@@ -40,7 +40,7 @@ namespace Common
         /// <param name="authenticationHeader">Optional authentocationheader.</param>
         public HttpClientToolbox(string uri, AuthenticationHeaderValue authenticationHeader = null)
         {
-            HttpClient = new HttpClient { BaseAddress = new Uri(uri) };
+            HttpClient = new HttpClientWrapper(new HttpClient { BaseAddress = new Uri(uri) });
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (authenticationHeader != null)
             {
@@ -55,12 +55,18 @@ namespace Common
         /// <param name="authenticationHeader">Optional authentocationheader.</param>
         public HttpClientToolbox(Uri uri, AuthenticationHeaderValue authenticationHeader = null)
         {
-            HttpClient = new HttpClient { BaseAddress = uri };
+            HttpClient = new HttpClientWrapper(new HttpClient { BaseAddress = uri });
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (authenticationHeader != null)
             {
                 HttpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
             }
+        }
+
+        public HttpClientToolbox(IHttpClient httpClient)
+        {
+            HttpClient = httpClient;
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         /// <summary>
@@ -69,7 +75,7 @@ namespace Common
         /// <param name="uri"></param>
         public void SetBaseAddress(string uri)
         {
-            HttpClient = new HttpClient { BaseAddress = new Uri(uri) };
+            HttpClient = new HttpClientWrapper(new HttpClient { BaseAddress = new Uri(uri) });
         }
 
         /// <summary>
@@ -78,7 +84,7 @@ namespace Common
         /// <param name="uri"></param>
         public void SetBaseAddress(Uri uri)
         {
-            HttpClient = new HttpClient { BaseAddress = uri };
+            HttpClient = new HttpClientWrapper(new HttpClient { BaseAddress = uri });
         }
 
         /// <summary>

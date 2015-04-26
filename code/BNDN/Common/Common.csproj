@@ -54,6 +54,8 @@
     <Compile Include="Exceptions\UnauthorizedException.cs" />
     <Compile Include="Exceptions\NotExecutableException.cs" />
     <Compile Include="Exceptions\NotFoundException.cs" />
+    <Compile Include="HttpClientWrapper.cs" />
+    <Compile Include="IHttpClient.cs" />
     <Compile Include="LoginDto.cs" />
     <Compile Include="History\HistoryDto.cs" />
     <Compile Include="History\HistoryModel.cs" />
