@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 
-namespace DcrParserGraphic.Views
+namespace XMLtoJSONParser.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

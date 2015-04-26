@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common;
 
-namespace DcrParserGraphic
+namespace XMLtoJSONParser
 {
     public class EventUploader
     {

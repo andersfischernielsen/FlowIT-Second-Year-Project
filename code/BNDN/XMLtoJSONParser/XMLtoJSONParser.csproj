@@ -7,8 +7,8 @@
     <ProjectGuid>{11E938AB-31B1-42A8-9F6E-3AF4507DB350}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DcrParserGraphic</RootNamespace>
-    <AssemblyName>DcrParserGraphic</AssemblyName>
+    <RootNamespace>XMLtoJSONParser</RootNamespace>
+    <AssemblyName>XMLtoJSONParser</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

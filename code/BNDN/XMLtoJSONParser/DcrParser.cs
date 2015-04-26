@@ -7,7 +7,7 @@ using System.Xml.Linq;
 using Common;
 using Newtonsoft.Json;
 
-namespace DCRParserGraphic
+namespace XMLtoJSONParser
 {
     public class DcrParser
     {

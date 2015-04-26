@@ -1,13 +1,13 @@
 using System;
 using System.ComponentModel;
 
-namespace DcrParserGraphic.ViewModels
+namespace XMLtoJSONParser.ViewModels
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void NotifyPropertyChanged(String info)
+        public void NotifyPropertyChanged(string info)
         {
             if (PropertyChanged != null)
             {
