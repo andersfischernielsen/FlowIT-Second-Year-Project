@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Common.History;
+using Server.Exceptions;
 using Server.Interfaces;
 using Server.Models;
 
@@ -29,8 +30,14 @@ namespace Server.Storage
         /// <param name="username">Username of the user</param>
         /// <param name="password">Claimed password of the user</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<ServerUserModel> GetUser(string username, string password)
         {
+            if (username == null || password == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             var user = await _db.Users.SingleOrDefaultAsync(u => string.Equals(u.Name, username));
 
             if (user == null) return null;
@@ -38,6 +45,7 @@ namespace Server.Storage
             return PasswordHasher.VerifyHashedPassword(password, user.Password) ? user : null;
         }
 
+        // TODO: Someone else than Morten proof-read this documentation, please!
         /// <summary>
         /// Attempts to login using the provided ServerUserModel
         /// </summary>
@@ -45,7 +53,8 @@ namespace Server.Storage
         /// <returns></returns>
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
         {
-            if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;
+            // TODO: Is this correct / sensible? If I provide a non-null object, I can make this method return whatever role I want it to...
+            if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;    
 
             var user = await _db.Users.FindAsync(userModel.Id);
             return user != null ? user.ServerRolesModels : null;
@@ -55,17 +64,32 @@ namespace Server.Storage
         /// <summary>
         /// Gets the Events within the specified workflow.
         /// </summary>
-        /// <param name="workflow">Represents the workflow, whose Events are to be returned</param>
+        /// <param name="workflowId">Represents the workflow, whose Events are to be returned</param>
         /// <returns></returns>
-        public async Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(ServerWorkflowModel workflow)
+        /// <exception cref="ArgumentNullException">Thrown if the provided argument is null</exception>
+        /// <exception cref="NotFoundException">Thrown if the workflow does not exist at Server</exception>
+        public async Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(string workflowId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            // Check whether workflow exists
+            if (! await WorkflowExists(workflowId))
+            {
+                throw new NotFoundException();
+            }
+
             var events = from e in _db.Events
-                         where workflow.Id == e.ServerWorkflowModelId
+                         where workflowId == e.ServerWorkflowModelId
                          select e;
             return await events.ToListAsync();
         }
 
 
+        // TODO: Does this add Roles to a workflow? It seems (to me, Morten) it adds roles to a common list / set of Roles...
+        // TODO: Documentation
         public async Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
         {
             var result = new List<ServerRoleModel>();
@@ -86,25 +110,63 @@ namespace Server.Storage
         }
 
 
+        // TODO: More descriptive naming of 'id' - I (Morten) couldn't make out, what 'id' represents...Maybe censor won't either
+        // TODO: Documentation. 
         public async Task<ServerRoleModel> GetRole(string id, string workflowId)
         {
+            if (id == null || workflowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (! await WorkflowExists(workflowId))
+            {
+                throw new NotFoundException();
+            }
+
             return await _db.Roles.SingleOrDefaultAsync(role => role.Id.Equals(id) && role.ServerWorkflowModelId.Equals(workflowId));
         }
 
+        /// <summary>
+        /// States whether a given username already exists at Server
+        /// </summary>
+        /// <param name="username">The username to check for</param>
+        /// <returns></returns>
+        public async Task<bool> UserExists(string username)
+        {
+            return await _db.Users.AnyAsync(u => u.Name.Equals(username));
+        }
 
-
+        // TODO: Documentation. 
         public async Task<bool> RoleExists(ServerRoleModel role)
         {
+            if (role == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             return await _db.Roles.AnyAsync(rr => rr.Id.Equals(role.Id)
                 && rr.ServerWorkflowModelId.Equals(role.ServerWorkflowModelId));
         }
 
 
+        /// <summary>
+        /// Adds a user to Server. Server holds a hashed value for the password. 
+        /// </summary>
+        /// <param name="user">Holds the logininformation about the user</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided input is null</exception>
+        /// <exception cref="UserExistsException">Thrown if the user already exists at Server</exception>
         public async Task AddUser(ServerUserModel user)
         {
-            if (_db.Users.Any(u => u.Name.Equals(user.Name)))
+            if (user == null)
             {
-                throw new ArgumentException("User already exists", "user");
+                throw new ArgumentNullException();
+            }
+
+            if (await UserExists(user.Name))
+            {
+                throw new UserExistsException();
             }
 
             user.Password = PasswordHasher.HashPassword(user.Password);
@@ -115,25 +177,74 @@ namespace Server.Storage
         }
 
 
+        /// <summary>
+        /// Adds an Event to a specified workflow. The information needed to identify what workflow, the Event should be added to,
+        /// is held within argument. 
+        /// </summary>
+        /// <param name="eventToBeAddedDto">Holds information about a) the Event, that is to be added and 
+        /// b) the workflow, the Event should be added to.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Trhown if the provided argument is null</exception>
+        /// <exception cref="NotFoundException">Thrown if the workflow could not be found</exception>
+        /// <exception cref="EventExistsException">Thrown if the Event already exists</exception>
+        /// <exception cref="IllegalStorageStateException">Thrown if the storage was found to be in an illegal state</exception>
         public async Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto)
         {
+            if (eventToBeAddedDto == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            var workflowId = eventToBeAddedDto.ServerWorkflowModel.Id;
+
+            if (!await WorkflowExists(workflowId))
+            {
+                // TODO: Check, that the correct Id is used above...
+                throw new NotFoundException();
+            }
+            if (await EventExists(workflowId,eventToBeAddedDto.Id))
+            {
+                throw new EventExistsException();
+            }
+
             var workflows = from w in _db.Workflows
                             where eventToBeAddedDto.ServerWorkflowModelId == w.Id
                             select w;
 
             if (workflows.Count() != 1)
             {
-                // TODO: Throw IllegalstorageStateException instead (move from Event into Common)
-                throw new IOException("Multiple or no workflow with given ID.");
+                throw new IllegalStorageStateException();
             }
 
             _db.Events.Add(eventToBeAddedDto);
             await _db.SaveChangesAsync();
         }
 
-
-        public async Task UpdateEventOnWorkflow(ServerWorkflowModel workflow, ServerEventModel eventToBeUpdated)
+        // TODO: Discuss: Should we just keep this method to stay REST'ed? Or delete?
+        /// <summary>
+        /// Will update an Event on a specified workflow. 
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow</param>
+        /// <param name="eventToBeUpdated">Contains the updated information on the Event</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided arguments are null</exception>
+        /// <exception cref="NotFoundException">Thrown if either the Workflow or the Event does not exist</exception>
+        public async Task UpdateEventOnWorkflow(string workflowId, ServerEventModel eventToBeUpdated)
         {
+            if (workflowId == null || eventToBeUpdated == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (! await WorkflowExists(workflowId))
+            {
+                throw new NotFoundException();
+            }
+            if (! await EventExists(workflowId, eventToBeUpdated.Id))
+            {
+                throw new NotFoundException();
+            }
+
             var events = from e in _db.Events
                          where e.Id == eventToBeUpdated.Id
                          select e;
@@ -147,18 +258,35 @@ namespace Server.Storage
         }
 
 
-        public async Task RemoveEventFromWorkflow(ServerWorkflowModel workflow, string eventId)
+        /// <summary>
+        /// Will delete the Event from the specified workflow
+        /// </summary>
+        /// <param name="workflowId">Id if the workflow</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if either of the arguments are null</exception>
+        /// <exception cref="NotFoundException">Thrown if either the workflow or the event could not be found</exception>
+        public async Task RemoveEventFromWorkflow(string workflowId, string eventId)
         {
+            if (workflowId == null || eventId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (!await WorkflowExists(workflowId))
+            {
+                throw new NotFoundException();
+            }
+            if (! await EventExists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
             var events = from e in _db.Events
                          where e.Id == eventId
                          select e;
 
             var eventToRemove = await events.SingleOrDefaultAsync();
-            if (eventToRemove == null)
-            {
-                // Event was already deleted
-                return;
-            }
 
             _db.Events.Remove(eventToRemove);
             await _db.SaveChangesAsync();
@@ -186,12 +314,39 @@ namespace Server.Storage
         }
 
         /// <summary>
+        /// Checks whether an Event exists or not in the database
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event</param>
+        /// <returns></returns>
+        public async Task<bool> EventExists(string workflowId, string eventId)
+        {
+            if (workflowId == null || eventId == null)
+            {
+                throw new ArgumentNullException();
+            }
+            
+            // Returns true if any Event matches both the workflowId and the eventId, otherwise false.
+            return await _db.Events.AnyAsync(x => x.Id == eventId && x.ServerWorkflowModel.Id == workflowId);
+        }
+
+        /// <summary>
         /// Returns the specified workflow. 
         /// </summary>
         /// <param name="workflowId"></param>
         /// <returns></returns>
         public async Task<ServerWorkflowModel> GetWorkflow(string workflowId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (!await WorkflowExists(workflowId))
+            {
+                throw new NotFoundException();
+            }
+
             var workflows = from w in _db.Workflows
                             where w.Id == workflowId
                             select w;
@@ -202,82 +357,148 @@ namespace Server.Storage
         /// <summary>
         /// Adds a new workflow. 
         /// </summary>
-        /// <param name="workflow">Represents the workflow that is to be added</param>
+        /// <param name="workflowToAdd">Represents the workflow that is to be added</param>
         /// <returns></returns>
-        public async Task AddNewWorkflow(ServerWorkflowModel workflow)
+        /// <exception cref="ArgumentNullException">Thrown if the provided ServerWorkflowModel is null</exception>
+        /// <exception cref="WorkflowAlreadyExistsException">Thrown if the workflow already exists</exception>
+        public async Task AddNewWorkflow(ServerWorkflowModel workflowToAdd)
         {
-            // TODO: What if that workflow already exists?
-            _db.Workflows.Add(workflow);
+            if (workflowToAdd == null)
+            {
+                throw new ArgumentNullException();   
+            }
+            if (await WorkflowExists(workflowToAdd.Id))
+            {
+                throw new WorkflowAlreadyExistsException();
+            }
+
+            _db.Workflows.Add(workflowToAdd);
             await _db.SaveChangesAsync();
         }
 
-        public async Task UpdateWorkflow(ServerWorkflowModel workflow)
+
+        /// <summary>
+        /// Updates a workflow
+        /// </summary>
+        /// <param name="replacingWorkflow">The replacing workflow</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided argument is null</exception>
+        /// <exception cref="NotFoundException">Thrown if the workflow was not found</exception>
+        public async Task UpdateWorkflow(ServerWorkflowModel replacingWorkflow)
         {
+            if (replacingWorkflow == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (!await WorkflowExists(replacingWorkflow.Id))
+            {
+                throw new NotFoundException();
+            }
+
             var workflows = from w in _db.Workflows
-                            where w.Id == workflow.Id
+                            where w.Id == replacingWorkflow.Id
                             select w;
 
             var tempWorkflow = workflows.Single();
-            tempWorkflow.Name = workflow.Name;
+            tempWorkflow.Name = replacingWorkflow.Name;
 
             await _db.SaveChangesAsync();
         }
 
-        public async Task RemoveWorkflow(ServerWorkflowModel workflow)
+
+        /// <summary>
+        /// Deletes a workflow
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow to be deleted</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided argument is null</exception>
+        /// <exception cref="NotFoundException">Thrown if the workflow was not found</exception>
+        /// <exception cref="IllegalStorageStateException">Thrown if the storage was found to be in an illegal state</exception>
+        public async Task RemoveWorkflow(string workflowId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (!await WorkflowExists(workflowId))
+            {
+                throw new NotFoundException();
+            }
+
             var workflows =
                 from w in _db.Workflows
-                where w.Id == workflow.Id
+                where w.Id == workflowId
                 select w;
 
-            if (workflow.ServerEventModels.Count > 0)
+            if (workflows.Count() > 1)
             {
-                throw new IOException("The workflow contains events");
+                // Because workflowId's are unique identifiers, and hence, there should be only a single element in workflows. 
+                throw new IllegalStorageStateException();
             }
 
             _db.Workflows.Remove(await workflows.SingleAsync());
             await _db.SaveChangesAsync();
         }
 
+
+
+
         public void Dispose()
         {
             _db.Dispose();
         }
 
+        // TODO: Documentation
         public async Task SaveHistory(HistoryModel toSave)
         {
-            if (!await Exists(toSave.WorkflowId))
+            if (toSave == null)
             {
-                throw new InvalidOperationException("The workflowId does not exist");
+                throw new ArgumentNullException();
+            }
+
+            if (!await WorkflowExists(toSave.WorkflowId))
+            {
+                throw new NotFoundException();
             }
             _db.History.Add(toSave);
             await _db.SaveChangesAsync();
         }
 
+        // TODO: Documentation
         public async Task SaveNonWorkflowSpecificHistory(HistoryModel toSave)
         {
+            if (toSave == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             _db.History.Add(toSave);
             await _db.SaveChangesAsync();
         }
 
+
+        /// <summary>
+        /// Returns the history (at Server) for the specified workflow.
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow, whose history (at Server) is to be obtained</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
+        /// <exception cref="NotFoundException">Thrown if the workflow could not be found</exception>
         public async Task<IQueryable<HistoryModel>> GetHistoryForWorkflow(string workflowId)
         {
-            if (!await Exists(workflowId))
+            if (workflowId == null)
             {
-                throw new InvalidOperationException("The workflowId does not exist");
+                throw new ArgumentNullException();
+            }
+
+            if (!await WorkflowExists(workflowId))
+            {
+                throw new NotFoundException();
             }
 
             return _db.History.Where(h => h.WorkflowId == workflowId);
-        }
-
-        /// <summary>
-        /// Determines whether a workflow already exists
-        /// </summary>
-        /// <param name="workflowId">The workflow to test for existence</param>
-        /// <returns></returns>
-        private async Task<bool> Exists(string workflowId)
-        {
-            return await _db.Workflows.AnyAsync(w => w.Id == workflowId);
         }
     }
 }

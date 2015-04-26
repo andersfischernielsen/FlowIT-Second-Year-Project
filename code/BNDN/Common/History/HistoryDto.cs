@@ -1,10 +1,10 @@
-﻿using System;
+﻿using System.Globalization;
 
 namespace Common.History
 {
     public class HistoryDto
     {
-        public DateTime TimeStamp { get; private set; }
+        public string TimeStamp { get; set; }
         public string EventId { get; set; }
         public string WorkflowId { get; set; }
         public string HttpRequestType { get; set; }
@@ -17,7 +17,7 @@ namespace Common.History
         }
         public HistoryDto(HistoryModel model)
         {
-            TimeStamp = model.TimeStamp;
+            TimeStamp = model.TimeStamp.ToString(CultureInfo.InvariantCulture);
             EventId = model.EventId;
             WorkflowId = model.WorkflowId;
             HttpRequestType = model.HttpRequestType;

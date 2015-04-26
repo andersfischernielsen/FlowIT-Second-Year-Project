@@ -16,7 +16,7 @@ namespace Common
     /// </summary>
     public class HttpClientToolbox : IDisposable
     {
-        private HttpClient HttpClient { get; set; }
+        public HttpClient HttpClient { get; private set; }
 
         /// <summary>
         /// Get/set the authetication header to the given value. Used for API's which needs authentication.

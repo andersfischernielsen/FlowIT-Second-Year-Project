@@ -78,6 +78,7 @@
     <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\WorkflowsController.cs" />
+    <Compile Include="Exceptions\UserExistsException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

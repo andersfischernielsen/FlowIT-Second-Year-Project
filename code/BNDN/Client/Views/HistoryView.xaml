@@ -19,7 +19,7 @@
                     <UniformGrid Rows="1" Columns="3">
                         <Label Content="{Binding Title}" HorizontalAlignment="Stretch"/>
                         <Label Content="{Binding Message}" HorizontalAlignment="Stretch" />
-                        <Label Content="{Binding TimeStamp}" HorizontalAlignment="Stretch" />
+                        <Label Content="{Binding TimeStamp}" ContentStringFormat="{}{0:yyyy/MM/dd HH:mm:ss}" HorizontalAlignment="Stretch" />
                     </UniformGrid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.History;
@@ -27,8 +28,14 @@ namespace Server.Logic
         /// </summary>
         /// <param name="workflowId">Id of the workflow, whose history is to be obtained</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
         public async Task<IEnumerable<HistoryDto>> GetHistoryForWorkflow(string workflowId)
         {
+            if (workflowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             var models = (await _storage.GetHistoryForWorkflow(workflowId)).ToList();
             return models.Select(model => new HistoryDto(model));
         }
@@ -38,8 +45,14 @@ namespace Server.Logic
         /// </summary>
         /// <param name="toSave">Contains the information about the history that should be saved</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
         public async Task SaveHistory(HistoryModel toSave)
         {
+            if (toSave == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             await _storage.SaveHistory(toSave);
         }
 
@@ -48,9 +61,20 @@ namespace Server.Logic
         /// </summary>
         /// <param name="toSave">Information to be saved</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
         public async Task SaveNoneWorkflowSpecificHistory(HistoryModel toSave)
         {
+            if (toSave == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             await _storage.SaveNonWorkflowSpecificHistory(toSave);
+        }
+
+        public void Dispose()
+        {
+            _storage.Dispose();
         }
     }
 }

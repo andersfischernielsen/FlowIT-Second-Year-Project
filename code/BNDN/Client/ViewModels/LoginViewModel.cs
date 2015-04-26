@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Client.Connections;
+using Client.Exceptions;
 using Client.Views;
 
 namespace Client.ViewModels
@@ -66,37 +67,39 @@ namespace Client.ViewModels
             _loginStarted = true;
             Status = "Attempting login...";
 
-            // PUT LOGIN LOGIC HERE
-            IServerConnection connection = new ServerConnection(_serverAddress);
             try
             {
-                var roles = await connection.Login(Username, Password);
+                using (IServerConnection connection = new ServerConnection(_serverAddress))
+                {
+                    RoleForWorkflow = (await connection.Login(Username, Password)).RolesOnWorkflows;
+                }
                 Status = "Login successful";
-                RoleForWorkflow = roles.RolesOnWorkflows;
 
                 // Save settings
-                var settings = new Settings
+                new Settings
                 {
                     ServerAddress = _serverAddress.AbsoluteUri,
                     Username = _username,
-                };
-                
-                
-                settings.SaveSettings();
-                // Save settings end.
+                }.SaveSettings();
 
-                
-
-                var window = new MainWindow();
-                window.Show();
+                new MainWindow().Show();
                 CloseAction.Invoke();
             }
-            catch (Exception ex)
+            catch (LoginFailedException)
             {
                 _loginStarted = false;
-                Status = ex.Message;
+                Status = "The provided username and password does not correspond to a user in Flow";
             }
-            
+            catch (HostNotFoundException)
+            {
+                _loginStarted = false;
+                Status = "The server is not available, or the settings file is pointing to an invalid address";
+            }
+            catch (Exception)
+            {
+                _loginStarted = false;
+                Status = "An unexpected error occured. Try again in a while.";
+            }
         }
 
         #endregion

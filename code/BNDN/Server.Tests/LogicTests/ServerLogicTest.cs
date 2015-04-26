@@ -8,7 +8,6 @@ using NUnit.Framework;
 using Server.Interfaces;
 using Server.Logic;
 using Server.Models;
-using Server.Storage;
 
 namespace Server.Tests.LogicTests
 {
@@ -44,8 +43,8 @@ namespace Server.Tests.LogicTests
                 .ReturnsAsync(_list);
 
             //Set up method for getting all events in a workflow. Gets the list of events on the given workflow.
-            toSetup.Setup(m => m.GetEventsFromWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Returns((ServerWorkflowModel toGet) => Task.FromResult(toGet.ServerEventModels.AsEnumerable()));
+            toSetup.Setup(m => m.GetEventsFromWorkflow(It.IsAny<string>()))
+                .Returns((string toGet) => Task.FromResult(_list.Single(w => w.Id == toGet).ServerEventModels.AsEnumerable()));
 
             //Set up method for getting a specific workflow. Finds the given workflow in the list.
             toSetup.Setup(m => m.GetWorkflow(It.IsAny<string>()))
@@ -53,33 +52,33 @@ namespace Server.Tests.LogicTests
 
             //Set up method for removing an event from a workflow. 
             //Finds the given workflow in the list, finds the event in the workflow and removes it.
-            toSetup.Setup(m => m.RemoveEventFromWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<string>()))
-                .Returns((ServerWorkflowModel toRemoveFrom, string eventId) => Task.Run(() =>
+            toSetup.Setup(m => m.RemoveEventFromWorkflow(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string workflowId, string eventId) => Task.Run(() =>
                 {
-                    var events = _list.Find(x => x.Id == toRemoveFrom.Id).ServerEventModels;
+                    var events = _list.Find(x => x.Id == workflowId).ServerEventModels;
                     var toRemove = events.First(x => x.Id == eventId);
                     events.Remove(toRemove);
                 }));
 
             //Set up method for removing workflow. Removes the input workflow from the list. 
-            toSetup.Setup(m => m.RemoveWorkflow(It.IsAny<ServerWorkflowModel>()))
-                .Returns((ServerWorkflowModel dtoToRemove) => Task.Run(() =>
+            toSetup.Setup(m => m.RemoveWorkflow(It.IsAny<string>()))
+                .Returns((string workflowId) => Task.Run(() =>
                 {
-                    var toRemove = _list.Find(x => x.Id == dtoToRemove.Id);
+                    var toRemove = _list.Find(x => x.Id == workflowId);
                     _list.Remove(toRemove);
                 }));
 
             //Set up method for updating an event in a workflow.
             //Finds the workflow in the list, finds the event in the workflow and replaces it with the new event.
-            toSetup.Setup(m => m.UpdateEventOnWorkflow(It.IsAny<ServerWorkflowModel>(), It.IsAny<ServerEventModel>()))
-                .Returns((ServerWorkflowModel toUpdateOn, ServerEventModel eventToUpdate) => Task.Run(() =>
+            toSetup.Setup(m => m.UpdateEventOnWorkflow(It.IsAny<string>(), It.IsAny<ServerEventModel>()))
+                .Returns((string workflowId, ServerEventModel eventToUpdate) => Task.Run(() =>
                 {
-                    var events = _list.Find(x => x.Id == toUpdateOn.Id).ServerEventModels;
+                    var events = _list.Find(x => x.Id == workflowId).ServerEventModels;
                     var toReplace = events.First(x => x.Id == eventToUpdate.Id);
                     var asList = events.ToList();
                     var index = asList.IndexOf(toReplace);
                     asList[index] = eventToUpdate;
-                    _list.Find(x => x.Id == toUpdateOn.Id).ServerEventModels = asList;
+                    _list.Find(x => x.Id == workflowId).ServerEventModels = asList;
                 }));
 
             //Set up method for updating a workflow.

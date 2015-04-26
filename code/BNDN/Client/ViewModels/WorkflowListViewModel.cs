@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using Client.Connections;
-using Newtonsoft.Json;
+using Client.Exceptions;
+using Common;
 
 namespace Client.ViewModels
 {
@@ -26,6 +27,7 @@ namespace Client.ViewModels
         public ObservableCollection<WorkflowViewModel> WorkflowList { get; set; }
 
         private WorkflowViewModel _selecteWorkflowViewModel;
+        private string _status;
 
         public WorkflowViewModel SelectedWorkflowViewModel
         {
@@ -34,6 +36,16 @@ namespace Client.ViewModels
             {
                 _selecteWorkflowViewModel = value;
                 NotifyPropertyChanged("SelectedWorkflowViewModel");
+            }
+        }
+
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                NotifyPropertyChanged("Status");
             }
         }
 
@@ -50,12 +62,26 @@ namespace Client.ViewModels
             SelectedWorkflowViewModel = null;
             WorkflowList.Clear();
 
-            //TODO: Implement exception handling.
-            var connection = new ServerConnection(_serverAddress);
+            IList<WorkflowDto> workflows;
+            using (IServerConnection connection = new ServerConnection(_serverAddress))
+            {
+                try
+                {
+                    workflows = await connection.GetWorkflows();
+                }
+                catch (HostNotFoundException)
+                {
+                    Status = "The host of the server was not found. If the problem persists, contact you Flow administrator";
+                    return;
+                }
+                catch (Exception e)
+                {
+                    _status = e.Message;
+                    return;
+                }
+            }
 
-            var workflows = await connection.GetWorkflows();
-
-            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(workflowDto)));
+            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(this, workflowDto)));
             SelectedWorkflowViewModel = WorkflowList.Count >= 1 ? WorkflowList[0] : null;
 
             NotifyPropertyChanged("");

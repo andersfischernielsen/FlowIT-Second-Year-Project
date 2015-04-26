@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Common.Exceptions;
 using Event.Communicators;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Models;
@@ -151,6 +150,13 @@ namespace Event.Controllers
             }
 
             await _historyLogic.SaveSuccesfullCall("DELETE", "Unlock", eventId, workflowId);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _historyLogic.Dispose();
+            _lockLogic.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

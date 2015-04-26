@@ -6,6 +6,7 @@ using System.Web.Http;
 using Common;
 using Common.Exceptions;
 using Common.History;
+using Server.Exceptions;
 using Server.Interfaces;
 using Server.Logic;
 using Server.Storage;
@@ -70,6 +71,13 @@ namespace Server.Controllers
 
                 return toReturn;
             }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "POST", Message = "Threw: " + toThrow.GetType(), MethodCalledOnSender = "Login" });
+                throw toThrow;
+            }
             catch (UnauthorizedException e)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
@@ -127,6 +135,42 @@ namespace Server.Controllers
                     MethodCalledOnSender = "CreateUser",
                 });
             }
+            catch (ArgumentNullException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType() + " with username: " + dto.Name,
+                    MethodCalledOnSender = "CreateUser"
+                });
+                throw toThrow;
+            }
+            catch (NotFoundException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "A role attached to the provided user could not be found"));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType() + " with username: " + dto.Name,
+                    MethodCalledOnSender = "CreateUser"
+                }).Wait();
+                throw toThrow;
+            }
+            catch (UserExistsException)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "The provided user already exists at Server."));
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType() + " with username: " + dto.Name,
+                    MethodCalledOnSender = "CreateUser"
+                }).Wait();
+                throw toThrow;
+            }
             catch (InvalidOperationException)
             {
                 var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
@@ -136,7 +180,7 @@ namespace Server.Controllers
                     HttpRequestType = "POST",
                     Message = "Threw: " + toThrow.GetType() + " with username: " + dto.Name,
                     MethodCalledOnSender = "CreateUser",
-                });
+                }).Wait();
 
                 throw toThrow;
 

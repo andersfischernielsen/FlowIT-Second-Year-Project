@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Common.Exceptions;
 using Event.Interfaces;
@@ -16,6 +17,9 @@ namespace Event.Logic
         private readonly IEventStorage _storage;
         private readonly IEventFromEvent _eventCommunicator;
 
+        //QUEUE is holding a dictionary of string (workflowid) , dictionary which holds string (eventid), the queue
+        private static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> _lockQueue = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>>();
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -28,6 +32,7 @@ namespace Event.Logic
             _eventCommunicator = eventCommunicator;
         }
 
+
         /// <summary>
         /// Attempt to lock the specified Event down
         /// </summary>
@@ -38,6 +43,36 @@ namespace Event.Logic
         /// <exception cref="LockedException">Thrown if the specified Event is already locked down</exception>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
         /// <exception cref="ArgumentException">Thrown if the arguments are non-sensible</exception>
+
+
+        public static void AddToQueue(string workflowId, string eventId, LockDto lockDto)
+        {
+            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
+            queue.Enqueue(lockDto);
+        }
+
+        public static LockDto Dequeue(string workflowId, string eventId, LockDto lockDto)
+        {
+            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
+            LockDto next;
+            queue.TryDequeue(out next);
+            return next;
+        }
+
+        public static bool AmINext(string workflowId, string eventId, LockDto lockDto)
+        {
+            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
+            LockDto next;
+            if (queue.TryPeek(out next))
+            {
+                return next.LockOwner == lockDto.LockOwner && next.WorkflowId == lockDto.WorkflowId;
+            }
+            return false;
+        }
+
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
         {
             // Check input
@@ -58,10 +93,31 @@ namespace Event.Logic
                 // Reject request on setting the lockDto
                 throw new ArgumentException("lockDto.lockOwner was null");
             }
-
+            //TODO: Why this guy?, Is ID null?
             lockDto.Id = eventId;
 
+
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner); 
+
+            // Check if this Event is currently locked
+            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
+            {
+                AddToQueue(workflowId, eventId, lockDto);
+                var watch = new Stopwatch();
+                watch.Start();
+                //todo: ugly mayby?
+                while (!AmINext(workflowId, eventId, lockDto))
+                {
+                    if (watch.Elapsed.Seconds > 10)
+                    {
+                        throw new InvalidOperationException("Waited too long");
+                    }
+                    await Task.Delay(100);
+                }
+                Dequeue(workflowId, eventId, lockDto);
+            }
+
+            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
         }
 
         /// <summary>
@@ -78,6 +134,15 @@ namespace Event.Logic
             if (workflowId == null || eventId == null || callerId == null)
             {
                 throw new ArgumentNullException("workflowId");
+            }
+
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("callerId", "callerId was null");
+            }
+            if (callerId == null)
+            {
+                throw new ArgumentNullException("eventId", "eventId was null");
             }
 
             if (!await IsAllowedToOperate(workflowId, eventId, callerId))
@@ -113,22 +178,52 @@ namespace Event.Logic
             // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
 
+
             // Get dependent events
             var resp = await _storage.GetResponses(workflowId, eventId);
             var incl = await _storage.GetInclusions(workflowId, eventId);
             var excl = await _storage.GetExclusions(workflowId, eventId);            
 
-            // Put into Set to eliminate duplicates.
-            var eventsToBeLocked = new HashSet<RelationToOtherEventModel>(
-                resp.Concat(
-                    incl.Concat(
-                        excl))             // We have already locked ourselves, so no need to request that.
-                    .Where(relation => relation.WorkflowId != workflowId && relation.EventId != eventId));
+            var allDependentEventsSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+            // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
+            allDependentEventsSorted.Add(eventId.GetHashCode(), new RelationToOtherEventModel()
+            {
+                EventId = eventId,
+                WorkflowId = workflowId,
+                Uri = await _storage.GetUri(workflowId, eventId)
+            });
+
+            foreach (var res in resp)
+            {
+                if (!allDependentEventsSorted.ContainsKey(res.EventId.GetHashCode()))
+                {
+                    allDependentEventsSorted.Add(res.EventId.GetHashCode(), res);
+                }
+            }
+
+            foreach (var inc in incl)
+            {
+                if (!allDependentEventsSorted.ContainsKey(inc.EventId.GetHashCode()))
+                {
+                    allDependentEventsSorted.Add(inc.EventId.GetHashCode(), inc);
+                }
+            }
+
+            foreach (var exc in excl)
+            {
+                if (!allDependentEventsSorted.ContainsKey(exc.EventId.GetHashCode()))
+                {
+                    allDependentEventsSorted.Add(exc.EventId.GetHashCode(), exc);
+                }
+            }
+
+
 
             // For every related, dependent Event, attempt to lock it
-            foreach (var relation in eventsToBeLocked)
+            foreach (var tuple in allDependentEventsSorted)
             {
-                var toLock = new LockDto {LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId};
+                var relation = tuple.Value;
+                var toLock = new LockDto { LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId };
 
                 try
                 {
@@ -137,12 +232,12 @@ namespace Event.Logic
                 }
                 catch (Exception)
                 {
-                    // Continue (we won't have added the relation, that failed to lock, to _lockedEvents)
+                    break;
                 }
 
             }
 
-            if (eventsToBeLocked.Count != lockedEvents.Count)
+            if (allDependentEventsSorted.Count != lockedEvents.Count)
             {
                 // TODO: May be an error here, if one list contains this Event itself, while the other does not. 
                 await UnlockSome(workflowId, eventId, lockedEvents);
@@ -177,9 +272,26 @@ namespace Event.Logic
             {
                 throw new NullReferenceException("At least one of response-,inclusions or exclusions-relations retrieved from storage was null");
             }
-            var eventsToBelocked = resp.Concat(incl.Concat(excl));
 
-            if (eventsToBelocked == null)
+            var eventsToBeUnlockedSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+
+            foreach (var res in resp)
+            {
+                if (!eventsToBeUnlockedSorted.ContainsKey(res.EventId.GetHashCode()))
+                {
+                    eventsToBeUnlockedSorted.Add(res.EventId.GetHashCode(), res);
+                }
+            }
+
+            foreach (var exc in excl)
+            {
+                if (!eventsToBeUnlockedSorted.ContainsKey(exc.EventId.GetHashCode()))
+                {
+                    eventsToBeUnlockedSorted.Add(exc.EventId.GetHashCode(), exc);
+                }
+            }
+
+            if (eventsToBeUnlockedSorted == null)
             {
                 throw new NullReferenceException("eventsToBelocked must not be null");
             }
@@ -188,8 +300,9 @@ namespace Event.Logic
             bool everyEventIsUnlocked = true;
 
             // Unlock the other Events. 
-            foreach (var relation in eventsToBelocked)
+            foreach (var tuple in eventsToBeUnlockedSorted)
             {
+                var relation = tuple.Value;
                 try
                 {
                     await _eventCommunicator.Unlock(relation.Uri, relation.WorkflowId, relation.EventId, eventId);
@@ -200,10 +313,7 @@ namespace Event.Logic
                     everyEventIsUnlocked = false;
                 }
             }
-            // TODO: Shouldn't 
-            // Unlock self
-
-            // TODO: Shouldn't we do a IsAllowedToOperate() call before doing this call?
+            
             await _storage.ClearLock(workflowId, eventId);
             
             return everyEventIsUnlocked;
@@ -219,6 +329,7 @@ namespace Event.Logic
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsAllowedToOperate(string workflowId, string eventId, string callerId)
         {
+
             if (workflowId == null || eventId == null || callerId == null)
             {
                 throw new ArgumentNullException();
