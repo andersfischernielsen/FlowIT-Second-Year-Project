@@ -214,8 +214,6 @@ namespace Event.Controllers
         [HttpGet]
         public async Task<EventDto> GetEvent(string workflowId, string eventId)
         {
-            Exception toLog, toThrow;
-
             try
             {
                 var toReturn = await _logic.GetEventDto(workflowId, eventId);
@@ -225,25 +223,22 @@ namespace Event.Controllers
             }
             catch (NotFoundException e)
             {
-                toLog = e;
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
                         workflowId + "." + eventId + " not found"));
             }
             catch (ArgumentNullException e)
             {
-                toLog = e;
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Seems input was not satisfactory"));
             }
             catch (Exception e)
             {
-                toLog = e;
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "An unexpected exception was thrown"));
             }
-
-            await _historyLogic.SaveException(toLog, "GET", "GetEvent", eventId, workflowId);
-            throw toThrow;
         }
 
         protected override void Dispose(bool disposing)
