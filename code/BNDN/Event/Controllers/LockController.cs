@@ -52,10 +52,9 @@ namespace Event.Controllers
         [HttpPost]
         public async Task Lock(string workflowId, string eventId, [FromBody] LockDto lockDto)
         {
-            HttpResponseException toThrow;
             if (!ModelState.IsValid)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Provided input could not be mapped onto an instance of LockDto"));
                 await _historyLogic.SaveException(toThrow, "POST", "Lock", eventId, workflowId);
                 throw toThrow;
@@ -67,29 +66,34 @@ namespace Event.Controllers
                 await _historyLogic.SaveSuccesfullCall("POST", "Lock", eventId, workflowId);
                 return;
             }
-            catch (ArgumentNullException)
+            catch (ArgumentNullException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                _historyLogic.SaveException(e, "POST", "Lock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Lock: Seems input was not satisfactory"));
             }
-            catch (LockedException)
+            catch (LockedException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                _historyLogic.SaveException(e, "POST", "Lock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                     "Lock: Failed to lock: Event is currently locked by someone else"));
             }
-            catch (NotFoundException)
+            catch (NotFoundException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                _historyLogic.SaveException(e, "POST", "Lock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Lock: Event seems not to exist"));
             }
-            catch (IllegalStorageStateException)
+            catch (IllegalStorageStateException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                _historyLogic.SaveException(e, "POST", "Lock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "Lock: Storage reported it is in a non-valid state"));
             }
-
-            _historyLogic.SaveException(toThrow, "POST", "Lock").Wait();
-            throw toThrow;
         }
 
         /// <summary>
@@ -102,36 +106,41 @@ namespace Event.Controllers
         [HttpDelete]
         public async Task Unlock(string workflowId, string eventId, string senderId)
         {
-            HttpResponseException toThrow;
             try
             {
                 await _lockLogic.UnlockSelf(workflowId, eventId, senderId);
                 await _historyLogic.SaveSuccesfullCall("DELETE", "Unlock", eventId, workflowId);
                 return;
             }
-            catch (ArgumentNullException)
+            catch (ArgumentNullException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Unlock: Could not unlock: One or more of the provided arguments was null"));
             }
-            catch (LockedException)
+            catch (LockedException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                     "Unlock: Could not unlock: Event is locked by someone else"));
             }
-            catch (NotFoundException)
+            catch (NotFoundException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     "Unlock: Event seems not to exist"));
             }
-            catch (IllegalStorageStateException)
+            catch (IllegalStorageStateException e)
             {
-                toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
                     "Unlock: Storage reported it is in a non-valid state"));
             }
 
-            _historyLogic.SaveException(toThrow, "DELETE", "Unlock").Wait();
-            throw toThrow;
         }
 
         protected override void Dispose(bool disposing)
