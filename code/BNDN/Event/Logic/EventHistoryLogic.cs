@@ -55,6 +55,9 @@ namespace Event.Logic
         /// <returns></returns>
         public async Task SaveException(Exception ex, string requestType, string method, string eventId = "", string workflowId = "")
         {
+            //Don't save a null reference.
+            if (ex == null) return;
+
             var toSave = new HistoryModel
             {
                 EventId = eventId,

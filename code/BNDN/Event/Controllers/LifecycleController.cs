@@ -242,7 +242,7 @@ namespace Event.Controllers
                     "An unexpected exception was thrown"));
             }
 
-            if (toLog != null) await _historyLogic.SaveException(toLog, "GET", "GetEvent", eventId, workflowId);
+            await _historyLogic.SaveException(toLog, "GET", "GetEvent", eventId, workflowId);
             throw toThrow;
         }
 
