@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using DCRParserGraphic;
 using Microsoft.Win32;
 
-namespace DcrParserGraphic.ViewModels
+namespace XMLtoJSONParser.ViewModels
 {
     public class ParsingViewModel : ViewModelBase
     {
