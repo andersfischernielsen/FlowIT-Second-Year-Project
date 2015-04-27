@@ -52,7 +52,7 @@ namespace Event.Logic
             queue.Enqueue(lockDto);
         }
 
-        public static LockDto Dequeue(string workflowId, string eventId, LockDto lockDto)
+        public static LockDto Dequeue(string workflowId, string eventId)
         {
             var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
             var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
@@ -87,14 +87,14 @@ namespace Event.Logic
                 // Reject request on setting the lockDto
                 throw new ArgumentException("lockDto.lockOwner was null");
             }
-            //TODO: Why this guy?, Is ID null?
-            lockDto.Id = eventId;
 
+
+            //Add to queue
+            AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
             if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
-                AddToQueue(workflowId, eventId, lockDto);
                 var watch = new Stopwatch();
                 watch.Start();
                 //todo: ugly mayby?
@@ -106,7 +106,6 @@ namespace Event.Logic
                     }
                     await Task.Delay(100);
                 }
-                Dequeue(workflowId, eventId, lockDto);
             }
 
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
@@ -143,6 +142,7 @@ namespace Event.Logic
             }
 
             await _storage.ClearLock(workflowId, eventId);
+            Dequeue(workflowId, eventId);
         }
 
         /// <summary>
