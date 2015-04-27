@@ -145,6 +145,7 @@ namespace Client.ViewModels
 
         public async void GetState()
         {
+            Status = "";
             try
             {
                 using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
@@ -177,6 +178,7 @@ namespace Client.ViewModels
         /// </summary>
         public async void Execute()
         {
+            Status = "";
             try
             {
                 using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
