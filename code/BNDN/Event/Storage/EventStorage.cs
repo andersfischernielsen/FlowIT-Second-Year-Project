@@ -467,7 +467,7 @@ namespace Event.Storage
             
             var @event =
                 await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
-            if (@event.LockOwner != null)
+            if (@event.LockOwner != null && @event.LockOwner != lockOwner)
             {
                 throw new LockedException();
             }

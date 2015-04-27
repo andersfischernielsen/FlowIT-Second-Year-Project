@@ -106,6 +106,7 @@ namespace Event.Logic
                     //}
                     await Task.Delay(100);
                 }
+                await _storage.Reload(workflowId, eventId);
             }
 
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
