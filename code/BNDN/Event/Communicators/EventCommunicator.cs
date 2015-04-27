@@ -157,8 +157,8 @@ namespace Event.Communicators
         /// <exception cref="FailedToLockOtherEventException">Thrown if this method fails to lock the target Event</exception>
         public async Task Lock(Uri targetEventUri, LockDto lockDto, string targetWorkflowId, string targetId)
         {
-            long oldTimeout = _httpClient.HttpClient.Timeout.Ticks;
-            _httpClient.HttpClient.Timeout = new TimeSpan(0,0,10);
+            //long oldTimeout = _httpClient.HttpClient.Timeout.Ticks;
+            //_httpClient.HttpClient.Timeout = new TimeSpan(0,0,10);
             _httpClient.SetBaseAddress(targetEventUri);
             try
             {

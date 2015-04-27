@@ -81,12 +81,6 @@ namespace Event.Logic
                 throw new ArgumentNullException();
             }
 
-            // Check if this Event is currently locked
-            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
-            {
-                throw new LockedException();
-            }
-
             // Checks that the provided lockDto actually has sensible values for its fields.
             if (String.IsNullOrEmpty(lockDto.LockOwner) || String.IsNullOrWhiteSpace(lockDto.LockOwner))
             {
