@@ -271,6 +271,14 @@ namespace Event.Logic
                 }
             }
 
+            foreach (var inc in incl)
+            {
+                if (!eventsToBeUnlockedSorted.ContainsKey(inc.EventId.GetHashCode()))
+                {
+                    eventsToBeUnlockedSorted.Add(inc.EventId.GetHashCode(), inc);
+                }
+            }
+
             foreach (var exc in excl)
             {
                 if (!eventsToBeUnlockedSorted.ContainsKey(exc.EventId.GetHashCode()))
