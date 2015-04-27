@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.History;
 using Moq;
 using NUnit.Framework;
 using Server.Controllers;
@@ -28,6 +29,8 @@ namespace Server.Tests.ControllerTests
         {
             _mock = new Mock<IServerLogic>();
             _historyLogic = new Mock<IWorkflowHistoryLogic>();
+            _historyLogic.Setup(h => h.SaveHistory(It.IsAny<HistoryModel>())).Returns((HistoryModel model) => Task.Run(() => 1+1));
+
             _mock.Setup(logic => logic.Dispose());
 
             _controller = new WorkflowsController(_mock.Object, _historyLogic.Object) { Request = new HttpRequestMessage() };
@@ -148,9 +151,7 @@ namespace Server.Tests.ControllerTests
         }
 
         [Test]
-        [TestCase("AWorkflowId")]
-        [TestCase(null)]
-        public async Task PostWorkflow_with_id_and_null_workflow(string workflowId)
+        public async Task PostWorkflow_with_id_and_null_workflow()
         {
             // Arrange
             _mock.Setup(logic => logic.AddNewWorkflow(null)).Throws<ArgumentNullException>();

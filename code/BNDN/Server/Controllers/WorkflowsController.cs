@@ -169,7 +169,7 @@ namespace Server.Controllers
                     HttpRequestType = "POST",
                     Message = "Threw: " + e.GetType(),
                     MethodCalledOnSender = "PostWorkflow",
-                    WorkflowId = workflowDto.Id
+                    WorkflowId = workflowDto != null ? workflowDto.Id : ""
                 });
 
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
