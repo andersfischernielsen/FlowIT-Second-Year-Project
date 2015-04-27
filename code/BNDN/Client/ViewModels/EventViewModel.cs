@@ -14,6 +14,31 @@ namespace Client.ViewModels
         private readonly EventAddressDto _eventAddressDto;
         private EventStateDto _eventStateDto;
         private readonly WorkflowViewModel _parent;
+        private static readonly Brush WhiteBrush, IncludedBrush, PendingBrush, ExecutedBrush;
+
+        static EventViewModel()
+        {
+            // Create the brushes, and Freeze them so the UI-thread can access them.
+            // Pending
+            var path = Path.Combine(Environment.CurrentDirectory, "Assets", "Pending.png");
+            var uri = new Uri(path);
+            PendingBrush = new ImageBrush(new BitmapImage(uri));
+            PendingBrush.Freeze();
+
+            // Executed
+            path = Path.Combine(Environment.CurrentDirectory, "Assets", "Executed.png");
+            uri = new Uri(path);
+            ExecutedBrush = new ImageBrush(new BitmapImage(uri));
+            ExecutedBrush.Freeze();
+
+            // Included
+            IncludedBrush = new SolidColorBrush(Colors.DeepSkyBlue);
+            IncludedBrush.Freeze();
+
+            // Empty
+            WhiteBrush = new SolidColorBrush(Colors.White);
+            WhiteBrush.Freeze();
+        }
 
         public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
         {
@@ -71,16 +96,7 @@ namespace Client.ViewModels
 
         public Brush PendingColor
         {
-            get
-            {
-                if (Pending)
-                {
-                    var path = Path.Combine(Environment.CurrentDirectory, "Assets", "Pending.png");
-                    var uri = new Uri(path);
-                    return new ImageBrush(new BitmapImage(uri));
-                }
-                return null;
-            }
+            get { return Pending ? PendingBrush : WhiteBrush; }
         }
 
         public bool Executed
@@ -96,16 +112,7 @@ namespace Client.ViewModels
 
         public Brush ExecutedColor
         {
-            get
-            {
-                if (Executed)
-                {
-                    var path = Path.Combine(Environment.CurrentDirectory, "Assets", "Executed.png");
-                    var uri = new Uri(path);
-                    return new ImageBrush(new BitmapImage(uri));
-                }
-                return null;
-            }
+            get { return Executed ? ExecutedBrush : WhiteBrush; }
         }
         public bool Included
         {
@@ -120,7 +127,7 @@ namespace Client.ViewModels
 
         public Brush IncludedColor
         {
-            get { return Included ? new SolidColorBrush(Colors.DeepSkyBlue) : null; }
+            get { return Included ? IncludedBrush : WhiteBrush; }
         }
 
         public bool Executable
