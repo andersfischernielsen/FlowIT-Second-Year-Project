@@ -307,8 +307,6 @@ namespace Event.Logic
             FailedToUpdateStateAtOtherEventException exception = null;
             try
             {
-                await _storage.SetExecuted(workflowId, eventId, true);
-                await _storage.SetPending(workflowId, eventId, false);
                 var addressDto = new EventAddressDto
                 {
                     WorkflowId = workflowId,
@@ -331,6 +329,12 @@ namespace Event.Logic
                         _eventCommunicator.SendExcluded(exclusion.Uri, addressDto, exclusion.WorkflowId,
                             exclusion.EventId);
                 }
+                // There might have been made changes on the entity itself in another controller-call
+                // Therefore we have to reload the state from database.
+                await _storage.Reload(workflowId, eventId);
+
+                await _storage.SetExecuted(workflowId, eventId, true);
+                await _storage.SetPending(workflowId, eventId, false);
             }
             catch (Exception)
             {

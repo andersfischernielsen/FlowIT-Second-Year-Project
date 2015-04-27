@@ -92,6 +92,10 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
+        public async Task Reload(string workflowId, string eventId)
+        {
+            await _context.Entry(await _context.Events.SingleAsync(e => e.WorkflowId == workflowId && e.Id == eventId)).ReloadAsync();
+        }
 
         #region Properties
 
@@ -345,7 +349,10 @@ namespace Event.Storage
             // TODO: Try-catch here...?
             await EventIsInALegalState(workflowId, eventId);
 
-            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Included = includedValue;
+            var @event = (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId));
+            
+            @event.Included = includedValue;
+
             await _context.SaveChangesAsync();
         }
 
