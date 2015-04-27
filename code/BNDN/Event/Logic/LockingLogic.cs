@@ -97,8 +97,6 @@ namespace Event.Logic
             lockDto.Id = eventId;
 
 
-            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner); 
-
             // Check if this Event is currently locked
             if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
@@ -174,10 +172,6 @@ namespace Event.Logic
             // Initiate the lockDto that is to be passed to the other Events
             // identifing this Event as the lockowner
             var lockDto = new LockDto {LockOwner = eventId, Id = eventId};
-
-            // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
-            await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
-
 
             // Get dependent events
             var resp = await _storage.GetResponses(workflowId, eventId);

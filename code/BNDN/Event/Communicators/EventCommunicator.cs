@@ -168,8 +168,7 @@ namespace Event.Communicators
             {
                 throw new FailedToLockOtherEventException();
             }
-            await _httpClient.Create(String.Format("events/{0}/{1}/lock",targetWorkflowId, targetId), lockDto);
-            _httpClient.HttpClient.Timeout = new TimeSpan(oldTimeout);
+            //_httpClient.HttpClient.Timeout = new TimeSpan(oldTimeout);
         }
 
         /// <summary>
