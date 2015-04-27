@@ -24,6 +24,7 @@ namespace Event.Interfaces
 
         Task InitializeNewEvent(EventModel eventModel);
         Task DeleteEvent(string workflowId, string eventId);
+        Task Reload(string workflowId, string eventId);
 
         #region State
         Task<bool> GetExecuted(string workflowId, string eventId);
