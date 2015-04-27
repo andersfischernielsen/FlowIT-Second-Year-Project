@@ -493,10 +493,10 @@ namespace Event.Storage
 
             await EventIsInALegalState(workflowId, eventId);
 
-            var @event =
-                await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
+            var @event = await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
 
             @event.LockOwner = null;
+            _context.Entry(@event).State = EntityState.Modified;
 
             await _context.SaveChangesAsync();
         }

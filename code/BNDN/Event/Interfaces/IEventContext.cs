@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace Event.Interfaces
         DbSet<InclusionUri> Inclusions { get; set; }
         DbSet<ExclusionUri> Exclusions { get; set; }
         DbSet<HistoryModel> History { get; set; }
+        DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class; 
 
         int SaveChanges();
         Task<int> SaveChangesAsync();
