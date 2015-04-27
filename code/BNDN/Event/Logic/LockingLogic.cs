@@ -100,10 +100,11 @@ namespace Event.Logic
                 //todo: ugly mayby?
                 while (!AmINext(workflowId, eventId, lockDto))
                 {
-                    //if (watch.Elapsed.Seconds > 10)
-                    //{
-                    //    throw new InvalidOperationException("Waited too long");
-                    //}
+                    if (watch.Elapsed.Seconds > 10)
+                    {
+                        //Waited too long in queue
+                        throw new LockedException();
+                    }
                     await Task.Delay(100);
                 }
                 await _storage.Reload(workflowId, eventId);
