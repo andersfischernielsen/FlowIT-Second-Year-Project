@@ -100,10 +100,10 @@ namespace Event.Logic
                 //todo: ugly mayby?
                 while (!AmINext(workflowId, eventId, lockDto))
                 {
-                    if (watch.Elapsed.Seconds > 10)
-                    {
-                        throw new InvalidOperationException("Waited too long");
-                    }
+                    //if (watch.Elapsed.Seconds > 10)
+                    //{
+                    //    throw new InvalidOperationException("Waited too long");
+                    //}
                     await Task.Delay(100);
                 }
             }
