@@ -59,6 +59,7 @@ namespace Client.ViewModels
         /// </summary>
         public async void GetWorkflows()
         {
+            Status = "";
             SelectedWorkflowViewModel = null;
             WorkflowList.Clear();
 
@@ -76,7 +77,7 @@ namespace Client.ViewModels
                 }
                 catch (Exception e)
                 {
-                    _status = e.Message;
+                    Status = e.Message;
                     return;
                 }
             }
