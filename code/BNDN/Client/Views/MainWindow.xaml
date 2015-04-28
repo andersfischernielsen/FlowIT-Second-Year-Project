@@ -25,7 +25,7 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="170" Style="{DynamicResource ButtonDefaultStyle}">
+            <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="229" Style="{DynamicResource ButtonDefaultStyle}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetWorkflows"/>

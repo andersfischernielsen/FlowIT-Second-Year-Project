@@ -6,17 +6,17 @@ namespace Client
     class Settings
     {
         public string ServerAddress { get; set; }
+        public string Username { get; set; }
 
         public static Settings LoadSettings()
         {
-            if (!File.Exists("settings.json"))
-            {
-                return new Settings { ServerAddress = "http://flowit.azurewebsites.net/" };
-            }
-
-            var settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
+            var settings = 
+                !File.Exists("settings.json") 
+                ? new Settings() 
+                : JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
 
             settings.ServerAddress = settings.ServerAddress ?? "http://flowit.azurewebsites.net/";
+            settings.Username = settings.Username ?? "";
             return settings;
         }
 

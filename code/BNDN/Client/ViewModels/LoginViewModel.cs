@@ -19,7 +19,7 @@ namespace Client.ViewModels
             var settings = Settings.LoadSettings();
             _serverAddress = new Uri(settings.ServerAddress);
 
-            Username = "";
+            Username = settings.Username;
             Status = "";
             Password = "";
         }
@@ -79,6 +79,7 @@ namespace Client.ViewModels
                 new Settings
                 {
                     ServerAddress = _serverAddress.AbsoluteUri,
+                    Username = Username
                 }.SaveSettings();
 
                 new MainWindow(RolesForWorkflows).Show();
