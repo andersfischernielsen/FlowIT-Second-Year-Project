@@ -1,0 +1,172 @@
+<dcrgraph title="Example workflow" id="dreyersfond.dk/application" filterLevel="-1" zoomLevel="-2">
+    <specification>
+        <resources>
+            <events>
+                <event id="Activity 0" scope="private" >
+                    <custom>
+                        <visualization>
+                            <location xLoc="341" yLoc="159" />
+                        </visualization>
+                        <roles>
+                            <role>Customer</role>
+                        </roles>
+                        <groups>
+                            <group />
+                        </groups>
+                        <eventType></eventType>
+                        <eventDescription></eventDescription>
+                        <level>1</level>
+                    </custom>
+                </event>
+                <event id="Activity 1" scope="private" >
+                    <custom>
+                        <visualization>
+                            <location xLoc="558" yLoc="159" />
+                        </visualization>
+                        <roles>
+                            <role>Customer</role>
+                        </roles>
+                        <groups>
+                            <group />
+                        </groups>
+                        <eventType></eventType>
+                        <eventDescription></eventDescription>
+                        <level>1</level>
+                    </custom>
+                </event>
+                <event id="Activity 2" scope="private" >
+                    <custom>
+                        <visualization>
+                            <location xLoc="781" yLoc="42" />
+                        </visualization>
+                        <roles>
+                            <role>Inspector</role>
+                        </roles>
+                        <groups>
+                            <group />
+                        </groups>
+                        <eventType></eventType>
+                        <eventDescription></eventDescription>
+                        <level>1</level>
+                    </custom>
+                </event>
+                <event id="Activity 3" scope="private" >
+                    <custom>
+                        <visualization>
+                            <location xLoc="1011" yLoc="163" />
+                        </visualization>
+                        <roles>
+                            <role>Inspector</role>
+                        </roles>
+                        <groups>
+                            <group />
+                        </groups>
+                        <eventType></eventType>
+                        <eventDescription></eventDescription>
+                        <level>1</level>
+                    </custom>
+                </event>
+                <event id="Activity 4" scope="private" >
+                    <custom>
+                        <visualization>
+                            <location xLoc="786" yLoc="288" />
+                        </visualization>
+                        <roles>
+                            <role>Inspector</role>
+                        </roles>
+                        <groups>
+                            <group />
+                        </groups>
+                        <eventType></eventType>
+                        <eventDescription></eventDescription>
+                        <level>1</level>
+                    </custom>
+                </event>
+            </events>
+            <subProcesses></subProcesses>
+            <distribution>
+                <externalEvents></externalEvents>
+            </distribution>
+            <labels>
+                <label id="Check gasmeter" />
+                <label id="Report gas
+consumption" />
+                <label id="Approve reported
+numbers" />
+                <label id="Bill customer" />
+                <label id="Reject reported
+numbers" />
+            </labels>
+            <labelMappings>
+                <labelMapping eventId="Activity 0" labelId="Check gasmeter"/>
+                <labelMapping eventId="Activity 1" labelId="Report gas
+consumption"/>
+                <labelMapping eventId="Activity 2" labelId="Approve reported
+numbers"/>
+                <labelMapping eventId="Activity 3" labelId="Bill customer"/>
+                <labelMapping eventId="Activity 4" labelId="Reject reported
+numbers"/>
+            </labelMappings>
+            <expressions></expressions>
+            <variables></variables>
+            <variableAccesses>
+                <writeAccesses />
+            </variableAccesses>
+            <custom>
+                <roles>
+                    <role>Customer</role>
+                    <role>Inspector</role>
+                </roles>
+                <groups></groups>
+                <eventTypes></eventTypes>
+                <graphDetails>This workflow is intended to be used as an example-workflow in the final report. It should be a) basic, but b) still cover the most important cases</graphDetails>
+                <graphFilters>
+                    <filteredGroups></filteredGroups>
+                    <filteredRoles></filteredRoles>
+                </graphFilters>
+            </custom>
+        </resources>
+        <constraints>
+            <conditions>
+                <condition sourceId="Activity 1" targetId="Activity 0" filterLevel="1"  description=""  />
+                <condition sourceId="Activity 3" targetId="Activity 2" filterLevel="1"  description=""  />
+                <condition sourceId="Activity 4" targetId="Activity 1" filterLevel="1"  description=""  />
+                <condition sourceId="Activity 2" targetId="Activity 1" filterLevel="1"  description=""  />
+            </conditions>
+            <responses>
+                <response sourceId="Activity 0" targetId="Activity 1" filterLevel="1"  description=""  />
+                <response sourceId="Activity 4" targetId="Activity 1" filterLevel="1"  description=""  />
+                <response sourceId="Activity 1" targetId="Activity 2" filterLevel="1"  description=""  />
+                <response sourceId="Activity 2" targetId="Activity 3" filterLevel="1"  description=""  />
+            </responses>
+            <excludes>
+                <exclude sourceId="Activity 1" targetId="Activity 1" filterLevel="1"  description=""  />
+                <exclude sourceId="Activity 2" targetId="Activity 4" filterLevel="1"  description=""  />
+                <exclude sourceId="Activity 4" targetId="Activity 2" filterLevel="1"  description=""  />
+                <exclude sourceId="Activity 2" targetId="Activity 1" filterLevel="1"  description=""  />
+            </excludes>
+            <includes>
+                <include sourceId="Activity 0" targetId="Activity 1" filterLevel="1"  description=""  />
+                <include sourceId="Activity 1" targetId="Activity 2" filterLevel="1"  description=""  />
+                <include sourceId="Activity 1" targetId="Activity 4" filterLevel="1"  description=""  />
+                <include sourceId="Activity 2" targetId="Activity 3" filterLevel="1"  description=""  />
+            </includes>
+            <milestones></milestones>
+        </constraints>
+    </specification>
+    <runtime>
+        <marking>
+            <globalStore></globalStore>
+            <executed></executed>
+            <included>
+                <event id="Activity 0"/>
+                <event id="Activity 1"/>
+                <event id="Activity 2"/>
+                <event id="Activity 3"/>
+                <event id="Activity 4"/>
+            </included>
+            <pendingResponses></pendingResponses>
+        </marking>
+        <custom />
+    </runtime>
+</dcrgraph>
