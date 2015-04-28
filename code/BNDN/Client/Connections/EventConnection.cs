@@ -108,7 +108,7 @@ namespace Client.Connections
         public async Task Execute(string workflowId, string eventId)
         {
             IList<string> roles;
-            LoginViewModel.RoleForWorkflow.TryGetValue(workflowId, out roles);
+            LoginViewModel.RolesForWorkflows.TryGetValue(workflowId, out roles);
             try
             {
                 await

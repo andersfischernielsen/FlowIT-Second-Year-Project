@@ -16,6 +16,7 @@ namespace Client.ViewModels
         private readonly WorkflowDto _workflowDto;
         private bool _resetEventRuns;
         private readonly WorkflowListViewModel _parent;
+        private readonly IList<string> _roles; 
 
         public string WorkflowId { get { return _workflowDto.Id; } }
 
@@ -24,13 +25,15 @@ namespace Client.ViewModels
             _parent = parent;
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = new WorkflowDto();
+            _roles = new List<string>();
         }
 
-        public WorkflowViewModel(WorkflowListViewModel parent, WorkflowDto workflowDto)
+        public WorkflowViewModel(WorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles)
         {
             _parent = parent;
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = workflowDto;
+            _roles = roles;
         }
 
         #region Databindings
@@ -85,14 +88,13 @@ namespace Client.ViewModels
             EventList.Clear();
 
             var settings = Settings.LoadSettings();
-            var username = settings.Username;
 
             List<EventViewModel> events;
             using (IServerConnection connection = new ServerConnection(new Uri(settings.ServerAddress)))
             {
                 events = (await connection.GetEventsFromWorkflow(WorkflowId))
                 .AsParallel()
-                .Where(e => e.Roles.Any(r => r == username)) //Only selects the events, the current user can execute
+                .Where(e => e.Roles.Intersect(_roles).Any()) //Only selects the events, the current user can execute
                 .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
                 .ToList();
             }
