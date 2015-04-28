@@ -17,11 +17,11 @@ namespace Client.ViewModels
         public LoginViewModel()
         {
             var settings = Settings.LoadSettings();
-            Username = settings.Username;
             _serverAddress = new Uri(settings.ServerAddress);
 
+            _username = "";
             _status = "";
-            _password = "Password";
+            _password = "";
         }
 
         #region Databindings
