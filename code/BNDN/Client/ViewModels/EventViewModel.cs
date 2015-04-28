@@ -46,7 +46,7 @@ namespace Client.ViewModels
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
-            GetState(); // Do not await or .Wait.
+            GetStateInternal();
         }
 
         #region Databindings
@@ -150,6 +150,11 @@ namespace Client.ViewModels
         #endregion
 
         #region Actions
+
+        private async void GetStateInternal()
+        {
+            await GetState();
+        }
 
         public async Task GetState()
         {

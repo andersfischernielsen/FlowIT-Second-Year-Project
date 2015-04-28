@@ -40,10 +40,7 @@ namespace Event.Logic
                 throw new ArgumentNullException("eventId", "eventId was null");
             }
 
-           var eventRoles = await _storage.GetRoles(workflowId, eventId);
-
-            // TODO: This should be obsolete by now, right, because GetRoles will not return null, since it checks for Event-existence?
-            if (eventRoles == null) throw new NotFoundException();
+            var eventRoles = await _storage.GetRoles(workflowId, eventId);
 
             return eventRoles.Intersect(roles).Any();
         }

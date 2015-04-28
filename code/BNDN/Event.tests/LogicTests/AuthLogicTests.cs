@@ -94,7 +94,7 @@ namespace Event.Tests.LogicTests
         public void IsAuthorized_Throws_NotFoundException_When_EventId_Is_Not_Found()
         {
             // Arrange
-            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(null);
+            _storageMock.Setup(s => s.GetRoles(It.IsAny<string>(), It.IsAny<string>())).ThrowsAsync(new NotFoundException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _logic.IsAuthorized("workflowId", "eventId", new HashSet<string>

@@ -5,9 +5,6 @@ namespace Event.Models.UriClasses
 {
     public class UriRepresentationBase
     {
-        // This Id should be used for internal Entity Framework representation only
-        // TODO: Consider making property private
-
         [Required]
         public string UriString { get; set; }
 

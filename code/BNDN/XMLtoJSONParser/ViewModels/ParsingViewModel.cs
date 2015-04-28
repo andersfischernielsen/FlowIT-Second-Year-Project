@@ -129,8 +129,7 @@ namespace XMLtoJSONParser.ViewModels
         {
             if (string.IsNullOrEmpty(XmlFilePath) || string.IsNullOrEmpty(EventUris) || string.IsNullOrEmpty(WorkflowId))
             {
-                // Todo: Shouldn't this show some kind of error message to the user?
-                await DcrParser.Parse(XmlFilePath, WorkflowId, new string[1]).CreateJsonFile();
+                MessageBox.Show("You have to fill in the information first.");
             }
             else
             {

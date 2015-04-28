@@ -122,22 +122,29 @@ namespace Server.Storage
             return await events.ToListAsync();
         }
 
-
-        // TODO: Does this add Roles to a workflow? It seems (to me, Morten) it adds roles to a common list / set of Roles...
-        // TODO: Documentation
-        public async Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
+        /// <summary>
+        /// Adds the given roles to a workflow, and returns the server-representation of the added roles.
+        /// </summary>
+        /// <param name="roles">The roles to add to a workflow.</param>
+        /// <returns>A collection of the server-representation of the workflows.</returns>
+        public async Task<IEnumerable<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
         {
+            // Result contains the ServerRoleModels as EntityFramework sees them.
             var result = new List<ServerRoleModel>();
             foreach (var role in roles)
             {
                 if (!await RoleExists(role))
                 {
+                    // We add the result of the Add call to result, because we don't want entityFramework
+                    // To create another identical role when the roles are added to the events.
                     result.Add(_db.Roles.Add(role));
                 }
                 else
                 {
+                    // ReSharper says that the following two statements are required in order to do what we want.
                     var roleId = role.Id;
                     var workflowId = role.ServerWorkflowModelId;
+                    // We have to find the server-representation of these roles
                     result.Add(await _db.Roles.SingleAsync(r => r.Id == roleId && r.ServerWorkflowModelId == workflowId));
                 }
             }
@@ -145,12 +152,15 @@ namespace Server.Storage
             return result;
         }
 
-
-        // TODO: More descriptive naming of 'id' - I (Morten) couldn't make out, what 'id' represents...Maybe censor won't either
-        // TODO: Documentation. 
-        public async Task<ServerRoleModel> GetRole(string id, string workflowId)
+        /// <summary>
+        /// Get the server-representation of a role
+        /// </summary>
+        /// <param name="rolename">The name of the role. This is what identifies the role.</param>
+        /// <param name="workflowId">The Id of the Workflow the role belongs to.</param>
+        /// <returns>If found, the server-representation of the role. null otherwise.</returns>
+        public async Task<ServerRoleModel> GetRole(string rolename, string workflowId)
         {
-            if (id == null || workflowId == null)
+            if (rolename == null || workflowId == null)
             {
                 throw new ArgumentNullException();
             }
@@ -160,7 +170,7 @@ namespace Server.Storage
                 throw new NotFoundException();
             }
 
-            return await _db.Roles.SingleOrDefaultAsync(role => role.Id.Equals(id) && role.ServerWorkflowModelId.Equals(workflowId));
+            return await _db.Roles.SingleOrDefaultAsync(role => role.Id.Equals(rolename) && role.ServerWorkflowModelId.Equals(workflowId));
         }
 
         /// <summary>
@@ -173,7 +183,11 @@ namespace Server.Storage
             return await _db.Users.AnyAsync(u => u.Name.Equals(username));
         }
 
-        // TODO: Documentation. 
+        /// <summary>
+        /// States whether the given role exists on the server already or not.
+        /// </summary>
+        /// <param name="role">The role to test</param>
+        /// <returns>True if the role exists on the server, false otherwise.</returns>
         public async Task<bool> RoleExists(ServerRoleModel role)
         {
             if (role == null)
@@ -181,8 +195,8 @@ namespace Server.Storage
                 throw new ArgumentNullException();
             }
 
-            return await _db.Roles.AnyAsync(rr => rr.Id.Equals(role.Id)
-                && rr.ServerWorkflowModelId.Equals(role.ServerWorkflowModelId));
+            return await _db.Roles.AnyAsync(rr => rr.Id == role.Id
+                && rr.ServerWorkflowModelId == role.ServerWorkflowModelId);
         }
 
 
@@ -231,14 +245,11 @@ namespace Server.Storage
                 throw new ArgumentNullException();
             }
 
-            var workflowId = eventToBeAddedDto.ServerWorkflowModelId;
-
-            if (!await WorkflowExists(workflowId))
+            if (!await WorkflowExists(eventToBeAddedDto.ServerWorkflowModelId))
             {
-                // TODO: Check, that the correct Id is used above...
                 throw new NotFoundException();
             }
-            if (await EventExists(workflowId, eventToBeAddedDto.Id))
+            if (await EventExists(eventToBeAddedDto.ServerWorkflowModelId, eventToBeAddedDto.Id))
             {
                 throw new EventExistsException();
             }
@@ -256,44 +267,6 @@ namespace Server.Storage
 
             await _db.SaveChangesAsync();
         }
-
-        // TODO: Discuss: Should we just keep this method to stay REST'ed? Or delete?
-        /// <summary>
-        /// Will update an Event on a specified workflow. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow</param>
-        /// <param name="eventToBeUpdated">Contains the updated information on the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if either the Workflow or the Event does not exist</exception>
-        public async Task UpdateEventOnWorkflow(string workflowId, ServerEventModel eventToBeUpdated)
-        {
-            if (workflowId == null || eventToBeUpdated == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (!await WorkflowExists(workflowId))
-            {
-                throw new NotFoundException();
-            }
-            if (!await EventExists(workflowId, eventToBeUpdated.Id))
-            {
-                throw new NotFoundException();
-            }
-
-            var events = from e in _db.Events
-                         where e.Id == eventToBeUpdated.Id
-                         select e;
-
-            var tempEvent = events.Single();
-            tempEvent.ServerWorkflowModel = eventToBeUpdated.ServerWorkflowModel;
-            tempEvent.ServerWorkflowModelId = eventToBeUpdated.ServerWorkflowModelId;
-            tempEvent.Uri = eventToBeUpdated.Uri;
-
-            await _db.SaveChangesAsync();
-        }
-
 
         /// <summary>
         /// Will delete the Event from the specified workflow

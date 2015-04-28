@@ -68,19 +68,6 @@ namespace Server.Tests.LogicTests
                     _list.Remove(toRemove);
                 }));
 
-            //Set up method for updating an event in a workflow.
-            //Finds the workflow in the list, finds the event in the workflow and replaces it with the new event.
-            toSetup.Setup(m => m.UpdateEventOnWorkflow(It.IsAny<string>(), It.IsAny<ServerEventModel>()))
-                .Returns((string workflowId, ServerEventModel eventToUpdate) => Task.Run(() =>
-                {
-                    var events = _list.Find(x => x.Id == workflowId).ServerEventModels;
-                    var toReplace = events.First(x => x.Id == eventToUpdate.Id);
-                    var asList = events.ToList();
-                    var index = asList.IndexOf(toReplace);
-                    asList[index] = eventToUpdate;
-                    _list.Find(x => x.Id == workflowId).ServerEventModels = asList;
-                }));
-
             //Set up method for updating a workflow.
             //Finds the workflow to update in the list, then replaces it with the new workflow.
             toSetup.Setup(m => m.UpdateWorkflow(It.IsAny<ServerWorkflowModel>()))
@@ -218,36 +205,6 @@ namespace Server.Tests.LogicTests
             await _toTest.RemoveWorkflow("1");
 
             Assert.AreEqual(0, _list.Count(x => x.Id == "1"));
-        }
-
-        [Test]
-        public async void TestUpdateEventOnWorkflow()
-        {
-            var workflow = _list.Find(x => x.Id == "1");
-            var existing = workflow.ServerEventModels.First(x => x.Id == "1");
-            Assert.IsNotNull(existing);
-            Assert.AreEqual(existing.Uri, "http://2.2.2.2/");
-
-            await _toTest.UpdateEventOnWorkflow("1", new EventAddressDto { Id = "1", Uri = new Uri("http://3.3.3.3") });
-
-            var updated = workflow.ServerEventModels.First(x => x.Id == "1");
-            Assert.IsNotNull(updated);
-            Assert.AreEqual(updated.Uri, "http://3.3.3.3/");
-        }
-
-        [Test]
-        public async void TestUpdateWorkflow()
-        {
-            var existing = _list.Find(x => x.Id == "1");
-            Assert.IsNotNull(existing);
-            Assert.AreEqual(existing.Name, "w1");
-            Assert.IsNotEmpty(existing.ServerEventModels);
-
-            await _toTest.UpdateWorkflow(new WorkflowDto { Id = "1", Name = "CHANGED" });
-
-            var updated = _list.Find(x => x.Id == "1");
-            Assert.IsNotNull(updated);
-            Assert.AreEqual(updated.Name, "CHANGED");
         }
     }
 }

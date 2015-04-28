@@ -13,13 +13,10 @@ namespace Event.Interfaces
 
         //For notifying server about this event. Is fetched when receiving EventDto on creation!
         Task<Uri> GetUri(string workflowId, string eventId);
-        Task SetUri(string workflowId, string eventId, Uri value);
 
         Task<string> GetName(string workflowId, string eventId);
-        Task SetName(string workflowId, string eventId, string value);
 
         Task<IEnumerable<string>> GetRoles(string workflowId, string eventId);
-        Task SetRoles(string workflowId, string eventId, IEnumerable<string> value);
         #endregion
 
         Task InitializeNewEvent(EventModel eventModel);
@@ -46,16 +43,12 @@ namespace Event.Interfaces
 
         #region Rules
         Task<HashSet<RelationToOtherEventModel>> GetConditions(string workflowId, string eventId);
-        Task SetConditions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
         Task<HashSet<RelationToOtherEventModel>> GetResponses(string workflowId, string eventId);
-        Task SetResponses(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
         Task<HashSet<RelationToOtherEventModel>> GetExclusions(string workflowId, string eventId);
-        Task SetExclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
 
         Task<HashSet<RelationToOtherEventModel>> GetInclusions(string workflowId, string eventId);
-        Task SetInclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value);
         #endregion
     }
 }
