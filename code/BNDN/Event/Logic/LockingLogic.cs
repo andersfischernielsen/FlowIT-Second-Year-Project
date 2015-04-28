@@ -73,6 +73,44 @@ namespace Event.Logic
             return false;
         }
 
+        public async Task WaitForMyTurn(string workflowId, string eventId, LockDto lockDto)
+        {
+            // Check input
+            if (workflowId == null || lockDto == null || eventId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            // Checks that the provided lockDto actually has sensible values for its fields.
+            if (String.IsNullOrEmpty(lockDto.LockOwner) || String.IsNullOrWhiteSpace(lockDto.LockOwner))
+            {
+                // Reject request on setting the lockDto
+                throw new ArgumentException("lockDto.lockOwner was null");
+            }
+
+            //Add to queue
+            AddToQueue(workflowId, eventId, lockDto);
+
+            // Check if this Event is currently locked
+            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
+            {
+                var watch = new Stopwatch();
+                watch.Start();
+                //todo: ugly mayby?
+                while (!AmINext(workflowId, eventId, lockDto))
+                {
+                    if (watch.Elapsed.Seconds > 10)
+                    {
+                        //Waited too long in queue
+                        throw new LockedException();
+                    }
+                    await Task.Delay(100);
+                }
+                await _storage.Reload(workflowId, eventId);
+            }
+            Dequeue(workflowId, eventId);
+        }
+
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
         {
             // Check input

@@ -73,7 +73,12 @@ namespace Event.Logic
             // Check is made to see if caller is allowed to execute this method at the moment. 
             if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, senderId))
             {
-                throw new LockedException();
+                await _lockingLogic.WaitForMyTurn(workflowId, eventId, new LockDto()
+                {
+                    WorkflowId = workflowId,
+                    LockOwner = senderId,
+                    Id = eventId
+                });
             }
 
             return await _storage.GetExecuted(workflowId, eventId);
@@ -105,10 +110,16 @@ namespace Event.Logic
             // Check is made to see if caller is allowed to execute this method
             if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, senderId))
             {
-                throw new LockedException();
+                await _lockingLogic.WaitForMyTurn(workflowId, eventId, new LockDto()
+                {
+                    WorkflowId = workflowId,
+                    LockOwner = senderId,
+                    Id = eventId
+                });
             }
 
-            return await _storage.GetIncluded(workflowId, eventId);   
+            var b = await _storage.GetIncluded(workflowId, eventId);
+            return b;
         }
 
         // TODO: Discuss: Should this not be moved into a method on EventStorage?
@@ -136,40 +147,32 @@ namespace Event.Logic
             }
 
 
-            var conditionRelations = await _storage.GetConditions(workflowId, eventId);
-            var lockOrder = new SortedDictionary<int, RelationToOtherEventModel>();
 
-            //adds us self
-            lockOrder.Add(eventId.GetHashCode(), new RelationToOtherEventModel()
+            if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, senderId))
             {
-                EventId = eventId,
-                WorkflowId = workflowId,
-                Uri = await _storage.GetUri(workflowId, eventId)
-            });
-
-            foreach (var con in conditionRelations)
-            {
-                lockOrder.Add(con.EventId.GetHashCode(), con);
+                await _lockingLogic.WaitForMyTurn(workflowId,eventId,new LockDto()
+                {
+                    Id = eventId,
+                    WorkflowId = workflowId,
+                    LockOwner = senderId
+                });
             }
 
-            var b = await _lockingLogic.LockList(lockOrder, eventId);
-
-            if (!b)
-            {
-                throw new LockedException();
-            }
+            var name = await _storage.GetName(workflowId, eventId);
+            var executed = await _storage.GetExecuted(workflowId, eventId);
+            var included = await _storage.GetIncluded(workflowId, eventId);
+            var pending = await _storage.GetPending(workflowId, eventId);
 
             var eventStateDto = new EventStateDto
             {
                 Id = eventId,
-                Name = await _storage.GetName(workflowId, eventId),
-                Executed = await _storage.GetExecuted(workflowId, eventId),
-                Included = await _storage.GetIncluded(workflowId, eventId),
-                Pending = await _storage.GetPending(workflowId, eventId),
+                Name = name,
+                Executed = executed,
+                Included = included,
+                Pending = pending,
                 Executable = await IsExecutable(workflowId, eventId)
             };
 
-            await _lockingLogic.UnlockList(lockOrder, eventId);
             return eventStateDto;
         }
 

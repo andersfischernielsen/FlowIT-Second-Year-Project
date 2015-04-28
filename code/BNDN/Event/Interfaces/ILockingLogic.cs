@@ -18,5 +18,6 @@ namespace Event.Interfaces
         Task<bool> IsAllowedToOperate(string workflowId, string eventId, string callerId);
         Task<bool> LockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId);
         Task<bool> UnlockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId);
+        Task WaitForMyTurn(string workflowId, string eventId, LockDto lockDto);
     }
 }
