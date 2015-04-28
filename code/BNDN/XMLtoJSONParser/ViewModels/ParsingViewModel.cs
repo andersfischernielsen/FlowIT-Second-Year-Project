@@ -20,6 +20,8 @@ namespace XMLtoJSONParser.ViewModels
         public ParsingViewModel()
         {
             _uploadButtonActive = true;
+            _serverUri = "http://";
+            _eventUris = "http://";
         }
 
         public string XmlFilePath
