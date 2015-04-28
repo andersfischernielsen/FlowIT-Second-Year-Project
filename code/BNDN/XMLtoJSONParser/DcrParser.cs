@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -50,12 +51,6 @@ namespace XMLtoJSONParser
                 EventDto eventDto;
 
                 var dto = ExtractFromId(element, out eventDto);
-
-                //TODO: Redundant check? Remove? 
-                if (eventDto == null)
-                {
-                    throw new NullReferenceException();
-                }
 
                 //Get roles.
                 var role = element.Descendants("roles").Descendants("role");
@@ -111,9 +106,15 @@ namespace XMLtoJSONParser
                 var id = element.Attribute("eventId").Value;
                 var eventId = element.Attribute("labelId").Value;
                 var eventDto = _map[id];
-                eventDto.EventId = eventId;
+                eventDto.EventId = PrettifyId(eventId);
                 _map[id] = eventDto;
             }
+        }
+
+        private static string PrettifyId(string input)
+        {
+            var textInfo = new CultureInfo("en-US", false).TextInfo;
+            return textInfo.ToTitleCase((input.Replace(" ", "")));
         }
 
         private void DelegateIps()
