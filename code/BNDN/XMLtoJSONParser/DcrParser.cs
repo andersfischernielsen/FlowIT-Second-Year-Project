@@ -51,12 +51,6 @@ namespace XMLtoJSONParser
 
                 var dto = ExtractFromId(element, out eventDto);
 
-                //TODO: Redundant check? Remove? 
-                if (eventDto == null)
-                {
-                    throw new NullReferenceException();
-                }
-
                 //Get roles.
                 var role = element.Descendants("roles").Descendants("role");
                 foreach (var r in role.Select(r => r.Value))
