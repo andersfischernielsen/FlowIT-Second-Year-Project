@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Common.Exceptions;
 
 namespace Server.Interfaces
 {
@@ -17,8 +18,19 @@ namespace Server.Interfaces
         /// <summary>
         /// Add a new user.
         /// </summary>
-        /// <param name="user">The UserDto to use for adding.</param>
+        /// <param name="userDto">The UserDto to use for adding.</param>
         Task AddUser(UserDto userDto);
+
+        /// <summary>
+        /// Adds the given roles to the given username, if not already included.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="roles">The roles to add to the user.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If the username or the roles are null.</exception>
+        /// <exception cref="NotFoundException">If the username does not correspond to a user,
+        /// or if a role does not exist at some event in the given workflow.</exception>
+        Task AddRolesToUser(string username, IEnumerable<WorkflowRole> roles);
         
         /// <summary>
         /// Get all events from a workflow

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Common.Exceptions;
-using Server.Exceptions;
 using Server.Interfaces;
 using Server.Models;
 
@@ -124,9 +123,50 @@ namespace Server.Logic
                     throw new NotFoundException();
                 }
             }
-
             user.ServerRolesModels = roles;
             await _storage.AddUser(user);
+        }
+
+        /// <summary>
+        /// Adds the given roles to the given username, if not already included.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="roles">The roles to add to the user.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If the username or the roles are null.</exception>
+        /// <exception cref="NotFoundException">If the username does not correspond to a user,
+        /// or if a role does not exist at some event in the given workflow.</exception>
+        public async Task AddRolesToUser(string username, IEnumerable<WorkflowRole> roles)
+        {
+            if (username == null || roles == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (!await _storage.UserExists(username))
+            {
+                throw new NotFoundException();
+            }
+            
+            var serverRoles = new List<ServerRoleModel>();
+
+            foreach (var serverRoleModel in roles.Select(workflowRole => new ServerRoleModel
+            {
+                Id = workflowRole.Role,
+                ServerWorkflowModelId = workflowRole.Workflow
+            }))
+            {
+                if (await _storage.RoleExists(serverRoleModel))
+                {
+                    serverRoles.Add(serverRoleModel);
+                }
+                else
+                {
+                    throw new NotFoundException();
+                }
+            }
+
+            await _storage.AddRolesToUser(username, serverRoles);
         }
 
         /// <summary>

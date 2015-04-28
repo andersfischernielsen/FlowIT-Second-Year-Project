@@ -45,6 +45,42 @@ namespace Server.Storage
             return PasswordHasher.VerifyHashedPassword(password, user.Password) ? user : null;
         }
 
+        /// <summary>
+        /// Adds the given roles to the user with username, if the user does not already have them.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="roles">The roles to add to the user.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If username or roles are null.</exception>
+        /// <exception cref="NotFoundException">If username does not match a user.</exception>
+        public async Task AddRolesToUser(string username, IEnumerable<ServerRoleModel> roles)
+        {
+            if (username == null || roles == null)
+            {
+                throw
+                    new ArgumentNullException();
+            }
+
+            var user = await _db.Users.SingleOrDefaultAsync(u => string.Equals(u.Name, username));
+
+            if (user == null)
+            {
+                throw new NotFoundException();
+            }
+
+            foreach (var role in roles)
+            {
+                var serverRole = await GetRole(role.Id, role.ServerWorkflowModelId);
+                if (!user.ServerRolesModels.Contains(serverRole))
+                {
+                    user.ServerRolesModels.Add(serverRole);
+                }
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+
         // TODO: Someone else than Morten proof-read this documentation, please!
         /// <summary>
         /// Attempts to login using the provided ServerUserModel
@@ -54,17 +90,16 @@ namespace Server.Storage
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
         {
             // TODO: Is this correct / sensible? If I provide a non-null object, I can make this method return whatever role I want it to...
-            if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;    
+            if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;
 
-            var user = await _db.Users.FindAsync(userModel.Id);
+            var user = await _db.Users.FindAsync(userModel.Name);
             return user != null ? user.ServerRolesModels : null;
         }
 
-        // TODO: Discuss: Could this method not instead just be called with: string workflowId?
         /// <summary>
         /// Gets the Events within the specified workflow.
         /// </summary>
-        /// <param name="workflowId">Represents the workflow, whose Events are to be returned</param>
+        /// <param name="workflowId">The id of the workflow, whose Events are to be returned</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if the provided argument is null</exception>
         /// <exception cref="NotFoundException">Thrown if the workflow does not exist at Server</exception>
@@ -76,7 +111,7 @@ namespace Server.Storage
             }
 
             // Check whether workflow exists
-            if (! await WorkflowExists(workflowId))
+            if (!await WorkflowExists(workflowId))
             {
                 throw new NotFoundException();
             }
@@ -102,7 +137,8 @@ namespace Server.Storage
                 else
                 {
                     var roleId = role.Id;
-                    result.Add(await _db.Roles.SingleAsync(r => r.Id == roleId));
+                    var workflowId = role.ServerWorkflowModelId;
+                    result.Add(await _db.Roles.SingleAsync(r => r.Id == roleId && r.ServerWorkflowModelId == workflowId));
                 }
             }
             await _db.SaveChangesAsync();
@@ -119,7 +155,7 @@ namespace Server.Storage
                 throw new ArgumentNullException();
             }
 
-            if (! await WorkflowExists(workflowId))
+            if (!await WorkflowExists(workflowId))
             {
                 throw new NotFoundException();
             }
@@ -195,14 +231,14 @@ namespace Server.Storage
                 throw new ArgumentNullException();
             }
 
-            var workflowId = eventToBeAddedDto.ServerWorkflowModel.Id;
+            var workflowId = eventToBeAddedDto.ServerWorkflowModelId;
 
             if (!await WorkflowExists(workflowId))
             {
                 // TODO: Check, that the correct Id is used above...
                 throw new NotFoundException();
             }
-            if (await EventExists(workflowId,eventToBeAddedDto.Id))
+            if (await EventExists(workflowId, eventToBeAddedDto.Id))
             {
                 throw new EventExistsException();
             }
@@ -217,6 +253,7 @@ namespace Server.Storage
             }
 
             _db.Events.Add(eventToBeAddedDto);
+
             await _db.SaveChangesAsync();
         }
 
@@ -236,11 +273,11 @@ namespace Server.Storage
                 throw new ArgumentNullException();
             }
 
-            if (! await WorkflowExists(workflowId))
+            if (!await WorkflowExists(workflowId))
             {
                 throw new NotFoundException();
             }
-            if (! await EventExists(workflowId, eventToBeUpdated.Id))
+            if (!await EventExists(workflowId, eventToBeUpdated.Id))
             {
                 throw new NotFoundException();
             }
@@ -277,7 +314,7 @@ namespace Server.Storage
             {
                 throw new NotFoundException();
             }
-            if (! await EventExists(workflowId, eventId))
+            if (!await EventExists(workflowId, eventId))
             {
                 throw new NotFoundException();
             }
@@ -325,7 +362,7 @@ namespace Server.Storage
             {
                 throw new ArgumentNullException();
             }
-            
+
             // Returns true if any Event matches both the workflowId and the eventId, otherwise false.
             return await _db.Events.AnyAsync(x => x.Id == eventId && x.ServerWorkflowModel.Id == workflowId);
         }
@@ -365,7 +402,7 @@ namespace Server.Storage
         {
             if (workflowToAdd == null)
             {
-                throw new ArgumentNullException();   
+                throw new ArgumentNullException();
             }
             if (await WorkflowExists(workflowToAdd.Id))
             {

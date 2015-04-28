@@ -25,7 +25,7 @@ namespace Server.Storage
                 .HasMany(@event => @event.ServerRolesModels)
                 .WithMany(role => role.ServerEventModels)
                 .Map(m => m
-                    .MapLeftKey("EventRefId")
+                    .MapLeftKey("WorkflowId", "EventRefId")
                     .MapRightKey("RoleRefId", "WorkflowRefId")
                     .ToTable("EventRoles"));
 

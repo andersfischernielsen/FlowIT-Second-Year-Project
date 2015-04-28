@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
+using Common.Exceptions;
 
 namespace XMLtoJSONParser
 {
@@ -32,8 +33,9 @@ namespace XMLtoJSONParser
             }
         }
         //THIS MUST HAPPEN after Upload()
-        public async Task UploadUsers(IEnumerable<string> roles, string password)
+        public async Task<bool> UploadUsers(IEnumerable<string> roles, string password)
         {
+            var usersCreated = true;
             var tool = new HttpClientToolbox(_serverAddress);
             foreach (var user in roles.Select(r => new UserDto
             {
@@ -50,8 +52,29 @@ namespace XMLtoJSONParser
                 
             }))
             {
-                await tool.Create("users", user);
+                var userCreated = true;
+                try
+                {
+                    await tool.Create("users", user);
+                }
+                catch (LockedException)
+                {
+                    // LockedException in this case means that a user with that username is exiting.
+                    // Therefore we add the roles instead.
+                    userCreated = false;
+                    usersCreated = false;
+                }
+                if (!userCreated)
+                {
+                    await AddRolesToUser(tool, user.Name, user.Roles);
+                }
             }
+            return usersCreated;
+        }
+
+        private static async Task AddRolesToUser(HttpClientToolbox tool, string username, IEnumerable<WorkflowRole> roles)
+        {
+            await tool.Create(string.Format("users/{0}/roles", username), roles);
         }
     }
 }

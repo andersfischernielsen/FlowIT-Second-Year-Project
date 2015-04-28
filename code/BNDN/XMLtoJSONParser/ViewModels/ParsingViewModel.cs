@@ -199,7 +199,13 @@ namespace XMLtoJSONParser.ViewModels
                 {
                     try
                     {
-                        await uploader.UploadUsers(roles, DefaultPassword);
+                        if (!await uploader.UploadUsers(roles, DefaultPassword))
+                        {
+                            // Some of the users wasn't created, but updated with new roles.
+                            MessageBox.Show("One or more of the users in this workflow already exists" +
+                                            Environment.NewLine +
+                                            "These users have the same password as before, but the new roles have been added");
+                        }
                     }
                     catch (Exception e)
                     {
