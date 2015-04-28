@@ -107,14 +107,17 @@ namespace XMLtoJSONParser
                 var eventId = element.Attribute("labelId").Value;
                 var eventDto = _map[id];
                 eventDto.EventId = PrettifyId(eventId);
+                if (string.IsNullOrEmpty(eventDto.Name)) eventDto.Name = eventId;
                 _map[id] = eventDto;
             }
         }
 
         private static string PrettifyId(string input)
         {
-            var textInfo = new CultureInfo("en-US", false).TextInfo;
-            return textInfo.ToTitleCase((input.Replace(" ", "")));
+            return input.Trim().Replace(" ", "");
+            // The statement below turns ReferToUBS into Refertoubs
+            //var textInfo = new CultureInfo("en-US", false).TextInfo;
+            //return textInfo.ToTitleCase((input.Replace(" ", "")));
         }
 
         private void DelegateIps()
