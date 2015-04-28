@@ -31,6 +31,7 @@
             <Setter Property="Width" Value="auto"/>
             <Setter Property="Height" Value="auto"/>
         </Style>
+        <!-- Found at http://prabu-guru.blogspot.dk/2010/06/how-to-add-watermark-text-to-textbox.html -->
         <Style x:Key="PasswordBoxWatermark" TargetType="{x:Type PasswordBox}">
             <Setter Property="client:WaterMarkTextHelper.IsMonitoring" Value="True"/>
             <Setter Property="client:WaterMarkTextHelper.WatermarkText" Value="Password" />

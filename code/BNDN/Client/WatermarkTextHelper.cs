@@ -3,6 +3,9 @@ using System.Windows.Controls;
 
 namespace Client
 {
+    /// <summary>
+    /// Found at http://prabu-guru.blogspot.dk/2010/06/how-to-add-watermark-text-to-textbox.html
+    /// </summary>
     public class WaterMarkTextHelper : DependencyObject
     {
         #region Attached Properties
