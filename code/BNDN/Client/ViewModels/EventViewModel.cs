@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Client.Connections;
@@ -45,7 +46,7 @@ namespace Client.ViewModels
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
-            GetState();
+            GetState(); // Do not await or .Wait.
         }
 
         #region Databindings
@@ -150,7 +151,7 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public async void GetState()
+        public async Task GetState()
         {
             Status = "";
             try
@@ -192,7 +193,7 @@ namespace Client.ViewModels
                 {
                     await eventConnection.Execute(_parent.WorkflowId, _eventAddressDto.Id);
                 }
-                _parent.GetEvents();
+                _parent.RefreshEvents();
             }
             catch (NotFoundException)
             {
