@@ -39,8 +39,8 @@ namespace Event.Tests.LogicTests
 
             // Make the Event unlocked unless other is specified.
             _lockingLogicMock.Setup(l => l.IsAllowedToOperate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
-            _lockingLogicMock.Setup(l => l.LockAll(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
-            _lockingLogicMock.Setup(l => l.UnlockAll(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+            _lockingLogicMock.Setup(l => l.LockAllForExecute(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+            _lockingLogicMock.Setup(l => l.UnlockAllForExecute(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
 
             _authLogicMock = new Mock<IAuthLogic>(MockBehavior.Strict);
 
@@ -275,7 +275,7 @@ namespace Event.Tests.LogicTests
         public void Execute_Throws_FailedToLockOtherEventsException_When_Other_Events_Cannot_Be_Locked()
         {
             // Arrange
-            _lockingLogicMock.Setup(l => l.LockAll(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
+            _lockingLogicMock.Setup(l => l.LockAllForExecute(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("workflowId", "eventId", new RoleDto { Roles = new List<string> { "Roles" } }));
@@ -288,7 +288,7 @@ namespace Event.Tests.LogicTests
         public void Execute_Throws_FailedToUnlockOtherEventsException_When_Other_Events_Cannot_Be_Locked()
         {
             // Arrange
-            _lockingLogicMock.Setup(l => l.UnlockAll(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
+            _lockingLogicMock.Setup(l => l.UnlockAllForExecute(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateLogic.Execute("workflowId", "eventId", new RoleDto { Roles = new List<string> { "Roles" } }));

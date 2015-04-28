@@ -148,26 +148,18 @@ namespace Event.Logic
         }
 
         /// <summary>
-        /// LockAll attempts to lockall related Events for the specified Event
+        /// LockAllForExecute attempts to lockall related Events for the specified Event
         /// </summary>
         /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
         /// <param name="eventId">Id of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        public async Task<bool> LockAll(string workflowId, string eventId)
+        public async Task<bool> LockAllForExecute(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
             {
                 throw new ArgumentNullException();
             }
-
-            var lockedEvents = new List<RelationToOtherEventModel>();
-
-            // Attempt to lock down related, dependent Events down
-            
-            // Initiate the lockDto that is to be passed to the other Events
-            // identifing this Event as the lockowner
-            var lockDto = new LockDto {LockOwner = eventId, Id = eventId};
 
             // Get dependent events
             var resp = await _storage.GetResponses(workflowId, eventId);
@@ -207,10 +199,16 @@ namespace Event.Logic
                 }
             }
 
+            return await LockList(allDependentEventsSorted, eventId);
+
+        }
 
 
+        public async Task<bool> LockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId)
+        {
+            var lockedEvents = new List<RelationToOtherEventModel>();
             // For every related, dependent Event, attempt to lock it
-            foreach (var tuple in allDependentEventsSorted)
+            foreach (var tuple in list)
             {
                 var relation = tuple.Value;
                 var toLock = new LockDto { LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId };
@@ -227,10 +225,10 @@ namespace Event.Logic
 
             }
 
-            if (allDependentEventsSorted.Count != lockedEvents.Count)
+            if (list.Count != lockedEvents.Count)
             {
                 // TODO: May be an error here, if one list contains this Event itself, while the other does not. 
-                await UnlockSome(workflowId, eventId, lockedEvents);
+                await UnlockSome(eventId, lockedEvents);
 
                 return false;
             }
@@ -238,14 +236,14 @@ namespace Event.Logic
         }
 
         /// <summary>
-        /// UnlockAll attempts to unlock all related events for the specified Event. 
+        /// UnlockAllForExecute attempts to unlock all related events for the specified Event. 
         /// </summary>
         /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
         /// <param name="eventId">Id of the Event</param>
         /// <returns>False if it fails to unlock other Events</returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="NullReferenceException">Thrown if Storage layer returns null-relations.</exception>
-        public async Task<bool> UnlockAll(string workflowId, string eventId)
+        public async Task<bool> UnlockAllForExecute(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
             {
@@ -294,11 +292,18 @@ namespace Event.Logic
                 throw new NullReferenceException("eventsToBelocked must not be null");
             }
 
-            // Optimistic approach; assuming every unlocking goes well, everyEventIsUnlocked will go unaffected 
-            bool everyEventIsUnlocked = true;
+            var b = await UnlockList(eventsToBeUnlockedSorted, eventId);
+            
+            
+            await _storage.ClearLock(workflowId, eventId);
+            
+            return b;
+        }
 
-            // Unlock the other Events. 
-            foreach (var tuple in eventsToBeUnlockedSorted)
+        public async Task<bool> UnlockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId)
+        {
+            var everyEventIsUnlocked = true;
+            foreach (var tuple in list)
             {
                 var relation = tuple.Value;
                 try
@@ -311,9 +316,6 @@ namespace Event.Logic
                     everyEventIsUnlocked = false;
                 }
             }
-            
-            await _storage.ClearLock(workflowId, eventId);
-            
             return everyEventIsUnlocked;
         }
 
@@ -357,9 +359,9 @@ namespace Event.Logic
         /// <param name="eventsToBeUnlocked">List specifying which Events are to be unlocked</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        private async Task UnlockSome(string workflowId, string eventId, List<RelationToOtherEventModel> eventsToBeUnlocked)
+        private async Task UnlockSome(string eventId, List<RelationToOtherEventModel> eventsToBeUnlocked)
         {
-            if (workflowId == null || eventId == null || eventsToBeUnlocked == null)
+            if (eventId == null || eventsToBeUnlocked == null)
             {
                 throw new ArgumentNullException();
             }
