@@ -13,7 +13,7 @@ namespace Event.Logic
     /// </summary>
     public class EventHistoryLogic : IEventHistoryLogic 
     {
-        private readonly IEventStorage _storage;
+        private readonly IEventHistoryStorage _storage;
 
         /// <summary>
         /// Default constructor

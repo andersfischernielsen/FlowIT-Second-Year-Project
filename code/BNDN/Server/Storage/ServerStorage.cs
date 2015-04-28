@@ -14,7 +14,7 @@ namespace Server.Storage
     /// <summary>
     /// ServerStorage is the layer that rests on top of the actual database. 
     /// </summary>
-    public class ServerStorage : IServerStorage
+    public class ServerStorage : IServerStorage, IServerHistoryStorage
     {
         private readonly IServerContext _db;
 

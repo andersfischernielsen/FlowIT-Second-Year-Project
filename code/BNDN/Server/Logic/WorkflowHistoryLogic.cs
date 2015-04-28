@@ -13,7 +13,7 @@ namespace Server.Logic
     /// </summary>
     public class WorkflowHistoryLogic : IWorkflowHistoryLogic
     {
-        private readonly IServerStorage _storage;
+        private readonly IServerHistoryStorage _storage;
 
         /// <summary>
         /// Default constructor. 

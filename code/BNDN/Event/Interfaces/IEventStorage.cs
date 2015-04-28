@@ -5,7 +5,7 @@ using Event.Models;
 
 namespace Event.Interfaces
 {
-    public interface IEventStorage : IDisposable, IEventHistoryStorage
+    public interface IEventStorage : IDisposable
     {
         #region Ids
 

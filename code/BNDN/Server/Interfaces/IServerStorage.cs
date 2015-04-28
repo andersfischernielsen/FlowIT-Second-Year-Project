@@ -6,7 +6,7 @@ using Server.Models;
 
 namespace Server.Interfaces
 {
-    public interface IServerStorage : IServerHistoryStorage
+    public interface IServerStorage : IDisposable
     {
         #region Workflow related
         /// <summary>
