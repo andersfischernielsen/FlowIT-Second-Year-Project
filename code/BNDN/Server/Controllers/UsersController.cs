@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -178,7 +179,7 @@ namespace Server.Controllers
                     Message = "Threw: " + e.GetType() + " with username: " + dto.Name,
                     MethodCalledOnSender = "CreateUser"
                 });
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
                     "The provided user already exists at Server."));
             }
             catch (InvalidOperationException e)
@@ -226,6 +227,75 @@ namespace Server.Controllers
                     HttpRequestType = "POST",
                     Message = "Threw: " + e.GetType(),
                     MethodCalledOnSender = "CreateUser",
+                });
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e)); ;
+            }
+        }
+
+        /// <summary>
+        /// Add roles to an already existing user.
+        /// </summary>
+        /// <param name="username">The username of the user which should have the roles added.</param>
+        /// <param name="roles">The roles to add.</param>
+        /// <returns></returns>
+        [Route("users/{username}/roles")]
+        [HttpPost]
+        public async Task AddRolesToUser(string username, [FromBody] IEnumerable<WorkflowRole> roles)
+        {
+            if (!ModelState.IsValid)
+            {
+                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
+                await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + toThrow.GetType(),
+                    MethodCalledOnSender = "AddRolesToUser",
+                });
+
+                throw toThrow;
+            }
+
+            try
+            {
+                await _logic.AddRolesToUser(username, roles);
+                await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Called: AddRolesToUser with username: " + username,
+                    MethodCalledOnSender = "AddRolesToUser",
+                });
+            }
+            catch (ArgumentNullException e)
+            {
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + e.GetType() + " with username: " + username,
+                    MethodCalledOnSender = "AddRolesToUser"
+                });
+
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "Seems input was not satisfactory"));
+            }
+            catch (NotFoundException e)
+            {
+                _historyLogic.SaveHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + e.GetType() + " with username: " + username,
+                    MethodCalledOnSender = "AddRolesToUser"
+                });
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
+                    "The user, or the role could not be found."));
+            }
+            catch (Exception e)
+            {
+                _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
+                {
+                    HttpRequestType = "POST",
+                    Message = "Threw: " + e.GetType(),
+                    MethodCalledOnSender = "AddRolesToUser",
                 });
 
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e)); ;

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
@@ -21,7 +20,7 @@ namespace Server.Tests.StorageTests
             context.SetupAllProperties();
 
             //USERS:
-            var users = new List<ServerUserModel> { new ServerUserModel { Id = 1, Name = "TestingName", Password = PasswordHasher.HashPassword("TestingPassword") } };
+            var users = new List<ServerUserModel> { new ServerUserModel { Name = "TestingName", Password = PasswordHasher.HashPassword("TestingPassword") } };
             context.Object.Users = new FakeDbSet<ServerUserModel>(users.AsQueryable()).Object;
 
             //WORKFLOWS:
@@ -47,7 +46,6 @@ namespace Server.Tests.StorageTests
             var result = (await toTest.GetUser("TestingName", "TestingPassword"));
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Id);
             Assert.AreEqual("TestingName", result.Name);
 
             Assert.IsTrue(PasswordHasher.VerifyHashedPassword("TestingPassword", result.Password));

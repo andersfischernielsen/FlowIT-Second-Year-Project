@@ -14,7 +14,7 @@ namespace Server.Models
             ServerEventModels = new List<ServerEventModel>();
         }
 
-        [Required]
+        [Required, Key]
         public string Id { get; set; }
 
         public string Name { get; set; }

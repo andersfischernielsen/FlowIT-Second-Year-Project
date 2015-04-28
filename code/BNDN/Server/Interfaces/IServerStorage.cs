@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Server.Models;
 using Server.Storage;
 
@@ -70,9 +71,17 @@ namespace Server.Interfaces
         Task<ServerRoleModel> GetRole(string id, string workflowId);
         Task<ServerUserModel> GetUser(string username, string password);
 
+        /// <summary>
+        /// Adds the given roles to the user with username, if the user does not already have them.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="roles">The roles to add to the user.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If username or roles are null.</exception>
+        /// <exception cref="NotFoundException">If username does not match a user.</exception>
+        Task AddRolesToUser(string username, IEnumerable<ServerRoleModel> roles);
+
         Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel);
         #endregion
-
-
     }
 }
