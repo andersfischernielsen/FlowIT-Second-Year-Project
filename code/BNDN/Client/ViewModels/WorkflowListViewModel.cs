@@ -10,24 +10,31 @@ namespace Client.ViewModels
 {
     public class WorkflowListViewModel : ViewModelBase
     {
+        public Action CloseAction { get; set; }
         private readonly Uri _serverAddress;
+        private readonly Dictionary<string, IList<string>> _rolesForWorkflows;
 
-        public WorkflowListViewModel()
+        public WorkflowListViewModel(Dictionary<string, IList<string>> rolesForWorkflows)
         {
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
 
             var settings = Settings.LoadSettings();
             _serverAddress = new Uri(settings.ServerAddress);
+            _rolesForWorkflows = rolesForWorkflows;
 
             GetWorkflows();
         }
 
         #region Databindings
-
         public ObservableCollection<WorkflowViewModel> WorkflowList { get; set; }
 
         private WorkflowViewModel _selecteWorkflowViewModel;
         private string _status;
+
+        public WorkflowListViewModel()
+        {
+            
+        }
 
         public WorkflowViewModel SelectedWorkflowViewModel
         {
@@ -47,6 +54,11 @@ namespace Client.ViewModels
                 _status = value;
                 NotifyPropertyChanged("Status");
             }
+        }
+
+        public Dictionary<string, IList<string>> RolesForWorkflows
+        {
+            get { return _rolesForWorkflows; }
         }
 
         #endregion
@@ -82,8 +94,20 @@ namespace Client.ViewModels
                 }
             }
 
-            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(this, workflowDto)));
-            SelectedWorkflowViewModel = WorkflowList.Count >= 1 ? WorkflowList[0] : null;
+            WorkflowList = new ObservableCollection<WorkflowViewModel>();
+
+            foreach (var workflowDto in workflows)
+            {
+                IList<string> roles;
+                if (!_rolesForWorkflows.TryGetValue(workflowDto.Id, out roles))
+                {
+                    // The user has no roles associated with this workflow.
+                    continue;
+                }
+                WorkflowList.Add(new WorkflowViewModel(this, workflowDto, roles));
+            }
+
+            SelectedWorkflowViewModel = WorkflowList.FirstOrDefault();
 
             NotifyPropertyChanged("");
         }

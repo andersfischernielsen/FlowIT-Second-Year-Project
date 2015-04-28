@@ -6,16 +6,13 @@
         xmlns:viewModels="clr-namespace:Client.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="Client.Views.MainWindow"
-        Title="Flow" Height="700" Width="885" WindowStartupLocation="CenterScreen">
+        Title="Flow" Height="700" Width="1000" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="191"/>
+            <ColumnDefinition Width="250"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Grid.DataContext>
-            <viewModels:WorkflowListViewModel/>
-        </Grid.DataContext>
-        <Grid x:Name="WorkFlowGrid" Margin="0" Width="190" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left">
+        <Grid x:Name="WorkFlowGrid" Margin="0" Width="249" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="45"/>
                 <RowDefinition/>
@@ -28,7 +25,7 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="170" Style="{DynamicResource ButtonDefaultStyle}">
+            <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="229" Style="{DynamicResource ButtonDefaultStyle}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetWorkflows"/>
@@ -42,28 +39,16 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Content="Events" Margin="10,0" VerticalAlignment="Top" FontSize="24" HorizontalAlignment="Left"/>
-            <TextBlock Text="{Binding Status}" MaxWidth="500" TextAlignment="Center" TextWrapping="Wrap" Foreground="Red" Margin="10,0" VerticalAlignment="Top" FontSize="16" HorizontalAlignment="Right" />
+            <TextBlock Grid.Row="0" Text="{Binding Status}" MaxWidth="450" TextAlignment="Right" TextWrapping="Wrap" Foreground="Red" VerticalAlignment="Top" FontSize="16" HorizontalAlignment="Right" />
             <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}" Margin="10,10,10,60">
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate DataType="viewModels:EventViewModel">
                         <UniformGrid Rows="1" Columns="3">
                             <Label Content="{Binding Name}" HorizontalAlignment="Left"/>
                             <UniformGrid Rows="1" Columns="3">
-                                <Rectangle Height="20" Width="20" Fill="{Binding PendingColor, Mode=OneWay}" Stroke="Black">
-                                    <Rectangle.ToolTip>
-                                        <ToolTip  Visibility="{Binding Pending}" Content="Pending"/>
-                                    </Rectangle.ToolTip>
-                                </Rectangle>
-                                <Rectangle Height="20" Width="20" Fill="{Binding IncludedColor, Mode=OneWay}" Stroke="Black">
-                                    <Rectangle.ToolTip>
-                                        <ToolTip  Visibility="{Binding Included}" Content="Included"/>
-                                    </Rectangle.ToolTip>
-                                </Rectangle>
-                                <Rectangle Height="20" Width="20" Fill="{Binding ExecutedColor, Mode=OneWay}" Stroke="Black">
-                                    <Rectangle.ToolTip>
-                                        <ToolTip  Visibility="{Binding Executed}" Content="Executed"/>
-                                    </Rectangle.ToolTip>
-                                </Rectangle>
+                                <Rectangle Height="20" Width="20" Fill="{Binding PendingColor, Mode=OneWay}" Stroke="Black" ToolTip="Pending" />
+                                <Rectangle Height="20" Width="20" Fill="{Binding IncludedColor, Mode=OneWay}" Stroke="Black" ToolTip="Included" />
+                                <Rectangle Height="20" Width="20" Fill="{Binding ExecutedColor, Mode=OneWay}" Stroke="Black" ToolTip="Executed" />
                             </UniformGrid>
                             <Button IsEnabled="{Binding Executable, Mode=OneWay}" HorizontalAlignment="Right" Content="Execute" VerticalAlignment="Center" Width="110" Height="34" >
                                 <i:Interaction.Triggers>

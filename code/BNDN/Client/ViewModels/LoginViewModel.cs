@@ -9,7 +9,7 @@ namespace Client.ViewModels
     public class LoginViewModel : ViewModelBase
     {
         public Action CloseAction { get; set; }       
-        public static Dictionary<string, IList<string>> RoleForWorkflow { get; set; }
+        public static Dictionary<string, IList<string>> RolesForWorkflows { get; set; }
 
         private bool _loginStarted;
         private readonly Uri _serverAddress;
@@ -17,11 +17,11 @@ namespace Client.ViewModels
         public LoginViewModel()
         {
             var settings = Settings.LoadSettings();
-            Username = settings.Username;
             _serverAddress = new Uri(settings.ServerAddress);
 
-            _status = "";
-            _password = "Password";
+            Username = settings.Username;
+            Status = "";
+            Password = "";
         }
 
         #region Databindings
@@ -71,7 +71,7 @@ namespace Client.ViewModels
             {
                 using (IServerConnection connection = new ServerConnection(_serverAddress))
                 {
-                    RoleForWorkflow = (await connection.Login(Username, Password)).RolesOnWorkflows;
+                    RolesForWorkflows = (await connection.Login(Username, Password)).RolesOnWorkflows;
                 }
                 Status = "Login successful";
 
@@ -79,10 +79,10 @@ namespace Client.ViewModels
                 new Settings
                 {
                     ServerAddress = _serverAddress.AbsoluteUri,
-                    Username = _username,
+                    Username = Username
                 }.SaveSettings();
 
-                new MainWindow().Show();
+                new MainWindow(RolesForWorkflows).Show();
                 CloseAction.Invoke();
             }
             catch (LoginFailedException)

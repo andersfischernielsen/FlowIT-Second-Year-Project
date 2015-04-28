@@ -5,7 +5,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Client.Connections;
+using Client.Exceptions;
 using Common;
+using Common.Exceptions;
 
 namespace Client.ViewModels
 {
@@ -35,6 +37,7 @@ namespace Client.ViewModels
         #region DataBindings
 
         private string _workflowId;
+        private string _status;
 
         public string WorkflowId
         {
@@ -50,6 +53,15 @@ namespace Client.ViewModels
 
         public ObservableCollection<HistoryViewModel> HistoryViewModelList { get; set; }
 
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                NotifyPropertyChanged("Status");
+            }
+        }
 
         #region Actions
 
@@ -63,20 +75,38 @@ namespace Client.ViewModels
             HistoryViewModelList.Clear();
             NotifyPropertyChanged("");
 
-            List<EventAddressDto> eventAddresses;
+            IEnumerable<EventAddressDto> eventAddresses;
             ConcurrentBag<HistoryViewModel> history;
 
-            // create a server connection
-            using (IServerConnection serverConnection = new ServerConnection(_serverAddress))
+            try
             {
+                // create a server connection
+                using (IServerConnection serverConnection = new ServerConnection(_serverAddress))
+                {
+                    // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
+                    eventAddresses = await serverConnection.GetEventsFromWorkflow(WorkflowId);
 
-                // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
-                eventAddresses = (await serverConnection.GetEventsFromWorkflow(WorkflowId))
-                    .AsParallel()
-                    .ToList();
-
-                // add the history of the server
-                history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto) { Title = WorkflowId }));
+                    // add the history of the server
+                    history =
+                        new ConcurrentBag<HistoryViewModel>(
+                            (await serverConnection.GetHistory(WorkflowId)).Select(
+                                dto => new HistoryViewModel(dto) {Title = WorkflowId}));
+                }
+            }
+            catch (NotFoundException)
+            {
+                Status = "Workflow wasn't found on server. Please refresh the workflow and try again.";
+                return;
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "The server could not be found. Please try again later or contact your Flow administrator";
+                return;
+            }
+            catch (Exception)
+            {
+                Status = "An unexpected error has occured. Please try again later.";
+                return;
             }
 
             var tasks = eventAddresses.Select(async dto =>
@@ -86,14 +116,31 @@ namespace Client.ViewModels
                     var list =
                         (await eventConnection.GetHistory(WorkflowId, dto.Id)).Select(
                             historyDto => new HistoryViewModel(historyDto) {Title = dto.Id});
-                    list.ToList().ForEach(model => history.Add(model));
+                    list.ToList().ForEach(history.Add);
                 }
             });
 
-            await Task.WhenAll(tasks);
+            try
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (NotFoundException)
+            {
+                Status = "An event wasn't found. Please refresh the workflow and try again.";
+                return;
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "An event-server could not be found. Please try again later or contact your Flow administrator";
+                return;
+            }
+            catch (Exception)
+            {
+                Status = "An unexpected error has occured. Please try again later.";
+                return;
+            }
 
             // order them by timestamp
-            // TODO: Currently, DateTimes are not parsed correctly.
             var orderedHistory = history.ToList().OrderByDescending(model => model.TimeStamp);
 
             // move the list into the observable collection.

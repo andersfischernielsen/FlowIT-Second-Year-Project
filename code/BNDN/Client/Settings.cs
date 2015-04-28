@@ -10,15 +10,13 @@ namespace Client
 
         public static Settings LoadSettings()
         {
-            if (!File.Exists("settings.json"))
-            {
-                return new Settings { Username = "Enter role", ServerAddress = "http://flowit.azurewebsites.net/" };
-            }
+            var settings = 
+                !File.Exists("settings.json") 
+                ? new Settings() 
+                : JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
 
-            var settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
-
-            settings.Username = settings.Username ?? "Enter Role";
             settings.ServerAddress = settings.ServerAddress ?? "http://flowit.azurewebsites.net/";
+            settings.Username = settings.Username ?? "";
             return settings;
         }
 
