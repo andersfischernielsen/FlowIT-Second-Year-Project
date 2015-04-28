@@ -118,6 +118,11 @@ namespace Client.ViewModels
             }
         }
 
+        public async Task DisableExecuteButtons()
+        {
+            await Task.WhenAll(EventList.Select(e => Task.Run(() => e.Executable = false)));
+        }
+
         /// <summary>
         /// This method resets all the events on the workflow by deleting them and adding them again.
         /// This Method ONLY EXISTS FOR TESTING!

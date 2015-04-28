@@ -187,6 +187,7 @@ namespace Client.ViewModels
         public async void Execute()
         {
             Status = "";
+            await _parent.DisableExecuteButtons();
             try
             {
                 using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
