@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using Client.ViewModels;
 
 namespace Client.Views
@@ -15,6 +16,12 @@ namespace Client.Views
             DataContext = vm; // this sets the newly created ViewModel as the DataContext for the View
             if (vm.CloseAction == null)
                 vm.CloseAction = Close;
+        }
+
+        private void Password_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (this.DataContext != null)
+            { ((LoginViewModel)DataContext).Password = ((PasswordBox)sender).Password; }
         }
     }
 }

@@ -11,9 +11,9 @@
     <UniformGrid Rows="3" Margin="10,10,10,10">
         <StackPanel Orientation="Vertical" VerticalAlignment="Top">
             <xctk:WatermarkTextBox Name="Username" Style="{StaticResource FillTextBoxStyle}" Watermark="Role" Margin="10,10,10,0 " TextWrapping="Wrap" Text="{Binding Username}" />
-            <xctk:WatermarkTextBox Name="Password" Style="{StaticResource FillTextBoxStyle}" Watermark="Password" Margin="10,10,10,0 " TextWrapping="Wrap" Text="{Binding Password}" />
+            <PasswordBox Name="Password" Style="{StaticResource PasswordBoxWatermark}" Margin="10,10,10,0" PasswordChanged="Password_PasswordChanged"/>
         </StackPanel>
-        <TextBlock VerticalAlignment="Center" TextWrapping="WrapWithOverflow" Style="{StaticResource HeaderTextBlockStyle}" FontStyle="Italic" FontSize="18" Text="{Binding Status}" Margin="10,0,10,0"/>
+        <TextBlock VerticalAlignment="Center" TextWrapping="WrapWithOverflow" Style="{StaticResource HeaderTextBlockStyle}" FontStyle="Italic" Text="{Binding Status}" Margin="10,0,10,0"/>
         <Button Name="Login" Style="{StaticResource ButtonDefaultStyle}"  Content="Login" Margin="10,56,10.333,10.333" Height="Auto">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Click">
