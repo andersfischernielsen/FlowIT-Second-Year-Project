@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Common.Exceptions;
 using Event.Communicators;
 using Event.Exceptions;
 using Event.Interfaces;
+using Event.Models;
 using Event.Storage;
 
 namespace Event.Logic
@@ -133,9 +135,26 @@ namespace Event.Logic
                 throw new NotFoundException();
             }
 
-            //Todo: The client uses this method and sends -1 as an ID. This is a bad solution, so refactoring is encouraged.
-            // Check is made to see whether caller is allowed to execute this method at the moment
-            if (!senderId.Equals("-1") && !await _lockingLogic.IsAllowedToOperate(workflowId, eventId, senderId))
+
+            var conditionRelations = await _storage.GetConditions(workflowId, eventId);
+            var lockOrder = new SortedDictionary<int, RelationToOtherEventModel>();
+
+            //adds us self
+            lockOrder.Add(eventId.GetHashCode(), new RelationToOtherEventModel()
+            {
+                EventId = eventId,
+                WorkflowId = workflowId,
+                Uri = await _storage.GetUri(workflowId, eventId)
+            });
+
+            foreach (var con in conditionRelations)
+            {
+                lockOrder.Add(con.EventId.GetHashCode(), con);
+            }
+
+            var b = await _lockingLogic.LockList(lockOrder, eventId);
+
+            if (!b)
             {
                 throw new LockedException();
             }
@@ -150,6 +169,7 @@ namespace Event.Logic
                 Executable = await IsExecutable(workflowId, eventId)
             };
 
+            await _lockingLogic.UnlockList(lockOrder, eventId);
             return eventStateDto;
         }
 
@@ -298,7 +318,7 @@ namespace Event.Logic
 
             // Lock all dependent Events (including one-self)
             // TODO: Check: Does the following include locking on this Event itself...?
-            if (!await _lockingLogic.LockAll(workflowId, eventId))
+            if (!await _lockingLogic.LockAllForExecute(workflowId, eventId))
             {
                 throw new FailedToLockOtherEventException();
             }
@@ -344,7 +364,7 @@ namespace Event.Logic
                 exception = new FailedToUpdateStateAtOtherEventException();
             }
 
-            if (!await _lockingLogic.UnlockAll(workflowId, eventId))
+            if (!await _lockingLogic.UnlockAllForExecute(workflowId, eventId))
             {
                 // If we cannot even unlock, we give up!
                 throw new FailedToUnlockOtherEventException();      

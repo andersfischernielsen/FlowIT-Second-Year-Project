@@ -136,7 +136,7 @@ namespace Event.Tests.LogicTests
 
         #endregion 
 
-        #region LockAll tests
+        #region LockAllForExecute tests
         // TODO: How do we test this?
 
         [Test]
@@ -146,7 +146,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var lockAllTask = logic.LockAll(null, null);
+            var lockAllTask = logic.LockAllForExecute(null, null);
 
             // Assert
             if (lockAllTask.Exception == null)
@@ -199,7 +199,7 @@ namespace Event.Tests.LogicTests
 
         #endregion
 
-        #region UnlockAll tests
+        #region UnlockAllForExecute tests
         // TODO: How do we do this?
 
         [Test]
@@ -209,7 +209,7 @@ namespace Event.Tests.LogicTests
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var unlockAllTask = logic.UnlockAll(null, null);
+            var unlockAllTask = logic.UnlockAllForExecute(null, null);
 
             // Assert
             if (unlockAllTask.Exception == null)
@@ -234,7 +234,7 @@ namespace Event.Tests.LogicTests
                 mockEventCommunicator.Object);
 
             // Act
-            var unlockAllTask = logic.UnlockAll("workflowId", "someEvent");
+            var unlockAllTask = logic.UnlockAllForExecute("workflowId", "someEvent");
 
             // Assert
             if (unlockAllTask.Exception == null)
