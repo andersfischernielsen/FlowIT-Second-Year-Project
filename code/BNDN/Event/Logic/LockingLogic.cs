@@ -253,9 +253,10 @@ namespace Event.Logic
 
             }
 
+            // if something has gone wrong, the lockedEvents list only includes some of the relations in the list. 
+            // Therefore is the sizes are not equal - the ones who are locked must be unlcoked.
             if (list.Count != lockedEvents.Count)
             {
-                // TODO: May be an error here, if one list contains this Event itself, while the other does not. 
                 await UnlockSome(eventId, lockedEvents);
 
                 return false;
@@ -280,14 +281,10 @@ namespace Event.Logic
 
             // Gather dependent events
             
-            var resp = await _storage.GetResponses(workflowId, eventId);          // TODO: What if any (or all) of these return null?
+            // list should be set on setup and therefore will always be an empty list
+            var resp = await _storage.GetResponses(workflowId, eventId);
             var incl = await _storage.GetInclusions(workflowId, eventId);
             var excl = await _storage.GetExclusions(workflowId, eventId);
-            
-            if (resp == null || incl == null || excl == null)
-            {
-                throw new NullReferenceException("At least one of response-,inclusions or exclusions-relations retrieved from storage was null");
-            }
 
             var eventsToBeUnlockedSorted = new SortedDictionary<int, RelationToOtherEventModel>();
 
@@ -340,7 +337,6 @@ namespace Event.Logic
                 }
                 catch (Exception)
                 {
-                    // TODO: Find out what to do if you cant even unlock. Even.
                     everyEventIsUnlocked = false;
                 }
             }
