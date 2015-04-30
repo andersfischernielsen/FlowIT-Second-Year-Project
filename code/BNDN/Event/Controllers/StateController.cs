@@ -279,7 +279,7 @@ namespace Event.Controllers
         /// <returns></returns>
         [Route("events/{workflowId}/{eventId}/executed")]
         [HttpPut]
-        public async Task<bool> Execute(string workflowId, string eventId, [FromBody] RoleDto executeDto)
+        public async Task Execute(string workflowId, string eventId, [FromBody] RoleDto executeDto)
         {
             // Check that provided input can be mapped onto an instance of ExecuteDto
             if (!ModelState.IsValid)
@@ -293,10 +293,9 @@ namespace Event.Controllers
             }
             try
             {
-                var toReturn = await _logic.Execute(workflowId, eventId, executeDto);   
-                await _historyLogic.SaveSuccesfullCall("PUT", "Execute", eventId, workflowId);
+                await _logic.Execute(workflowId, eventId, executeDto);   
 
-                return toReturn;
+                await _historyLogic.SaveSuccesfullCall("PUT", "Execute", eventId, workflowId);
             }
             catch (NotFoundException e)
             {

@@ -54,7 +54,6 @@ namespace Server.Tests.StorageTests
         [Test]
         public void TestLogin()
         {
-            //TODO: Implement.
         }
 
         [Test]

@@ -122,7 +122,6 @@ namespace Event.Logic
             return b;
         }
 
-        // TODO: Discuss: Should this not be moved into a method on EventStorage?
         /// <summary>
         /// GetStateDto returns an EventStateDto for the specified Event
         /// </summary>
@@ -276,7 +275,6 @@ namespace Event.Logic
             await _storage.SetPending(workflowId, eventId, newPendingValue);
         }
 
-        // TODO: Discuss why is Execute() a Task<bool>?
         /// <summary>
         /// Execute attempts to Execute the specified Event. The process includes locking the other events, and updating their state. 
         /// </summary>
@@ -290,7 +288,7 @@ namespace Event.Logic
         /// <exception cref="FailedToLockOtherEventException">Thrown if locking of an other (dependent) Event failed.</exception>
         /// <exception cref="FailedToUpdateStateAtOtherEventException">Thrown if updating of another Event's state failed</exception>
         /// <exception cref="FailedToUnlockOtherEventException">Thrown if unlocking of another Event fails.</exception>
-        public async Task<bool> Execute(string workflowId, string eventId, RoleDto executeDto)
+        public async Task Execute(string workflowId, string eventId, RoleDto executeDto)
         {
             if (workflowId == null || eventId == null || executeDto == null)
             {
@@ -373,7 +371,7 @@ namespace Event.Logic
             }
             if (allOk)
             {
-                return true;
+                return;
             }
             throw exception;
         }
