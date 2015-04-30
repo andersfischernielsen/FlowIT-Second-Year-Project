@@ -5,6 +5,7 @@ using System.Linq;
 using Client.Connections;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Event;
 
 namespace Client.ViewModels
 {

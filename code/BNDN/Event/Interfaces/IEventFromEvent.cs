@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Common;
 using Event.Exceptions;
 using Event.Exceptions.EventInteraction;
+using Common.DTO.Shared;
 using Event.Models;
 
 namespace Event.Interfaces

@@ -2,7 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.Server;
 using Common.Exceptions;
+using Common.Tools;
 
 namespace XMLtoJSONParser
 {

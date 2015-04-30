@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Common;
 using Event.Exceptions;
+using Common.DTO.Shared;
 
 namespace Event.Interfaces
 {

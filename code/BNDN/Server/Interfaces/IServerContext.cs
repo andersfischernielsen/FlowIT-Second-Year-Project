@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.Entity;
 using System.Threading.Tasks;
-using Common.History;
+using Common.DTO.History;
 using Server.Models;
 
 namespace Server.Interfaces

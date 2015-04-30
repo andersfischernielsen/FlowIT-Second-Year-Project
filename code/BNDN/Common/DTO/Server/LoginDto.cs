@@ -1,4 +1,4 @@
-﻿namespace Common
+﻿namespace Common.DTO.Server
 {
     public class LoginDto
     {

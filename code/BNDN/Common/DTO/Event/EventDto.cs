@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Common.DTO.Shared;
 
-namespace Common
+namespace Common.DTO.Event
 {
     public class EventDto
     {

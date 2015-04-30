@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.Shared;
 using Common.Exceptions;
 using Event.Exceptions;
 using Event.Exceptions.EventInteraction;

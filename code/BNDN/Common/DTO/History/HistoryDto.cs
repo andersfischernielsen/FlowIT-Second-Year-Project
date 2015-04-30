@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Common.History
+namespace Common.DTO.History
 {
     public class HistoryDto
     {

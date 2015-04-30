@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Client.Exceptions;
 using Client.ViewModels;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.History;
 using Common.Exceptions;
-using Common.History;
+using Common.Tools;
 
 namespace Client.Connections
 {

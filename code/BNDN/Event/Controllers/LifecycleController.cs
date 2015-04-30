@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using Common;
+using Common.DTO.Event;
 using Common.Exceptions;
 using Event.Exceptions;
 using Event.Interfaces;
