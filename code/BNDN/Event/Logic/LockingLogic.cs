@@ -141,15 +141,6 @@ namespace Event.Logic
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
         }
 
-        /// <summary>
-        /// Tries to unlock the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="callerId">Represents caller</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either of the input arguments are null</exception>
-        /// <exception cref="LockedException">Thrown if the Event is currently locked by someone else</exception>
         public async Task UnlockSelf(string workflowId, string eventId, string callerId)
         {
             if (workflowId == null || eventId == null || callerId == null)
@@ -175,13 +166,6 @@ namespace Event.Logic
             Dequeue(workflowId, eventId);
         }
 
-        /// <summary>
-        /// LockAllForExecute attempts to lockall related Events for the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> LockAllForExecute(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -264,14 +248,6 @@ namespace Event.Logic
             return true;
         }
 
-        /// <summary>
-        /// UnlockAllForExecute attempts to unlock all related events for the specified Event. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns>False if it fails to unlock other Events</returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NullReferenceException">Thrown if Storage layer returns null-relations.</exception>
         public async Task<bool> UnlockAllForExecute(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -343,14 +319,6 @@ namespace Event.Logic
             return everyEventIsUnlocked;
         }
 
-        /// <summary>
-        /// Will determine, on basis of the provided arguments, if caller is allowed to operate on the target Event. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the target Event belongs to</param>
-        /// <param name="eventId">Id of the target Event</param>
-        /// <param name="callerId">Id of the Event, that wishes to operate on the target Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsAllowedToOperate(string workflowId, string eventId, string callerId)
         {
 
@@ -378,7 +346,6 @@ namespace Event.Logic
         /// <summary>
         /// Attempts to unlock the Events, that are provided in the argument list.  
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the target Event belongs to</param>
         /// <param name="eventId">Id of the target Event</param>
         /// <param name="eventsToBeUnlocked">List specifying which Events are to be unlocked</param>
         /// <returns></returns>

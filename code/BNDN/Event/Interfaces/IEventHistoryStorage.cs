@@ -1,22 +1,31 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Common.History;
 
 namespace Event.Interfaces
 {
+    /// <summary>
+    /// IEventHistoryStorage is an interface used to save details about the history of an Event.
+    /// </summary>
     public interface IEventHistoryStorage : IDisposable
     {
         /// <summary>
-        /// Save a given HistoryModel to storage.
+        /// Saves the given historyModel to storage.
         /// </summary>
-        /// <param name="toSave"></param>
+        /// <param name="toSave">The history that is to be saved</param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         Task SaveHistory(HistoryModel toSave);
 
         /// <summary>
-        /// Get every HistoryModel in storage for a given event.
+        /// Retrieves the History for a specified Event
         /// </summary>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
+        /// <param name="eventId">Id of the Event, whose history is to be retrieved</param>
         /// <returns></returns>
+        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         Task<IQueryable<HistoryModel>> GetHistoryForEvent(string workflowId, string eventId);
     }
 }
