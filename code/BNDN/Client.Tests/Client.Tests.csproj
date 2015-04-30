@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="ServerConnectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\HistoryListViewModelTests.cs" />
     <Compile Include="ViewModels\WorkflowViewModelTests.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Client.ViewModels;
-using Common;
+using Common.DTO.Event;
 using NUnit.Framework;
 
 namespace Client.Tests.ViewModels
