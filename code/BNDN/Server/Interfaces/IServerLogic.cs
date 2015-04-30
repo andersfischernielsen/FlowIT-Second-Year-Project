@@ -15,19 +15,19 @@ namespace Server.Interfaces
     public interface IServerLogic : IDisposable
     {
         /// <summary>
-        /// Tries to log in / returns all the roles the user has on all workflows
+        /// Tries to log in/return all the roles a given user (stored in a LoginDto) has on all workflows.
         /// </summary>
         /// <param name="loginDto"></param>
         /// <returns></returns>
         Task<RolesOnWorkflowsDto> Login(LoginDto loginDto);
 
         /// <summary>
-        /// Will add a user.
+        /// Add a user.
         /// </summary>
-        /// <param name="userDto">Contains information about the user</param>
+        /// <param name="userDto">Contains information about the user.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if a role in the provided UserDto could not be found at the Server</exception>
+        /// <exception cref="ArgumentNullException">Thrown if either of the provided arguments are null.</exception>
+        /// <exception cref="NotFoundException">Thrown if a role in the provided UserDto could not be found at the Server.</exception>
         Task AddUser(UserDto userDto);
 
         /// <summary>
@@ -42,28 +42,28 @@ namespace Server.Interfaces
         Task AddRolesToUser(string username, IEnumerable<WorkflowRole> roles);
 
         /// <summary>
-        /// Returns a list of Events on the specified workflow.
+        /// Returns a list of Events for the specified workflow.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow</param>
+        /// <param name="workflowId">Id of the workflow.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if workflowId is null</exception>
+        /// <exception cref="ArgumentNullException">Thrown if workflowId is null.</exception>
         Task<IEnumerable<EventAddressDto>> GetEventsOnWorkflow(string workflowId);
 
         /// <summary>
-        /// Adds an Event to the specified workflow
+        /// Adds an Event to the specified workflow.
         /// </summary>
-        /// <param name="workflowToAttachToId">Id of the workflow, that the Event should be added to</param>
-        /// <param name="eventToBeAddedDto">Contains information about the Event, that is to be added</param>
+        /// <param name="workflowToAttachToId">Id of the workflow that the Event should be added to.</param>
+        /// <param name="eventToBeAddedDto">Contains information about the Event that is to be added.</param>
         /// <returns></returns>
         Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
 
         /// <summary>
         /// Will delete an Event from a specified workflow. 
         /// </summary>
-        /// <param name="workflowId">Id of the target workflow</param>
-        /// <param name="eventId">Id of the target Event</param>
+        /// <param name="workflowId">Id of the target workflow.</param>
+        /// <param name="eventId">Id of the target Event.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either of the arguments are null</exception>
+        /// <exception cref="ArgumentNullException">Thrown if either of the arguments are null.</exception>
         Task RemoveEventFromWorkflow(string workflowId, string eventId);
 
         /// <summary>

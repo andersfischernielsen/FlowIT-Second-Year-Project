@@ -15,64 +15,64 @@ namespace Event.Interfaces
         /// <summary>
         /// Tells whether an Event exists in the storage.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns>True if the an Event with eventId exists at workflow with workflowId</returns>
-        /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null</exception>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to.</param>
+        /// <param name="eventId">Id of the Event to check for.</param>
+        /// <returns>True if the an Event with eventId exists at workflow with workflowId.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null.</exception>
         Task<bool> Exists(string workflowId, string eventId);
 
         /// <summary>
-        /// Returns the URI-address of the Event belonging to the given workflowId and identified by eventId 
+        /// Returns the URI-address of the Event belonging to the given workflowId and identified by eventId.
         /// </summary>
-        /// <param name="workflowId">Identifies the workflow the event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">Identifies the workflow the event belongs to.</param>
+        /// <param name="eventId">Id of the Event to get.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null</exception>
-        /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments</exception>
+        /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null.</exception>
+        /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments.</exception>
         Task<Uri> GetUri(string workflowId, string eventId);
 
         /// <summary>
         /// Returns the name of an Event. 
         /// </summary>
-        /// <param name="workflowId">Id of thw workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">Id of the workflow the Event belongs to.</param>
+        /// <param name="eventId">Id of the Event.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if no Event exists with the given workflowId and EventId</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null.</exception>
+        /// <exception cref="NotFoundException">Thrown if no Event exists with the given workflowId and EventId.</exception>
         Task<string> GetName(string workflowId, string eventId);
 
         /// <summary>
-        /// GetRoles returns the Roles, that are allowed to execute an Event
+        /// GetRoles returns the Roles that are allowed to execute an Event.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">Id of the workflow the Event belongs to.</param>
+        /// <param name="eventId">Id of the Event.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown when no Event matches the provided workflowId and eventId</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null.</exception>
+        /// <exception cref="NotFoundException">Thrown when no Event matches the provided workflowId and eventId.</exception>
         Task<IEnumerable<string>> GetRoles(string workflowId, string eventId);
         #endregion
 
         /// <summary>
-        /// Initializes a new Event, based on the provided EventModel.
+        /// Initializes a new Event based on the provided EventModel.
         /// </summary>
         /// <param name="eventModel"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException">Thrown when an Event with the same id already exists</exception>
-        /// <exception cref="ArgumentNullException">Thrown when provided EventModel was null</exception>
+        /// <exception cref="InvalidOperationException">Thrown when an Event with the same id already exists.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when provided EventModel was null.</exception>
         Task InitializeNewEvent(EventModel eventModel);
 
         /// <summary>
-        /// DeleteEvent deletes the Event, belonging to the given workflowId and with the given eventId
+        /// DeleteEvent deletes the Event, belonging to the given workflowId and with the given eventId.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to.</param>
+        /// <param name="eventId">Id of the Event to be deleted.</param>
         /// <returns>Task</returns>
-        /// <exception cref="ArgumentNullException">Will be thrown if either workflowId or eventId is null</exception>
-        /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments</exception>
+        /// <exception cref="ArgumentNullException">Will be thrown if either workflowId or eventId is null.</exception>
+        /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments.</exception>
         Task DeleteEvent(string workflowId, string eventId);
 
         /// <summary>
-        /// Reload makes re-caches the workflow identified by the arguments.
+        /// Reload the workflow identified by the arguments.
         /// This ensures that any changes from other controller-calls are updated in memory.
         /// </summary>
         /// <param name="workflowId">The workflow in which the event belongs.</param>
@@ -93,18 +93,18 @@ namespace Event.Interfaces
         Task<bool> GetExecuted(string workflowId, string eventId);
 
         /// <summary>
-        /// Sets the Executed value for the specified Event
+        /// Sets the Executed value for the specified Event.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">Id of the workflow, the Event belongs to.</param>
+        /// <param name="eventId">Id of the Event.</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either workflowId or eventId is null</exception>
-        /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage</exception>
+        /// <exception cref="ArgumentNullException">Thrown if either workflowId or eventId is null.</exception>
+        /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage.</exception>
         Task SetExecuted(string workflowId, string eventId, bool value);
 
         /// <summary>
-        /// Returns the Included value of the specified Event
+        /// Returns the Included value of the specified Event.
         /// </summary>
         /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
         /// <param name="eventId">Id of the Event</param>

@@ -13,7 +13,7 @@ namespace Event.Interfaces
         /// <summary>
         /// Creates an Event based on the provided EventDto.
         /// </summary>
-        /// <param name="eventDto">Contains the information about the Event, that is to be created</param>
+        /// <param name="eventDto">Contains the information about the Event, that is to be created.</param>
         /// <param name="ownUri">Represents the address at which the Event is located / hosted at.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>

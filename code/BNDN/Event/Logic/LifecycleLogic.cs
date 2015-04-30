@@ -15,7 +15,7 @@ using Event.Storage;
 namespace Event.Logic
 {
     /// <summary>
-    /// LifecycleLogic is a logic-layer, that handles logic involved in Event-lifecycle operations. 
+    /// LifecycleLogic is a logic-layer that handles logic involved in Event-lifecycle operations. 
     /// </summary>
     public class LifecycleLogic : ILifecycleLogic
     {

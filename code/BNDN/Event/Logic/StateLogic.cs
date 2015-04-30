@@ -13,7 +13,7 @@ using Event.Storage;
 namespace Event.Logic
 {
     /// <summary>
-    /// StateLogic is a logic-layer, that handles logic involved in operations on an Event's state. 
+    /// StateLogic is a logic-layer that handles logic involved in operations on an Event's state. 
     /// </summary>
     public class StateLogic : IStateLogic
     {
