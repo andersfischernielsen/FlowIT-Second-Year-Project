@@ -32,6 +32,10 @@ namespace Client.ViewModels
 
         public WorkflowViewModel(WorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles)
         {
+            if (parent == null || workflowDto == null || roles == null )
+            {
+                throw new ArgumentNullException();
+            }
             _parent = parent;
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = workflowDto;
