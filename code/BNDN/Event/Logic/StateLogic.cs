@@ -320,7 +320,6 @@ namespace Event.Logic
             }
 
             // Lock all dependent Events (including one-self)
-            // TODO: Check: Does the following include locking on this Event itself...?
             if (!await _lockingLogic.LockAllForExecute(workflowId, eventId))
             {
                 throw new FailedToLockOtherEventException();

@@ -212,11 +212,11 @@ namespace Server.Logic
             var workflow = await _storage.GetWorkflow(workflowToAttachToId);
 
             // Add roles to the current workflow if they do not exist (the storage method handles the if-part)
-            var roles = await _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
+            var roles = (await _storage.AddRolesToWorkflow(eventToBeAddedDto.Roles.Select(role => new ServerRoleModel
             {
                 Id = role,
                 ServerWorkflowModelId = workflowToAttachToId
-            }));
+            }))).ToList();
 
             await _storage.AddEventToWorkflow(new ServerEventModel
             {
@@ -225,31 +225,6 @@ namespace Server.Logic
                 ServerWorkflowModelId = workflowToAttachToId,
                 ServerWorkflowModel = workflow,
                 ServerRolesModels = roles
-            });
-        }
-
-        // TODO: Is this ever used? (Except by a Controller-route, that is never used itself?)
-        /// <summary>
-        /// Will update a specified Event on a specified workflow
-        /// </summary>
-        /// <param name="workflowToAttachToId">Id of the target workflow</param>
-        /// <param name="eventToBeAddedDto">Updated information about the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Will be thrown if either of the arguments are null</exception>
-        public async Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
-        {
-            if (workflowToAttachToId == null || eventToBeAddedDto == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            var workflow = await _storage.GetWorkflow(workflowToAttachToId);
-            await _storage.UpdateEventOnWorkflow(workflowToAttachToId, new ServerEventModel
-            {
-                Id = eventToBeAddedDto.Id,
-                Uri = eventToBeAddedDto.Uri.ToString(),
-                ServerWorkflowModelId = workflowToAttachToId,
-                ServerWorkflowModel = workflow
             });
         }
 
@@ -288,28 +263,6 @@ namespace Server.Logic
                 Name = workflow.Name,
             });
         }
-
-        // TODO: Is this ever used? Delete?
-        /// <summary>
-        /// Updates the specified workflow
-        /// </summary>
-        /// <param name="workflow">Updated information about the workflow</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
-        public async Task UpdateWorkflow(WorkflowDto workflow)
-        {
-            if (workflow == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            await _storage.UpdateWorkflow(new ServerWorkflowModel
-            {
-                Id = workflow.Id,
-                Name = workflow.Name,
-            });
-        }
-
 
         /// <summary>
         /// Deletes the specified workflow

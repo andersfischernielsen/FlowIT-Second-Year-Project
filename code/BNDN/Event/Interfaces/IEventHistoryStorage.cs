@@ -1,10 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Common.History;
 
 namespace Event.Interfaces
 {
-    public interface IEventHistoryStorage {
+    public interface IEventHistoryStorage : IDisposable
+    {
         /// <summary>
         /// Save a given HistoryModel to storage.
         /// </summary>

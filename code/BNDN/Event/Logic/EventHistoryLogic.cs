@@ -13,7 +13,7 @@ namespace Event.Logic
     /// </summary>
     public class EventHistoryLogic : IEventHistoryLogic 
     {
-        private readonly IEventStorage _storage;
+        private readonly IEventHistoryStorage _storage;
 
         /// <summary>
         /// Default constructor
@@ -21,27 +21,6 @@ namespace Event.Logic
         public EventHistoryLogic()
         {
             _storage = new EventStorage();
-        }
-
-
-        // TODO: Is this method ever used?
-        /// <summary>
-        /// Will save a History. Should be used for successfull operations in an Event.
-        /// </summary>
-        /// <param name="toSave">History that needs to be saved</param>
-        /// <returns></returns>
-        public Task SaveHistory(HistoryModel toSave)
-        {
-            var asDto = new HistoryModel
-            {
-                EventId = toSave.EventId,
-                HttpRequestType = toSave.HttpRequestType,
-                Message = toSave.Message,
-                MethodCalledOnSender = toSave.MethodCalledOnSender,
-                WorkflowId = toSave.WorkflowId
-            };
-
-            return _storage.SaveHistory(asDto);
         }
 
         /// <summary>

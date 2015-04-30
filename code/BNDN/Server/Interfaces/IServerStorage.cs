@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Exceptions;
 using Server.Models;
-using Server.Storage;
 
 namespace Server.Interfaces
 {
-    public interface IServerStorage : IDisposable, IServerHistoryStorage
+    public interface IServerStorage : IDisposable
     {
         #region Workflow related
         /// <summary>
@@ -17,20 +16,13 @@ namespace Server.Interfaces
         /// <returns></returns>
         Task<IEnumerable<ServerEventModel>> GetEventsFromWorkflow(string workflowId);
 
-        Task<ICollection<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
+        Task<IEnumerable<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles);
 
         /// <summary>
         /// Add event to a workflow
         /// </summary>
         /// <param name="eventToBeAddedDto"></param>
         Task AddEventToWorkflow(ServerEventModel eventToBeAddedDto);
-
-        /// <summary>
-        /// Updates an event.
-        /// </summary>
-        /// <param name="workflowId"></param>
-        /// <param name="eventToBeUpdated"></param>
-        Task UpdateEventOnWorkflow(string workflowId, ServerEventModel eventToBeUpdated);
 
         /// <summary>
         /// Remove an event from a workflow
@@ -68,7 +60,7 @@ namespace Server.Interfaces
         Task AddUser(ServerUserModel user);
         Task<bool> RoleExists(ServerRoleModel role);
         Task<bool> UserExists(string username);
-        Task<ServerRoleModel> GetRole(string id, string workflowId);
+        Task<ServerRoleModel> GetRole(string rolename, string workflowId);
         Task<ServerUserModel> GetUser(string username, string password);
 
         /// <summary>

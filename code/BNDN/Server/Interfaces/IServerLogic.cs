@@ -44,12 +44,7 @@ namespace Server.Interfaces
         /// <param name="workflowToAttachToId"></param>
         /// <param name="eventToBeAddedDto"></param>
         Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
-        /// <summary>
-        /// Add event to a workflow
-        /// </summary>
-        /// <param name="workflowToAttachToId"></param>
-        /// <param name="eventToBeAddedDto"></param>
-        Task UpdateEventOnWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto);
+
         /// <summary>
         /// Remove an event from a workflow
         /// </summary>
@@ -74,12 +69,7 @@ namespace Server.Interfaces
         /// </summary>
         /// <param name="workflow"></param>
         Task AddNewWorkflow(WorkflowDto workflow);
-        /// <summary>
-        /// Adds a new workflow
-        /// If a worksflot with the same ID exists, it will throw an exception
-        /// </summary>
-        /// <param name="workflow"></param>
-        Task UpdateWorkflow(WorkflowDto workflow);
+
         /// <summary>
         /// Adds a new workflow
         /// If a worksflot with the same ID exists, it will throw an exception

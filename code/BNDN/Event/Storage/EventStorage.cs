@@ -8,7 +8,6 @@ using Event.Exceptions;
 using Common.History;
 using Event.Interfaces;
 using Event.Models;
-using Event.Models.UriClasses;
 
 namespace Event.Storage
 {
@@ -140,35 +139,6 @@ namespace Event.Storage
             return new Uri((await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).OwnUri);
         }
 
-        // TODO: Is this method ever used?
-        /// <summary>
-        /// Sets the URI of the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event, whose Uri is to be set</param>
-        /// <param name="uri">The uri, the Event's Uri should be set to</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Will be thrown if either of the input-arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments</exception>
-        public async Task SetUri(string workflowId, string eventId, Uri uri)
-        {
-            if (workflowId == null || eventId == null || uri == null)
-            {
-                throw new ArgumentNullException();
-            }
-            if (!await Exists(workflowId, eventId))
-            {
-                throw new NotFoundException();
-            }
-
-            await EventIsInALegalState(workflowId, eventId);
-
-            // Add replacing value
-            _context.Events.Single(model => model.WorkflowId == workflowId && model.Id == eventId).OwnUri = uri.AbsoluteUri;
-            await _context.SaveChangesAsync();
-        }
-
-
         /// <summary>
         /// Returns the name of an Event. 
         /// </summary>
@@ -194,16 +164,6 @@ namespace Event.Storage
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Name;
         }
 
-        
-        // TODO: Is this method ever used?
-        public async Task SetName(string workflowId, string eventId, string name)
-        {
-            await EventIsInALegalState(workflowId, eventId);
-
-            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Name = name;
-            await _context.SaveChangesAsync();
-        }
-
         /// <summary>
         /// GetRoles returns the Roles, that are allowed to execute an Event
         /// </summary>
@@ -227,15 +187,6 @@ namespace Event.Storage
             await EventIsInALegalState(workflowId, eventId);
 
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles.Select(role => role.Role);
-        }
-
-        // TODO: Is this method ever used? 
-        public async Task SetRoles(string workflowId, string eventId, IEnumerable<string> value)
-        {
-            await EventIsInALegalState(workflowId, eventId);
-
-            (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles = value.Select(role => new EventRoleModel { Role = role, WorkflowId = workflowId, EventId = eventId }).ToList();
-            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -540,46 +491,6 @@ namespace Event.Storage
             return hashSet;
         }
 
-        // TODO: Is this method ever used? Do we need it?
-        /// <summary>
-        /// Sets the Condition-relations on the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
-        public async Task SetConditions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
-        {
-            if (workflowId == null || eventId == null)
-            {
-                throw new ArgumentNullException();
-            }
-            if (!await Exists(workflowId, eventId))
-            {
-                throw new NotFoundException();
-            }
-
-            foreach (var uri in _context.Conditions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
-            {
-                _context.Conditions.Remove(uri);
-            }
-
-            foreach (var element in value)
-            {
-                var uriToAdd = new ConditionUri
-                {
-                    UriString = element.Uri.AbsoluteUri,
-                    ForeignEventId = element.EventId,
-                    WorkflowId = element.WorkflowId,
-                    EventId = eventId,
-                };
-                _context.Conditions.Add(uriToAdd);
-            }
-            await _context.SaveChangesAsync();
-        }
-
         /// <summary>
         /// GetResponses returns a HashSet containing the response relations for the provided event.
         /// Notice, that this method will not return null, but may return an empty set.
@@ -614,45 +525,6 @@ namespace Event.Storage
 
             return hashSet;
         }
-
-        // TODO: Is this method ever used?
-        /// <summary>
-        /// Sets the Response-relations on the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="value">The response-relations that should be set on the specified Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
-        public async Task SetResponses(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
-        {
-            if (workflowId == null || eventId == null)
-            {
-                throw new ArgumentNullException();
-            }
-            if (!await Exists(workflowId, eventId))
-            {
-                throw new NotFoundException();
-            }
-            foreach (var uri in _context.Responses.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
-            {
-                _context.Responses.Remove(uri);
-            }
-
-            foreach (var uriToAdd in value.Select(element => new ResponseUri
-            {
-                UriString = element.Uri.AbsoluteUri,
-                WorkflowId = element.WorkflowId,
-                ForeignEventId = element.EventId,
-                EventId = eventId
-            }))
-            {
-                _context.Responses.Add(uriToAdd);
-            }
-            await _context.SaveChangesAsync();
-        }
-
 
         /// <summary>
         /// Returns the Exclusion-relations on the specified Event
@@ -689,47 +561,6 @@ namespace Event.Storage
             return hashSet;
         }
 
-        // TODO: Is this method ever used?
-        /// <summary>
-        /// Sets the Exclusion-relations on the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="value">The Exclusion-relations that should be set on the specified Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
-        public async Task SetExclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
-        {
-            if (workflowId == null || eventId == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (!await Exists(workflowId, eventId))
-            {
-                throw new NotFoundException();
-            }
-
-            foreach (var uri in _context.Exclusions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
-            {
-                _context.Exclusions.Remove(uri);
-            }
-
-            foreach (var uriToAdd in value.Select(element => new ExclusionUri
-            {
-                UriString = element.Uri.AbsoluteUri,
-                WorkflowId = element.WorkflowId,
-                ForeignEventId = element.EventId,
-                EventId = eventId
-            }))
-            {
-                _context.Exclusions.Add(uriToAdd);
-            }
-            await _context.SaveChangesAsync();
-        }
-
-
         /// <summary>
         /// GetResponses returns a HashSet containing the inclusion relations for the provided event.
         /// Notice, that this method will not return null, but may return an empty set.
@@ -765,47 +596,6 @@ namespace Event.Storage
 
             return hashSet;
         }
-
-        // TODO: Is this method ever used?
-        /// <summary>
-        /// Sets the Inclusion-relations on the specified Event. Even if the Event has no Inclusion-relations
-        /// an empty set (and not a Null-set) should be provided
-        /// </summary>
-        ///  <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="value">The Inclusion-relations that should be set on the specified Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null.</exception>
-        /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
-        public async Task SetInclusions(string workflowId, string eventId, HashSet<RelationToOtherEventModel> value)
-        {
-            if (workflowId == null || eventId == null || value == null)
-            {
-                throw new ArgumentNullException();
-            }
-            if (!await Exists(workflowId, eventId))
-            {
-                throw new NotFoundException();
-            }
-
-            foreach (var uri in _context.Inclusions.Where(model => model.WorkflowId == workflowId && model.EventId == eventId))
-            {
-                _context.Inclusions.Remove(uri);
-            }
-
-            foreach (var uriToAdd in value.Select(element => new InclusionUri
-            {
-                UriString = element.Uri.AbsoluteUri,
-                WorkflowId = element.WorkflowId,
-                ForeignEventId = element.EventId,
-                EventId = eventId
-            }))
-            {
-                _context.Inclusions.Add(uriToAdd);
-            }
-            await _context.SaveChangesAsync();
-        }
-
         #endregion
 
         #region Public methods

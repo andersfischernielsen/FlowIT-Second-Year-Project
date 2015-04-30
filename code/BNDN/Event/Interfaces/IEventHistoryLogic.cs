@@ -7,8 +7,6 @@ namespace Event.Interfaces
 {
     public interface IEventHistoryLogic : IDisposable
     {
-        Task SaveHistory(HistoryModel toSave);
-
         Task<IEnumerable<HistoryDto>> GetHistoryForEvent(string workflowId, string eventId);
 
         Task SaveException(Exception ex, string requestType, string method, string eventId = "", string workflowId = "");

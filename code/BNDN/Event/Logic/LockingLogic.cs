@@ -205,8 +205,8 @@ namespace Event.Logic
             var excl = await _storage.GetExclusions(workflowId, eventId);            
 
             var allDependentEventsSorted = new SortedDictionary<int, RelationToOtherEventModel>();
-            // Set this Event's own lockDto (so the Event know for the future that it locked itself down)
-            allDependentEventsSorted.Add(eventId.GetHashCode(), new RelationToOtherEventModel()
+            // Add this Event's own lockDto (so the Event will be locked in order.)
+            allDependentEventsSorted.Add(eventId.GetHashCode(), new RelationToOtherEventModel
             {
                 EventId = eventId,
                 WorkflowId = workflowId,
