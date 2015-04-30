@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Client.Connections;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Shared;
 using Common.Exceptions;
 
 namespace Client.ViewModels

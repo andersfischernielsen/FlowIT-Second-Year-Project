@@ -92,23 +92,28 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
+            CheckIfEventIsLocked(workflowId, eventId, lockDto);  // refactored into its own method.
+
+            Dequeue(workflowId, eventId);
+        }
+
+        private async void CheckIfEventIsLocked(string workflowId, string eventId, LockDto lockDto)
+        {
             if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
                 var watch = new Stopwatch();
                 watch.Start();
-                //todo: ugly mayby?
+
                 while (!AmINext(workflowId, eventId, lockDto))
                 {
                     if (watch.Elapsed.Seconds > 10)
                     {
-                        //Waited too long in queue
                         throw new LockedException();
                     }
                     await Task.Delay(100);
                 }
                 await _storage.Reload(workflowId, eventId);
             }
-            Dequeue(workflowId, eventId);
         }
 
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
@@ -131,35 +136,11 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
-            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
-            {
-                var watch = new Stopwatch();
-                watch.Start();
-                //todo: ugly mayby?
-                while (!AmINext(workflowId, eventId, lockDto))
-                {
-                    if (watch.Elapsed.Seconds > 10)
-                    {
-                        //Waited too long in queue
-                        throw new LockedException();
-                    }
-                    await Task.Delay(100);
-                }
-                await _storage.Reload(workflowId, eventId);
-            }
+            CheckIfEventIsLocked(workflowId, eventId, lockDto); // refactored into its own method.
 
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
         }
 
-        /// <summary>
-        /// Tries to unlock the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="callerId">Represents caller</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either of the input arguments are null</exception>
-        /// <exception cref="LockedException">Thrown if the Event is currently locked by someone else</exception>
         public async Task UnlockSelf(string workflowId, string eventId, string callerId)
         {
             if (workflowId == null || eventId == null || callerId == null)
@@ -185,13 +166,6 @@ namespace Event.Logic
             Dequeue(workflowId, eventId);
         }
 
-        /// <summary>
-        /// LockAllForExecute attempts to lockall related Events for the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> LockAllForExecute(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -263,9 +237,10 @@ namespace Event.Logic
 
             }
 
+            // if something has gone wrong, the lockedEvents list only includes some of the relations in the list. 
+            // Therefore is the sizes are not equal - the ones who are locked must be unlcoked.
             if (list.Count != lockedEvents.Count)
             {
-                // TODO: May be an error here, if one list contains this Event itself, while the other does not. 
                 await UnlockSome(eventId, lockedEvents);
 
                 return false;
@@ -273,14 +248,6 @@ namespace Event.Logic
             return true;
         }
 
-        /// <summary>
-        /// UnlockAllForExecute attempts to unlock all related events for the specified Event. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns>False if it fails to unlock other Events</returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NullReferenceException">Thrown if Storage layer returns null-relations.</exception>
         public async Task<bool> UnlockAllForExecute(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -290,14 +257,10 @@ namespace Event.Logic
 
             // Gather dependent events
             
-            var resp = await _storage.GetResponses(workflowId, eventId);          // TODO: What if any (or all) of these return null?
+            // list should be set on setup and therefore will always be an empty list
+            var resp = await _storage.GetResponses(workflowId, eventId);
             var incl = await _storage.GetInclusions(workflowId, eventId);
             var excl = await _storage.GetExclusions(workflowId, eventId);
-            
-            if (resp == null || incl == null || excl == null)
-            {
-                throw new NullReferenceException("At least one of response-,inclusions or exclusions-relations retrieved from storage was null");
-            }
 
             var eventsToBeUnlockedSorted = new SortedDictionary<int, RelationToOtherEventModel>();
 
@@ -350,21 +313,12 @@ namespace Event.Logic
                 }
                 catch (Exception)
                 {
-                    // TODO: Find out what to do if you cant even unlock. Even.
                     everyEventIsUnlocked = false;
                 }
             }
             return everyEventIsUnlocked;
         }
 
-        /// <summary>
-        /// Will determine, on basis of the provided arguments, if caller is allowed to operate on the target Event. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the target Event belongs to</param>
-        /// <param name="eventId">Id of the target Event</param>
-        /// <param name="callerId">Id of the Event, that wishes to operate on the target Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsAllowedToOperate(string workflowId, string eventId, string callerId)
         {
 
@@ -392,7 +346,6 @@ namespace Event.Logic
         /// <summary>
         /// Attempts to unlock the Events, that are provided in the argument list.  
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the target Event belongs to</param>
         /// <param name="eventId">Id of the target Event</param>
         /// <param name="eventsToBeUnlocked">List specifying which Events are to be unlocked</param>
         /// <returns></returns>

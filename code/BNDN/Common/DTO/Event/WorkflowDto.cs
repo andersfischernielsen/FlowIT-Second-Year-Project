@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Common
+namespace Common.DTO.Event
 {
     public class WorkflowDto
     {

@@ -4,8 +4,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Common.DTO.History;
 using Common.Exceptions;
-using Common.History;
 using Server.Interfaces;
 using Server.Logic;
 

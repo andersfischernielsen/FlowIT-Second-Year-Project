@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.History;
 using Common.Exceptions;
-using Common.History;
 
 namespace Client.Connections
 {

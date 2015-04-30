@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using Common;
+using Common.DTO.Event;
 using Common.Exceptions;
 using Event.Exceptions;
 using Event.Interfaces;
@@ -13,7 +14,7 @@ using Event.Logic;
 namespace Event.Controllers
 {
     /// <summary>
-    /// LifecycleController handles handles HTTP-request regarding Event lifecycle
+    /// LifecycleController handles handles HTTP-request regarding Event lifecycle.
     /// </summary>
     public class LifecycleController : ApiController
     {
@@ -21,7 +22,7 @@ namespace Event.Controllers
         private readonly IEventHistoryLogic _historyLogic;
 
         /// <summary>
-        /// Default constructor; should be used during runtime
+        /// Default constructor. Will be used by ASP.NET during runtime.
         /// </summary>
         public LifecycleController()
         {

@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace Common
+namespace Common.Tools
 {
     class HttpClientWrapper : IHttpClient
     {
@@ -51,9 +51,6 @@ namespace Common
             return await _httpClient.GetAsync(uri);
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
         public void Dispose()
         {
             _httpClient.Dispose();

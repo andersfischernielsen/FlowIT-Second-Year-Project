@@ -137,7 +137,6 @@ namespace Event.Tests.LogicTests
         #endregion 
 
         #region LockAllForExecute tests
-        // TODO: How do we test this?
 
         [Test]
         public void LockAll_WillRaiseExceptionIfEventIdIsNull()
@@ -200,7 +199,6 @@ namespace Event.Tests.LogicTests
         #endregion
 
         #region UnlockAllForExecute tests
-        // TODO: How do we do this?
 
         [Test]
         public void UnlockAll_WillRaiseExceptionIfEventIdWasNull()
@@ -311,7 +309,7 @@ namespace Event.Tests.LogicTests
         #endregion
 
         #region UnlockSome tests
-        // TODO: What to do? This is a private method? How to test? 
+        // dont test private methods.
         #endregion
 
     }

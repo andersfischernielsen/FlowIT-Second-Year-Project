@@ -5,7 +5,11 @@ using System.Net.Http;
 using Client.Connections;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.Server;
+using Common.DTO.Shared;
 using Common.Exceptions;
+using Common.Tools;
 using Moq;
 using NUnit.Framework;
 
