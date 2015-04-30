@@ -75,7 +75,6 @@ namespace Event.Logic
                 Roles = eventDto.Roles
             };
 
-            // Todo: Check that this works correcly when deployed!
 #if DEBUG
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventDto.EventId, eventDto.WorkflowId);
 #else
@@ -150,7 +149,6 @@ namespace Event.Logic
                 throw new LockedException();
             }
 
-            // Todo: Check that this works correcly when deployed!
 #if DEBUG
             IServerFromEvent serverCommunicator = new ServerCommunicator("http://localhost:13768/", eventId, workflowId);
 #else
@@ -183,7 +181,6 @@ namespace Event.Logic
             await _resetStorage.ResetToInitialState(workflowId, eventId);
         }
 
-        // TODO: Explain Morten, why this is not a Storage method...
         /// <summary>
         /// GetEventDto returns an EventDto representing the Event matching the given workflowId and EventId.
         /// </summary>

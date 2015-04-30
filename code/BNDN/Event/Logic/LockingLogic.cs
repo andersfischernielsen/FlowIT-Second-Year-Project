@@ -92,23 +92,28 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
+            CheckIfEventIsLocked(workflowId, eventId, lockDto);  // refactored into its own method.
+
+            Dequeue(workflowId, eventId);
+        }
+
+        private async void CheckIfEventIsLocked(string workflowId, string eventId, LockDto lockDto)
+        {
             if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
                 var watch = new Stopwatch();
                 watch.Start();
-                //todo: ugly mayby?
+
                 while (!AmINext(workflowId, eventId, lockDto))
                 {
                     if (watch.Elapsed.Seconds > 10)
                     {
-                        //Waited too long in queue
                         throw new LockedException();
                     }
                     await Task.Delay(100);
                 }
                 await _storage.Reload(workflowId, eventId);
             }
-            Dequeue(workflowId, eventId);
         }
 
         public async Task LockSelf(string workflowId, string eventId, LockDto lockDto)
@@ -131,22 +136,7 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
-            if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
-            {
-                var watch = new Stopwatch();
-                watch.Start();
-                //todo: ugly mayby?
-                while (!AmINext(workflowId, eventId, lockDto))
-                {
-                    if (watch.Elapsed.Seconds > 10)
-                    {
-                        //Waited too long in queue
-                        throw new LockedException();
-                    }
-                    await Task.Delay(100);
-                }
-                await _storage.Reload(workflowId, eventId);
-            }
+            CheckIfEventIsLocked(workflowId, eventId, lockDto); // refactored into its own method.
 
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
         }
