@@ -12,7 +12,7 @@ using Common.Exceptions;
 
 namespace Client.ViewModels
 {
-    public class WorkflowViewModel : ViewModelBase
+    public class WorkflowViewModel : ViewModelBase, IWorkflowViewModel
     {
         private readonly WorkflowDto _workflowDto;
         private bool _resetEventRuns;

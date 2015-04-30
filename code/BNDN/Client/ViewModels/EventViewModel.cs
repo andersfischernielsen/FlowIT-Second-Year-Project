@@ -15,7 +15,7 @@ namespace Client.ViewModels
     {
         private readonly EventAddressDto _eventAddressDto;
         private EventStateDto _eventStateDto;
-        private readonly WorkflowViewModel _parent;
+        private readonly IWorkflowViewModel _parent;
         private static readonly Brush WhiteBrush, IncludedBrush, PendingBrush, ExecutedBrush;
         private readonly IEventConnection _eventConnection;
 
@@ -43,13 +43,25 @@ namespace Client.ViewModels
             WhiteBrush.Freeze();
         }
 
-        public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
+        public EventViewModel(EventAddressDto eventAddressDto, IWorkflowViewModel workflow)
         {
+            if (eventAddressDto == null || workflow == null)
+            {
+                throw new ArgumentNullException();
+            }
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
             _eventConnection = new EventConnection();
             GetStateInternal();
+        }
+
+        public EventViewModel(IEventConnection eventConnection, EventAddressDto eventAddressDto, IWorkflowViewModel parent)
+        {
+            _parent = parent;
+            _eventStateDto = new EventStateDto();
+            _eventAddressDto = eventAddressDto;
+            _eventConnection = eventConnection;
         }
 
         #region Databindings
@@ -223,7 +235,6 @@ namespace Client.ViewModels
             {
                 Status = e.Message;
             }
-
         }
         #endregion
     }
