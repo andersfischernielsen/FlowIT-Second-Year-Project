@@ -56,7 +56,7 @@ namespace Server.Controllers
             await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
             {
                 HttpRequestType = "GET",
-                Message = "Called: Get",
+                Message = "Succesfully called: Get",
                 MethodCalledOnSender = "Get"
             });
 
@@ -78,7 +78,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     WorkflowId = workflowId,
-                    Message = "Called: Get",
+                    Message = "Succesfully called: Get",
                     HttpRequestType = "GET",
                     MethodCalledOnSender = "Get(" + workflowId + ")"
                 });
@@ -157,7 +157,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
-                    Message = "Called: PostWorkflow",
+                    Message = "Succesfully called: PostWorkflow",
                     MethodCalledOnSender = "PostWorkflow",
                     WorkflowId = workflowDto.Id
                 });
@@ -234,7 +234,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     EventId = eventToAddDto.Id,
-                    Message = "Called: PostEventWorkflow",
+                    Message = "Succesfully called: PostEventWorkflow",
                     MethodCalledOnSender = "PostEventWorkflow(" + workflowId + ")",
                     HttpRequestType = "POST",
                     WorkflowId = workflowId
@@ -341,7 +341,7 @@ namespace Server.Controllers
                 {
                     EventId = eventToBeUpdated.Id,
                     WorkflowId = workflowId,
-                    Message = "Called: UpdateEventOnWorkFlow",
+                    Message = "Succesfully called: UpdateEventOnWorkFlow",
                     HttpRequestType = "PUT",
                     MethodCalledOnSender = "UpdateEventOnWorkFlow(" + workflowId + ")"
                 });
@@ -405,7 +405,7 @@ namespace Server.Controllers
                 {
                     EventId = eventId,
                     WorkflowId = workflowId,
-                    Message = "Called: DeleteEventFromWorkflow",
+                    Message = "Succesfully called: DeleteEventFromWorkflow",
                     HttpRequestType = "DELETE",
                     MethodCalledOnSender = "DeleteEventFromWorkflow(" + workflowId + ", " + eventId + ")",
                 });
@@ -469,7 +469,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     WorkflowId = workflowId,
-                    Message = "Called: DeleteWorkflow",
+                    Message = "Succesfully called: DeleteWorkflow",
                     HttpRequestType = "DELETE",
                     MethodCalledOnSender = "DeleteWorkflow(" + workflowId + ")",
                 });
