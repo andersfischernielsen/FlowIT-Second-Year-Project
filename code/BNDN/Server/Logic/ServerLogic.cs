@@ -25,10 +25,6 @@ namespace Server.Logic
             _storage = storage;
         }
 
-        /// <summary>
-        /// Returns all workflows. May return an empty list. 
-        /// </summary>
-        /// <returns></returns>
         public async Task<IEnumerable<WorkflowDto>> GetAllWorkflows()
         {
             var workflows = await _storage.GetAllWorkflows();
@@ -40,12 +36,6 @@ namespace Server.Logic
             });
         }
 
-        /// <summary>
-        /// Returns information about the specified workflow. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the provided argument is null</exception>
         public async Task<WorkflowDto> GetWorkflow(string workflowId)
         {
             if (workflowId == null)
@@ -93,13 +83,6 @@ namespace Server.Logic
             return new RolesOnWorkflowsDto { RolesOnWorkflows = rolesOnWorkflows };
         }
 
-        /// <summary>
-        /// Will add a user.
-        /// </summary>
-        /// <param name="userDto">Contains information about the user</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if a role in the provided UserDto could not be found at the Server</exception>
         public async Task AddUser(UserDto userDto)
         {
             if (userDto == null)
@@ -127,15 +110,6 @@ namespace Server.Logic
             await _storage.AddUser(user);
         }
 
-        /// <summary>
-        /// Adds the given roles to the given username, if not already included.
-        /// </summary>
-        /// <param name="username">The username of the user.</param>
-        /// <param name="roles">The roles to add to the user.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">If the username or the roles are null.</exception>
-        /// <exception cref="NotFoundException">If the username does not correspond to a user,
-        /// or if a role does not exist at some event in the given workflow.</exception>
         public async Task AddRolesToUser(string username, IEnumerable<WorkflowRole> roles)
         {
             if (username == null || roles == null)
@@ -169,12 +143,6 @@ namespace Server.Logic
             await _storage.AddRolesToUser(username, serverRoles);
         }
 
-        /// <summary>
-        /// Returns a list of Events on the specified workflow.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if workflowId is null</exception>
         public async Task<IEnumerable<EventAddressDto>> GetEventsOnWorkflow(string workflowId)
         {
             if (workflowId == null)
@@ -196,12 +164,6 @@ namespace Server.Logic
                         });
         }
 
-        /// <summary>
-        /// Adds an Event to the specified workflow
-        /// </summary>
-        /// <param name="workflowToAttachToId">Id of the workflow, that the Event should be added to</param>
-        /// <param name="eventToBeAddedDto">Contains information about the Event, that is to be added</param>
-        /// <returns></returns>
         public async Task AddEventToWorkflow(string workflowToAttachToId, EventAddressDto eventToBeAddedDto)
         {
             if (workflowToAttachToId == null || eventToBeAddedDto == null)
@@ -228,13 +190,6 @@ namespace Server.Logic
             });
         }
 
-        /// <summary>
-        /// Will delete an Event from a specified workflow. 
-        /// </summary>
-        /// <param name="workflowId">Id of the target workflow</param>
-        /// <param name="eventId">Id of the target Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either of the arguments are null</exception>
         public async Task RemoveEventFromWorkflow(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -244,12 +199,6 @@ namespace Server.Logic
             await _storage.RemoveEventFromWorkflow(workflowId, eventId);
         }
 
-        /// <summary>
-        /// Adds a new workflow
-        /// </summary>
-        /// <param name="workflow">Contains information about the workflow</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
         public async Task AddNewWorkflow(WorkflowDto workflow)
         {
             if (workflow == null)
@@ -264,12 +213,6 @@ namespace Server.Logic
             });
         }
 
-        /// <summary>
-        /// Deletes the specified workflow
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow to be deleted</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
         public async Task RemoveWorkflow(string workflowId)
         {
             if (workflowId == null)

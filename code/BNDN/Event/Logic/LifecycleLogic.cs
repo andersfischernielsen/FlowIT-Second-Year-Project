@@ -45,14 +45,6 @@ namespace Event.Logic
             _lockLogic = lockLogic;
         }
 
-        /// <summary>
-        /// Creates an Event based on the provided EventDto.
-        /// </summary>
-        /// <param name="eventDto">Contains the information about the Event, that is to be created</param>
-        /// <param name="ownUri">Represents the address at which the Event is located / hosted at.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
-        /// <exception cref="EventExistsException">Thrown if an Event already is created with that EventId and WorkflowId</exception>
         public async Task CreateEvent(EventDto eventDto, Uri ownUri)
         {
             if (eventDto == null || ownUri == null || eventDto.WorkflowId == null || eventDto.EventId == null)
@@ -129,14 +121,6 @@ namespace Event.Logic
             }
         }
 
-        /// <summary>
-        /// Will attempt to Delete the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="LockedException">Thrown if the Event is currently locked</exception>
         public async Task DeleteEvent(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -162,13 +146,6 @@ namespace Event.Logic
             await _storage.DeleteEvent(workflowId, eventId);
         }
 
-        /// <summary>
-        /// ResetEvent will bruteforce reset this Event, regardless of whether it is currently locked
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
         public async Task ResetEvent(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -184,14 +161,6 @@ namespace Event.Logic
         }
 
         // TODO: Explain Morten, why this is not a Storage method...
-        /// <summary>
-        /// GetEventDto returns an EventDto representing the Event matching the given workflowId and EventId.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if no Event is found, that matches the arguments</exception>
         public async Task<EventDto> GetEventDto(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)

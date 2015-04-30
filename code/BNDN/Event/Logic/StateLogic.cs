@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Common.Exceptions;
@@ -48,16 +47,6 @@ namespace Event.Logic
             _eventCommunicator = eventCommunicator;
         }
 
-        /// <summary>
-        /// IsExecuted returns the executed value for the specified Event. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
-        /// <returns></returns>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
-        /// <exception cref="LockedException">Thrown if the Event is locked by someone else than caller</exception>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsExecuted(string workflowId, string eventId, string senderId)
         {
             if (workflowId == null || workflowId == null || senderId == null)
@@ -84,17 +73,6 @@ namespace Event.Logic
             return await _storage.GetExecuted(workflowId, eventId);
         }
 
-
-        /// <summary>
-        /// IsIncluded returns the included value for the specified Event. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
-        /// <returns></returns>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
-        /// <exception cref="LockedException">Thrown if the Event is locked by someone else than caller</exception>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsIncluded(string workflowId, string eventId, string senderId)
         {
             if (workflowId == null || workflowId == null || senderId == null)
@@ -123,16 +101,6 @@ namespace Event.Logic
         }
 
         // TODO: Discuss: Should this not be moved into a method on EventStorage?
-        /// <summary>
-        /// GetStateDto returns an EventStateDto for the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
-        /// <exception cref="LockedException">Thrown if the Event is currently locked</exception>
         public async Task<EventStateDto> GetStateDto(string workflowId, string eventId, string senderId)
         {
             // Input check
@@ -212,17 +180,6 @@ namespace Event.Logic
             return true; // If all conditions are executed or excluded.
         }
 
-        /// <summary>
-        /// SetIncluded sets the specified Event's Included value to the provided value. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
-        /// <param name="newIncludedValue">The value that the Event's Included value should be set to</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the string-type arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
-        /// <exception cref="LockedException">Thrown if the specified Event is currently locked</exception>
         public async Task SetIncluded(string workflowId, string eventId, string senderId, bool newIncludedValue)
         {
             if (workflowId == null || eventId == null || senderId == null)
@@ -244,18 +201,6 @@ namespace Event.Logic
             await _storage.SetIncluded(workflowId, eventId, newIncludedValue);
         }
 
-        /// <summary>
-        /// SetPending sets the specified Event's Pending value to the provided value. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
-        /// <param name="newPendingValue">The value that the Event's Included value should be set to</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the string-type arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
-        /// <exception cref="LockedException">Thrown if the specified Event is currently locked</exception>
-        /// <returns></returns>
         public async Task SetPending(string workflowId, string eventId, string senderId, bool newPendingValue)
         {
             if (workflowId == null || eventId == null || senderId == null)
@@ -277,19 +222,6 @@ namespace Event.Logic
         }
 
         // TODO: Discuss why is Execute() a Task<bool>?
-        /// <summary>
-        /// Execute attempts to Execute the specified Event. The process includes locking the other events, and updating their state. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="executeDto">Contains the roles, that caller has.</param>
-        /// <returns></returns>
-        /// <exception cref="LockedException">Thrown if the specified Event is currently locked by someone else</exception>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
-        /// <exception cref="FailedToLockOtherEventException">Thrown if locking of an other (dependent) Event failed.</exception>
-        /// <exception cref="FailedToUpdateStateAtOtherEventException">Thrown if updating of another Event's state failed</exception>
-        /// <exception cref="FailedToUnlockOtherEventException">Thrown if unlocking of another Event fails.</exception>
         public async Task<bool> Execute(string workflowId, string eventId, RoleDto executeDto)
         {
             if (workflowId == null || eventId == null || executeDto == null)
