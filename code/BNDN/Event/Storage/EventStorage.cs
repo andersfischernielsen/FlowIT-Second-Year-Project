@@ -297,7 +297,6 @@ namespace Event.Storage
                 throw new NotFoundException();
             }
 
-            // TODO: Try-catch here...?
             await EventIsInALegalState(workflowId, eventId);
 
             var @event = (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId));
@@ -382,8 +381,8 @@ namespace Event.Storage
             var @event =
                 await
                     _context.Events.SingleOrDefaultAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
-            if (@event.LockOwner == null) return null;      // TODO: With Exists() check above, this should be obsolete...? Right?
-                                                            // TODO: From Mikael: Nope, Exists checks whether the event exists. This checks if there is a lockOwner set.
+            if (@event.LockOwner == null) return null;
+
             return new LockDto
             {
                 WorkflowId = @event.WorkflowId,
