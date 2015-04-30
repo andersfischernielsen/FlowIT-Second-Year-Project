@@ -13,7 +13,7 @@ using Event.Logic;
 namespace Event.Controllers
 {
     /// <summary>
-    /// LifecycleController handles handles HTTP-request regarding Event lifecycle
+    /// LifecycleController handles handles HTTP-request regarding Event lifecycle.
     /// </summary>
     public class LifecycleController : ApiController
     {
@@ -21,7 +21,7 @@ namespace Event.Controllers
         private readonly IEventHistoryLogic _historyLogic;
 
         /// <summary>
-        /// Default constructor; should be used during runtime
+        /// Default constructor. Will be used by ASP.NET during runtime.
         /// </summary>
         public LifecycleController()
         {
