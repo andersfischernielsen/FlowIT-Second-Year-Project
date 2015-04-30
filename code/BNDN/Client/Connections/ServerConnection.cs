@@ -4,8 +4,12 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.History;
+using Common.DTO.Server;
+using Common.DTO.Shared;
 using Common.Exceptions;
-using Common.History;
+using Common.Tools;
 
 namespace Client.Connections
 {

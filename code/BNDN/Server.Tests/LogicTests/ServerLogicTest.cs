@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.Shared;
 using Moq;
 using NUnit.Framework;
 using Server.Interfaces;

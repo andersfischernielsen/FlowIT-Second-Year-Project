@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Common
+namespace Common.DTO.Shared
 {
     public class EventAddressDto
     {

@@ -1,8 +1,8 @@
 ﻿using System.Data.Entity;
+using Common.DTO.History;
 using Event.Interfaces;
 using Event.Models;
 using Event.Models.UriClasses;
-using Common.History;
 
 namespace Event.Storage
 {

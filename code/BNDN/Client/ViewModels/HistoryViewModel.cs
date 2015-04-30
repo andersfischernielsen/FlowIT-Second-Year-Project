@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using Common.History;
+using Common.DTO.History;
 
 namespace Client.ViewModels
 {

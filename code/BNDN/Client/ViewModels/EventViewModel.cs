@@ -6,6 +6,8 @@ using System.Windows.Media.Imaging;
 using Client.Connections;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.Shared;
 using Common.Exceptions;
 
 namespace Client.ViewModels

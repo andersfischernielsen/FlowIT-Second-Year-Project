@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.DTO.History;
 using Common.Exceptions;
 using Event.Exceptions;
-using Common.History;
 using Event.Interfaces;
 using Event.Models;
 

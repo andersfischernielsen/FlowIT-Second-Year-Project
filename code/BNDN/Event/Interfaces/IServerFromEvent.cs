@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Common;
+using Common.DTO.Shared;
 
 namespace Event.Interfaces
 {

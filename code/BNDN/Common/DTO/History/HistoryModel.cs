@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Common.History
+namespace Common.DTO.History
 {
     public class HistoryModel
     {

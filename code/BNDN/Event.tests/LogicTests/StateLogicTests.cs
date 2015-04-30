@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.Shared;
 using Common.Exceptions;
 using Event.Exceptions;
 using Event.Interfaces;

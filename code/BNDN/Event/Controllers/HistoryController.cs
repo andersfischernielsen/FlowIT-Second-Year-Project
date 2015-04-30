@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Common.History;
+using Common.DTO.History;
 using Event.Interfaces;
 using Event.Logic;
 

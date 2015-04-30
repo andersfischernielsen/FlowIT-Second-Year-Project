@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.Server;
+using Common.DTO.Shared;
 using Common.Exceptions;
 
 namespace Server.Interfaces

@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace Common
+namespace Common.Tools
 {
     class HttpClientWrapper : IHttpClient
     {

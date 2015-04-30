@@ -2,7 +2,7 @@
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Threading.Tasks;
-using Common.History;
+using Common.DTO.History;
 using Event.Models;
 using Event.Models.UriClasses;
 

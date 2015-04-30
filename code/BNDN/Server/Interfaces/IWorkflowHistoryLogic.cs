@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Common.History;
+using Common.DTO.History;
 
 namespace Server.Interfaces
 {

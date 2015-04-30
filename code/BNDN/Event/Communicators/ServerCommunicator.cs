@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Common;
+using Common.DTO.Shared;
+using Common.Tools;
 using Event.Exceptions;
 using Event.Interfaces;
 

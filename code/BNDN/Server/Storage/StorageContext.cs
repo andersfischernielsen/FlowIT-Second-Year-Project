@@ -1,6 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using Common.History;
+using Common.DTO.History;
 using Server.Interfaces;
 using Server.Models;
 
