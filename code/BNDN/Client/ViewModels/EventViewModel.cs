@@ -5,7 +5,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Client.Connections;
 using Client.Exceptions;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
@@ -18,6 +17,7 @@ namespace Client.ViewModels
         private EventStateDto _eventStateDto;
         private readonly WorkflowViewModel _parent;
         private static readonly Brush WhiteBrush, IncludedBrush, PendingBrush, ExecutedBrush;
+        private readonly IEventConnection _eventConnection;
 
         static EventViewModel()
         {
@@ -48,6 +48,7 @@ namespace Client.ViewModels
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
+            _eventConnection = new EventConnection();
             GetStateInternal();
         }
 
@@ -163,10 +164,7 @@ namespace Client.ViewModels
             Status = "";
             try
             {
-                using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
-                {
-                    _eventStateDto = await eventConnection.GetState(_parent.WorkflowId, _eventAddressDto.Id);
-                }
+                _eventStateDto = await _eventConnection.GetState(_eventAddressDto.Uri, _parent.WorkflowId, _eventAddressDto.Id);
                 NotifyPropertyChanged("");
             }
             catch (NotFoundException)
@@ -197,10 +195,7 @@ namespace Client.ViewModels
             await _parent.DisableExecuteButtons();
             try
             {
-                using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
-                {
-                    await eventConnection.Execute(_parent.WorkflowId, _eventAddressDto.Id);
-                }
+                await _eventConnection.Execute(_eventAddressDto.Uri, _parent.WorkflowId, _eventAddressDto.Id);
                 _parent.RefreshEvents();
             }
             catch (NotFoundException)

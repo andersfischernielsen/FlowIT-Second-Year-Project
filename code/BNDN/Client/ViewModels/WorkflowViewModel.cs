@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Client.Connections;
 using Client.Exceptions;
 using Client.Views;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
@@ -18,7 +17,8 @@ namespace Client.ViewModels
         private readonly WorkflowDto _workflowDto;
         private bool _resetEventRuns;
         private readonly WorkflowListViewModel _parent;
-        private readonly IList<string> _roles; 
+        private readonly IList<string> _roles;
+        private readonly IEventConnection _eventConnection;
 
         public string WorkflowId { get { return _workflowDto.Id; } }
 
@@ -28,6 +28,7 @@ namespace Client.ViewModels
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = new WorkflowDto();
             _roles = new List<string>();
+            _eventConnection = new EventConnection();
         }
 
         public WorkflowViewModel(WorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles)
@@ -40,6 +41,7 @@ namespace Client.ViewModels
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = workflowDto;
             _roles = roles;
+            _eventConnection = new EventConnection();
         }
 
         #region Databindings
@@ -172,10 +174,7 @@ namespace Client.ViewModels
             {
                 foreach (var eventViewModel in adminEventList)
                 {
-                    using (IEventConnection connection = new EventConnection(eventViewModel.Uri))
-                    {
-                        await connection.ResetEvent(WorkflowId, eventViewModel.Id);
-                    }
+                    await _eventConnection.ResetEvent(eventViewModel.Uri, WorkflowId, eventViewModel.Id);
                 }
                 NotifyPropertyChanged("");
                 GetEvents();

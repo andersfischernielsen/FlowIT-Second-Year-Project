@@ -7,7 +7,7 @@ namespace Client.Views
     /// <summary>
     /// Interaction logic for LoginView.xaml
     /// </summary>
-    public partial class LoginView : Window
+    public partial class LoginView
     {
         public LoginView()
         {
@@ -15,13 +15,15 @@ namespace Client.Views
             var vm = new LoginViewModel(); // this creates an instance of the ViewModel
             DataContext = vm; // this sets the newly created ViewModel as the DataContext for the View
             if (vm.CloseAction == null)
-                vm.CloseAction = Close;
+                vm.CloseAction += Close;
         }
 
         private void Password_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (this.DataContext != null)
-            { ((LoginViewModel)DataContext).Password = ((PasswordBox)sender).Password; }
+            if (DataContext != null)
+            {
+                ((LoginViewModel)DataContext).Password = ((PasswordBox)sender).Password;
+            }
         }
     }
 }

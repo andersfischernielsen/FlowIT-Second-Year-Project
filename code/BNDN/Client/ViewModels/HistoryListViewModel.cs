@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Client.Connections;
 using Client.Exceptions;
-using Common;
 using Common.DTO.Shared;
 using Common.Exceptions;
 
@@ -14,14 +13,16 @@ namespace Client.ViewModels
 {
     public class HistoryListViewModel : ViewModelBase
     {
-        private readonly Uri _serverAddress;
+        private readonly IServerConnection _serverConnection;
+        private readonly IEventConnection _eventConnection;
 
         public HistoryListViewModel()
         {
             HistoryViewModelList = new ObservableCollection<HistoryViewModel>();
-
             var settings = Settings.LoadSettings();
-            _serverAddress = new Uri(settings.ServerAddress);
+            var serverAddress = new Uri(settings.ServerAddress);
+            _serverConnection = new ServerConnection(serverAddress);
+            _eventConnection = new EventConnection();
         }
 
         public HistoryListViewModel(string workflowId)
@@ -30,7 +31,21 @@ namespace Client.ViewModels
             WorkflowId = workflowId;
 
             var settings = Settings.LoadSettings();
-            _serverAddress = new Uri(settings.ServerAddress);
+            var serverAddress = new Uri(settings.ServerAddress);
+
+            _serverConnection = new ServerConnection(serverAddress);
+            _eventConnection = new EventConnection();
+
+            GetHistory();
+        }
+
+        public HistoryListViewModel(string workflowId, IServerConnection serverConnection, IEventConnection eventConnection)
+        {
+            HistoryViewModelList = new ObservableCollection<HistoryViewModel>();
+            WorkflowId = workflowId;
+
+            _serverConnection = serverConnection;
+            _eventConnection = eventConnection;
 
             GetHistory();
         }
@@ -82,17 +97,14 @@ namespace Client.ViewModels
             try
             {
                 // create a server connection
-                using (IServerConnection serverConnection = new ServerConnection(_serverAddress))
-                {
-                    // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
-                    eventAddresses = await serverConnection.GetEventsFromWorkflow(WorkflowId);
+                // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
+                eventAddresses = await _serverConnection.GetEventsFromWorkflow(WorkflowId);
 
-                    // add the history of the server
-                    history =
-                        new ConcurrentBag<HistoryViewModel>(
-                            (await serverConnection.GetHistory(WorkflowId)).Select(
-                                dto => new HistoryViewModel(dto) {Title = WorkflowId}));
-                }
+                // add the history of the server
+                history =
+                    new ConcurrentBag<HistoryViewModel>(
+                        (await _serverConnection.GetHistory(WorkflowId)).Select(
+                            dto => new HistoryViewModel(dto) { Title = WorkflowId }));
             }
             catch (NotFoundException)
             {
@@ -112,13 +124,10 @@ namespace Client.ViewModels
 
             var tasks = eventAddresses.Select(async dto =>
             {
-                using (IEventConnection eventConnection = new EventConnection(dto.Uri))
-                {
-                    var list =
-                        (await eventConnection.GetHistory(WorkflowId, dto.Id)).Select(
-                            historyDto => new HistoryViewModel(historyDto) {Title = dto.Id});
-                    list.ToList().ForEach(history.Add);
-                }
+                var list =
+                    (await _eventConnection.GetHistory(dto.Uri, WorkflowId, dto.Id)).Select(
+                        historyDto => new HistoryViewModel(historyDto) { Title = dto.Id });
+                list.ToList().ForEach(history.Add);
             });
 
             try
