@@ -19,6 +19,7 @@ namespace Client.ViewModels
         private readonly IWorkflowListViewModel _parent;
         private readonly IList<string> _roles;
         private readonly IEventConnection _eventConnection;
+        private readonly IServerConnection _serverConnection;
 
         public string WorkflowId { get { return _workflowDto.Id; } }
 
@@ -29,11 +30,12 @@ namespace Client.ViewModels
             _workflowDto = new WorkflowDto();
             _roles = new List<string>();
             _eventConnection = new EventConnection();
+            _serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
         }
 
         public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles)
         {
-            if (parent == null || workflowDto == null || roles == null )
+            if (parent == null || workflowDto == null || roles == null)
             {
                 throw new ArgumentNullException();
             }
@@ -42,15 +44,17 @@ namespace Client.ViewModels
             _workflowDto = workflowDto;
             _roles = roles;
             _eventConnection = new EventConnection();
+            _serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
         }
 
         public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles,
-            IEventConnection eventConnection, ObservableCollection<EventViewModel> eventList)
+            IEventConnection eventConnection, IServerConnection serverConnection, ObservableCollection<EventViewModel> eventList)
         {
             _parent = parent;
             _workflowDto = workflowDto;
             _roles = roles;
             _eventConnection = eventConnection;
+            _serverConnection = serverConnection;
             EventList = eventList;
         }
 
@@ -105,22 +109,16 @@ namespace Client.ViewModels
             SelectedEventViewModel = null;
             EventList.Clear();
 
-            var settings = Settings.LoadSettings();
-
-            List<EventViewModel> events;
-            using (IServerConnection connection = new ServerConnection(new Uri(settings.ServerAddress)))
-            {
-                events = (await connection.GetEventsFromWorkflow(WorkflowId))
+            var events = (await _serverConnection.GetEventsFromWorkflow(WorkflowId))
                 .AsParallel()
                 .Where(e => e.Roles.Intersect(_roles).Any()) //Only selects the events, the current user can execute
                 .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
                 .ToList();
-            }
-            
+
             EventList = new ObservableCollection<EventViewModel>(events);
 
             SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
-            
+
             NotifyPropertyChanged("");
         }
 
@@ -154,11 +152,7 @@ namespace Client.ViewModels
             IEnumerable<EventAddressDto> adminEventList;
             try
             {
-                using (IServerConnection serverConnection =
-                    new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress)))
-                {
-                    adminEventList = (await serverConnection.GetEventsFromWorkflow(WorkflowId));
-                }
+                adminEventList = (await _serverConnection.GetEventsFromWorkflow(WorkflowId));
             }
             catch (NotFoundException)
             {
@@ -178,7 +172,7 @@ namespace Client.ViewModels
                 _resetEventRuns = false;
                 return;
             }
-            
+
             // Reset all the events.
             try
             {

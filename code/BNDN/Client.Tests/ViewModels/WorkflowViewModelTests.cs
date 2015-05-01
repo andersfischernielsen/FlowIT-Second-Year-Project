@@ -18,6 +18,7 @@ namespace Client.Tests.ViewModels
         private WorkflowViewModel _model;
         private Mock<IWorkflowListViewModel> _workflowListViewModelMock;
         private Mock<IEventConnection> _eventConnectionMock;
+        private Mock<IServerConnection> _serverConnectionMock;
         private WorkflowDto _dto;
         private IList<string> _rolesList;
         private ObservableCollection<EventViewModel> _eventList;
@@ -30,13 +31,15 @@ namespace Client.Tests.ViewModels
 
             _eventConnectionMock = new Mock<IEventConnection>(MockBehavior.Strict);
 
+            _serverConnectionMock = new Mock<IServerConnection>(MockBehavior.Strict);
+
             _eventList = new ObservableCollection<EventViewModel>();
 
             _rolesList = new List<string>();
 
             _dto = new WorkflowDto {Id = "WorkflowId", Name = "WorkflowName"};
 
-            _model = new WorkflowViewModel(_workflowListViewModelMock.Object, _dto, _rolesList, _eventConnectionMock.Object, _eventList);
+            _model = new WorkflowViewModel(_workflowListViewModelMock.Object, _dto, _rolesList, _eventConnectionMock.Object, _serverConnectionMock.Object, _eventList);
         }
 
         #region Constructors
