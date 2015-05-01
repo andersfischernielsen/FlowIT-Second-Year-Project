@@ -16,13 +16,13 @@ namespace Client.ViewModels
     {
         private readonly WorkflowDto _workflowDto;
         private bool _resetEventRuns;
-        private readonly WorkflowListViewModel _parent;
+        private readonly IWorkflowListViewModel _parent;
         private readonly IList<string> _roles;
         private readonly IEventConnection _eventConnection;
 
         public string WorkflowId { get { return _workflowDto.Id; } }
 
-        public WorkflowViewModel(WorkflowListViewModel parent)
+        public WorkflowViewModel(IWorkflowListViewModel parent)
         {
             _parent = parent;
             EventList = new ObservableCollection<EventViewModel>();
@@ -31,7 +31,7 @@ namespace Client.ViewModels
             _eventConnection = new EventConnection();
         }
 
-        public WorkflowViewModel(WorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles)
+        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles)
         {
             if (parent == null || workflowDto == null || roles == null )
             {
@@ -42,6 +42,16 @@ namespace Client.ViewModels
             _workflowDto = workflowDto;
             _roles = roles;
             _eventConnection = new EventConnection();
+        }
+
+        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles,
+            IEventConnection eventConnection, ObservableCollection<EventViewModel> eventList)
+        {
+            _parent = parent;
+            _workflowDto = workflowDto;
+            _roles = roles;
+            _eventConnection = eventConnection;
+            EventList = eventList;
         }
 
         #region Databindings
@@ -194,15 +204,5 @@ namespace Client.ViewModels
             _resetEventRuns = false;
         }
         #endregion
-
-        /// <summary>
-        /// This method is used by the list in the UI to represent each object.
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            //.FormatString(this string myString) is an extension.
-            return Name;
-        }
     }
 }

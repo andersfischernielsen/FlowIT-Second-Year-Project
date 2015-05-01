@@ -176,7 +176,7 @@ namespace Client.ViewModels
             Status = "";
             try
             {
-                _eventStateDto = await _eventConnection.GetState(_eventAddressDto.Uri, _parent.WorkflowId, _eventAddressDto.Id);
+                _eventStateDto = await _eventConnection.GetState(Uri, _parent.WorkflowId, Id);
                 NotifyPropertyChanged("");
             }
             catch (NotFoundException)

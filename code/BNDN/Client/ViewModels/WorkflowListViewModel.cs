@@ -4,12 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Client.Connections;
 using Client.Exceptions;
-using Common;
 using Common.DTO.Event;
 
 namespace Client.ViewModels
 {
-    public class WorkflowListViewModel : ViewModelBase
+    public class WorkflowListViewModel : ViewModelBase, IWorkflowListViewModel
     {
         public Action CloseAction { get; set; }
         private readonly Uri _serverAddress;

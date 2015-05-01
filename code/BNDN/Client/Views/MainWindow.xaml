@@ -19,6 +19,11 @@
             </Grid.RowDefinitions>
             <Label Content="Workflows" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Margin="10,0"/>
             <ListBox Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding WorkflowList}" SelectedItem="{Binding SelectedWorkflowViewModel}" Margin="10,10,10,60">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="viewModels:WorkflowViewModel">
+                        <Label Content="{Binding Name}"></Label>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetEventsOnWorkflow"/>
