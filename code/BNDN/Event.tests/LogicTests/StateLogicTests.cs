@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
@@ -76,16 +75,6 @@ namespace Event.Tests.LogicTests
         }
 
         [Test]
-        public void IsExecuted_Throws_LockedException()
-        {
-            // Arrange
-            _lockingLogicMock.Setup(l => l.IsAllowedToOperate("workflowId", "eventId", "senderId")).ReturnsAsync(false);
-
-            // Assert
-            Assert.Throws<LockedException>(async () => await _stateLogic.IsExecuted("workflowId", "eventId", "senderId"));
-        }
-
-        [Test]
         public void IsExecuted_Throws_NotFoundException()
         {
             // Arrange
@@ -118,19 +107,6 @@ namespace Event.Tests.LogicTests
 
             // Assert
             Assert.IsFalse(await _stateLogic.IsIncluded("workflowId", "eventId", "senderId"));
-        }
-
-        [Test]
-        public void IsIncluded_Throws_LockedException()
-        {
-            // Arrange
-            _lockingLogicMock.Setup(l => l.IsAllowedToOperate("workflowId", "eventId", "senderId")).ReturnsAsync(false);
-
-            // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.IsIncluded("workflowId", "eventId", "senderId"));
-
-            // Assert
-            Assert.Throws<LockedException>(testDelegate);
         }
 
         [Test]
@@ -194,26 +170,6 @@ namespace Event.Tests.LogicTests
         }
 
         [Test]
-        public void GetStateDto_Throws_LockedException()
-        {
-            // Arrange
-            _eventStorageMock.Setup(s => s.GetExecuted("workflowId", "eventId")).ReturnsAsync(false);
-            _eventStorageMock.Setup(s => s.GetIncluded("workflowId", "eventId")).ReturnsAsync(true);
-            _eventStorageMock.Setup(s => s.GetPending("workflowId", "eventId")).ReturnsAsync(false);
-            _eventStorageMock.Setup(s => s.GetName("workflowId", "eventId")).ReturnsAsync("Event Name");
-            _eventStorageMock.Setup(s => s.GetConditions("workflowId", "eventId")).Returns(Task.Run(() =>new HashSet<RelationToOtherEventModel>()));
-
-            // Make the event locked.
-            _lockingLogicMock.Setup(l => l.IsAllowedToOperate("workflowId", "eventId", "senderId")).ReturnsAsync(false);
-
-            // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.GetStateDto("workflowId", "eventId", "senderId"));
-
-            // Assert
-            Assert.Throws<LockedException>(testDelegate);
-        }
-
-        [Test]
         public void GetStateDto_Throws_NotFoundException()
         {
             // Arrange
@@ -229,20 +185,6 @@ namespace Event.Tests.LogicTests
 
         #region Execute
         // Todo: Make tests that takes loops into account.
-        [Test]
-        public void Execute_Throws_LockedException_When_Another_Event_Has_Lock()
-        {
-            // Arrange
-            // Lock the event to another id.
-            _lockingLogicMock.Setup(l => l.IsAllowedToOperate("workflowId", "eventId", "senderId")).ReturnsAsync(false);
-
-            // Act
-            var testDelegate = new TestDelegate(async () => await _stateLogic.GetStateDto("workflowId", "eventId", "senderId"));
-
-            // Throws
-            Assert.Throws<LockedException>(testDelegate);
-        }
-
         [Test]
         public void Execute_Throws_NotAuthorizedException_When_Role_Is_Wrong()
         {

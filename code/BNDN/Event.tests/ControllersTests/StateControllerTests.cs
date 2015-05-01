@@ -613,7 +613,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new UnauthorizedException());
+                .Throws(new UnauthorizedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -627,7 +627,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new UnauthorizedException());
+                .Throws(new UnauthorizedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -642,7 +642,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new LockedException());
+                .Throws(new LockedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -656,7 +656,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new LockedException());
+                .Throws(new LockedException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -671,7 +671,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotFoundException());
+                .Throws(new NotFoundException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -685,7 +685,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotFoundException());
+                .Throws(new NotFoundException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -700,7 +700,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotExecutableException());
+                .Throws(new NotExecutableException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -714,7 +714,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new NotExecutableException());
+                .Throws(new NotExecutableException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -729,7 +729,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToLockOtherEventException());
+                .Throws(new FailedToLockOtherEventException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -743,7 +743,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToLockOtherEventException());
+                .Throws(new FailedToLockOtherEventException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -758,7 +758,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToUnlockOtherEventException());
+                .Throws(new FailedToUnlockOtherEventException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -772,7 +772,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToUnlockOtherEventException());
+                .Throws(new FailedToUnlockOtherEventException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -787,7 +787,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToUpdateStateException());
+                .Throws(new FailedToUpdateStateException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -801,7 +801,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToUpdateStateException());
+                .Throws(new FailedToUpdateStateException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -816,7 +816,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
+                .Throws(new FailedToUpdateStateAtOtherEventException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -830,7 +830,7 @@ namespace Event.Tests.ControllersTests
         {
             // Arrange
             _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
-                .ThrowsAsync(new FailedToUpdateStateAtOtherEventException());
+                .Throws(new FailedToUpdateStateAtOtherEventException());
 
             // Act
             var testDelegate = new TestDelegate(async () => await _stateController.Execute("workflowId", "eventId", new RoleDto()));
@@ -844,27 +844,14 @@ namespace Event.Tests.ControllersTests
         public async Task Execute_Calls_Logic_Execute()
         {
             // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(true).Verifiable();
+            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()))
+                .Returns(Task.Delay(0)).Verifiable();
 
             // Act
             await _stateController.Execute("workflowId", "eventId", new RoleDto());
 
             // Assert
             _stateLogicMock.Verify(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>()), Times.Once());
-        }
-
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Execute_Returns_x(bool x)
-        {
-            // Arrange
-            _stateLogicMock.Setup(sl => sl.Execute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RoleDto>())).ReturnsAsync(x);
-
-            // Act
-            var result = await _stateController.Execute("workflowId", "eventId", new RoleDto());
-
-            // Assert
-            Assert.AreEqual(x, result);
         }
         #endregion
     }
