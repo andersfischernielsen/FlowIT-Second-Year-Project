@@ -199,7 +199,7 @@ namespace Server.Controllers
             }
             catch (ArgumentException e)
             {
-                if (e.ParamName == "user")
+                if (e.ParamName.Equals("user"))
                 {
                     _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                     {
