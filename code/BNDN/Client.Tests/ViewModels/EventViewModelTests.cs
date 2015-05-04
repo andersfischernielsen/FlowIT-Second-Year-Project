@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using Client.Connections;
@@ -405,7 +406,7 @@ namespace Client.Tests.ViewModels
         {
             // Arrange
             _workflowViewModelMock.Setup(wvm => wvm.DisableExecuteButtons()).Returns(Task.Delay(0));
-            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.Delay(0));
 
             // Act
@@ -420,7 +421,7 @@ namespace Client.Tests.ViewModels
         {
             // Arrange
             _workflowViewModelMock.Setup(wvm => wvm.DisableExecuteButtons()).Returns(Task.Delay(0));
-            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .Throws<NotFoundException>();
 
             // Act
@@ -435,7 +436,7 @@ namespace Client.Tests.ViewModels
         {
             // Arrange
             _workflowViewModelMock.Setup(wvm => wvm.DisableExecuteButtons()).Returns(Task.Delay(0));
-            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .Throws<UnauthorizedException>();
 
             // Act
@@ -450,7 +451,7 @@ namespace Client.Tests.ViewModels
         {
             // Arrange
             _workflowViewModelMock.Setup(wvm => wvm.DisableExecuteButtons()).Returns(Task.Delay(0));
-            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .Throws<LockedException>();
 
             // Act
@@ -465,7 +466,7 @@ namespace Client.Tests.ViewModels
         {
             // Arrange
             _workflowViewModelMock.Setup(wvm => wvm.DisableExecuteButtons()).Returns(Task.Delay(0));
-            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .Throws<NotExecutableException>();
 
             // Act
@@ -480,7 +481,7 @@ namespace Client.Tests.ViewModels
         {
             // Arrange
             _workflowViewModelMock.Setup(wvm => wvm.DisableExecuteButtons()).Returns(Task.Delay(0));
-            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .Throws(new HostNotFoundException(new Exception()));
 
             // Act
@@ -495,7 +496,7 @@ namespace Client.Tests.ViewModels
         {
             // Arrange
             _workflowViewModelMock.Setup(wvm => wvm.DisableExecuteButtons()).Returns(Task.Delay(0));
-            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+            _eventConnectionMock.Setup(conn => conn.Execute(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .Throws(new Exception("Message"));
 
             // Act
