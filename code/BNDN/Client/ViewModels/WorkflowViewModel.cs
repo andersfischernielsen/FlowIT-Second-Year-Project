@@ -37,7 +37,7 @@ namespace Client.ViewModels
             _serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
         }
 
-        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, ICollection<string> roles,
+        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IEnumerable<string> roles,
             IEventConnection eventConnection, IServerConnection serverConnection, ObservableCollection<EventViewModel> eventList)
         {
             _parent = parent;
