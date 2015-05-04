@@ -227,5 +227,44 @@ namespace Event.Tests.ControllersTests
             Assert.AreEqual(@event.OwnUri, eventInList.OwnUri);
             Assert.AreEqual(@event.Pending, eventInList.Pending);
         }
+        
+        [Test]
+        public void TestDeleteEvent() {
+            //Setup.
+            var @event = new EventModel
+            {
+                WorkflowId = ")(!&lkjasdkøåøæ+*¨´           $$§§",
+                Id = ")(!&lkjasdkøåøæ+*¨´           $$§§",
+                Executed = true,
+                Included = true,
+                Name = ")(!&lkjasdkøåøæ+*¨´           $$§§",
+                OwnUri = "http://testing.com/",
+                Pending = true, 
+            };
+
+            var testRoles = new List<EventRoleModel> { new EventRoleModel { Event = @event, WorkflowId = @")(!&lkjasdkøåøæ+*¨´           $$§§", EventId = ")(!&lkjasdkøåøæ+*¨´           $$§§", Role = ")(!&lkjasdkøåøæ+*¨´           $$§§"} };
+            var conditionUris = new List<ConditionUri> { new ConditionUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+            var exclusionUris = new List<ExclusionUri> { new ExclusionUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+            var inclusionUris = new List<InclusionUri> { new InclusionUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+            var responseUris = new List<ResponseUri> { new ResponseUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+
+            @event.Roles = testRoles;
+            @event.ConditionUris = conditionUris;
+            @event.ExclusionUris = exclusionUris;
+            @event.InclusionUris = inclusionUris;
+            @event.ResponseUris = responseUris;
+            
+            _eventTestList.Add(@event);
+ 
+            //Execute.
+            _toTest.DeleteEvent(")(!&lkjasdkøåøæ+*¨´           $$§§", ")(!&lkjasdkøåøæ+*¨´           $$§§");
+            _toTest.DeleteEvent("notExisting", "notExistingEither");
+            _toTest.DeleteEvent(null, null);
+            _toTest.DeleteEvent("", "");
+            
+            //Assert.
+            _lifecycleMock.Verify(m => m.CreateEvent(It.IsAny<EventDto>(), It.IsAny<Uri>()), Times.Once);
+            Assert.IsFalse(_eventTestList.Any()); //The list is now empty.
+        }
     }
 }
