@@ -23,24 +23,26 @@ namespace Event.Tests.ControllersTests
         private IList<HistoryModel> _historyTestList;
         private IList<EventModel> _eventTestList;
         private LifecycleController _toTest;
-            
+        private Mock<IEventHistoryLogic> _historyMock;
+        private Mock<ILifecycleLogic> _lifecycleMock;
+
         [TestFixtureSetUp]
         public void SetUp()
         {
             ResetLists();
-            var historyMock = new Mock<IEventHistoryLogic>(MockBehavior.Strict);
-            var lifecycleMock = new Mock<ILifecycleLogic>(MockBehavior.Strict);
+            _historyMock = new Mock<IEventHistoryLogic>(MockBehavior.Strict);
+            _lifecycleMock = new Mock<ILifecycleLogic>(MockBehavior.Strict);
 
-            historyMock.Setup(l => l.GetHistoryForEvent(It.IsAny<string>(), It.IsAny<string>()))
+            _historyMock.Setup(l => l.GetHistoryForEvent(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns((string wId, string eId) => Task.Run( () => 
                 {
                     var models = _historyTestList.Where(x => x.EventId == eId && x.WorkflowId == wId).ToList();
                     var dtos = new List<HistoryDto>();
                     models.ForEach(x => dtos.Add(new HistoryDto(x)));
                     return dtos.AsEnumerable();
-                }));
+                })).Verifiable();
 
-            historyMock.Setup(l => l.SaveException(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            _historyMock.Setup(l => l.SaveException(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Returns((Exception e, string request, string method, string eId, string wId) =>
                     {
                        return Task.Run( () => _historyTestList.Add(new HistoryModel
@@ -48,9 +50,9 @@ namespace Event.Tests.ControllersTests
                            EventId = eId, WorkflowId = wId, HttpRequestType = request, Message = e.GetType().ToString(), MethodCalledOnSender = method
                        }));
                     }
-                );
+                ).Verifiable();
 
-            historyMock.Setup(l => l.SaveSuccesfullCall(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            _historyMock.Setup(l => l.SaveSuccesfullCall(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Returns((string request, string method, string eId, string wId) =>
                     {
                         return Task.Run( () => 
@@ -63,12 +65,12 @@ namespace Event.Tests.ControllersTests
                             MethodCalledOnSender = method
                         }));
                     }
-                );
+                ).Verifiable();
 
-            lifecycleMock.Setup(m => m.CreateEvent(It.IsAny<EventDto>(), It.IsAny<Uri>()))
-                .Returns((EventDto dto, Uri uri) => Task.Run(() => _eventTestList.Add(ConvertDtoToEventModel(dto, uri))));
+            _lifecycleMock.Setup(m => m.CreateEvent(It.IsAny<EventDto>(), It.IsAny<Uri>()))
+                .Returns((EventDto dto, Uri uri) => Task.Run(() => _eventTestList.Add(ConvertDtoToEventModel(dto, uri)))).Verifiable();
 
-            lifecycleMock.Setup(m => m.DeleteEvent(It.IsAny<string>(), It.IsAny<string>()))
+            _lifecycleMock.Setup(m => m.DeleteEvent(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns((string workflowId, string eventId) =>
                 {
                     return Task.Run(() =>
@@ -76,19 +78,19 @@ namespace Event.Tests.ControllersTests
                         var toRemove = _eventTestList.FirstOrDefault(e => e.WorkflowId == workflowId && e.Id == eventId);
                         if (toRemove != null) _eventTestList.Remove(toRemove);
                     });
-                });
+                }).Verifiable();
 
-            lifecycleMock.Setup(m => m.GetEventDto(It.IsAny<string>(), It.IsAny<string>()))
+            _lifecycleMock.Setup(m => m.GetEventDto(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns((string workflowId, string eventId) =>
                 {
                     return Task.Run(() => _eventTestList.Where(e => e.Id == eventId && e.WorkflowId == workflowId)
                         .Select(e => ConvertEventModelToDto(e, workflowId, eventId)).First());
                 });
 
-            lifecycleMock.Setup(m => m.ResetEvent(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.Run(() => true));
+            _lifecycleMock.Setup(m => m.ResetEvent(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Run(() => true)).Verifiable();
 
-            _toTest = new LifecycleController(lifecycleMock.Object, historyMock.Object);
+            _toTest = new LifecycleController(_lifecycleMock.Object, _historyMock.Object);
         }
 
         private static EventModel ConvertDtoToEventModel(EventDto dto, Uri uri)
@@ -208,6 +210,7 @@ namespace Event.Tests.ControllersTests
             await _toTest.CreateEvent(ConvertEventModelToDto(@event, ")(!&lkjasdkøåøæ+*¨´           $$§§", ")(!&lkjasdkøåøæ+*¨´           $$§§"));
 
             //Assert.
+            _lifecycleMock.Verify(m => m.CreateEvent(It.IsAny<EventDto>(), It.IsAny<Uri>()), Times.Once);
             Assert.IsTrue(_eventTestList.Any()); //The list now has an EventModel.
 
             var eventInList = _eventTestList.First();
