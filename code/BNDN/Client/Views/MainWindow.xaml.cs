@@ -8,7 +8,7 @@ namespace Client.Views
     /// </summary>
     public partial class MainWindow
     {
-        public MainWindow(Dictionary<string, IList<string>> rolesOnWorkflows)
+        public MainWindow(Dictionary<string, ICollection<string>> rolesOnWorkflows)
         {
             var vm = new WorkflowListViewModel(rolesOnWorkflows);
             DataContext = vm;

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using Client.Connections;
 using Client.Exceptions;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.Server;
 using Common.DTO.Shared;
@@ -88,7 +87,7 @@ namespace Client.Tests
             // Arrange
             var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
 
-            var rolesOnWorkflows = new Dictionary<string, IList<string>>
+            var rolesOnWorkflows = new Dictionary<string, ICollection<string>>
             {
                 {
                     "course", new List<string>

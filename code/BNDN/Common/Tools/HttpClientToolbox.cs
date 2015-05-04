@@ -142,7 +142,7 @@ namespace Common.Tools
         /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
         /// <exception cref="HttpRequestException">If the host wasn't found.</exception>
-        public virtual async Task<IList<T>> ReadList<T>(string uri)
+        public virtual async Task<IEnumerable<T>> ReadList<T>(string uri)
         {
             var response = await HttpClient.GetAsync(uri);
             await EnsureSuccessStatusCode(response);

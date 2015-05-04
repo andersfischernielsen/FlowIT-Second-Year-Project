@@ -6,6 +6,6 @@ namespace Common.DTO.Event
     public class RoleDto
     {
         [Required]
-        public IList<string> Roles { get; set; }
+        public IEnumerable<string> Roles { get; set; }
     }
 }
