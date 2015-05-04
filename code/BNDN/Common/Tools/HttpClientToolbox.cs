@@ -209,7 +209,7 @@ namespace Common.Tools
             await EnsureSuccessStatusCode(response);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             HttpClient.Dispose();
         }

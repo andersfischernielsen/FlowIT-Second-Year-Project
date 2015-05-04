@@ -5,6 +5,7 @@ using System.Net.Http;
 using Client.Connections;
 using Client.Exceptions;
 using Common.DTO.Event;
+using Common.DTO.History;
 using Common.DTO.Server;
 using Common.DTO.Shared;
 using Common.Exceptions;
@@ -12,36 +13,65 @@ using Common.Tools;
 using Moq;
 using NUnit.Framework;
 
-namespace Client.Tests
+namespace Client.Tests.Connections
 {
     [TestFixture]
     public class ServerConnectionTests
     {
+        private ServerConnection _connection;
+        private Mock<HttpClientToolbox> _toolboxMock;
+        private List<WorkflowDto> _workflowDtos;
+        private List<EventAddressDto> _eventAddressDtos;
+        private List<HistoryDto> _historyDtos;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _workflowDtos = new List<WorkflowDto>();
+            _eventAddressDtos = new List<EventAddressDto>();
+            _historyDtos = new List<HistoryDto>();
+
+            _toolboxMock = new Mock<HttpClientToolbox>(MockBehavior.Strict);
+            _toolboxMock.Setup(t => t.ReadList<WorkflowDto>(It.IsAny<string>())).ReturnsAsync(_workflowDtos);
+            _toolboxMock.Setup(t => t.ReadList<EventAddressDto>(It.IsAny<string>())).ReturnsAsync(_eventAddressDtos);
+            _toolboxMock.Setup(t => t.ReadList<HistoryDto>(It.IsAny<string>())).ReturnsAsync(_historyDtos);
+
+            _connection = new ServerConnection(_toolboxMock.Object);
+        }
+
+        [Test]
+        public void Dispose_Test()
+        {
+            // Arrange
+            _toolboxMock.Setup(t => t.Dispose()).Verifiable();
+
+            // Act
+            using (_connection)
+            {
+                // Do nothing.
+            }
+
+            // Assert
+            _toolboxMock.Verify(t => t.Dispose(), Times.Once);
+        }
 
         [Test]
         public async void GetWorkflows_Ok()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-            var workflowlist = new List<WorkflowDto>
+            _workflowDtos.Add(new WorkflowDto
             {
-                new WorkflowDto
-                {
-                    Id = "course",
-                    Name = "Course Workflow"
-                },
-                new WorkflowDto
-                {
-                    Id = "gasstation",
-                    Name = "Gas station Workflow"
-                }
-            };
-            m.Setup(t => t.ReadList<WorkflowDto>(It.IsAny<string>())).ReturnsAsync(workflowlist);
-
-            var serverConnection = new ServerConnection(m.Object);
+                Id = "course",
+                Name = "Course Workflow"
+            });
+            _workflowDtos.Add(new WorkflowDto
+            {
+                Id = "gasstation",
+                Name = "Gas station Workflow"
+            });
 
             // Act
-            var workflows = await serverConnection.GetWorkflows();
+            var workflows = await _connection.GetWorkflows();
 
             // Assert
             Assert.IsNotNull(workflows);
@@ -52,13 +82,10 @@ namespace Client.Tests
         public void GetWorkflows_Throws()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-            m.Setup(t => t.ReadList<WorkflowDto>(It.IsAny<string>())).ThrowsAsync(new HttpRequestException());
-
-            var serverConnection = new ServerConnection(m.Object);
+            _toolboxMock.Setup(t => t.ReadList<WorkflowDto>(It.IsAny<string>())).ThrowsAsync(new HttpRequestException());
 
             // Act
-            var testDelegate = new TestDelegate(async () => await serverConnection.GetWorkflows());
+            var testDelegate = new TestDelegate(async () => await _connection.GetWorkflows());
 
             // Assert
             Assert.Throws<HostNotFoundException>(testDelegate);
@@ -68,13 +95,10 @@ namespace Client.Tests
         public async void GetWorkflows_Empty()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-            m.Setup(t => t.ReadList<WorkflowDto>(It.IsAny<string>())).ReturnsAsync(new List<WorkflowDto>());
-
-            var serverConnection = new ServerConnection(m.Object);
+            _toolboxMock.Setup(t => t.ReadList<WorkflowDto>(It.IsAny<string>())).ReturnsAsync(new List<WorkflowDto>());
 
             // Act
-            var workflows = await serverConnection.GetWorkflows();
+            var workflows = await _connection.GetWorkflows();
 
             // Assert
             Assert.IsNotNull(workflows);
@@ -85,8 +109,6 @@ namespace Client.Tests
         public async void Login_Success()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-
             var rolesOnWorkflows = new Dictionary<string, ICollection<string>>
             {
                 {
@@ -102,13 +124,11 @@ namespace Client.Tests
                 RolesOnWorkflows = rolesOnWorkflows
             };
 
-            m.Setup(t => t.Create<LoginDto, RolesOnWorkflowsDto>(It.IsAny<string>(), It.IsAny<LoginDto>()))
+            _toolboxMock.Setup(t => t.Create<LoginDto, RolesOnWorkflowsDto>(It.IsAny<string>(), It.IsAny<LoginDto>()))
                 .ReturnsAsync(rolesOnWorkflowDto);
 
-            var serverConnection = new ServerConnection(m.Object);
-
             // Act
-            var rolesOnWorkflow = await serverConnection.Login("testy-testy", "testy-password");
+            var rolesOnWorkflow = await _connection.Login("testy-testy", "testy-password");
 
             // Assert
             Assert.IsNotNull(rolesOnWorkflow);
@@ -116,54 +136,55 @@ namespace Client.Tests
         }
 
         [Test]
-        public void Login_Error()
+        public void Login_Failed()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-
-            m.Setup(t => t.Create<LoginDto, RolesOnWorkflowsDto>(It.IsAny<string>(), It.IsAny<LoginDto>()))
+            _toolboxMock.Setup(t => t.Create<LoginDto, RolesOnWorkflowsDto>(It.IsAny<string>(), It.IsAny<LoginDto>()))
                 .ThrowsAsync(new UnauthorizedException());
 
-            var serverConnection = new ServerConnection(m.Object);
-
             // Act
-            var testDelegate = new TestDelegate(async () => await serverConnection.Login("wrongUsername", "wrongPassword"));
+            var testDelegate = new TestDelegate(async () => await _connection.Login("wrongUsername", "wrongPassword"));
 
             // Assert
             Assert.Throws<LoginFailedException>(testDelegate);
         }
 
         [Test]
+        public void Login_HostNotFound()
+        {
+            // Arrange
+            _toolboxMock.Setup(t => t.Create<LoginDto, RolesOnWorkflowsDto>(It.IsAny<string>(), It.IsAny<LoginDto>()))
+                .ThrowsAsync(new HttpRequestException());
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _connection.Login("wrongUsername", "wrongPassword"));
+
+            // Assert
+            Assert.Throws<HostNotFoundException>(testDelegate);
+        }
+
+        [Test]
         public async void GetEventsFromWorkflow_Returns_Events()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-
-            var list = new List<EventAddressDto>
+            _eventAddressDtos.Add(new EventAddressDto
             {
-                new EventAddressDto
-                {
-                    Id = "register",
-                    Uri = new Uri("http://localhost:13752")
-                },
-                new EventAddressDto
-                {
-                    Id = "pass",
-                    Uri = new Uri("http://localhost:13753")
-                },
-                new EventAddressDto
-                {
-                    Id = "fail",
-                    Uri = new Uri("http://localhost:13754")
-                }
-            };
-
-            m.Setup(t => t.ReadList<EventAddressDto>(It.IsAny<string>())).ReturnsAsync(list);
-
-            var serverConnection = new ServerConnection(m.Object);
-
+                Id = "register",
+                Uri = new Uri("http://localhost:13752")
+            });
+            _eventAddressDtos.Add(new EventAddressDto
+            {
+                Id = "pass",
+                Uri = new Uri("http://localhost:13753")
+            });
+            _eventAddressDtos.Add(new EventAddressDto
+            {
+                Id = "fail",
+                Uri = new Uri("http://localhost:13754")
+            });
+            
             // Act
-            var result = await serverConnection.GetEventsFromWorkflow("course");
+            var result = await _connection.GetEventsFromWorkflow("course");
 
             // Assert
             Assert.IsNotNull(result);
@@ -174,14 +195,9 @@ namespace Client.Tests
         public async void GetEventsFromWorkflow_Returns_Empty()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-
-            m.Setup(t => t.ReadList<EventAddressDto>(It.IsAny<string>())).ReturnsAsync(new List<EventAddressDto>());
-
-            var serverConnection = new ServerConnection(m.Object);
 
             // Act
-            var result = await serverConnection.GetEventsFromWorkflow("course");
+            var result = await _connection.GetEventsFromWorkflow("course");
 
             // Assert
             Assert.IsNotNull(result);
@@ -192,18 +208,59 @@ namespace Client.Tests
         public void GetEventsFromWorkflow_Throws_Exception()
         {
             // Arrange
-            var m = new Mock<HttpClientToolbox>(new Uri("http://someUri/"), null);
-
-            m.Setup(t => t.ReadList<EventAddressDto>(It.IsAny<string>()))
+            _toolboxMock.Setup(t => t.ReadList<EventAddressDto>(It.IsAny<string>()))
                 .Throws(new HttpRequestException()); //no message, we expect the HostNotFoundException exception
 
-            var serverConnection = new ServerConnection(m.Object);
-
             // Act
-            var testDelegate = new TestDelegate(async () => await serverConnection.GetEventsFromWorkflow("course"));
+            var testDelegate = new TestDelegate(async () => await _connection.GetEventsFromWorkflow("course"));
 
             // Assert
             Assert.Throws<HostNotFoundException>(testDelegate);
+        }
+
+        [Test]
+        public async void GetHistory_Ok()
+        {
+            // Arrange
+            _historyDtos.Add(new HistoryDto
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId"
+            });
+
+            // Act
+            var history = await _connection.GetHistory("workflowId");
+
+            // Assert
+            Assert.IsNotNull(history);
+            Assert.IsNotEmpty(history);
+        }
+
+        [Test]
+        public void GetHistory_Throws()
+        {
+            // Arrange
+            _toolboxMock.Setup(t => t.ReadList<HistoryDto>(It.IsAny<string>())).ThrowsAsync(new HttpRequestException());
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _connection.GetHistory("workflowId"));
+
+            // Assert
+            Assert.Throws<HostNotFoundException>(testDelegate);
+        }
+
+        [Test]
+        public async void GetHistory_Empty()
+        {
+            // Arrange
+            _toolboxMock.Setup(t => t.ReadList<HistoryDto>(It.IsAny<string>())).ReturnsAsync(new List<HistoryDto>());
+
+            // Act
+            var workflows = await _connection.GetHistory("workflowId");
+
+            // Assert
+            Assert.IsNotNull(workflows);
+            Assert.IsEmpty(workflows);
         }
     }
 }
