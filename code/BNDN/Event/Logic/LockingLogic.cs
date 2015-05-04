@@ -137,7 +137,7 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
-            CheckIfEventIsLocked(workflowId, eventId, lockDto); // refactored into its own method.
+            await CheckIfEventIsLocked(workflowId, eventId, lockDto); // refactored into its own method.
 
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
         }
