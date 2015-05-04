@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Exceptions;
@@ -38,6 +39,44 @@ namespace Event.Tests.LogicTests
 
 
         #region WaitForMyTurn Tests
+
+        [TestCase("AnotherWid","Eid")]
+        [TestCase("AnotherWid", "AnotherEid")]
+        [TestCase("Wid", "AnotherEid")]
+        public async void WaitForMyTurn_Succes_EmptyQueueLockEntersAndLeaves(string alreadyWid, string alreadyEid)
+        {
+            //Arrange
+            ILockingLogic lockingLogic = SetupDefaultLockingLogic();
+
+            string eventId = "Eid";
+            string workflowId = "Wid";
+
+            var eventDictionary = LockingLogic.LockQueue.GetOrAdd(alreadyWid, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(alreadyEid, new ConcurrentQueue<LockDto>());
+            queue.Enqueue(new LockDto { WorkflowId = alreadyWid, EventId = alreadyEid, LockOwner = "AlreadyThereOwner" });
+
+            LockDto lockDto = new LockDto { EventId = eventId, LockOwner = "LockOwner", WorkflowId = workflowId };
+            //Act
+            await lockingLogic.WaitForMyTurn(workflowId, eventId, lockDto);
+            //Assert
+            Assert.IsEmpty(LockingLogic.LockQueue[workflowId][eventId]);
+            //Cleanup
+            LockingLogic.LockQueue.Clear();
+        }
+
+        [Test]
+        public async void WaitForMyTurn_Succes_OtherLocksOnOtherWorkflowsExist()
+        {
+            //Arrange
+            ILockingLogic lockingLogic = SetupDefaultLockingLogic();
+            LockDto lockDto = new LockDto { EventId = "Eid", LockOwner = "LockOwner", WorkflowId = "Wid" };
+            //Act
+            await lockingLogic.WaitForMyTurn("Wid", "Eid", lockDto);
+            //Assert
+            Assert.IsEmpty(LockingLogic.LockQueue["Wid"]["Eid"]);
+            //Cleanup
+            LockingLogic.LockQueue.Clear();
+        }
 
         [TestCase(null,"")]
         [TestCase("", null)]
@@ -85,6 +124,44 @@ namespace Event.Tests.LogicTests
             //Cleanup
             LockingLogic.LockQueue.Clear();
         }
+
+        [Test]
+        public async void WaitForMyTurn_QueueHasAnElementWhichDoesNotGetRemoved()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+            var lockDtoToReturnFromStorage = new LockDto
+            {
+                WorkflowId = "Wid",
+                EventId = "Eid",
+                LockOwner = "AlreadyThereOwner"          // Notice, AlreadyThereOwner will be the lockOwner according to Storage!
+            };
+
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(lockDtoToReturnFromStorage);
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            string eventId = "Eid";
+            string workflowId = "Wid";
+
+            var eventDictionary = LockingLogic.LockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
+            queue.Enqueue(new LockDto { WorkflowId = workflowId, EventId = eventId, LockOwner = "AlreadyThereOwner"});
+
+            LockDto lockDto = new LockDto { EventId = eventId, LockOwner = "LockOwner", WorkflowId = workflowId };
+            //Act
+            var testDelegate = new TestDelegate(async () => await lockingLogic.WaitForMyTurn(workflowId, eventId, lockDto));
+            //Assert
+            Assert.Throws<LockedException>(testDelegate);
+            //Cleanup
+            LockingLogic.LockQueue.Clear();
+        }
+
         #endregion
 
         #region IsAllowedToOperate tests
