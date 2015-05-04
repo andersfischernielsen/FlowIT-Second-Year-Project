@@ -12,9 +12,9 @@ namespace Client.ViewModels
     {
         public Action CloseAction { get; set; }
         private readonly Uri _serverAddress;
-        private readonly Dictionary<string, IList<string>> _rolesForWorkflows;
+        private readonly Dictionary<string, ICollection<string>> _rolesForWorkflows;
 
-        public WorkflowListViewModel(Dictionary<string, IList<string>> rolesForWorkflows)
+        public WorkflowListViewModel(Dictionary<string, ICollection<string>> rolesForWorkflows)
         {
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
 
@@ -56,7 +56,7 @@ namespace Client.ViewModels
             }
         }
 
-        public Dictionary<string, IList<string>> RolesForWorkflows
+        public Dictionary<string, ICollection<string>> RolesForWorkflows
         {
             get { return _rolesForWorkflows; }
         }
@@ -75,7 +75,7 @@ namespace Client.ViewModels
             SelectedWorkflowViewModel = null;
             WorkflowList.Clear();
 
-            IList<WorkflowDto> workflows;
+            IEnumerable<WorkflowDto> workflows;
             using (IServerConnection connection = new ServerConnection(_serverAddress))
             {
                 try
@@ -98,7 +98,7 @@ namespace Client.ViewModels
 
             foreach (var workflowDto in workflows)
             {
-                IList<string> roles;
+                ICollection<string> roles;
                 if (!_rolesForWorkflows.TryGetValue(workflowDto.Id, out roles))
                 {
                     // The user has no roles associated with this workflow.

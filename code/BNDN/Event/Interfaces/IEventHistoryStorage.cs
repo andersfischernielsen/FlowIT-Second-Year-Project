@@ -22,8 +22,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Retrieves the History for a specified Event as an IQueryable.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to.</param>
-        /// <param name="eventId">Id of the Event, whose history is to be retrieved.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to.</param>
+        /// <param name="eventId">EventId of the Event, whose history is to be retrieved.</param>
         /// <returns></returns>
         /// <exception cref="NotFoundException">Thrown if the specified Event does not exist.</exception>
         Task<IQueryable<HistoryModel>> GetHistoryForEvent(string workflowId, string eventId);

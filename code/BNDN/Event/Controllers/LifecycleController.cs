@@ -170,7 +170,7 @@ namespace Event.Controllers
         /// to their initial values, and reset any locks!. 
         /// </summary>
         /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
-        /// <param name="eventId">Id of the Event, that is to be reset</param>
+        /// <param name="eventId">EventId of the Event, that is to be reset</param>
         /// <returns></returns>
         [Route("events/{workflowId}/{eventId}/reset")]
         [HttpPut]

@@ -159,7 +159,7 @@ namespace Event.Tests.LogicTests
             {
                 LockOwner = "AnotherEventWhoLockedMeId",
                 WorkflowId = "workflowId", 
-                Id = "AnotherEventWhoLockedMeId"
+                EventId = "AnotherEventWhoLockedMeId"
             }));
 
             var mockResetStorage = new Mock<IEventStorageForReset>();

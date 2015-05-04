@@ -23,8 +23,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Will attempt to Delete the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event to be deleted</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="LockedException">Thrown if the Event is currently locked</exception>
@@ -33,8 +33,8 @@ namespace Event.Interfaces
         /// <summary>
         /// ResetEvent will bruteforce reset this Event, regardless of whether it is currently locked
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event to be deleted</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
         Task ResetEvent(string workflowId, string eventId);
@@ -42,8 +42,8 @@ namespace Event.Interfaces
         /// <summary>
         /// GetEventDto returns an EventDto representing the Event matching the given workflowId and EventId.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event to be deleted</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if no Event is found, that matches the arguments</exception>

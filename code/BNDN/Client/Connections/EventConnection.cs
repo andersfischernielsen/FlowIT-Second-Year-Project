@@ -107,7 +107,7 @@ namespace Client.Connections
         /// <exception cref="Exception">If an unexpected error happened</exception>
         public async Task Execute(Uri uri, string workflowId, string eventId)
         {
-            IList<string> roles;
+            ICollection<string> roles;
             LoginViewModel.RolesForWorkflows.TryGetValue(workflowId, out roles);
             try
             {

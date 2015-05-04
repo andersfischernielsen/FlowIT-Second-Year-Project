@@ -68,7 +68,7 @@ namespace Event.Logic
                 {
                     WorkflowId = workflowId,
                     LockOwner = senderId,
-                    Id = eventId
+                    EventId = eventId
                 });
             }
 
@@ -94,7 +94,7 @@ namespace Event.Logic
                 {
                     WorkflowId = workflowId,
                     LockOwner = senderId,
-                    Id = eventId
+                    EventId = eventId
                 });
             }
 
@@ -105,9 +105,9 @@ namespace Event.Logic
         /// <summary>
         /// GetStateDto returns an EventStateDto for the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
+        /// <param name="senderId">EventId of the one, who wants this information.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if the provided arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
@@ -131,7 +131,7 @@ namespace Event.Logic
             {
                 await _lockingLogic.WaitForMyTurn(workflowId,eventId,new LockDto()
                 {
-                    Id = eventId,
+                    EventId = eventId,
                     WorkflowId = workflowId,
                     LockOwner = senderId
                 });
@@ -158,8 +158,8 @@ namespace Event.Logic
         /// <summary>
         /// Determines whether an Event can be executed at the moment. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         private async Task<bool> IsExecutable(string workflowId, string eventId)
@@ -235,8 +235,8 @@ namespace Event.Logic
         /// <summary>
         /// Execute attempts to Execute the specified Event. The process includes locking the other events, and updating their state. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <param name="executeDto">Contains the roles, that caller has.</param>
         /// <returns></returns>
         /// <exception cref="LockedException">Thrown if the specified Event is currently locked by someone else</exception>
