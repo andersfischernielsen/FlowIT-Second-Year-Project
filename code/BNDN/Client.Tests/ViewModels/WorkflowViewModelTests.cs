@@ -4,9 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Client.Connections;
+using Client.Exceptions;
 using Client.ViewModels;
 using Common.DTO.Event;
 using Common.DTO.Shared;
+using Common.Exceptions;
 using Moq;
 using NUnit.Framework;
 
@@ -58,12 +60,11 @@ namespace Client.Tests.ViewModels
         public void Test_ConstructorWithLegalArguments()
         {
             //Arrange
-            WorkflowListViewModel workflowListViewModel = new WorkflowListViewModel();
-            WorkflowDto workflowDto = new WorkflowDto();
-            IList<string> roles = new List<string>();
+            var workflowListViewModel = new WorkflowListViewModel();
+            var workflowDto = new WorkflowDto();
 
             //Act
-            var workflowViewModel = new WorkflowViewModel(workflowListViewModel, workflowDto, roles);
+            var workflowViewModel = new WorkflowViewModel(workflowListViewModel, workflowDto, new List<string>());
 
             //Assert
             Assert.IsNotNull(workflowViewModel);
@@ -190,6 +191,198 @@ namespace Client.Tests.ViewModels
 
             // Assert
             Assert.IsTrue(_eventList.All(e => e.Executable == false));
+        }
+
+        [Test]
+        public void ResetWorkflow_Ok()
+        {
+            // Arrange
+            var eventAddressList = new List<EventAddressDto> {new EventAddressDto()};
+
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ReturnsAsync(eventAddressList).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0)).Verifiable();
+
+            // Act
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.AtLeastOnce);
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(eventAddressList.Count));
+        }
+
+        [Test]
+        public void ResetWorkflow_SecondCallReturnsImmediately()
+        {
+            // Arrange
+            var eventAddressList = new List<EventAddressDto> { new EventAddressDto() };
+
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ReturnsAsync(eventAddressList).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0)).Verifiable();
+
+            
+            // Act
+            // One of these calls will hit the boolean-switch which tells the call not to continue.
+            Task.Run(() => _model.ResetWorkflow());
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.AtMost(2));
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(eventAddressList.Count));
+        }
+
+        [Test]
+        public void ResetWorkflow_ServerThrowsNotFound()
+        {
+            // Arrange
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ThrowsAsync(new NotFoundException()).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0)).Verifiable();
+
+            // Act
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.AtLeastOnce);
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            Assert.AreEqual("The workflow wasn't found. Please refresh the list of workflows.", _model.Status);
+        }
+
+        [Test]
+        public void ResetWorkflow_ServerThrowsHostNotFound()
+        {
+            // Arrange
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ThrowsAsync(new HostNotFoundException(new Exception())).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0)).Verifiable();
+
+            // Act
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.AtLeastOnce);
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            Assert.AreEqual("The server is currently unavailable. Please try again later.", _model.Status);
+        }
+
+        [Test]
+        public void ResetWorkflow_ServerThrowsUnknownException()
+        {
+            // Arrange
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ThrowsAsync(new Exception()).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0)).Verifiable();
+
+            // Act
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.AtLeastOnce);
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            Assert.AreEqual("An unexpected error has occurred. Please refresh or try again later.", _model.Status);
+        }
+
+        [Test]
+        public void ResetWorkflow_EventThrowsNotFoundException()
+        {
+            // Arrange
+            var eventAddressList = new List<EventAddressDto> { new EventAddressDto() };
+
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ReturnsAsync(eventAddressList).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Throws(new NotFoundException()).Verifiable();
+
+            // Act
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.Once);
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            Assert.AreEqual("One of the events wasn't found. Please refresh the list of workflows.", _model.Status);
+        }
+
+        [Test]
+        public void ResetWorkflow_EventThrowsHostNotFoundException()
+        {
+            // Arrange
+            var eventAddressList = new List<EventAddressDto> { new EventAddressDto() };
+
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ReturnsAsync(eventAddressList).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Throws(new HostNotFoundException(new Exception())).Verifiable();
+
+            // Act
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.Once);
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            Assert.AreEqual("An event-server is currently unavailable. Please try again later.", _model.Status);
+        }
+
+        [Test]
+        public void ResetWorkflow_EventThrowsUnknownException()
+        {
+            // Arrange
+            var eventAddressList = new List<EventAddressDto> {new EventAddressDto()};
+
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ReturnsAsync(eventAddressList).Verifiable();
+
+            _eventConnectionMock.Setup(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Throws(new Exception()).Verifiable();
+
+            // Act
+            _model.ResetWorkflow();
+
+            // Assert
+            _serverConnectionMock.Verify(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()), Times.Once);
+            _eventConnectionMock.Verify(conn => conn.ResetEvent(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            Assert.AreEqual("An unexpected error has occurred. Please refresh or try again later.", _model.Status);
+        }
+
+        [Test]
+        public void GetEvents_Ok()
+        {
+            // Arrange
+            _rolesList.Add("Admin");
+
+            var eventAddressList = new List<EventAddressDto>
+            {
+                new EventAddressDto
+                {
+                    Id = "eventId",
+                    Roles = new List<string>
+                    {
+                        "Admin"
+                    }
+                }
+            };
+
+            _serverConnectionMock.Setup(conn => conn.GetEventsFromWorkflow(It.IsAny<string>()))
+                .ReturnsAsync(eventAddressList).Verifiable();
+
+            // Act
+            _model.GetEvents();
+            
+            // Assert
+            Assert.AreEqual(1, _model.EventList.Count);
+            Assert.AreEqual("eventId", _model.SelectedEventViewModel.Id);
         }
         #endregion
     }
