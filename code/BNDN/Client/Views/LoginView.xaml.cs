@@ -14,8 +14,7 @@ namespace Client.Views
             InitializeComponent();
             var vm = new LoginViewModel(); // this creates an instance of the ViewModel
             DataContext = vm; // this sets the newly created ViewModel as the DataContext for the View
-            if (vm.CloseAction == null)
-                vm.CloseAction += Close;
+            vm.CloseAction += Close;
         }
 
         private void Password_PasswordChanged(object sender, RoutedEventArgs e)

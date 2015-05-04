@@ -24,11 +24,14 @@ namespace Client.ViewModels
             Username = settings.Username;
             Status = "";
             Password = "";
+            CloseAction += () => new MainWindow(RolesForWorkflows).Show();
         }
 
-        public LoginViewModel(IServerConnection serverConnection)
+        public LoginViewModel(IServerConnection serverConnection, Uri serverAddress, Action mainWindowAction)
         {
             _serverConnection = serverConnection;
+            CloseAction += mainWindowAction;
+            _serverAddress = serverAddress;
         }
 
         #region Databindings
@@ -86,8 +89,7 @@ namespace Client.ViewModels
                     Username = Username
                 }.SaveSettings();
 
-                new MainWindow(RolesForWorkflows).Show();
-                CloseAction.Invoke();
+                CloseAction();
             }
             catch (LoginFailedException)
             {
