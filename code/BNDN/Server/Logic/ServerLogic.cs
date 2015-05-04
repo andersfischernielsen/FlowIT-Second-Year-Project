@@ -67,11 +67,11 @@ namespace Server.Logic
             }
 
             var rolesModels = await _storage.Login(user);
-            var rolesOnWorkflows = new Dictionary<string, IList<string>>();
+            var rolesOnWorkflows = new Dictionary<string, ICollection<string>>();
 
             foreach (var roleModel in rolesModels)
             {
-                IList<string> list;
+                ICollection<string> list;
 
                 if (rolesOnWorkflows.TryGetValue(roleModel.ServerWorkflowModelId, out list))
                 {

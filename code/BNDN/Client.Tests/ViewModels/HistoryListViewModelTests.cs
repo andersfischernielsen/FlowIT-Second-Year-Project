@@ -33,7 +33,7 @@ namespace Client.Tests.ViewModels
 
             _serverConnectionMock = new Mock<IServerConnection>(MockBehavior.Strict);
             _serverConnectionMock.Setup(connection => connection.GetEventsFromWorkflow(It.IsAny<string>()))
-                .Returns((string workflowId) => Task.FromResult((IList<EventAddressDto>)_eventAddressDtos.Where(dto => dto.WorkflowId == workflowId).ToList()));
+                .Returns((string workflowId) => Task.FromResult(_eventAddressDtos.Where(dto => dto.WorkflowId == workflowId)));
 
             _serverConnectionMock.Setup(connection => connection.GetHistory(It.IsAny<string>()))
                 .Returns((string workflowId) => Task.FromResult(_serverHistoryDtos.Where(dto => dto.WorkflowId == workflowId)));

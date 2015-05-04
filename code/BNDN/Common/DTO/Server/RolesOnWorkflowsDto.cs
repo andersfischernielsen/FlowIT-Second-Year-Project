@@ -6,8 +6,8 @@ namespace Common.DTO.Server
     {
         public RolesOnWorkflowsDto()
         {
-            RolesOnWorkflows = new Dictionary<string, IList<string>>();
+            RolesOnWorkflows = new Dictionary<string, ICollection<string>>();
         }
-        public Dictionary<string, IList<string>> RolesOnWorkflows { get; set; }  // Key is workflowId, value is list of roles on that workflow.
+        public Dictionary<string, ICollection<string>> RolesOnWorkflows { get; set; }  // Key is workflowId, value is list of roles on that workflow.
     }
 }

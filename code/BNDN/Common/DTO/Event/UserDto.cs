@@ -11,6 +11,6 @@ namespace Common.DTO.Event
         [Required]
         public string Password { get; set; }
         [Required]
-        public ICollection<WorkflowRole> Roles { get; set; }
+        public IEnumerable<WorkflowRole> Roles { get; set; }
     }
 }

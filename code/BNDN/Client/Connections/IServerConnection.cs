@@ -30,7 +30,7 @@ namespace Client.Connections
         /// <returns>A list of information about workflows, which can be shown on the UI.</returns>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        Task<IList<WorkflowDto>> GetWorkflows();
+        Task<IEnumerable<WorkflowDto>> GetWorkflows();
 
         /// <summary>
         /// Retrieve the events of a workflow.
@@ -40,7 +40,7 @@ namespace Client.Connections
         /// <exception cref="NotFoundException">If the resource isn't found</exception>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        Task<IList<EventAddressDto>> GetEventsFromWorkflow(string workflowId);
+        Task<IEnumerable<EventAddressDto>> GetEventsFromWorkflow(string workflowId);
 
         /// <summary>
         /// Retrieve the worklfow history from the server.

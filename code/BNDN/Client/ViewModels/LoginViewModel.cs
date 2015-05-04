@@ -9,7 +9,7 @@ namespace Client.ViewModels
     public class LoginViewModel : ViewModelBase
     {
         public Action CloseAction { get; set; }
-        public static Dictionary<string, IList<string>> RolesForWorkflows { get; set; }
+        public static Dictionary<string, ICollection<string>> RolesForWorkflows { get; set; }
 
         private bool _loginStarted;
         private readonly Uri _serverAddress;
