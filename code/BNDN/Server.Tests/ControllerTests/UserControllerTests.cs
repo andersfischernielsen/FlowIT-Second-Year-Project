@@ -38,7 +38,7 @@ namespace Server.Tests.ControllerTests
         {
             // Arrange
             var loginDto = new LoginDto() {Username = "Hans", Password = "1234"};
-            var rolesDictionary = new Dictionary<string, IList<string>>();
+            var rolesDictionary = new Dictionary<string, ICollection<string>>();
             var roles = new List<string> {"Inspector", "Administrator", "Receptionist"};
             rolesDictionary.Add("Hans",roles);
 
@@ -60,7 +60,7 @@ namespace Server.Tests.ControllerTests
             // Arrange
             bool logMethodWasCalled = false;
             var loginDto = new LoginDto() { Username = "Hans", Password = "1234" };
-            var rolesDictionary = new Dictionary<string, IList<string>>();
+            var rolesDictionary = new Dictionary<string, ICollection<string>>();
 
             var returnDto = new RolesOnWorkflowsDto();
             returnDto.RolesOnWorkflows = rolesDictionary;
