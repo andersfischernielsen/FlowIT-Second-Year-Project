@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Common.DTO.Event;
@@ -40,22 +41,19 @@ namespace Event.Tests.ControllersTests
                 }));
 
             historyMock.Setup(l => l.SaveException(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Callback((Exception e, string request, string method, string eId, string wId) =>
+                .Returns((Exception e, string request, string method, string eId, string wId) =>
                     {
-                        _historyTestList.Add(new HistoryModel
-                        {
-                            EventId = eId,
-                            WorkflowId = wId,
-                            HttpRequestType = request,
-                            Message = e.GetType().ToString(),
-                            MethodCalledOnSender = method
-                        });
+                       return Task.Run( () => _historyTestList.Add(new HistoryModel
+                       {
+                           EventId = eId, WorkflowId = wId, HttpRequestType = request, Message = e.GetType().ToString(), MethodCalledOnSender = method
+                       }));
                     }
                 );
 
             historyMock.Setup(l => l.SaveSuccesfullCall(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Callback((string request, string method, string eId, string wId) =>
+                .Returns((string request, string method, string eId, string wId) =>
                     {
+                        return Task.Run( () => 
                         _historyTestList.Add(new HistoryModel
                         {
                             EventId = eId,
@@ -63,15 +61,12 @@ namespace Event.Tests.ControllersTests
                             HttpRequestType = request,
                             Message = "Called: " + method,
                             MethodCalledOnSender = method
-                        });
+                        }));
                     }
                 );
 
             lifecycleMock.Setup(m => m.CreateEvent(It.IsAny<EventDto>(), It.IsAny<Uri>()))
-                .Callback((EventDto dto, Uri uri) =>
-                {
-                    _eventTestList.Add(ConvertDtoToEventModel(dto, uri));
-                });
+                .Returns((EventDto dto, Uri uri) => Task.Run(() => _eventTestList.Add(ConvertDtoToEventModel(dto, uri))));
 
             lifecycleMock.Setup(m => m.DeleteEvent(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns((string workflowId, string eventId) =>
@@ -181,9 +176,53 @@ namespace Event.Tests.ControllersTests
         }
 
         [Test]
-        public void TestCreateEvent()
+        public async void TestCreateEvent()
         {
-            
+            //Setup.
+            _toTest.Request = new HttpRequestMessage(HttpMethod.Post, new Uri("http://testing.com/"));
+
+            var @event = new EventModel
+            {
+                WorkflowId = ")(!&lkjasdkøåøæ+*¨´           $$§§",
+                Id = ")(!&lkjasdkøåøæ+*¨´           $$§§",
+                Executed = true,
+                Included = true,
+                Name = ")(!&lkjasdkøåøæ+*¨´           $$§§",
+                OwnUri = "http://testing.com/",
+                Pending = true, 
+            };
+
+            var testRoles = new List<EventRoleModel> { new EventRoleModel { Event = @event, WorkflowId = @")(!&lkjasdkøåøæ+*¨´           $$§§", EventId = ")(!&lkjasdkøåøæ+*¨´           $$§§", Role = ")(!&lkjasdkøåøæ+*¨´           $$§§"} };
+            var conditionUris = new List<ConditionUri> { new ConditionUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+            var exclusionUris = new List<ExclusionUri> { new ExclusionUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+            var inclusionUris = new List<InclusionUri> { new InclusionUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+            var responseUris = new List<ResponseUri> { new ResponseUri { Event = @event, EventId = @event.Id, ForeignEventId = "testing", WorkflowId = @event.WorkflowId, UriString = "http://testing.com/" } };
+
+            @event.Roles = testRoles;
+            @event.ConditionUris = conditionUris;
+            @event.ExclusionUris = exclusionUris;
+            @event.InclusionUris = inclusionUris;
+            @event.ResponseUris = responseUris;
+
+            //Execute.
+            await _toTest.CreateEvent(ConvertEventModelToDto(@event, ")(!&lkjasdkøåøæ+*¨´           $$§§", ")(!&lkjasdkøåøæ+*¨´           $$§§"));
+
+            //Assert.
+            Assert.IsTrue(_eventTestList.Any()); //The list now has an EventModel.
+
+            var eventInList = _eventTestList.First();
+            Assert.AreEqual(@event.WorkflowId, eventInList.WorkflowId);
+            Assert.AreEqual(@event.ConditionUris.First().EventId, eventInList.ConditionUris.First().EventId);
+            Assert.AreEqual(@event.ExclusionUris.First().EventId, eventInList.ExclusionUris.First().EventId);
+            Assert.AreEqual(@event.Id, eventInList.Id);
+            Assert.AreEqual(@event.Included, eventInList.Included);
+            Assert.AreEqual(@event.InclusionUris.First().EventId, eventInList.InclusionUris.First().EventId);
+            Assert.AreEqual(@event.ResponseUris.First().EventId, eventInList.ResponseUris.First().EventId);
+            Assert.AreEqual(@event.Roles.First().Role, eventInList.Roles.First().Role);
+            Assert.AreEqual(@event.Executed, eventInList.Executed);
+            Assert.AreEqual(@event.Name, eventInList.Name);
+            Assert.AreEqual(@event.OwnUri, eventInList.OwnUri);
+            Assert.AreEqual(@event.Pending, eventInList.Pending);
         }
     }
 }
