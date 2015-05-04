@@ -13,6 +13,10 @@ namespace Client.ViewModels
         }
         public HistoryViewModel(HistoryDto historyDto)
         {
+            if (historyDto == null)
+            {
+                throw new ArgumentNullException("historyDto");
+            }
             _historyDto = historyDto;
         }
 
@@ -71,15 +75,5 @@ namespace Client.ViewModels
         }
         
         #endregion
-
-        #region Actions
-
-        public override string ToString()
-        {
-            return _historyDto.EventId + ": " + _historyDto.Message;
-        }
-
-        #endregion
-
     }
 }
