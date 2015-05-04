@@ -105,10 +105,8 @@ namespace Client.Connections
         /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        public async Task Execute(Uri uri, string workflowId, string eventId)
+        public async Task Execute(Uri uri, string workflowId, string eventId, IEnumerable<string> roles)
         {
-            ICollection<string> roles;
-            LoginViewModel.RolesForWorkflows.TryGetValue(workflowId, out roles);
             try
             {
                 await

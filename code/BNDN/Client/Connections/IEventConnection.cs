@@ -52,6 +52,6 @@ namespace Client.Connections
         /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        Task Execute(Uri uri, string workflowId, string eventId);
+        Task Execute(Uri uri, string workflowId, string eventId, IEnumerable<string> roles);
     }
 }

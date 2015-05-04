@@ -207,7 +207,7 @@ namespace Client.ViewModels
             await _parent.DisableExecuteButtons();
             try
             {
-                await _eventConnection.Execute(_eventAddressDto.Uri, _parent.WorkflowId, _eventAddressDto.Id);
+                await _eventConnection.Execute(_eventAddressDto.Uri, _parent.WorkflowId, _eventAddressDto.Id, _parent.Roles);
                 _parent.RefreshEvents();
             }
             catch (NotFoundException)

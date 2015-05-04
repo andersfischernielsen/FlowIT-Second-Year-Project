@@ -83,6 +83,11 @@ namespace Client.ViewModels
             }
         }
 
+        public IEnumerable<string> Roles
+        {
+            get { return _roles; }
+        }
+
         #endregion
 
         #region Actions
