@@ -353,14 +353,18 @@ namespace Event.Tests.LogicTests
 
         #region LockAllForExecute tests
 
-        [Test]
-        public void LockAll_WillRaiseExceptionIfEventIdIsNull()
+        [TestCase(null,null)]
+        [TestCase("", null)]
+        [TestCase(null, "")]
+        [TestCase("text", null)]
+        [TestCase(null, "text")]
+        public void LockAll_WillRaiseExceptionIfEventIdIsNull(string workflowId, string eventId)
         {
             // Arrange
             ILockingLogic logic = SetupDefaultLockingLogic();
 
             // Act
-            var lockAllTask = logic.LockAllForExecute(null, null);
+            var lockAllTask = logic.LockAllForExecute(workflowId, eventId);
 
             // Assert
             if (lockAllTask.Exception == null)
@@ -371,6 +375,36 @@ namespace Event.Tests.LogicTests
             var innerException = lockAllTask.Exception.InnerException;
 
             Assert.IsInstanceOf<ArgumentNullException>(innerException);
+        }
+
+        [Test]
+        public async void LockAll_Success_EmptyRelationLists()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+
+            mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            mockStorage.Setup(m => m.GetUri(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Uri("http://www.google.com"));
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            //Act
+            var returnValue = await lockingLogic.LockAllForExecute("Wid","Eid");
+            
+            //Assert
+            
         }
         #endregion
 
