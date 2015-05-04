@@ -295,7 +295,7 @@ namespace Event.Controllers
             }
             try
             {
-                await _logic.Execute(workflowId, eventId, executeDto);   
+                await _logic.Execute(workflowId, eventId, executeDto);
 
                 await _historyLogic.SaveSuccesfullCall("PUT", "Execute", eventId, workflowId);
             }

@@ -92,12 +92,12 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
-            CheckIfEventIsLocked(workflowId, eventId, lockDto);  // refactored into its own method.
+            await CheckIfEventIsLocked(workflowId, eventId, lockDto);  // refactored into its own method.
 
             Dequeue(workflowId, eventId);
         }
 
-        private async void CheckIfEventIsLocked(string workflowId, string eventId, LockDto lockDto)
+        private async Task CheckIfEventIsLocked(string workflowId, string eventId, LockDto lockDto)
         {
             if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
@@ -108,6 +108,7 @@ namespace Event.Logic
                 {
                     if (watch.Elapsed.Seconds > 10)
                     {
+                        Dequeue(workflowId, eventId);
                         throw new LockedException();
                     }
                     await Task.Delay(100);
