@@ -41,9 +41,9 @@ namespace Event.Tests.LogicTests
         #region WaitForMyTurn Tests
 
         [TestCase("AnotherWid","Eid")]
-        [TestCase("AnotherWid", "AnotherEid")]
         [TestCase("Wid", "AnotherEid")]
-        public async void WaitForMyTurn_Succes_EmptyQueueLockEntersAndLeaves(string alreadyWid, string alreadyEid)
+        [TestCase("AnotherWid", "AnotherEid")]
+        public async void WaitForMyTurn_Succes_OtherLocksOnOtherWorkflowsExist(string alreadyWid, string alreadyEid)
         {
             //Arrange
             ILockingLogic lockingLogic = SetupDefaultLockingLogic();
@@ -63,9 +63,9 @@ namespace Event.Tests.LogicTests
             //Cleanup
             LockingLogic.LockQueue.Clear();
         }
-
+        
         [Test]
-        public async void WaitForMyTurn_Succes_OtherLocksOnOtherWorkflowsExist()
+        public async void WaitForMyTurn_Succes_EmptyQueueLockEntersAndLeaves()
         {
             //Arrange
             ILockingLogic lockingLogic = SetupDefaultLockingLogic();
@@ -74,6 +74,40 @@ namespace Event.Tests.LogicTests
             await lockingLogic.WaitForMyTurn("Wid", "Eid", lockDto);
             //Assert
             Assert.IsEmpty(LockingLogic.LockQueue["Wid"]["Eid"]);
+            //Cleanup
+            LockingLogic.LockQueue.Clear();
+        }
+
+        [Test]
+        public async void WaitForMyTurn_Succes_AlreadyLockedBySelf()
+        {
+            //Arrange
+            string eventId = "Eid";
+            string workflowId = "Wid";
+            string lockOwner = "lockOwner";
+
+            var mockStorage = new Mock<IEventStorage>();
+            var lockDtoToReturnFromStorage = new LockDto
+            {
+                WorkflowId = workflowId,
+                EventId = eventId,
+                LockOwner = lockOwner
+            };
+
+            mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(lockDtoToReturnFromStorage);
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            LockDto lockDto = new LockDto { EventId = eventId, LockOwner = lockOwner, WorkflowId = workflowId };
+            //Act
+            await lockingLogic.WaitForMyTurn(workflowId, eventId, lockDto);
+            //Assert
+            Assert.IsEmpty(LockingLogic.LockQueue[workflowId][eventId]);
             //Cleanup
             LockingLogic.LockQueue.Clear();
         }
