@@ -63,6 +63,7 @@
     <Compile Include="ViewModels\EventViewModelTests.cs" />
     <Compile Include="ViewModels\HistoryListViewModelTests.cs" />
     <Compile Include="ViewModels\LoginViewModelTests.cs" />
+    <Compile Include="ViewModels\WorkflowListViewModelTests.cs" />
     <Compile Include="ViewModels\WorkflowViewModelTests.cs" />
   </ItemGroup>
   <ItemGroup>
