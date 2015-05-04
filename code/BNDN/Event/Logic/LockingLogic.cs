@@ -179,9 +179,9 @@ namespace Event.Logic
             var incl = await _storage.GetInclusions(workflowId, eventId);
             var excl = await _storage.GetExclusions(workflowId, eventId);            
 
-            var allDependentEventsSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+            var allDependentEventsSorted = new SortedDictionary<string, RelationToOtherEventModel>();
             // Add this Event's own lockDto (so the Event will be locked in order.)
-            allDependentEventsSorted.Add(eventId.GetHashCode(), new RelationToOtherEventModel
+            allDependentEventsSorted.Add(eventId, new RelationToOtherEventModel
             {
                 EventId = eventId,
                 WorkflowId = workflowId,
@@ -190,25 +190,25 @@ namespace Event.Logic
 
             foreach (var res in resp)
             {
-                if (!allDependentEventsSorted.ContainsKey(res.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(res.EventId))
                 {
-                    allDependentEventsSorted.Add(res.EventId.GetHashCode(), res);
+                    allDependentEventsSorted.Add(res.EventId, res);
                 }
             }
 
             foreach (var inc in incl)
             {
-                if (!allDependentEventsSorted.ContainsKey(inc.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(inc.EventId))
                 {
-                    allDependentEventsSorted.Add(inc.EventId.GetHashCode(), inc);
+                    allDependentEventsSorted.Add(inc.EventId, inc);
                 }
             }
 
             foreach (var exc in excl)
             {
-                if (!allDependentEventsSorted.ContainsKey(exc.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(exc.EventId))
                 {
-                    allDependentEventsSorted.Add(exc.EventId.GetHashCode(), exc);
+                    allDependentEventsSorted.Add(exc.EventId, exc);
                 }
             }
 
@@ -217,7 +217,7 @@ namespace Event.Logic
         }
 
 
-        public async Task<bool> LockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId)
+        public async Task<bool> LockList(SortedDictionary<string, RelationToOtherEventModel> list, string eventId)
         {
             var lockedEvents = new List<RelationToOtherEventModel>();
             // For every related, dependent Event, attempt to lock it
@@ -263,29 +263,29 @@ namespace Event.Logic
             var incl = await _storage.GetInclusions(workflowId, eventId);
             var excl = await _storage.GetExclusions(workflowId, eventId);
 
-            var eventsToBeUnlockedSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+            var eventsToBeUnlockedSorted = new SortedDictionary<string, RelationToOtherEventModel>();
 
             foreach (var res in resp)
             {
-                if (!eventsToBeUnlockedSorted.ContainsKey(res.EventId.GetHashCode()))
+                if (!eventsToBeUnlockedSorted.ContainsKey(res.EventId))
                 {
-                    eventsToBeUnlockedSorted.Add(res.EventId.GetHashCode(), res);
+                    eventsToBeUnlockedSorted.Add(res.EventId, res);
                 }
             }
 
             foreach (var inc in incl)
             {
-                if (!eventsToBeUnlockedSorted.ContainsKey(inc.EventId.GetHashCode()))
+                if (!eventsToBeUnlockedSorted.ContainsKey(inc.EventId))
                 {
-                    eventsToBeUnlockedSorted.Add(inc.EventId.GetHashCode(), inc);
+                    eventsToBeUnlockedSorted.Add(inc.EventId, inc);
                 }
             }
 
             foreach (var exc in excl)
             {
-                if (!eventsToBeUnlockedSorted.ContainsKey(exc.EventId.GetHashCode()))
+                if (!eventsToBeUnlockedSorted.ContainsKey(exc.EventId))
                 {
-                    eventsToBeUnlockedSorted.Add(exc.EventId.GetHashCode(), exc);
+                    eventsToBeUnlockedSorted.Add(exc.EventId, exc);
                 }
             }
 
@@ -302,7 +302,7 @@ namespace Event.Logic
             return b;
         }
 
-        public async Task<bool> UnlockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId)
+        public async Task<bool> UnlockList(SortedDictionary<string, RelationToOtherEventModel> list, string eventId)
         {
             var everyEventIsUnlocked = true;
             foreach (var tuple in list)
