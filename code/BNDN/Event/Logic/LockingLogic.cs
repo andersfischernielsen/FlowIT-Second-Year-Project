@@ -18,12 +18,7 @@ namespace Event.Logic
         private readonly IEventFromEvent _eventCommunicator;
 
         //QUEUE is holding a dictionary of string (workflowid) , dictionary which holds string (eventid), the queue
-        private static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> _lockQueue = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>>();
-        //This is probably bad but I do it to Assert in tests.
-        public static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> LockQueue {
-            get { return _lockQueue; }
-            private set { _lockQueue = value; }
-        }
+        public readonly static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> LockQueue = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>>();
 
         /// <summary>
         /// Constructor
@@ -52,14 +47,14 @@ namespace Event.Logic
 
         private void AddToQueue(string workflowId, string eventId, LockDto lockDto)
         {
-            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var eventDictionary = LockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
             var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
             queue.Enqueue(lockDto);
         }
 
         private LockDto Dequeue(string workflowId, string eventId)
         {
-            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var eventDictionary = LockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
             var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
             LockDto next;
             queue.TryDequeue(out next);
@@ -68,7 +63,7 @@ namespace Event.Logic
 
         private bool AmINext(string workflowId, string eventId, LockDto lockDto)
         {
-            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var eventDictionary = LockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
             var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
             LockDto next;
             if (queue.TryPeek(out next))
