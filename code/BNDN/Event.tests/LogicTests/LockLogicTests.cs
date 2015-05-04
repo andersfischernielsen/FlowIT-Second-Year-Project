@@ -40,17 +40,50 @@ namespace Event.Tests.LogicTests
         #region WaitForMyTurn Tests
 
         [TestCase(null,"")]
-        public void WaitForMyTurn_ParameterIsNull(string workflowId, string eventId)
+        [TestCase("", null)]
+        [TestCase(null, null)]
+        public async void WaitForMyTurn_ParameterIsNull(string workflowId, string eventId)
         {
             //Arrange
             ILockingLogic lockingLogic = SetupDefaultLockingLogic();
-            LockDto lockDto = new LockDto{};
+            LockDto lockDto = new LockDto{ EventId = eventId, LockOwner = "LockOwner", WorkflowId = workflowId};
             //Act
-            Assert.Throws<ArgumentNullException>(lockingLogic.WaitForMyTurn(workflowId,eventId)):
+            var testDelegate = new TestDelegate(async () => await lockingLogic.WaitForMyTurn(workflowId, eventId, lockDto));
             //Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
             //Cleanup
             LockingLogic.LockQueue.Clear();
+        }
+        [Test]
+        public async void WaitForMyTurn_LockDtoIsNull()
+        {
+            //Arrange
+            ILockingLogic lockingLogic = SetupDefaultLockingLogic();
+            LockDto lockDto = null;
+            //Act
+            var testDelegate = new TestDelegate(async () => await lockingLogic.WaitForMyTurn("Wid", "Eid", lockDto));
+            //Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+            //Cleanup
+            LockingLogic.LockQueue.Clear();
+        }
 
+        [TestCase("")]
+        [TestCase(" ")]
+        [TestCase("\n")]
+        [TestCase("\t")]
+        [TestCase(null)]
+        public async void WaitForMyTurn_LockDtoOwnerIsNull(string lockOwner)
+        {
+            //Arrange
+            ILockingLogic lockingLogic = SetupDefaultLockingLogic();
+            LockDto lockDto = new LockDto { EventId = "Eid", LockOwner = lockOwner, WorkflowId = "Wid" };
+            //Act
+            var testDelegate = new TestDelegate(async () => await lockingLogic.WaitForMyTurn("Wid", "Eid", lockDto));
+            //Assert
+            Assert.Throws<ArgumentException>(testDelegate);
+            //Cleanup
+            LockingLogic.LockQueue.Clear();
         }
         #endregion
 
