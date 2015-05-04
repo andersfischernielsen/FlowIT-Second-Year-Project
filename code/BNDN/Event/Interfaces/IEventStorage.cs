@@ -15,8 +15,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Tells whether an Event exists in the storage.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to.</param>
-        /// <param name="eventId">Id of the Event to check for.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to.</param>
+        /// <param name="eventId">EventId of the Event to check for.</param>
         /// <returns>True if the an Event with eventId exists at workflow with workflowId.</returns>
         /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null.</exception>
         Task<bool> Exists(string workflowId, string eventId);
@@ -25,7 +25,7 @@ namespace Event.Interfaces
         /// Returns the URI-address of the Event belonging to the given workflowId and identified by eventId.
         /// </summary>
         /// <param name="workflowId">Identifies the workflow the event belongs to.</param>
-        /// <param name="eventId">Id of the Event to get.</param>
+        /// <param name="eventId">EventId of the Event to get.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null.</exception>
         /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments.</exception>
@@ -34,8 +34,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Returns the name of an Event. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow the Event belongs to.</param>
-        /// <param name="eventId">Id of the Event.</param>
+        /// <param name="workflowId">EventId of the workflow the Event belongs to.</param>
+        /// <param name="eventId">EventId of the Event.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null.</exception>
         /// <exception cref="NotFoundException">Thrown if no Event exists with the given workflowId and EventId.</exception>
@@ -44,8 +44,8 @@ namespace Event.Interfaces
         /// <summary>
         /// GetRoles returns the Roles that are allowed to execute an Event.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow the Event belongs to.</param>
-        /// <param name="eventId">Id of the Event.</param>
+        /// <param name="workflowId">EventId of the workflow the Event belongs to.</param>
+        /// <param name="eventId">EventId of the Event.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null.</exception>
         /// <exception cref="NotFoundException">Thrown when no Event matches the provided workflowId and eventId.</exception>
@@ -64,8 +64,8 @@ namespace Event.Interfaces
         /// <summary>
         /// DeleteEvent deletes the Event, belonging to the given workflowId and with the given eventId.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to.</param>
-        /// <param name="eventId">Id of the Event to be deleted.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to.</param>
+        /// <param name="eventId">EventId of the Event to be deleted.</param>
         /// <returns>Task</returns>
         /// <exception cref="ArgumentNullException">Will be thrown if either workflowId or eventId is null.</exception>
         /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments.</exception>
@@ -85,8 +85,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Returns the Executed value for the specified event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage</exception>
@@ -95,8 +95,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Sets the Executed value for the specified Event.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to.</param>
-        /// <param name="eventId">Id of the Event.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to.</param>
+        /// <param name="eventId">EventId of the Event.</param>
         /// <param name="value"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if either workflowId or eventId is null.</exception>
@@ -106,8 +106,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Returns the Included value of the specified Event.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage</exception>
@@ -116,8 +116,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Sets the Included value for the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <param name="value">The value that included should be set to</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
@@ -127,8 +127,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Returns the Included value of the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if the Event does not exist</exception>
@@ -137,8 +137,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Sets the Pending value for the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <param name="value"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
@@ -149,8 +149,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Returns the LockDto for the specified Event.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
@@ -160,9 +160,9 @@ namespace Event.Interfaces
         /// The setter for this property should not be used to unlock the Event. If setter is provided with a null-value
         /// an ArgumentNullException will be raised. Instead, use ClearLock()-method to remove any Lock on this Event.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="lockOwner">Id of the lockowner</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
+        /// <param name="lockOwner">EventId of the lockowner</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
@@ -173,8 +173,8 @@ namespace Event.Interfaces
         /// (Setter for LockDto will raise an ArgumentNullException if provided a null-value)
         /// The method simply removes all (should be either 1 or 0) LockDto element(s) held in database. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
         Task ClearLock(string workflowId, string eventId);
@@ -184,8 +184,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Returns the Condition-relations for the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         Task<HashSet<RelationToOtherEventModel>> GetConditions(string workflowId, string eventId);
@@ -194,8 +194,8 @@ namespace Event.Interfaces
         /// GetResponses returns a HashSet containing the response relations for the provided event.
         /// Notice, that this method will not return null, but may return an empty set.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         Task<HashSet<RelationToOtherEventModel>> GetResponses(string workflowId, string eventId);
@@ -203,8 +203,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Returns the Exclusion-relations on the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         Task<HashSet<RelationToOtherEventModel>> GetExclusions(string workflowId, string eventId);
@@ -213,8 +213,8 @@ namespace Event.Interfaces
         /// GetResponses returns a HashSet containing the inclusion relations for the provided event.
         /// Notice, that this method will not return null, but may return an empty set.
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         Task<HashSet<RelationToOtherEventModel>> GetInclusions(string workflowId, string eventId);

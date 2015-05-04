@@ -13,8 +13,8 @@ namespace Event.Interfaces
         /// <summary>
         /// ClearLock clears the Lock on the specified Event, if possible. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         Task ClearLock(string workflowId, string eventId);
@@ -22,8 +22,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Will restore the Event to it's initial state. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event, that is to be reset.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event, that is to be reset.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if the Event does not exist</exception>
@@ -32,8 +32,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Determines whether a specified Event exists in the database. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if the specified Event does not exist</exception>
         Task<bool> Exists(string workflowId, string eventId);

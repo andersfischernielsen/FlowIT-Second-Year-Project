@@ -36,8 +36,8 @@ namespace Event.Logic
         /// <summary>
         /// Attempt to lock the specified Event down
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <param name="lockDto">Content should represent this Event</param>
         /// <returns></returns>
         /// <exception cref="LockedException">Thrown if the specified Event is already locked down</exception>
@@ -224,7 +224,7 @@ namespace Event.Logic
             foreach (var tuple in list)
             {
                 var relation = tuple.Value;
-                var toLock = new LockDto { LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId };
+                var toLock = new LockDto { LockOwner = eventId, WorkflowId = relation.WorkflowId, EventId = relation.EventId };
 
                 try
                 {
@@ -347,7 +347,7 @@ namespace Event.Logic
         /// <summary>
         /// Attempts to unlock the Events, that are provided in the argument list.  
         /// </summary>
-        /// <param name="eventId">Id of the target Event</param>
+        /// <param name="eventId">EventId of the target Event</param>
         /// <param name="eventsToBeUnlocked">List specifying which Events are to be unlocked</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>

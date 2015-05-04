@@ -14,9 +14,9 @@ namespace Event.Interfaces
         /// <summary>
         /// IsExecuted returns the executed value for the specified Event. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
+        /// <param name="senderId">EventId of the one, who wants this information.</param>
         /// <returns></returns>
         /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         /// <exception cref="LockedException">Thrown if the Event is locked by someone else than caller</exception>
@@ -26,9 +26,9 @@ namespace Event.Interfaces
         /// <summary>
         /// IsIncluded returns the included value for the specified Event. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
+        /// <param name="senderId">EventId of the one, who wants this information.</param>
         /// <returns></returns>
         /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         /// <exception cref="LockedException">Thrown if the Event is locked by someone else than caller</exception>
@@ -38,9 +38,9 @@ namespace Event.Interfaces
         /// <summary>
         /// GetStateDto returns an EventStateDto for the specified Event
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
+        /// <param name="senderId">EventId of the one, who wants this information.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if the provided arguments are null</exception>
         /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
@@ -50,9 +50,9 @@ namespace Event.Interfaces
         /// <summary>
         /// SetIncluded sets the specified Event's Included value to the provided value. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
+        /// <param name="senderId">EventId of the one, who wants this information.</param>
         /// <param name="newIncludedValue">The value that the Event's Included value should be set to</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the string-type arguments are null</exception>
@@ -63,9 +63,9 @@ namespace Event.Interfaces
         /// <summary>
         /// SetPending sets the specified Event's Pending value to the provided value. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="senderId">Id of the one, who wants this information.</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
+        /// <param name="senderId">EventId of the one, who wants this information.</param>
         /// <param name="newPendingValue">The value that the Event's Included value should be set to</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the string-type arguments are null</exception>
@@ -77,8 +77,8 @@ namespace Event.Interfaces
         /// <summary>
         /// Execute attempts to Execute the specified Event. The process includes locking the other events, and updating their state. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <param name="executeDto">Contains the roles, that caller has.</param>
         /// <exception cref="LockedException">Thrown if the specified Event is currently locked by someone else</exception>
         /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>

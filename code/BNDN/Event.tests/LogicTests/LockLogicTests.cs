@@ -37,6 +37,22 @@ namespace Event.Tests.LogicTests
         #endregion
 
 
+        #region WaitForMyTurn Tests
+
+        [TestCase(null,"")]
+        public void WaitForMyTurn_ParameterIsNull(string workflowId, string eventId)
+        {
+            //Arrange
+            ILockingLogic lockingLogic = SetupDefaultLockingLogic();
+            LockDto lockDto = new LockDto{};
+            //Act
+            Assert.Throws<ArgumentNullException>(lockingLogic.WaitForMyTurn(workflowId,eventId)):
+            //Assert
+            //Cleanup
+            LockingLogic.LockQueue.Clear();
+
+        }
+        #endregion
 
         #region IsAllowedToOperate tests
 
@@ -68,7 +84,7 @@ namespace Event.Tests.LogicTests
             {
                 LockOwner = "EventA",
                 WorkflowId = "workflowId",
-                Id = "DatabaseRelevantId"
+                EventId = "DatabaseRelevantId"
             };
             mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() => lockDto));
 
@@ -94,7 +110,7 @@ namespace Event.Tests.LogicTests
             {
                 LockOwner = "EventA",       // Notice, EventA is locking!
                 WorkflowId = "workflowId", 
-                Id = "DatabaseRelevantId"
+                EventId = "DatabaseRelevantId"
             };
             mockStorage.Setup(m => m.GetLockDto(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.Run(() => lockDto));
 
@@ -184,7 +200,7 @@ namespace Event.Tests.LogicTests
             var lockDto = new LockDto
             {
                 WorkflowId = "workflowId", 
-                Id = "DatabaseId",
+                EventId = "DatabaseId",
                 LockOwner = "whatever"
             };
 
@@ -287,7 +303,7 @@ namespace Event.Tests.LogicTests
             var lockDtoToReturnFromStorage = new LockDto
             {
                 WorkflowId = "workflowId", 
-                Id = "databaseRelevantId",
+                EventId = "databaseRelevantId",
                 LockOwner = "Johannes"          // Notice, Johannes will be the lockOwner according to Storage!
             };
 
