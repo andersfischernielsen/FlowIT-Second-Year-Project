@@ -34,9 +34,12 @@ namespace Event.Communicators
             _httpClient = new HttpClientToolbox(baseAddress);
         }
 
+        ///<summary>
+    	///A constructor with dependency injection for testing uses.
+    	///</summary>
         public ServerCommunicator(HttpClientToolbox httpClient, string eventId, string workFlowId)
         {
-            if (eventId == null || workFlowId == null)
+    		if ( eventId == null || workFlowId == null)
             {
                 throw new ArgumentNullException();
             }
