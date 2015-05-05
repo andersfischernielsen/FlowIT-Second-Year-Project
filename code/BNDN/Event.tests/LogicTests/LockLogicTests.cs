@@ -404,8 +404,392 @@ namespace Event.Tests.LogicTests
             var returnValue = await lockingLogic.LockAllForExecute("Wid","Eid");
             
             //Assert
-            
+            Assert.IsTrue(returnValue);
         }
+
+        [TestCase(true,false,false,false)]
+        [TestCase(false, true, false, false)]
+        [TestCase(false, false, true, false)]
+        [TestCase(false, false, false, true)]
+        [TestCase(true, true, false, false)]
+        [TestCase(false, true, true, false)]
+        [TestCase(false, false, true, true)]
+        [TestCase(true, false, true, false)]
+        [TestCase(false, true, false, true)]
+        [TestCase(true, false, false, true)]
+        [TestCase(true, true, true, false)]
+        [TestCase(false, true, true, true)]
+        [TestCase(true, false, true, true)]
+        [TestCase(true, true, false, true)]
+        [TestCase(true, true, true, true)]
+        public async void LockAll_Success_1OtherElementInRelations(bool conditions, bool exclusions, bool responses, bool inclusions)
+        {
+            //Arrange
+            string eventId = "Eid";
+            string workflowId = "Wid";
+
+            var mockStorage = new Mock<IEventStorage>();
+
+            if (!conditions)
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            if (!exclusions)
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            if (!responses)
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            if (!inclusions)
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            mockStorage.Setup(m => m.GetUri(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Uri("http://www.google.com"));
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            //Act
+            var returnValue = await lockingLogic.LockAllForExecute(workflowId, eventId);
+
+            //Assert
+            Assert.IsTrue(returnValue);
+        }
+
+        [TestCase(true, false, false, false)]
+        [TestCase(false, true, false, false)]
+        [TestCase(false, false, true, false)]
+        [TestCase(false, false, false, true)]
+        [TestCase(true, true, false, false)]
+        [TestCase(false, true, true, false)]
+        [TestCase(false, false, true, true)]
+        [TestCase(true, false, true, false)]
+        [TestCase(false, true, false, true)]
+        [TestCase(true, false, false, true)]
+        [TestCase(true, true, true, false)]
+        [TestCase(false, true, true, true)]
+        [TestCase(true, false, true, true)]
+        [TestCase(true, true, false, true)]
+        [TestCase(true, true, true, true)]
+        public async void LockAll_Success_TheSameEventInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
+        {
+            //Arrange
+            string eventId = "Eid";
+            string workflowId = "Wid";
+
+            var mockStorage = new Mock<IEventStorage>();
+
+            if (!conditions)
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            if (!exclusions)
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            if (!responses)
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            if (!inclusions)
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel> { new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId } });
+            }
+
+            mockStorage.Setup(m => m.GetUri(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Uri("http://www.google.com"));
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            //Act
+            var returnValue = await lockingLogic.LockAllForExecute(workflowId, eventId);
+
+            //Assert
+            Assert.IsTrue(returnValue);
+        }
+
+        [TestCase(true, false, false, false)]
+        [TestCase(false, true, false, false)]
+        [TestCase(false, false, true, false)]
+        [TestCase(false, false, false, true)]
+        [TestCase(true, true, false, false)]
+        [TestCase(false, true, true, false)]
+        [TestCase(false, false, true, true)]
+        [TestCase(true, false, true, false)]
+        [TestCase(false, true, false, true)]
+        [TestCase(true, false, false, true)]
+        [TestCase(true, true, true, false)]
+        [TestCase(false, true, true, true)]
+        [TestCase(true, false, true, true)]
+        [TestCase(true, true, false, true)]
+        [TestCase(true, true, true, true)]
+        public async void LockAll_Success_ManyOtherElementsInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
+        {
+            //Arrange
+            string eventId = "Eid";
+            string workflowId = "Wid";
+
+            var mockStorage = new Mock<IEventStorage>();
+
+            if (!conditions)
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid3", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+
+            if (!exclusions)
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid3", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+
+            if (!responses)
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid3", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+
+            if (!inclusions)
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = "Eid2", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid3", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+
+            mockStorage.Setup(m => m.GetUri(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Uri("http://www.google.com"));
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            //Act
+            var returnValue = await lockingLogic.LockAllForExecute(workflowId, eventId);
+
+            //Assert
+            Assert.IsTrue(returnValue);
+        }
+
+        [TestCase(true, false, false, false)]
+        [TestCase(false, true, false, false)]
+        [TestCase(false, false, true, false)]
+        [TestCase(false, false, false, true)]
+        [TestCase(true, true, false, false)]
+        [TestCase(false, true, true, false)]
+        [TestCase(false, false, true, true)]
+        [TestCase(true, false, true, false)]
+        [TestCase(false, true, false, true)]
+        [TestCase(true, false, false, true)]
+        [TestCase(true, true, true, false)]
+        [TestCase(false, true, true, true)]
+        [TestCase(true, false, true, true)]
+        [TestCase(true, true, false, true)]
+        [TestCase(true, true, true, true)]
+        [Test]
+        public async void LockAll_Success_ManySameElementsInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
+        {
+            //Arrange
+            string eventId = "Eid";
+            string workflowId = "Wid";
+
+            var mockStorage = new Mock<IEventStorage>();
+
+            if (!conditions)
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetConditions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+
+            if (!exclusions)
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetExclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+
+            if (!responses)
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetResponses(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+
+            if (!inclusions)
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                    .ReturnsAsync(new HashSet<RelationToOtherEventModel>());
+            }
+            else
+            {
+                mockStorage.Setup(m => m.GetInclusions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new HashSet<RelationToOtherEventModel>
+                {
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = eventId, Uri = new Uri("http://www.google.com"), WorkflowId = workflowId },
+                    new RelationToOtherEventModel { EventId = "Eid4", Uri = new Uri("http://www.google.com"), WorkflowId = workflowId }
+                });
+            }
+            mockStorage.Setup(m => m.GetUri(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new Uri("http://www.google.com"));
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            //Act
+            var returnValue = await lockingLogic.LockAllForExecute(workflowId, eventId);
+
+            //Assert
+            Assert.IsTrue(returnValue);
+        }
+        #endregion
+
+        #region LockAll
+
         #endregion
 
         #region LockSelf tests
