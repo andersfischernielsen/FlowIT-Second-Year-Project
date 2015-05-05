@@ -56,6 +56,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControllersTests\LifeCycleControllerTests.cs" />
     <Compile Include="ControllersTests\StateControllerTests.cs" />
     <Compile Include="EventCommunicatorTests.cs" />
     <Compile Include="LogicTests\AuthLogicTests.cs" />
