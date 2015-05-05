@@ -44,14 +44,14 @@ namespace Server.Tests.StorageTests
         [Test]
         public void VerifyHashedPasswordTest()
         {
-            const string password = "testing";
+            var hashedPassword = PasswordHasher.HashPassword("testing");
             const string correctPassword = "testing";
             const string incorrectPassword = "testingTesting";
 
-            Assert.IsFalse(PasswordHasher.VerifyHashedPassword(null, password));
-            Assert.IsFalse(PasswordHasher.VerifyHashedPassword(password, null));
-            Assert.IsFalse(PasswordHasher.VerifyHashedPassword(password, incorrectPassword));
-            Assert.IsTrue(PasswordHasher.VerifyHashedPassword(correctPassword, password));
+            Assert.IsFalse(PasswordHasher.VerifyHashedPassword(null, hashedPassword));
+            Assert.IsFalse(PasswordHasher.VerifyHashedPassword(correctPassword, null));
+            Assert.IsFalse(PasswordHasher.VerifyHashedPassword(incorrectPassword, hashedPassword));
+            Assert.IsTrue(PasswordHasher.VerifyHashedPassword(correctPassword, hashedPassword));
         }
     }
 }
