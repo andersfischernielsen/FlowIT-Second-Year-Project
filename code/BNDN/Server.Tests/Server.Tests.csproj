@@ -68,9 +68,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ControllerTests\HistoryControllerTests.cs" />
     <Compile Include="ControllerTests\UserControllerTests.cs" />
     <Compile Include="ControllerTests\WorkflowsControllerTests.cs" />
     <Compile Include="LogicTests\ServerLogicTest.cs" />
+    <Compile Include="LogicTests\WorkflowsHistoryLogicTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StorageTests\StorageSetup.cs" />
     <Compile Include="StorageTests\StorageTests.cs" />

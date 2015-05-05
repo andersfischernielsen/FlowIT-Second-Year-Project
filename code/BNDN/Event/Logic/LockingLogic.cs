@@ -219,6 +219,10 @@ namespace Event.Logic
 
         public async Task<bool> LockList(SortedDictionary<string, RelationToOtherEventModel> list, string eventId)
         {
+            if (eventId == null || list == null)
+            {
+                throw new ArgumentNullException();
+            }
             var lockedEvents = new List<RelationToOtherEventModel>();
             // For every related, dependent Event, attempt to lock it
             foreach (var tuple in list)
