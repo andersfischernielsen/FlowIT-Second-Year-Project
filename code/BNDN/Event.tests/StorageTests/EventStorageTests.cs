@@ -838,13 +838,296 @@ namespace Event.Tests.StorageTests
 
         #region SetState
         #region SetExecuted
+        [Test]
+        public async Task SetExecuted_False()
+        {
+            // Arrange
+            _eventModels.First().Executed = true;
+
+            // Act
+            await _eventStorage.SetExecuted("workflowId", "eventId", false);
+
+            // Assert
+            Assert.IsFalse(_eventModels.First().Executed);
+        }
+
+        [Test]
+        public async Task SetExecuted_True()
+        {
+            // Arrange
+            _eventModels.First().Executed = false;
+
+            // Act
+            await _eventStorage.SetExecuted("workflowId", "eventId", true);
+
+            // Assert
+            Assert.IsTrue(_eventModels.First().Executed);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void SetExecuted_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetExecuted(workflowId, eventId, true));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void SetExecuted_NotFound()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetExecuted("notWorkflowId", "notEventId", true));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
         #endregion
 
         #region SetPending
+        [Test]
+        public async Task SetPending_False()
+        {
+            // Arrange
+            _eventModels.First().Pending = true;
+
+            // Act
+            await _eventStorage.SetPending("workflowId", "eventId", false);
+
+            // Assert
+            Assert.IsFalse(_eventModels.First().Pending);
+        }
+
+        [Test]
+        public async Task SetPending_True()
+        {
+            // Arrange
+            _eventModels.First().Pending = false;
+
+            // Act
+            await _eventStorage.SetPending("workflowId", "eventId", true);
+
+            // Assert
+            Assert.IsTrue(_eventModels.First().Pending);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void SetPending_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetPending(workflowId, eventId, true));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void SetPending_NotFound()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetPending("notWorkflowId", "notEventId", true));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
         #endregion
 
         #region SetIncluded
+        [Test]
+        public async Task SetIncluded_False()
+        {
+            // Arrange
+            _eventModels.First().Included = true;
+
+            // Act
+            await _eventStorage.SetIncluded("workflowId", "eventId", false);
+
+            // Assert
+            Assert.IsFalse(_eventModels.First().Included);
+        }
+
+        [Test]
+        public async Task SetIncluded_True()
+        {
+            // Arrange
+            _eventModels.First().Included = false;
+
+            // Act
+            await _eventStorage.SetIncluded("workflowId", "eventId", true);
+
+            // Assert
+            Assert.IsTrue(_eventModels.First().Included);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void SetIncluded_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetIncluded(workflowId, eventId, true));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void SetIncluded_NotFound()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetIncluded("notWorkflowId", "notEventId", true));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
         #endregion
+        #endregion
+
+        #region InitializeNewEvent
+
+        [Test]
+        public async Task InitializeNewEvent_Ok()
+        {
+            // Act
+            await _eventStorage.InitializeNewEvent(new EventModel
+            {
+                WorkflowId = "WorkflowId",
+                Id = "EventId"
+            });
+
+            // Assert
+            _eventModelMock.EventStateMockSet.Verify(e => e.Add(It.IsAny<EventModel>()), Times.Once);
+            _contextMock.Verify(c => c.SaveChangesAsync(), Times.Once);
+        }
+
+        [Test]
+        public void InitializeNewEvent_NullArgument()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.InitializeNewEvent(null));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void InitializeNewEvent_NullArguments(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.InitializeNewEvent(new EventModel
+            {
+                WorkflowId = workflowId,
+                Id = eventId
+            }));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void InitializeNewEvent_EventExists()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.InitializeNewEvent(new EventModel
+            {
+                WorkflowId = "workflowId",
+                Id = "eventId"
+            }));
+
+            // Assert
+            Assert.Throws<EventExistsException>(testDelegate);
+        }
+        #endregion
+
+        #region ClearLock
+        [TestCase(null, null)]
+        [TestCase("workflowId", null)]
+        [TestCase(null, "eventId")]
+        public void ClearLock_NullArgument(string workflowId, string eventId)
+        {
+            // Arrange
+            _eventModels.First().LockOwner = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.ClearLock(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void ClearLock_NotFound()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.ClearLock("notWorkflowId", "notEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+        #endregion
+
+        #region SetLock
+        [Test]
+        public async Task SetLock_Ok()
+        {
+            // Arrange
+            _eventModels.First().LockOwner = null;
+
+            // Act
+            await _eventStorage.SetLock("workflowId", "eventId", "Flow");
+
+            // Assert
+            Assert.AreEqual("Flow", _eventModels.First().LockOwner);
+        }
+
+        [TestCase(null, null, null)]
+        [TestCase("workflowId", null, null)]
+        [TestCase("workflowId", "eventId", null)]
+        [TestCase("workflowId", null, "flow")]
+        [TestCase(null, "eventId", null)]
+        [TestCase(null, "eventId", "flow")]
+        [TestCase(null, null, "flow")]
+        public void SetLock_NullArgument(string workflowId, string eventId, string lockOwner)
+        {
+            // Arrange
+            _eventModels.First().LockOwner = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetLock(workflowId, eventId, lockOwner));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void SetLock_NotFound()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetLock("notWorkflowId", "notEventId", "flow"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [Test]
+        public void SetLock_Locked()
+        {
+            // Arrange
+            _eventModels.First().LockOwner = "notFlow";
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SetLock("workflowId", "eventId", "flow"));
+
+            // Assert
+            Assert.Throws<LockedException>(testDelegate);
+        }
         #endregion
     }
 }

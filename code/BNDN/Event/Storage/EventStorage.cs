@@ -210,7 +210,6 @@ namespace Event.Storage
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Included;
         }
 
-        // TODO: This method needs testing. 
         public async Task SetIncluded(string workflowId, string eventId, bool includedValue)
         {
             if (workflowId == null || eventId == null)
