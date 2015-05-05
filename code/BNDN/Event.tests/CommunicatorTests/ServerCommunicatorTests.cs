@@ -1,47 +1,83 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Common.DTO.Shared;
+using Common.Tools;
 using Event.Communicators;
 using Event.Exceptions;
 using Event.Exceptions.EventInteraction;
+using Moq;
 using NUnit.Framework;
 
 namespace Event.Tests.CommunicatorTests
 {
     [TestFixture]
-    public class EventCommunicatorTests
+    public class ServerCommunicatorTests
     {
         private ServerCommunicator _toTest;
-        private Mock<IHttpClientToolbox> _toolBoxMock;
+        private Mock<HttpClientToolbox> _toolBoxMock;
         
-        [TestFixtureSetup]
+        [TestFixtureSetUp]
         public void Setup() {
             var mock = new Mock<HttpClientToolbox>();
-            
-            mock.Setup(m => m.Create(It.IsAny<string>(), It.IsAny<EventAddressDto>())).Verifiable();
-            mock.Setup(m => m.Delete(It.IsAny<string>())).Verifiable();
+
+            mock.Setup(m => m.Create(It.IsAny<string>(), It.IsAny<EventAddressDto>())).Returns(Task.Run(() => Console.WriteLine())).Verifiable();
+            mock.Setup(m => m.Delete(It.IsAny<string>())).Returns(Task.Run(() => Console.WriteLine())).Verifiable();
             mock.Setup(m => m.Dispose()).Verifiable();
-            
-        }
-        
-        [Test]
-        public void ConstructorTest() {
-            Assert.Throws<ArgumentNullException>(_toTest = new ServerCommunicator(null, "", ""))
-            Assert.Throws<ArgumentNullException>(_toTest = new ServerCommunicator("", null, ""))
-            Assert.Throws<ArgumentNullException>(_toTest = new ServerCommunicator("", "", null))
+
+            _toolBoxMock = mock;
+            _toTest = new ServerCommunicator("testing", "testingEventId", "testingWorkflowId", mock.Object);
+
         }
 
         [Test]
-        public void PostEventToServerTest() {
-            
+        public void ConstructorTest()
+        {
+            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator(null, "", ""));
+            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator("", null, ""));
+            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator("", "", null));
         }
-        
+
         [Test]
-        public void DeleteEventFromServerTest() {
-            
+        public void PostEventToServerTestThrowsException()
+        {
+            var mock = new Mock<HttpClientToolbox>();
+            mock.Setup(m => m.Create(It.IsAny<string>(), It.IsAny<EventAddressDto>())).Throws(new Exception());
+            var toTest = new ServerCommunicator("testing", "testingEventId", "testingWorkflowId", mock.Object);
+
+            Assert.Throws<FailedToPostEventAtServerException>(async () => await toTest.PostEventToServer(new EventAddressDto()));
         }
-        
+
+        [Test]
+        public void PostEventToServerTestSuccedes()
+        {
+            Assert.DoesNotThrow((async () => await _toTest.PostEventToServer(new EventAddressDto())));
+            _toolBoxMock.Verify(t => t.Create(It.IsAny<string>(), It.IsAny<EventAddressDto>()), Times.AtLeastOnce);
+        }
+
+        [Test]
+        public void DeleteEventFromServerTestThrowsException() {
+            var mock = new Mock<HttpClientToolbox>();
+            mock.Setup(m => m.Delete(It.IsAny<string>())).Throws(new Exception());
+            var toTest = new ServerCommunicator("testing", "testingEventId", "testingWorkflowId", mock.Object);
+
+            Assert.Throws<FailedToDeleteEventFromServerException>(async () => await toTest.DeleteEventFromServer());
+        }
+
+        [Test]
+        public void DeleteEventFromServerTestSuccedes()
+        {
+            Assert.DoesNotThrow((async () => await _toTest.DeleteEventFromServer()));
+            _toolBoxMock.Verify(t => t.Delete(It.IsAny<string>()), Times.AtLeastOnce);
+        }
+
         [Test]
         public void DisposeTest() {
-            
+            using (_toTest)
+            {
+                
+            }
+
+            _toolBoxMock.Verify(m => m.Dispose(), Times.AtLeastOnce);
         }
     }
 }
