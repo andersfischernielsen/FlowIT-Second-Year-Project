@@ -15,7 +15,7 @@ namespace Event.Communicators
     /// </summary>
     public class ServerCommunicator : IServerFromEvent
     {
-        private readonly HttpClientToolbox _httpClient;
+        public readonly HttpClientToolbox _httpClient;
 
         // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of.
         private readonly string _eventId;
@@ -32,6 +32,18 @@ namespace Event.Communicators
             _workflowId = workFlowId;
              _eventId = eventId;
             _httpClient = new HttpClientToolbox(baseAddress);
+        }
+
+        public ServerCommunicator(HttpClientToolbox httpClient, string eventId, string workFlowId)
+        {
+            if (eventId == null || workFlowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            _workflowId = workFlowId;
+            _eventId = eventId;
+            _httpClient = httpClient;
         }
 
         public async Task PostEventToServer(EventAddressDto addressDto)
