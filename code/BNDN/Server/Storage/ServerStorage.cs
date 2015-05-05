@@ -25,7 +25,7 @@ namespace Server.Storage
 
         public async Task<ServerUserModel> GetUser(string username, string password)
         {
-            if (username == null || password == null)
+            if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password))
             {
                 throw new ArgumentNullException();
             }
@@ -41,8 +41,7 @@ namespace Server.Storage
         {
             if (username == null || roles == null)
             {
-                throw
-                    new ArgumentNullException();
+                throw new ArgumentNullException();
             }
 
             var user = await _db.Users.SingleOrDefaultAsync(u => string.Equals(u.Name, username));
@@ -94,6 +93,11 @@ namespace Server.Storage
 
         public async Task<IEnumerable<ServerRoleModel>> AddRolesToWorkflow(IEnumerable<ServerRoleModel> roles)
         {
+            if (roles == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             // Result contains the ServerRoleModels as EntityFramework sees them.
             var result = new List<ServerRoleModel>();
             foreach (var role in roles)
@@ -230,8 +234,18 @@ namespace Server.Storage
             return await workflows.ToListAsync();
         }
 
+        /// <summary>
+        /// Determines whether a workflow exists in storage
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNulLException">Thrown when provided argument is null</exception>
         public async Task<bool> WorkflowExists(string workflowId)
         {
+            if (String.IsNullOrEmpty(workflowId))
+            {
+                throw new ArgumentNullException();
+            }
             return await _db.Workflows.AnyAsync(workflow => workflow.Id == workflowId);
         }
 

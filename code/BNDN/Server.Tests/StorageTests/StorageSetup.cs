@@ -11,28 +11,40 @@ namespace Server.Tests.StorageTests
 {
     internal class FakeDbSet<TEntity> where TEntity : class
     {
+        readonly List<TEntity> _data;
+        private readonly IQueryable<TEntity> _queryable; 
+
         public DbSet<TEntity> Object { get; private set; }
 
-        public FakeDbSet(IQueryable<TEntity> queryable)
+        public FakeDbSet(List<TEntity> data)
         {
+            _data = data;
+            _queryable = data.AsQueryable();
+
             // Code to get all of the async stuff to work.
 
             var eventStateMockSet = new Mock<DbSet<TEntity>>();
             eventStateMockSet.As<IDbAsyncEnumerable<TEntity>>()
                 .Setup(m => m.GetAsyncEnumerator())
-                .Returns(new TestDbAsyncEnumerator<TEntity>(queryable.GetEnumerator()));
+                .Returns(new TestDbAsyncEnumerator<TEntity>(_queryable.GetEnumerator()));
 
             eventStateMockSet.As<IQueryable<TEntity>>()
                 .Setup(m => m.Provider)
-                .Returns(new TestDbAsyncQueryProvider<TEntity>(queryable.Provider));
+                .Returns(new TestDbAsyncQueryProvider<TEntity>(_queryable.Provider));
 
-            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.Expression).Returns(queryable.Expression);
-            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.Expression).Returns(_queryable.Expression);
+            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.ElementType).Returns(_queryable.ElementType);
+            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.GetEnumerator()).Returns(_queryable.GetEnumerator());
 
             Object = eventStateMockSet.Object;
         }
-        private class TestDbAsyncQueryProvider<TEntity1> : IDbAsyncQueryProvider
+
+        public TEntity Add(TEntity entity)
+        {
+            _data.Add(entity);
+            return entity;
+        }
+        internal class TestDbAsyncQueryProvider<TEntity1> : IDbAsyncQueryProvider
         {
             private readonly IQueryProvider _inner;
 
