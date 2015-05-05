@@ -20,6 +20,10 @@ namespace Event.Storage
         /// <param name="context">The database-context, with which this layer communicates with.</param>
         public EventStorageForReset(IEventContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
             _context = context;
         }
 
@@ -43,7 +47,7 @@ namespace Event.Storage
             {
                 throw new ArgumentNullException();
             }
-            if (! await Exists(workflowId, eventId))
+            if (!await Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
             }
