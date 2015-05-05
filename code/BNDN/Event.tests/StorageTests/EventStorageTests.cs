@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.DTO.History;
 using Common.Exceptions;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Models;
 using Event.Storage;
@@ -16,49 +17,98 @@ namespace Event.Tests.StorageTests
     {
         private Mock<IEventContext> _contextMock;
         private EventStorage _eventStorage;
-        private EventModel _em;
+        private List<EventModel> _eventModels;
+        private List<HistoryModel> _historyModels;
 
         [SetUp]
         public void SetUp()
         {
             _contextMock = new Mock<IEventContext>();
-            _contextMock.Setup(c => c.Dispose());
+            _contextMock.Setup(c => c.Dispose()).Verifiable();
             _contextMock.SetupAllProperties();
 
-            _em = new EventModel
-            {
-                Id = "eventId",
-                Name = "Event",
-                WorkflowId = "workflowId",
-                OwnUri = "http://www.contoso.com/",
-                Roles = new List<EventRoleModel>
+            _eventModels = new List<EventModel>
+            { 
+                new EventModel 
                 {
-                    new EventRoleModel
+                    Id = "eventId",
+                    Name = "Event",
+                    WorkflowId = "workflowId",
+                    OwnUri = "http://www.contoso.com/",
+                    Roles = new List<EventRoleModel>
                     {
-                        WorkflowId = "workflowId",
-                        EventId = "eventId",
-                        Role = "Student"
-                    }
-                },
-                Executed = false,
-                Included = true,
-                Pending = false
+                        new EventRoleModel
+                        {
+                            WorkflowId = "workflowId",
+                            EventId = "eventId",
+                            Role = "Student"
+                        }
+                    },
+                    Executed = false,
+                    Included = true,
+                    Pending = false
+                }
             };
+            _contextMock.Setup(c => c.Events).Returns(new FakeDbSet<EventModel>(_eventModels.AsQueryable()).Object);
 
-            // Code to get all of the async stuff to work.
-            var eventModels = new List<EventModel>{_em}.AsQueryable();
-            var eventMockSet = new FakeDbSet<EventModel>(eventModels);
-            _contextMock.Setup(c => c.Events).Returns(eventMockSet.Object); 
+            _historyModels = new List<HistoryModel>();
+            _contextMock.Setup(c => c.History).Returns(new FakeDbSet<HistoryModel>(_historyModels.AsQueryable()).Object);
 
             _eventStorage = new EventStorage(_contextMock.Object);
         }
+
+        #region Constructor and Dispose
+        [Test]
+        public void Constructor_NoArguments()
+        {
+            // Act
+            var storage = new EventStorage();
+
+            // Assert
+            Assert.IsNotNull(storage);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Constructor_NullArgument()
+        {
+            // Act
+            var storage = new EventStorage(null);
+
+            // Assert
+            Assert.Fail("This should not happen: {0}", storage.GetType());
+        }
+
+        [Test]
+        public void Constructor_Ok()
+        {
+            // Act
+            var storage = new EventStorage(_contextMock.Object);
+
+            // Assert
+            Assert.IsNotNull(storage);
+        }
+
+        [Test]
+        public void Dispose_Ok()
+        {
+            // Act
+            using (_eventStorage)
+            {
+                
+            }
+
+            // Assert
+            _contextMock.Verify(c => c.Dispose(), Times.Once);
+        }
+        #endregion
 
         #region GetExecuted
         [Test]
         public async Task GetExecuted_Returns_True()
         {
             // Arrange
-            _em.Executed = true;
+            _eventModels.First().Executed = true;
 
             // Act
             var result = await _eventStorage.GetExecuted("workflowId", "eventId");
@@ -86,13 +136,26 @@ namespace Event.Tests.StorageTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetExecuted_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetExecuted(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
         #endregion
+
         #region GetPending
         [Test]
         public async Task GetPending_Returns_True()
         {
             // Arrange
-            _em.Pending = true;
+            _eventModels.First().Pending = true;
 
             // Act
             var result = await _eventStorage.GetPending("workflowId", "eventId");
@@ -122,7 +185,20 @@ namespace Event.Tests.StorageTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetPending_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetPending(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
         #endregion
+
         #region GetIncluded
         [Test]
         public async Task GetIncluded_Returns_True()
@@ -140,7 +216,7 @@ namespace Event.Tests.StorageTests
         public async Task GetIncluded_Returns_False()
         {
             // Arrange
-            _em.Included = false;
+            _eventModels.First().Included = false;
 
             // Act
             var result = await _eventStorage.GetIncluded("workflowId", "eventId");
@@ -158,7 +234,20 @@ namespace Event.Tests.StorageTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetIncluded_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetIncluded(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
         #endregion
+
         #region Exists
 
         [Test]
@@ -180,7 +269,20 @@ namespace Event.Tests.StorageTests
             // Assert
             Assert.IsFalse(result);
         }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void Exists_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.Exists(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
         #endregion
+
         #region GetName
 
         [Test]
@@ -202,7 +304,20 @@ namespace Event.Tests.StorageTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetName_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetName(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
         #endregion
+
         #region GetRoles
 
         [Test]
@@ -224,6 +339,59 @@ namespace Event.Tests.StorageTests
 
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetRoles_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetRoles(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region GetHistoryForEvent
+        [Test]
+        public async Task GetHistoryForEvent_Returns_Histories()
+        {
+            // Arrange
+            _historyModels.Add(new HistoryModel
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId"
+            });
+
+            // Act
+            var result = await _eventStorage.GetHistoryForEvent("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNotEmpty(result);
+        }
+
+        [Test]
+        public void GetHistoryForEvent_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetHistoryForEvent("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetHistoryForEvent_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetHistoryForEvent(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
         #endregion
     }

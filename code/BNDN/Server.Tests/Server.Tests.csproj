@@ -74,6 +74,7 @@
     <Compile Include="LogicTests\ServerLogicTest.cs" />
     <Compile Include="LogicTests\WorkflowsHistoryLogicTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StorageTests\PasswordHasherTests.cs" />
     <Compile Include="StorageTests\StorageSetup.cs" />
     <Compile Include="StorageTests\StorageTests.cs" />
   </ItemGroup>
