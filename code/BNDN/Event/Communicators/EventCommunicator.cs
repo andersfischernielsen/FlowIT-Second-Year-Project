@@ -15,7 +15,7 @@ namespace Event.Communicators
     /// </summary>
     public class EventCommunicator : IEventFromEvent
     {
-        private readonly HttpClientToolbox _httpClient;
+        public readonly HttpClientToolbox _httpClient;
 
         /// <summary>
         /// Create a new EventCommunicator with no outgoing communication addresses.

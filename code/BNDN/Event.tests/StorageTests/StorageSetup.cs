@@ -11,26 +11,29 @@ namespace Event.Tests.StorageTests
 {
     internal class FakeDbSet<TEntity> where TEntity : class
     {
-        public DbSet<TEntity> Object { get; private set; }
+        public Mock<DbSet<TEntity>> EventStateMockSet { get; private set; }
+
+        public DbSet<TEntity> Object
+        {
+            get { return EventStateMockSet.Object; }
+        }
 
         public FakeDbSet(IQueryable<TEntity> queryable)
         {
             // Code to get all of the async stuff to work.
 
-            var eventStateMockSet = new Mock<DbSet<TEntity>>();
-            eventStateMockSet.As<IDbAsyncEnumerable<TEntity>>()
+            EventStateMockSet = new Mock<DbSet<TEntity>>();
+            EventStateMockSet.As<IDbAsyncEnumerable<TEntity>>()
                 .Setup(m => m.GetAsyncEnumerator())
                 .Returns(new TestDbAsyncEnumerator<TEntity>(queryable.GetEnumerator()));
 
-            eventStateMockSet.As<IQueryable<TEntity>>()
+            EventStateMockSet.As<IQueryable<TEntity>>()
                 .Setup(m => m.Provider)
                 .Returns(new TestDbAsyncQueryProvider<TEntity>(queryable.Provider));
 
-            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.Expression).Returns(queryable.Expression);
-            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            eventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
-
-            Object = eventStateMockSet.Object;
+            EventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.Expression).Returns(queryable.Expression);
+            EventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
+            EventStateMockSet.As<IQueryable<TEntity>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
         }
         private class TestDbAsyncQueryProvider<TEntity1> : IDbAsyncQueryProvider
         {

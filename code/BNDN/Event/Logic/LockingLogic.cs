@@ -146,16 +146,7 @@ namespace Event.Logic
         {
             if (workflowId == null || eventId == null || callerId == null)
             {
-                throw new ArgumentNullException("workflowId");
-            }
-
-            if (eventId == null)
-            {
-                throw new ArgumentNullException("callerId", "callerId was null");
-            }
-            if (callerId == null)
-            {
-                throw new ArgumentNullException("eventId", "eventId was null");
+                throw new ArgumentNullException();
             }
 
             if (!await IsAllowedToOperate(workflowId, eventId, callerId))
@@ -291,11 +282,6 @@ namespace Event.Logic
                 {
                     eventsToBeUnlockedSorted.Add(exc.EventId, exc);
                 }
-            }
-
-            if (eventsToBeUnlockedSorted == null)
-            {
-                throw new NullReferenceException("eventsToBelocked must not be null");
             }
 
             var b = await UnlockList(eventsToBeUnlockedSorted, eventId);

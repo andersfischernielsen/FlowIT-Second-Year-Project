@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
@@ -43,6 +42,10 @@ namespace Event.Logic
         /// <param name="eventCommunicator">An implementation of IEventFromEvent</param>
         public StateLogic(IEventStorage storage, ILockingLogic lockingLogic, IAuthLogic authLogic, IEventFromEvent eventCommunicator)
         {
+            if (storage == null || lockingLogic == null || authLogic == null || eventCommunicator == null)
+            {
+                throw new ArgumentNullException();
+            }
             _storage = storage;
             _lockingLogic = lockingLogic;
             _authLogic = authLogic;
@@ -51,7 +54,7 @@ namespace Event.Logic
 
         public async Task<bool> IsExecuted(string workflowId, string eventId, string senderId)
         {
-            if (workflowId == null || workflowId == null || senderId == null)
+            if (workflowId == null || eventId == null || senderId == null)
             {
                 throw new ArgumentNullException();
             }
@@ -64,7 +67,7 @@ namespace Event.Logic
             // Check is made to see if caller is allowed to execute this method at the moment. 
             if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, senderId))
             {
-                await _lockingLogic.WaitForMyTurn(workflowId, eventId, new LockDto()
+                await _lockingLogic.WaitForMyTurn(workflowId, eventId, new LockDto
                 {
                     WorkflowId = workflowId,
                     LockOwner = senderId,
@@ -77,7 +80,7 @@ namespace Event.Logic
 
         public async Task<bool> IsIncluded(string workflowId, string eventId, string senderId)
         {
-            if (workflowId == null || workflowId == null || senderId == null)
+            if (workflowId == null || eventId == null || senderId == null)
             {
                 throw new ArgumentNullException();
             }
@@ -90,7 +93,7 @@ namespace Event.Logic
             // Check is made to see if caller is allowed to execute this method
             if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, senderId))
             {
-                await _lockingLogic.WaitForMyTurn(workflowId, eventId, new LockDto()
+                await _lockingLogic.WaitForMyTurn(workflowId, eventId, new LockDto
                 {
                     WorkflowId = workflowId,
                     LockOwner = senderId,
@@ -115,7 +118,7 @@ namespace Event.Logic
         public async Task<EventStateDto> GetStateDto(string workflowId, string eventId, string senderId)
         {
             // Input check
-            if (workflowId == null || workflowId == null || senderId == null)
+            if (workflowId == null || eventId == null || senderId == null)
             {
                 throw new ArgumentNullException();
             }
@@ -129,7 +132,7 @@ namespace Event.Logic
 
             if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, senderId))
             {
-                await _lockingLogic.WaitForMyTurn(workflowId,eventId,new LockDto()
+                await _lockingLogic.WaitForMyTurn(workflowId, eventId, new LockDto
                 {
                     EventId = eventId,
                     WorkflowId = workflowId,
@@ -164,7 +167,7 @@ namespace Event.Logic
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         private async Task<bool> IsExecutable(string workflowId, string eventId)
         {
-            if (workflowId == null || workflowId == null)
+            if (workflowId == null || eventId == null)
             {
                 throw new ArgumentNullException();
             }
@@ -181,7 +184,7 @@ namespace Event.Logic
             {
                 var executed = await _eventCommunicator.IsExecuted(condition.Uri, condition.WorkflowId, condition.EventId, eventId);
                 var included = await _eventCommunicator.IsIncluded(condition.Uri, condition.WorkflowId, condition.EventId, eventId);
-                
+
                 // If the condition-event is not executed and currently included.
                 if (included && !executed)
                 {
@@ -208,7 +211,7 @@ namespace Event.Logic
             {
                 throw new LockedException();
             }
-            
+
             await _storage.SetIncluded(workflowId, eventId, newIncludedValue);
         }
 
@@ -262,7 +265,7 @@ namespace Event.Logic
             {
                 throw new UnauthorizedException();
             }
-            
+
             // Check if Event is currently locked
             if (!await _lockingLogic.IsAllowedToOperate(workflowId, eventId, eventId))
             {
@@ -324,7 +327,7 @@ namespace Event.Logic
             if (!await _lockingLogic.UnlockAllForExecute(workflowId, eventId))
             {
                 // If we cannot even unlock, we give up!
-                throw new FailedToUnlockOtherEventException();      
+                throw new FailedToUnlockOtherEventException();
             }
             if (allOk)
             {

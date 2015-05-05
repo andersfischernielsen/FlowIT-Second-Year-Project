@@ -34,6 +34,11 @@ namespace Event.Storage
                 throw new ArgumentNullException();
             }
 
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
+
             // Clear any LockDto-element (should only exist a single)
             var @event = await _context.Events.SingleAsync(e => e.WorkflowId == workflowId && e.Id == eventId);
 
