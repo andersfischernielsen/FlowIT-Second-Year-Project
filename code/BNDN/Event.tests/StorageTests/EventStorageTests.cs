@@ -6,6 +6,7 @@ using Common.DTO.History;
 using Common.Exceptions;
 using Event.Interfaces;
 using Event.Models;
+using Event.Models.UriClasses;
 using Event.Storage;
 using Moq;
 using NUnit.Framework;
@@ -19,7 +20,18 @@ namespace Event.Tests.StorageTests
         private EventStorage _eventStorage;
         private List<EventModel> _eventModels;
         private List<HistoryModel> _historyModels;
-
+        private List<ExclusionUri> _exclusionUris;
+        private List<InclusionUri> _inclusionUris;
+        private List<ConditionUri> _conditionUris;
+        private List<ResponseUri> _responseUris;
+        private FakeDbSet<EventModel> _eventModelMock;
+        private FakeDbSet<HistoryModel> _historyMock; 
+        private FakeDbSet<ResponseUri> _responseMock;
+        private FakeDbSet<ConditionUri> _conditionMock;
+        private FakeDbSet<InclusionUri> _inclusionMock;
+        private FakeDbSet<ExclusionUri> _exclusionMock;
+        
+        
         [SetUp]
         public void SetUp()
         {
@@ -46,13 +58,38 @@ namespace Event.Tests.StorageTests
                     },
                     Executed = false,
                     Included = true,
-                    Pending = false
+                    Pending = false,
+                    LockOwner = "Flow"
                 }
             };
-            _contextMock.Setup(c => c.Events).Returns(new FakeDbSet<EventModel>(_eventModels.AsQueryable()).Object);
+            _eventModelMock = new FakeDbSet<EventModel>(_eventModels.AsQueryable());
+            _eventModelMock.EventStateMockSet.Setup(c => c.Remove(It.IsAny<EventModel>())).Verifiable();
 
             _historyModels = new List<HistoryModel>();
-            _contextMock.Setup(c => c.History).Returns(new FakeDbSet<HistoryModel>(_historyModels.AsQueryable()).Object);
+            _historyMock = new FakeDbSet<HistoryModel>(_historyModels.AsQueryable());
+
+            _responseUris = new List<ResponseUri>();
+            _responseMock = new FakeDbSet<ResponseUri>(_responseUris.AsQueryable());
+            _responseMock.EventStateMockSet.Setup(c => c.RemoveRange(It.IsAny<IEnumerable<ResponseUri>>())).Verifiable();
+
+            _conditionUris = new List<ConditionUri>();
+            _conditionMock = new FakeDbSet<ConditionUri>(_conditionUris.AsQueryable());
+            _conditionMock.EventStateMockSet.Setup(c => c.RemoveRange(It.IsAny<IEnumerable<ConditionUri>>())).Verifiable();
+
+            _exclusionUris = new List<ExclusionUri>();
+            _exclusionMock = new FakeDbSet<ExclusionUri>(_exclusionUris.AsQueryable());
+            _exclusionMock.EventStateMockSet.Setup(c => c.RemoveRange(It.IsAny<IEnumerable<ExclusionUri>>())).Verifiable();
+
+            _inclusionUris = new List<InclusionUri>();
+            _inclusionMock = new FakeDbSet<InclusionUri>(_inclusionUris.AsQueryable());
+            _inclusionMock.EventStateMockSet.Setup(c => c.RemoveRange(It.IsAny<IEnumerable<InclusionUri>>())).Verifiable();
+
+            _contextMock.Setup(c => c.Events).Returns(_eventModelMock.Object);
+            _contextMock.Setup(c => c.History).Returns(_historyMock.Object);
+            _contextMock.Setup(c => c.Responses).Returns(_responseMock.Object);
+            _contextMock.Setup(c => c.Conditions).Returns(_conditionMock.Object);
+            _contextMock.Setup(c => c.Exclusions).Returns(_exclusionMock.Object);
+            _contextMock.Setup(c => c.Inclusions).Returns(_inclusionMock.Object);
 
             _eventStorage = new EventStorage(_contextMock.Object);
         }
@@ -284,7 +321,6 @@ namespace Event.Tests.StorageTests
         #endregion
 
         #region GetName
-
         [Test]
         public async Task GetName_Returns_Event()
         {
@@ -319,7 +355,6 @@ namespace Event.Tests.StorageTests
         #endregion
 
         #region GetRoles
-
         [Test]
         public async Task GetRoles_Returns_List()
         {
@@ -393,6 +428,423 @@ namespace Event.Tests.StorageTests
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
         }
+        #endregion
+
+        #region GetUri
+        [Test]
+        public async Task GetUri_Ok()
+        {
+            // Act
+            var result = await _eventStorage.GetUri("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(new Uri("http://www.contoso.com"), result);
+        }
+
+        [Test]
+        public void GetUri_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetUri("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetUri_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetUri(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region Reload
+        [Test]
+        public void Reload_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.Reload("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void Reload_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.Reload(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region DeleteEvent
+
+        [Test]
+        public async Task DeleteEvent_Ok()
+        {
+            // Arrange
+            _conditionUris.Add(new ConditionUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId"
+            });
+            _responseUris.Add(new ResponseUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId"
+            });
+            _inclusionUris.Add(new InclusionUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId"
+            });
+            _exclusionUris.Add(new ExclusionUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId"
+            });
+
+            // Act
+            await _eventStorage.DeleteEvent("workflowId", "eventId");
+
+            // Assert
+            _responseMock.EventStateMockSet.Verify(t => t.RemoveRange(It.IsAny<IEnumerable<ResponseUri>>()), Times.Once);
+            _conditionMock.EventStateMockSet.Verify(t => t.RemoveRange(It.IsAny<IEnumerable<ConditionUri>>()), Times.Once);
+            _exclusionMock.EventStateMockSet.Verify(t => t.RemoveRange(It.IsAny<IEnumerable<ExclusionUri>>()), Times.Once);
+            _inclusionMock.EventStateMockSet.Verify(t => t.RemoveRange(It.IsAny<IEnumerable<InclusionUri>>()), Times.Once);
+            _eventModelMock.EventStateMockSet.Verify(t => t.Remove(It.IsAny<EventModel>()), Times.Once);
+        }
+
+        [Test]
+        public void DeleteEvent_NotFound()
+        {
+            // Act
+            var testDelegate =
+                new TestDelegate(async () => await _eventStorage.DeleteEvent("notWorkflowId", "notEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, "eventId"),
+         TestCase(null, null),
+         TestCase("workflowId", null)]
+        public void DeleteEvent_NullArgument(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate =
+                new TestDelegate(async () => await _eventStorage.DeleteEvent(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region SaveHistory
+
+        [Test]
+        public async Task SaveHistory_Ok()
+        {
+            // Act
+            await _eventStorage.SaveHistory(new HistoryModel
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId"
+            });
+
+            // Assert
+            _historyMock.EventStateMockSet.Verify(c => c.Add(It.IsAny<HistoryModel>()), Times.Once);
+        }
+
+        [Test]
+        public void SaveHistory_NullArgument()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SaveHistory(null));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [TestCase(null, "eventId"),
+         TestCase(null, null),
+         TestCase("workflowId", null)]
+        public void SaveHistory_NullIds(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SaveHistory(new HistoryModel
+            {
+                WorkflowId = workflowId,
+                EventId = eventId
+            }));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void SaveHistory_NotFound()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.SaveHistory(new HistoryModel
+            {
+                WorkflowId = "notWorkflowId",
+                EventId = "notEventId"
+            }));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+        #endregion
+
+        #region GetLockDto
+        [Test]
+        public async Task GetLockDto_Locked()
+        {
+            // Act
+            var result = await _eventStorage.GetLockDto("workflowId", "eventId");
+
+            // Assert
+            Assert.AreEqual("Flow", result.LockOwner);
+            Assert.AreEqual("workflowId", result.WorkflowId);
+            Assert.AreEqual("eventId", result.EventId);
+        }
+
+        [Test]
+        public async Task GetLockDto_NotLocked()
+        {
+            // Arrange
+            _eventModels.First().LockOwner = null;
+
+            // Act
+            var result = await _eventStorage.GetLockDto("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public void GetLockDto_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetLockDto("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetLockDto_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetLockDto(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region GetRelations
+        #region GetConditions
+        [Test]
+        public async Task GetConditions_Ok()
+        {
+            // Arrange
+            _conditionUris.Add(new ConditionUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId",
+                UriString = "http://contoso.com/",
+                ForeignEventId = "anotherEventId"
+            });
+
+            // Act
+            var result = await _eventStorage.GetConditions("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNotEmpty(result);
+            Assert.AreEqual(_conditionUris.Count, result.Count);
+        }
+
+        [Test]
+        public void GetConditions_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetConditions("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetConditions_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetConditions(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region GetResponses
+        [Test]
+        public async Task GetResponses_Ok()
+        {
+            // Arrange
+            _responseUris.Add(new ResponseUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId",
+                UriString = "http://contoso.com/",
+                ForeignEventId = "anotherEventId"
+            });
+
+            // Act
+            var result = await _eventStorage.GetResponses("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNotEmpty(result);
+            Assert.AreEqual(_responseUris.Count, result.Count);
+        }
+
+        [Test]
+        public void GetResponses_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetResponses("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetResponses_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetResponses(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region GetInclusions
+        [Test]
+        public async Task GetInclusions_Ok()
+        {
+            // Arrange
+            _inclusionUris.Add(new InclusionUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId",
+                UriString = "http://contoso.com/",
+                ForeignEventId = "anotherEventId"
+            });
+
+            // Act
+            var result = await _eventStorage.GetInclusions("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNotEmpty(result);
+            Assert.AreEqual(_inclusionUris.Count, result.Count);
+        }
+
+        [Test]
+        public void GetInclusions_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetInclusions("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetInclusions_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetInclusions(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region GetExclusions
+        [Test]
+        public async Task GetExclusions_Ok()
+        {
+            // Arrange
+            _exclusionUris.Add(new ExclusionUri
+            {
+                WorkflowId = "workflowId",
+                EventId = "eventId",
+                UriString = "http://contoso.com/",
+                ForeignEventId = "anotherEventId"
+            });
+
+            // Act
+            var result = await _eventStorage.GetExclusions("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNotEmpty(result);
+            Assert.AreEqual(_exclusionUris.Count, result.Count);
+        }
+
+        [Test]
+        public void GetExclusions_Throws_NotFoundException()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetExclusions("wrongWorkflowId", "wrongEventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [TestCase(null, null),
+         TestCase(null, "eventId"),
+         TestCase("workflowId", null)]
+        public void GetExclusions_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _eventStorage.GetExclusions(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+        #endregion
+
+        #region SetState
+        #region SetExecuted
+        #endregion
+
+        #region SetPending
+        #endregion
+
+        #region SetIncluded
+        #endregion
         #endregion
     }
 }

@@ -32,6 +32,10 @@ namespace Event.Storage
         /// <param name="context">Context to be used by EventStorage</param>
         public EventStorage(IEventContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
             _context = context;
         }
 
@@ -487,6 +491,10 @@ namespace Event.Storage
 
         public async Task SaveHistory(HistoryModel toSave)
         {
+            if (toSave == null)
+            {
+                throw new ArgumentNullException("toSave");
+            }
             if (!await Exists(toSave.WorkflowId, toSave.EventId))
             {
                 throw new NotFoundException();
