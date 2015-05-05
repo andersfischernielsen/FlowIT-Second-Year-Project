@@ -34,6 +34,20 @@ namespace Event.Communicators
             _httpClient = new HttpClientToolbox(baseAddress);
         }
 
+    	///<summary>
+    	///A constructor with dependency injection for testing uses.
+    	///</summary>
+        public ServerCommunicator(string baseAddress, string eventId, string workFlowId, HttpClientToolbox toolbox) {
+    		if (baseAddress == null || eventId == null || workFlowId == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            _workflowId = workFlowId;
+             _eventId = eventId;
+            _httpClient = toolbox;
+        }
+
         public async Task PostEventToServer(EventAddressDto addressDto)
         {
             var path = string.Format("workflows/{0}", _workflowId);
