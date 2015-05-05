@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Event.Interfaces;
 using Event.Models;
 using Event.Storage;
@@ -15,12 +16,17 @@ namespace Event.Tests.StorageTests
     {
         private EventStorageForReset _storageForReset;
         private Mock<IEventContext> _contextMock;
+        private List<EventModel> _eventModels;
 
         [SetUp]
         public void SetUp()
         {
+            _eventModels = new List<EventModel>();
+
             _contextMock = new Mock<IEventContext>(MockBehavior.Strict);
             _contextMock.Setup(c => c.Dispose()).Verifiable();
+            _contextMock.Setup(c => c.SaveChangesAsync()).ReturnsAsync(1);
+            _contextMock.Setup(c => c.Events).Returns(new FakeDbSet<EventModel>(_eventModels.AsQueryable()).Object);
 
             _storageForReset = new EventStorageForReset(_contextMock.Object);
         }
@@ -78,13 +84,11 @@ namespace Event.Tests.StorageTests
         public async Task Exists_True()
         {
             // Arrange
-            var events = new List<EventModel>{ new EventModel
+            _eventModels.Add(new EventModel
             {
                 WorkflowId = "workflowId",
                 Id = "eventId"
-            }}.AsQueryable();
-
-            _contextMock.Setup(c => c.Events).Returns(new FakeDbSet<EventModel>(events).Object);
+            });
 
             // Act
             var result = await _storageForReset.Exists("workflowId", "eventId");
@@ -97,9 +101,6 @@ namespace Event.Tests.StorageTests
         public async Task Exists_False()
         {
             // Arrange
-            var events = new List<EventModel>().AsQueryable();
-
-            _contextMock.Setup(c => c.Events).Returns(new FakeDbSet<EventModel>(events).Object);
 
             // Act
             var result = await _storageForReset.Exists("workflowId", "eventId");
@@ -122,8 +123,7 @@ namespace Event.Tests.StorageTests
         public async Task ResetToInitialState_Ok(bool initialExecuted, bool initialIncluded, bool initialPending)
         {
             // Arrange
-            // Make Exists return true and set initial states
-            var events = new List<EventModel>{ new EventModel
+            _eventModels.Add(new EventModel
             {
                 WorkflowId = "workflowId",
                 Id = "eventId",
@@ -133,18 +133,87 @@ namespace Event.Tests.StorageTests
                 InitialExecuted = initialExecuted,
                 InitialIncluded = initialIncluded,
                 InitialPending = initialPending
-            }}.AsQueryable();
-
-            _contextMock.Setup(c => c.Events).Returns(new FakeDbSet<EventModel>(events).Object);
-            _contextMock.Setup(c => c.SaveChangesAsync()).Returns(Task.FromResult(1));
+            });
 
             // Act
             await _storageForReset.ResetToInitialState("workflowId", "eventId");
 
             // Assert
-            Assert.AreEqual(initialExecuted, events.First().Executed);
-            Assert.AreEqual(initialIncluded, events.First().Included);
-            Assert.AreEqual(initialPending, events.First().Pending);
+            Assert.AreEqual(initialExecuted, _eventModels.First().Executed);
+            Assert.AreEqual(initialIncluded, _eventModels.First().Included);
+            Assert.AreEqual(initialPending, _eventModels.First().Pending);
+        }
+
+        [TestCase(null, "eventId"),
+         TestCase("workflowId", null),
+         TestCase(null, null)]
+        public void ResetToInitialState_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _storageForReset.ResetToInitialState(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void ResetToInitialState_NotFound()
+        {
+            // Arrange
+            
+            // Act
+            var testDelegate =
+                new TestDelegate(async () => await _storageForReset.ResetToInitialState("workflowId", "eventId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+        #endregion
+
+        #region ClearLock
+
+        [Test]
+        public async Task ClearLock_Ok()
+        {
+            // Arrange
+            _eventModels.Add(new EventModel
+            {
+                WorkflowId = "workflowId",
+                Id = "eventId",
+                LockOwner = "SomeoneHasALockHere!"
+            });
+
+            // Act
+            await _storageForReset.ClearLock("workflowId", "eventId");
+
+            // Assert
+            Assert.IsNull(_eventModels.First().LockOwner);
+        }
+
+        [TestCase(null, "eventId"),
+         TestCase("workflowId", null),
+         TestCase(null, null)]
+        public void ClearLock_ArgumentNull(string workflowId, string eventId)
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _storageForReset.ClearLock(workflowId, eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        /// <summary>
+        /// This test fails because it is never checked whether the event exists or not.
+        /// Therefore the delegate throws another kind of exceptio.
+        /// </summary>
+        [Test]
+        public void ClearLock_NotFound()
+        {
+            // Act
+            var testDelegate = new TestDelegate(async () => await _storageForReset.ClearLock("NotId", "NotId"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
         }
         #endregion
     }
