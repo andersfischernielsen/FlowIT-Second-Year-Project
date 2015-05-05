@@ -87,8 +87,6 @@ namespace Event.Tests.LogicTests
 
         #endregion
 
-
-
         #region WaitForMyTurn Tests
 
         [TestCase("AnotherWid","Eid")]
@@ -409,7 +407,7 @@ namespace Event.Tests.LogicTests
         [TestCase(null, "")]
         [TestCase("text", null)]
         [TestCase(null, "text")]
-        public void LockAll_WillRaiseExceptionIfEventIdIsNull(string workflowId, string eventId)
+        public void LockAllForExecute_WillRaiseExceptionIfEventIdIsNull(string workflowId, string eventId)
         {
             // Arrange
             ILockingLogic logic = SetupDefaultLockingLogic();
@@ -429,7 +427,7 @@ namespace Event.Tests.LogicTests
         }
 
         [Test]
-        public async void LockAll_Success_EmptyRelationLists()
+        public async void LockAllForExecute_Success_EmptyRelationLists()
         {
             //Arrange
             var mockStorage = new Mock<IEventStorage>();
@@ -473,7 +471,7 @@ namespace Event.Tests.LogicTests
         [TestCase(true, false, true, true)]
         [TestCase(true, true, false, true)]
         [TestCase(true, true, true, true)]
-        public async void LockAll_Success_1OtherElementInRelations(bool conditions, bool exclusions, bool responses, bool inclusions)
+        public async void LockAllForExecute_Success_1OtherElementInRelations(bool conditions, bool exclusions, bool responses, bool inclusions)
         {
             //Arrange
             string eventId = "Eid";
@@ -558,7 +556,7 @@ namespace Event.Tests.LogicTests
         [TestCase(true, false, true, true)]
         [TestCase(true, true, false, true)]
         [TestCase(true, true, true, true)]
-        public async void LockAll_Success_TheSameEventInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
+        public async void LockAllForExecute_Success_TheSameEventInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
         {
             //Arrange
             string eventId = "Eid";
@@ -643,7 +641,7 @@ namespace Event.Tests.LogicTests
         [TestCase(true, false, true, true)]
         [TestCase(true, true, false, true)]
         [TestCase(true, true, true, true)]
-        public async void LockAll_Success_ManyOtherElementsInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
+        public async void LockAllForExecute_Success_ManyOtherElementsInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
         {
             //Arrange
             string eventId = "Eid";
@@ -749,7 +747,7 @@ namespace Event.Tests.LogicTests
         [TestCase(true, true, false, true)]
         [TestCase(true, true, true, true)]
         [Test]
-        public async void LockAll_Success_ManySameElementsInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
+        public async void LockAllForExecute_Success_ManySameElementsInResponses(bool conditions, bool exclusions, bool responses, bool inclusions)
         {
             //Arrange
             string eventId = "Eid";
@@ -839,13 +837,120 @@ namespace Event.Tests.LogicTests
         }
         #endregion
 
-        #region LockAll
+        #region LockList
 
         [Test]
-        public void LockAll_Success()
+        public async void LockAll_Success_EmptyRelationList()
         {
-            
+            //Arrange
+            ILockingLogic logic = SetupDefaultLockingLogic();
+            //Act
+            var returnValue = await logic.LockList(new SortedDictionary<string, RelationToOtherEventModel>(), "Eid");
+            //Assert
+            Assert.IsTrue(returnValue);
         }
+
+        [Test]
+        public async void LockAll_Success_1ElementRelationList()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+            //Act
+            var returnValue = await lockingLogic.LockList(new SortedDictionary<string, RelationToOtherEventModel> { { "testId", new RelationToOtherEventModel() } }, "Eid");
+            //Assert
+            Assert.IsTrue(returnValue);
+        }
+
+        [Test] 
+        public async void LockAll_Fails_1ElementRelationListNullEventId()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+            //Act
+            TestDelegate testDelegate = async()=>await lockingLogic.LockList(new SortedDictionary<string, RelationToOtherEventModel> { { "testId", new RelationToOtherEventModel() } }, null);
+            //Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [TestCase(null)]
+        [TestCase("Eid")]
+        public async void LockAll_Fails_WhenParametersAreNull(string eventId)
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+            //Act
+            TestDelegate testDelegate = async () => await lockingLogic.LockList(null, eventId);
+            //Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public async void LockAll_Fail_NullEventIdAndConnectionFails_UnlockSomeThrows()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Throws(new Exception());
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            //Act
+            TestDelegate testDelegate = async () => await lockingLogic.LockList(new SortedDictionary<string, RelationToOtherEventModel>{{"testId", new RelationToOtherEventModel()}}, null);
+            //Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public async void LockAll_Succes_FailsToLockAllEventsReturnsFalse()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Lock(It.IsAny<Uri>(), It.IsAny<LockDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Throws(new Exception());
+            mockEventCommunicator.Setup(m => m.Unlock(It.IsAny<Uri>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.Delay(0));
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            //Act
+            var returnValue = await lockingLogic.LockList(new SortedDictionary<string, RelationToOtherEventModel>() { { "testId", new RelationToOtherEventModel() } }, "Eid");
+            //Assert
+            Assert.IsFalse(returnValue);
+        }
+
+
         #endregion
 
         #region LockSelf tests
