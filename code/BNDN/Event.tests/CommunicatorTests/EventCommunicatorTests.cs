@@ -1,11 +1,10 @@
 ﻿using System;
-using Common.Exceptions;
 using Event.Communicators;
 using Event.Exceptions;
 using Event.Exceptions.EventInteraction;
 using NUnit.Framework;
 
-namespace Event.Tests
+namespace Event.Tests.CommunicatorTests
 {
     [TestFixture]
     public class EventCommunicatorTests
