@@ -23,6 +23,14 @@ namespace Server.Logic
             _storage = new ServerStorage();
         }
 
+        /// <summary>
+        /// Dependency injection constructor for testing purposes. 
+        /// </summary>
+        public WorkflowHistoryLogic(IServerHistoryStorage storage)
+        {
+            _storage = storage;
+        }
+
         public async Task<IEnumerable<HistoryDto>> GetHistoryForWorkflow(string workflowId)
         {
             if (workflowId == null)
