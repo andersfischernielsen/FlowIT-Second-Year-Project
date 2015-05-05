@@ -37,6 +37,57 @@ namespace Event.Tests.LogicTests
         }
         #endregion
 
+        #region Constructor and dispose
+
+        [Test]
+        public void DisposeStorage_Test()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+            mockStorage.Setup(m => m.Dispose()).Verifiable();
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            // Act
+            using (lockingLogic)
+            {
+                // Do nothing.
+            }
+
+            // Assert
+            mockStorage.Verify(t => t.Dispose(), Times.Once);
+        }
+
+        [Test]
+        public void DisposeCommunicator_Test()
+        {
+            //Arrange
+            var mockStorage = new Mock<IEventStorage>();
+
+            var mockEventCommunicator = new Mock<IEventFromEvent>();
+            mockEventCommunicator.Setup(m => m.Dispose()).Verifiable();
+
+            ILockingLogic lockingLogic = new LockingLogic(
+                mockStorage.Object,
+                mockEventCommunicator.Object);
+
+            // Act
+            using (lockingLogic)
+            {
+                // Do nothing.
+            }
+
+            // Assert
+            mockEventCommunicator.Verify(t => t.Dispose(), Times.Once);
+        }
+
+        #endregion
+
+
 
         #region WaitForMyTurn Tests
 
@@ -790,6 +841,11 @@ namespace Event.Tests.LogicTests
 
         #region LockAll
 
+        [Test]
+        public void LockAll_Success()
+        {
+            
+        }
         #endregion
 
         #region LockSelf tests
