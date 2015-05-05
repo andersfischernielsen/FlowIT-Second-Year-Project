@@ -199,7 +199,7 @@ namespace Server.Controllers
             }
             catch (ArgumentException e)
             {
-                if (e.ParamName.Equals("user"))
+                if (e.ParamName != null && e.ParamName.Equals("user"))
                 {
                     _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
                     {
@@ -209,7 +209,7 @@ namespace Server.Controllers
                     });
 
                     throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Conflict,
-                        "A user with that username already exists.")); ;
+                        "A user with that username already exists."));
                 }
                 else {
                     _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
