@@ -68,6 +68,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ControllerTests\HistoryControllerTests.cs" />
     <Compile Include="ControllerTests\UserControllerTests.cs" />
     <Compile Include="ControllerTests\WorkflowsControllerTests.cs" />
     <Compile Include="LogicTests\ServerLogicTest.cs" />
@@ -89,7 +90,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

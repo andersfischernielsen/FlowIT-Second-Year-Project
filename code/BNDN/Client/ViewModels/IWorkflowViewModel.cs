@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Client.ViewModels
 {
@@ -6,6 +7,7 @@ namespace Client.ViewModels
     {
         string Status { get; set; }
         string WorkflowId { get; }
+        IEnumerable<string> Roles { get; }
         Task DisableExecuteButtons();
         void RefreshEvents();
     }

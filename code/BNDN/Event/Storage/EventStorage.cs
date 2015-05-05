@@ -284,7 +284,7 @@ namespace Event.Storage
             return new LockDto
             {
                 WorkflowId = @event.WorkflowId,
-                Id = @event.Id,
+                EventId = @event.Id,
                 LockOwner = @event.LockOwner
             };
         }

@@ -18,12 +18,7 @@ namespace Event.Logic
         private readonly IEventFromEvent _eventCommunicator;
 
         //QUEUE is holding a dictionary of string (workflowid) , dictionary which holds string (eventid), the queue
-        private static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> _lockQueue = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>>();
-        //This is probably bad but I do it to Assert in tests.
-        public static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> LockQueue {
-            get { return _lockQueue; }
-            private set { _lockQueue = value; }
-        }
+        public readonly static ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>> LockQueue = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentQueue<LockDto>>>();
 
         /// <summary>
         /// Constructor
@@ -41,8 +36,8 @@ namespace Event.Logic
         /// <summary>
         /// Attempt to lock the specified Event down
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
+        /// <param name="workflowId">EventId of the workflow, the Event belongs to</param>
+        /// <param name="eventId">EventId of the Event</param>
         /// <param name="lockDto">Content should represent this Event</param>
         /// <returns></returns>
         /// <exception cref="LockedException">Thrown if the specified Event is already locked down</exception>
@@ -52,14 +47,14 @@ namespace Event.Logic
 
         private void AddToQueue(string workflowId, string eventId, LockDto lockDto)
         {
-            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var eventDictionary = LockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
             var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
             queue.Enqueue(lockDto);
         }
 
         private LockDto Dequeue(string workflowId, string eventId)
         {
-            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var eventDictionary = LockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
             var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
             LockDto next;
             queue.TryDequeue(out next);
@@ -68,7 +63,7 @@ namespace Event.Logic
 
         private bool AmINext(string workflowId, string eventId, LockDto lockDto)
         {
-            var eventDictionary = _lockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
+            var eventDictionary = LockQueue.GetOrAdd(workflowId, new ConcurrentDictionary<string, ConcurrentQueue<LockDto>>());
             var queue = eventDictionary.GetOrAdd(eventId, new ConcurrentQueue<LockDto>());
             LockDto next;
             if (queue.TryPeek(out next))
@@ -97,12 +92,12 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
-            CheckIfEventIsLocked(workflowId, eventId, lockDto);  // refactored into its own method.
+            await CheckIfEventIsLocked(workflowId, eventId, lockDto);  // refactored into its own method.
 
             Dequeue(workflowId, eventId);
         }
 
-        private async void CheckIfEventIsLocked(string workflowId, string eventId, LockDto lockDto)
+        private async Task CheckIfEventIsLocked(string workflowId, string eventId, LockDto lockDto)
         {
             if (!await IsAllowedToOperate(workflowId, eventId, lockDto.LockOwner))
             {
@@ -113,6 +108,7 @@ namespace Event.Logic
                 {
                     if (watch.Elapsed.Seconds > 10)
                     {
+                        Dequeue(workflowId, eventId);
                         throw new LockedException();
                     }
                     await Task.Delay(100);
@@ -141,7 +137,7 @@ namespace Event.Logic
             AddToQueue(workflowId, eventId, lockDto);
 
             // Check if this Event is currently locked
-            CheckIfEventIsLocked(workflowId, eventId, lockDto); // refactored into its own method.
+            await CheckIfEventIsLocked(workflowId, eventId, lockDto); // refactored into its own method.
 
             await _storage.SetLock(workflowId, eventId, lockDto.LockOwner);
         }
@@ -183,9 +179,9 @@ namespace Event.Logic
             var incl = await _storage.GetInclusions(workflowId, eventId);
             var excl = await _storage.GetExclusions(workflowId, eventId);            
 
-            var allDependentEventsSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+            var allDependentEventsSorted = new SortedDictionary<string, RelationToOtherEventModel>();
             // Add this Event's own lockDto (so the Event will be locked in order.)
-            allDependentEventsSorted.Add(eventId.GetHashCode(), new RelationToOtherEventModel
+            allDependentEventsSorted.Add(eventId, new RelationToOtherEventModel
             {
                 EventId = eventId,
                 WorkflowId = workflowId,
@@ -194,25 +190,25 @@ namespace Event.Logic
 
             foreach (var res in resp)
             {
-                if (!allDependentEventsSorted.ContainsKey(res.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(res.EventId))
                 {
-                    allDependentEventsSorted.Add(res.EventId.GetHashCode(), res);
+                    allDependentEventsSorted.Add(res.EventId, res);
                 }
             }
 
             foreach (var inc in incl)
             {
-                if (!allDependentEventsSorted.ContainsKey(inc.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(inc.EventId))
                 {
-                    allDependentEventsSorted.Add(inc.EventId.GetHashCode(), inc);
+                    allDependentEventsSorted.Add(inc.EventId, inc);
                 }
             }
 
             foreach (var exc in excl)
             {
-                if (!allDependentEventsSorted.ContainsKey(exc.EventId.GetHashCode()))
+                if (!allDependentEventsSorted.ContainsKey(exc.EventId))
                 {
-                    allDependentEventsSorted.Add(exc.EventId.GetHashCode(), exc);
+                    allDependentEventsSorted.Add(exc.EventId, exc);
                 }
             }
 
@@ -221,14 +217,14 @@ namespace Event.Logic
         }
 
 
-        public async Task<bool> LockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId)
+        public async Task<bool> LockList(SortedDictionary<string, RelationToOtherEventModel> list, string eventId)
         {
             var lockedEvents = new List<RelationToOtherEventModel>();
             // For every related, dependent Event, attempt to lock it
             foreach (var tuple in list)
             {
                 var relation = tuple.Value;
-                var toLock = new LockDto { LockOwner = eventId, WorkflowId = relation.WorkflowId, Id = relation.EventId };
+                var toLock = new LockDto { LockOwner = eventId, WorkflowId = relation.WorkflowId, EventId = relation.EventId };
 
                 try
                 {
@@ -267,29 +263,29 @@ namespace Event.Logic
             var incl = await _storage.GetInclusions(workflowId, eventId);
             var excl = await _storage.GetExclusions(workflowId, eventId);
 
-            var eventsToBeUnlockedSorted = new SortedDictionary<int, RelationToOtherEventModel>();
+            var eventsToBeUnlockedSorted = new SortedDictionary<string, RelationToOtherEventModel>();
 
             foreach (var res in resp)
             {
-                if (!eventsToBeUnlockedSorted.ContainsKey(res.EventId.GetHashCode()))
+                if (!eventsToBeUnlockedSorted.ContainsKey(res.EventId))
                 {
-                    eventsToBeUnlockedSorted.Add(res.EventId.GetHashCode(), res);
+                    eventsToBeUnlockedSorted.Add(res.EventId, res);
                 }
             }
 
             foreach (var inc in incl)
             {
-                if (!eventsToBeUnlockedSorted.ContainsKey(inc.EventId.GetHashCode()))
+                if (!eventsToBeUnlockedSorted.ContainsKey(inc.EventId))
                 {
-                    eventsToBeUnlockedSorted.Add(inc.EventId.GetHashCode(), inc);
+                    eventsToBeUnlockedSorted.Add(inc.EventId, inc);
                 }
             }
 
             foreach (var exc in excl)
             {
-                if (!eventsToBeUnlockedSorted.ContainsKey(exc.EventId.GetHashCode()))
+                if (!eventsToBeUnlockedSorted.ContainsKey(exc.EventId))
                 {
-                    eventsToBeUnlockedSorted.Add(exc.EventId.GetHashCode(), exc);
+                    eventsToBeUnlockedSorted.Add(exc.EventId, exc);
                 }
             }
 
@@ -306,7 +302,7 @@ namespace Event.Logic
             return b;
         }
 
-        public async Task<bool> UnlockList(SortedDictionary<int, RelationToOtherEventModel> list, string eventId)
+        public async Task<bool> UnlockList(SortedDictionary<string, RelationToOtherEventModel> list, string eventId)
         {
             var everyEventIsUnlocked = true;
             foreach (var tuple in list)
@@ -351,7 +347,7 @@ namespace Event.Logic
         /// <summary>
         /// Attempts to unlock the Events, that are provided in the argument list.  
         /// </summary>
-        /// <param name="eventId">Id of the target Event</param>
+        /// <param name="eventId">EventId of the target Event</param>
         /// <param name="eventsToBeUnlocked">List specifying which Events are to be unlocked</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>

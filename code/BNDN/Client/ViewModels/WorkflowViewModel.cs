@@ -17,23 +17,13 @@ namespace Client.ViewModels
         private readonly WorkflowDto _workflowDto;
         private bool _resetEventRuns;
         private readonly IWorkflowListViewModel _parent;
-        private readonly IList<string> _roles;
+        private readonly IEnumerable<string> _roles;
         private readonly IEventConnection _eventConnection;
         private readonly IServerConnection _serverConnection;
 
         public string WorkflowId { get { return _workflowDto.Id; } }
 
-        public WorkflowViewModel(IWorkflowListViewModel parent)
-        {
-            _parent = parent;
-            EventList = new ObservableCollection<EventViewModel>();
-            _workflowDto = new WorkflowDto();
-            _roles = new List<string>();
-            _eventConnection = new EventConnection();
-            _serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
-        }
-
-        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles)
+        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IEnumerable<string> roles)
         {
             if (parent == null || workflowDto == null || roles == null)
             {
@@ -47,7 +37,7 @@ namespace Client.ViewModels
             _serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
         }
 
-        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IList<string> roles,
+        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IEnumerable<string> roles,
             IEventConnection eventConnection, IServerConnection serverConnection, ObservableCollection<EventViewModel> eventList)
         {
             _parent = parent;
@@ -93,6 +83,11 @@ namespace Client.ViewModels
             }
         }
 
+        public IEnumerable<string> Roles
+        {
+            get { return _roles; }
+        }
+
         #endregion
 
         #region Actions
@@ -117,13 +112,13 @@ namespace Client.ViewModels
 
             EventList = new ObservableCollection<EventViewModel>(events);
 
-            SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
+            SelectedEventViewModel = EventList.FirstOrDefault();
 
             NotifyPropertyChanged("");
         }
 
         /// <summary>
-        /// Creates a new window with the log of the 
+        /// Creates a new window with the log of the workflow
         /// </summary>
         public void GetHistory()
         {

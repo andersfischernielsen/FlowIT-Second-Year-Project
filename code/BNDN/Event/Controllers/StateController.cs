@@ -47,7 +47,7 @@ namespace Event.Controllers
         /// </summary>
         /// <param name="workflowId">The id of the Workflow in which the Event exists</param>
         /// <param name="senderId">Content should represent the caller of this method</param>
-        /// <param name="eventId">Id of the Event, whose Executed value should be returned</param>
+        /// <param name="eventId">EventId of the Event, whose Executed value should be returned</param>
         /// <returns>Event's current Executed value</returns>
         [Route("events/{workflowId}/{eventId}/executed/{senderId}")]
         [HttpGet]
@@ -295,7 +295,7 @@ namespace Event.Controllers
             }
             try
             {
-                await _logic.Execute(workflowId, eventId, executeDto);   
+                await _logic.Execute(workflowId, eventId, executeDto);
 
                 await _historyLogic.SaveSuccesfullCall("PUT", "Execute", eventId, workflowId);
             }

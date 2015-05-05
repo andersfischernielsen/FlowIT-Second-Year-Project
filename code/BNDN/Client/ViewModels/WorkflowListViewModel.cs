@@ -11,31 +11,42 @@ namespace Client.ViewModels
     public class WorkflowListViewModel : ViewModelBase, IWorkflowListViewModel
     {
         public Action CloseAction { get; set; }
-        private readonly Uri _serverAddress;
-        private readonly Dictionary<string, IList<string>> _rolesForWorkflows;
-
-        public WorkflowListViewModel(Dictionary<string, IList<string>> rolesForWorkflows)
-        {
-            WorkflowList = new ObservableCollection<WorkflowViewModel>();
-
-            var settings = Settings.LoadSettings();
-            _serverAddress = new Uri(settings.ServerAddress);
-            _rolesForWorkflows = rolesForWorkflows;
-
-            GetWorkflows();
-        }
-
-        #region Databindings
         public ObservableCollection<WorkflowViewModel> WorkflowList { get; set; }
 
         private WorkflowViewModel _selecteWorkflowViewModel;
         private string _status;
+        private readonly Dictionary<string, ICollection<string>> _rolesForWorkflows;
+        private readonly IServerConnection _serverConnection;
 
         public WorkflowListViewModel()
         {
-            
+
         }
 
+        public WorkflowListViewModel(Dictionary<string, ICollection<string>> rolesForWorkflows)
+        {
+            if (rolesForWorkflows == null)
+            {
+                throw new ArgumentNullException("rolesForWorkflows");
+            }
+            WorkflowList = new ObservableCollection<WorkflowViewModel>();
+
+            var settings = Settings.LoadSettings();
+            _rolesForWorkflows = rolesForWorkflows;
+
+            _serverConnection = new ServerConnection(new Uri(settings.ServerAddress));
+
+            GetWorkflows();
+        }
+
+        public WorkflowListViewModel(IServerConnection serverConnection, Dictionary<string, ICollection<string>> rolesForWorkflows, ObservableCollection<WorkflowViewModel> workflowList)
+        {
+            WorkflowList = workflowList;
+            _rolesForWorkflows = rolesForWorkflows;
+            _serverConnection = serverConnection;
+        }
+
+        #region Databindings
         public WorkflowViewModel SelectedWorkflowViewModel
         {
             get { return _selecteWorkflowViewModel; }
@@ -56,7 +67,7 @@ namespace Client.ViewModels
             }
         }
 
-        public Dictionary<string, IList<string>> RolesForWorkflows
+        public Dictionary<string, ICollection<string>> RolesForWorkflows
         {
             get { return _rolesForWorkflows; }
         }
@@ -75,30 +86,27 @@ namespace Client.ViewModels
             SelectedWorkflowViewModel = null;
             WorkflowList.Clear();
 
-            IList<WorkflowDto> workflows;
-            using (IServerConnection connection = new ServerConnection(_serverAddress))
+            IEnumerable<WorkflowDto> workflows;
+            try
             {
-                try
-                {
-                    workflows = await connection.GetWorkflows();
-                }
-                catch (HostNotFoundException)
-                {
-                    Status = "The host of the server was not found. If the problem persists, contact you Flow administrator";
-                    return;
-                }
-                catch (Exception e)
-                {
-                    Status = e.Message;
-                    return;
-                }
+                workflows = await _serverConnection.GetWorkflows();
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "The host of the server was not found. If the problem persists, contact you Flow administrator";
+                return;
+            }
+            catch (Exception e)
+            {
+                Status = e.Message;
+                return;
             }
 
             WorkflowList = new ObservableCollection<WorkflowViewModel>();
 
             foreach (var workflowDto in workflows)
             {
-                IList<string> roles;
+                ICollection<string> roles;
                 if (!_rolesForWorkflows.TryGetValue(workflowDto.Id, out roles))
                 {
                     // The user has no roles associated with this workflow.
