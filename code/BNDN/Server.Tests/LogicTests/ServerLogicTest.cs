@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common;
 using Common.DTO.Event;
+using Common.DTO.Server;
 using Common.DTO.Shared;
+using Common.Exceptions;
 using Moq;
 using NUnit.Framework;
 using Server.Interfaces;
@@ -179,6 +181,13 @@ namespace Server.Tests.LogicTests
             Assert.AreEqual(expectedEvent.Uri.AbsoluteUri, "http://2.2.2.2/");
 
         }
+        [Test]
+        public async Task TestGetEventsOnWorkflow_Throws_NullArgument()
+        {
+            TestDelegate testDelegate = async () => await _toTest.GetEventsOnWorkflow(null);
+
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
 
         [Test]
         public async Task TestGetWorkflow()
@@ -189,6 +198,14 @@ namespace Server.Tests.LogicTests
             Assert.AreEqual(actual.Id, result.Id);
             Assert.AreEqual(actual.Name, result.Name);
         }
+        [Test]
+        public async Task TestGetWorkflow_NullArgument()
+        {
+            TestDelegate testDelegate = async () => await _toTest.GetWorkflow(null);
+
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
 
         [Test]
         public async Task TestRemoveEventFromWorkflow()
@@ -208,5 +225,142 @@ namespace Server.Tests.LogicTests
 
             Assert.AreEqual(0, _list.Count(x => x.Id == "1"));
         }
+
+        #region Login
+
+        [Test]
+        public async void Login_Succes_UserHasNoRolesReturnEmptyList()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.Login(It.IsAny<ServerUserModel>())).ReturnsAsync(new List<ServerRoleModel>());
+            mock.Setup(m => m.GetUser(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new ServerUserModel());
+            IServerLogic logic = new ServerLogic(mock.Object);
+            var loginDto = new LoginDto(){Username = "uName", Password="pWord"};
+            //Act
+            var result = await logic.Login(loginDto);
+            //Assert
+            Assert.IsEmpty(result.RolesOnWorkflows);
+        }
+
+        [Test]
+        public async void Login_Succes_UserHasARoleReturnEmptyList()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            var userModel = new ServerUserModel{Name = "Name", Password="password"};
+            var serverRoleModel = new ServerRoleModel {Id = "ServerRoleModelId", ServerWorkflowModelId = "Wid"};
+
+            mock.Setup(m => m.Login(It.Is<ServerUserModel>(model => userModel == model))).ReturnsAsync(new List<ServerRoleModel> { serverRoleModel });
+            mock.Setup(m => m.GetUser("Name", "password")).ReturnsAsync(userModel);
+
+            IServerLogic logic = new ServerLogic(mock.Object);
+            var loginDto = new LoginDto() { Username = "Name", Password = "password" };
+            //Act
+            var result = await logic.Login(loginDto);
+            //Assert
+            Assert.AreEqual(1, result.RolesOnWorkflows.Count);
+            Assert.AreEqual(1, result.RolesOnWorkflows["Wid"].Count);
+            Assert.Contains(serverRoleModel.Id, result.RolesOnWorkflows["Wid"].ToList());
+        }
+
+        [Test]
+        public async void Login_Succes_UserHas2EqualRoleReturnEmptyList()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            var userModel = new ServerUserModel { Name = "Name", Password = "password" };
+            var serverRoleModel1 = new ServerRoleModel { Id = "ServerRoleModelId", ServerWorkflowModelId = "Wid" };
+            var serverRoleModel2 = new ServerRoleModel { Id = "ServerRoleModelId2", ServerWorkflowModelId = "Wid" };
+
+            mock.Setup(m => m.Login(It.Is<ServerUserModel>(model => userModel == model))).ReturnsAsync(new List<ServerRoleModel> { serverRoleModel1, serverRoleModel2 });
+            mock.Setup(m => m.GetUser(It.Is<string>(name => name == "Name"), It.Is<string>(pass => pass == "password"))).ReturnsAsync(userModel);
+
+            IServerLogic logic = new ServerLogic(mock.Object);
+            var loginDto = new LoginDto() { Username = "Name", Password = "password" };
+            //Act
+            var result = await logic.Login(loginDto);
+            //Assert
+            Assert.AreEqual(1,result.RolesOnWorkflows.Count);
+            Assert.AreEqual(2, result.RolesOnWorkflows["Wid"].Count);
+            Assert.Contains(serverRoleModel1.Id, result.RolesOnWorkflows["Wid"].ToList());
+            Assert.Contains(serverRoleModel2.Id, result.RolesOnWorkflows["Wid"].ToList());
+        }
+
+        [Test]
+        public async void Login_Throws_GetUserReturnsNull()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.GetUser(It.Is<string>(name => name == "Name"), It.Is<string>(pass => pass == "password"))).ReturnsAsync(null);
+
+            IServerLogic logic = new ServerLogic(mock.Object);
+            var loginDto = new LoginDto() { Username = "Name", Password = "password" };
+            //Act
+            TestDelegate testDelegate = async() => await logic.Login(loginDto);
+            //Assert
+            Assert.Throws<UnauthorizedException>(testDelegate);
+        }
+        #endregion
+
+        #region AddUser
+        [Test]
+        public async void AddUser_Success_NormalUserWithoutRoles()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.AddUser(It.IsAny<ServerUserModel>())).Returns(Task.Delay(0));
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddUser(new UserDto{Name = "Name", Password = "Password", Roles = new List<WorkflowRole>()});
+            //Assert
+            Assert.DoesNotThrow(testDelegate);
+        }
+
+        [Test]
+        public async void AddUser_Success_NormalUserWithRoleThatAlreadyExists()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.AddUser(It.IsAny<ServerUserModel>())).Returns(Task.Delay(0));
+            mock.Setup(m => m.RoleExists(It.IsAny<ServerRoleModel>())).ReturnsAsync(true);
+            mock.Setup(m => m.GetRole(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new ServerRoleModel{Id = "role",ServerWorkflowModelId = "Wid"});
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddUser(new UserDto { Name = "Name", Password = "Password", Roles = new List<WorkflowRole>{new WorkflowRole{Role = "Role",Workflow = "Wid"}} });
+            //Assert
+            Assert.DoesNotThrow(testDelegate);
+        }
+
+        [Test]
+        public async void AddUser_Throws_NormalUserWithRoleThatDoesNotAlreadyExists()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.AddUser(It.IsAny<ServerUserModel>())).Returns(Task.Delay(0));
+            mock.Setup(m => m.RoleExists(It.IsAny<ServerRoleModel>())).ReturnsAsync(false);
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddUser(new UserDto { Name = "Name", Password = "Password", Roles = new List<WorkflowRole> { new WorkflowRole { Role = "Role", Workflow = "Wid" } } });
+            //Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [Test]
+        public async void AddUser_Throws_NullArgument()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddUser(null);
+            //Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region AddRolesToUser
+
+        #endregion
     }
 }
