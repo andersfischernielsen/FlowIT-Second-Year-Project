@@ -25,7 +25,7 @@ namespace Event.Tests.CommunicatorTests
             mock.Setup(m => m.Dispose()).Verifiable();
 
             _toolBoxMock = mock;
-            _toTest = new ServerCommunicator("testing", "testingEventId", "testingWorkflowId", mock.Object);
+            _toTest = new ServerCommunicator("testingEventId", "testingWorkflowId", mock.Object);
 
         }
 
@@ -34,7 +34,11 @@ namespace Event.Tests.CommunicatorTests
         {
             Assert.Throws<ArgumentNullException>(() => new ServerCommunicator(null, "", ""));
             Assert.Throws<ArgumentNullException>(() => new ServerCommunicator("", null, ""));
-            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator("", "", null));
+            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator("", "", (string)null));
+
+            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator(null, "", new HttpClientToolbox()));
+            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator("", null, new HttpClientToolbox()));
+            Assert.Throws<ArgumentNullException>(() => new ServerCommunicator("", "", (HttpClientToolbox)null));
         }
 
         [Test]
@@ -42,7 +46,7 @@ namespace Event.Tests.CommunicatorTests
         {
             var mock = new Mock<HttpClientToolbox>();
             mock.Setup(m => m.Create(It.IsAny<string>(), It.IsAny<EventAddressDto>())).Throws(new Exception());
-            var toTest = new ServerCommunicator("testing", "testingEventId", "testingWorkflowId", mock.Object);
+            var toTest = new ServerCommunicator("testingEventId", "testingWorkflowId", mock.Object);
 
             Assert.Throws<FailedToPostEventAtServerException>(async () => await toTest.PostEventToServer(new EventAddressDto()));
         }
@@ -51,14 +55,14 @@ namespace Event.Tests.CommunicatorTests
         public void PostEventToServerTestSuccedes()
         {
             Assert.DoesNotThrow((async () => await _toTest.PostEventToServer(new EventAddressDto())));
-            _toolBoxMock.Verify(t => t.Create(It.IsAny<string>(), It.IsAny<EventAddressDto>()), Times.AtLeastOnce);
+            _toolBoxMock.Verify(t => t.Create(It.IsAny<string>(), It.IsAny<EventAddressDto>()), Times.Once);
         }
 
         [Test]
         public void DeleteEventFromServerTestThrowsException() {
             var mock = new Mock<HttpClientToolbox>();
             mock.Setup(m => m.Delete(It.IsAny<string>())).Throws(new Exception());
-            var toTest = new ServerCommunicator("testing", "testingEventId", "testingWorkflowId", mock.Object);
+            var toTest = new ServerCommunicator("testingEventId", "testingWorkflowId", mock.Object);
 
             Assert.Throws<FailedToDeleteEventFromServerException>(async () => await toTest.DeleteEventFromServer());
         }
@@ -67,7 +71,7 @@ namespace Event.Tests.CommunicatorTests
         public void DeleteEventFromServerTestSuccedes()
         {
             Assert.DoesNotThrow((async () => await _toTest.DeleteEventFromServer()));
-            _toolBoxMock.Verify(t => t.Delete(It.IsAny<string>()), Times.AtLeastOnce);
+            _toolBoxMock.Verify(t => t.Delete(It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -77,7 +81,7 @@ namespace Event.Tests.CommunicatorTests
                 
             }
 
-            _toolBoxMock.Verify(m => m.Dispose(), Times.AtLeastOnce);
+            _toolBoxMock.Verify(m => m.Dispose(), Times.Once);
         }
     }
 }
