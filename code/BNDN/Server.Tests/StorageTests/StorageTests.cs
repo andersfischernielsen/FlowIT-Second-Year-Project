@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
+using Common.DTO.History;
 using Common.Exceptions;
 using Moq;
 using NUnit.Framework;
@@ -26,7 +22,8 @@ namespace Server.Tests.StorageTests
         private List<ServerWorkflowModel> workflows;
         private List<ServerEventModel> events;
         private List<ServerRoleModel> roles;
-
+        private List<HistoryModel> history;
+            
         [SetUp]
         public void SetUp()
         {
@@ -46,14 +43,19 @@ namespace Server.Tests.StorageTests
             var fakeEventsSet = new FakeDbSet<ServerEventModel>(events.AsQueryable()).Object;
 
             //ROLES:
-            roles = new List<ServerRoleModel> { new ServerRoleModel { Id = "1", ServerWorkflowModelId = "TestingName" } };
+            roles = new List<ServerRoleModel> { new ServerRoleModel { Id = "1", ServerWorkflowModelId = "1" } };
             var fakeRolesSet = new FakeDbSet<ServerRoleModel>(roles.AsQueryable()).Object;
+
+            //HISTORY:
+            history = new List<HistoryModel>();
+            var fakeHistorySet = new FakeDbSet<HistoryModel>(history.AsQueryable()).Object;
 
             // Final prep
             context.Setup(m => m.Users).Returns(fakeUserSet);
             context.Setup(m => m.Workflows).Returns(fakeWorkflowsSet);  
             context.Setup(m => m.Events).Returns(fakeEventsSet);
             context.Setup(m => m.Roles).Returns(fakeRolesSet);
+            context.Setup(m => m.History).Returns(fakeHistorySet);
 
             context.Setup(c => c.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -153,13 +155,6 @@ namespace Server.Tests.StorageTests
             Assert.Throws<IllegalStorageStateException>(testDelegate);
         }
 
-        [Test]
-        public void AddEventToWorkflow_WillAddEventToWorkflow()
-        {
-            // TODO: Not implemented yet <- Implement!
-            Assert.Fail();
-        }
-
         #endregion
 
         #region AddNewWorkflow
@@ -190,13 +185,6 @@ namespace Server.Tests.StorageTests
 
             // Assert
             Assert.Throws<WorkflowAlreadyExistsException>(testDelegate);
-        }
-
-        [Test]
-        public async Task AddNewWorkflow_WillAddWorkflow()
-        {
-            // TODO: Implement this one
-            Assert.Fail();
         }
         #endregion
 
@@ -244,20 +232,6 @@ namespace Server.Tests.StorageTests
             // Assert
             Assert.Throws<NotFoundException>(testDelegate);
         }
-
-        [Test]
-        public void AddRolesToUser_AddsRolesToUser()
-        {
-            // TODO: How to?
-            Assert.Fail();
-        }
-
-        [Test]
-        public void AddRolesToUser_DoesNotCreateDuplicateRolesWhenProvidedAlreadyExistingRoles()
-        {
-            // TODO: How to?
-            Assert.Fail();
-        }
         #endregion
 
         #region AddRolesToWorkflow
@@ -275,8 +249,6 @@ namespace Server.Tests.StorageTests
             // Assert
             Assert.Throws<ArgumentNullException>(testDelegate);
         }
-
-
         #endregion
 
         #region AddUser
@@ -309,37 +281,6 @@ namespace Server.Tests.StorageTests
             Assert.Throws<UserExistsException>(testDelegate);
         }
 
-        [Test]
-        public async Task AddUser_WillStoreProvidedPasswordInADifferentRepresentation()
-        {
-            // TODO: Help Morten implement this!
-            // This test checks, that the provided password is not stored in its original representation in the database.
-
-            // Arrange
-            IServerStorage storage = new ServerStorage(_context);
-            var inputPassword = "JellyBeans";
-            var name = "George";
-            var userToAdd = new ServerUserModel {Name = name, Password = inputPassword};
-
-            // Act
-            await storage.AddUser(userToAdd);
-
-            // Assert
-            var georgeInContext = _context.Users.SingleOrDefault(x => x.Name == name);
-
-            if (georgeInContext == null)
-            {
-                Assert.Fail();
-            }
-
-            Assert.AreNotEqual(inputPassword,georgeInContext.Password);
-        }
-
-        [Test]
-        public void AddUser_WillAddUser()
-        {
-            Assert.Fail();
-        }
         #endregion
 
         #region EventExists
@@ -532,9 +473,30 @@ namespace Server.Tests.StorageTests
         }
 
         [Test]
-        public void GetRole_GetsRole()
+        public async Task GetRole_GetsRole()
         {
-            Assert.Fail();
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+
+            // Act
+            var actualRole = await storage.GetRole("1", "1");
+            
+            // Assert
+            Assert.AreEqual("1", actualRole.Id);
+            Assert.AreEqual("1",actualRole.ServerWorkflowModelId);
+        }
+
+        [Test]
+        public async Task GetRole_ReturnsNullWhenRoleIsNotInDatabase()
+        {
+            // Arrange 
+            IServerStorage storage = new ServerStorage(_context);
+            
+            // Act
+            var result = await storage.GetRole("nonExistingRole", "1");
+
+            // Assert
+            Assert.IsNull(result);
         }
         #endregion
 
@@ -652,113 +614,316 @@ namespace Server.Tests.StorageTests
 
         #region Login
 
+        [Test]
+        public void Login_WillHandleNullArgument()
+        {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+            ServerUserModel nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.Login(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
         #endregion
 
+        #region RemoveEventFromWorkflow
 
-
-
-
-
-
-
-        [Test]
-        public void TestLogin()
+        [TestCase(null, null)]
+        [TestCase("Healtchcare", null)]
+        [TestCase(null, "RegisterPatient")]
+        public void RemoveEventFromWorkflow_HandlesNullArgument(string workflowId, string eventId)
         {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.RemoveEventFromWorkflow(workflowId,eventId));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [TestCase("nonExistingWorkflow","1")]
+        [TestCase("1", "nonExistingEventId")]
+        public void RemoveEventFromWorkflow_WhenWorkflowOrEventDoesNotExistNotFoundExceptionIsThrown(string workflowId, string eventId)
+        {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.RemoveEventFromWorkflow("nonExistingWorkflow", "1"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+        #endregion
+
+        #region RemoveWorkflow
+        [Test]
+        public void RemoveWorkflow_HandlesNullArgument()
+        {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+            string nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.RemoveWorkflow(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         [Test]
-        public async Task TestGetEventsFromWorkflow()
+        public void RemoveWorkflow_WhenWorkflowDoesNotExistNotFoundExceptionIsThrown()
         {
-            var toTest = new ServerStorage(_context);
-            var result = (await toTest.GetEventsFromWorkflow("1")).First();
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(result.Id, "1");
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.RemoveWorkflow("nonExistingWorkflow"));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
         }
 
         [Test]
-
-        public void TestAddRolesToWorkflow()
+        public void RemoveWorkflow_WhenIllegalStorageStateExceptionIsThrown()
         {
-            
+            // Arrange
+            var context = new Mock<IServerContext>(MockBehavior.Strict);
+
+            //WORKFLOWS:
+            workflows = new List<ServerWorkflowModel>
+            {
+                new ServerWorkflowModel { Id = "1", Name = "TestingName" },
+                new ServerWorkflowModel{ Id = "1", Name = "AnotherWorkflowId"}  // Two workflows sharing the same ID!
+            };
+            var fakeWorkflowsSet = new FakeDbSet<ServerWorkflowModel>(workflows.AsQueryable()).Object;
+
+            // Final prep
+            context.Setup(m => m.Workflows).Returns(fakeWorkflowsSet);
+
+            context.Setup(c => c.SaveChangesAsync()).ReturnsAsync(1);
+
+            //Assign the mocked StorageContext for use in tests.
+            _context = context.Object;
+
+            IServerStorage storage = new ServerStorage(_context);
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.RemoveWorkflow("1"));
+
+            // Assert
+            Assert.Throws<IllegalStorageStateException>(testDelegate);
+        }
+        #endregion
+
+        #region RoleExists
+
+        [Test]
+        public void RoleExists_HandlesNullArgument()
+        {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+            ServerRoleModel nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.RoleExists(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [TestCase("1", "1", true)]            // Both role and workflow exist 
+        [TestCase("2", "1", false)]           // Role does not exist, while workflow does
+        [TestCase("1", "NonExistingWorkflow",false)]    // Role exist, workflow does not exist
+        [TestCase("2", "NonExistingWorkflow", false)]   // Role and workflow does not exist
+        public async Task RoleExists_WorksAsIntended(string roleId,string workflowId, bool expectedResult)
+        {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+            ServerRoleModel argument = new ServerRoleModel
+            {
+                Id = roleId,
+                ServerWorkflowModelId = workflowId
+            };
+
+            // Act
+            var actualResult = await storage.RoleExists(argument);
+
+            // Assert
+            Assert.AreEqual(expectedResult,actualResult);
+        }
+        #endregion
+
+        #region SaveHistory
+        [Test]
+        public void SaveHistory_HandlesNullArgument()
+        {
+            // Arrange
+            IServerHistoryStorage storage = new ServerStorage(_context);
+            HistoryModel nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.SaveHistory(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         [Test]
-
-        public void TestAddUser()
+        public void SaveHistory_WhenWorkflowDoesNotExistNotFoundExceptionIsThrown()
         {
-            
+            // Arrange
+            IServerHistoryStorage storage = new ServerStorage(_context);
+
+            var argument = new HistoryModel
+            {
+                WorkflowId = "2"
+            };
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.SaveHistory(argument));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
         }
 
         [Test]
-
-        public void TestAddEventToWorkflow()
+        public void SaveHistory_WhenWorkflowExistNoExceptionIsThrown()
         {
-            
+            // Arrange
+            IServerHistoryStorage storage = new ServerStorage(_context);
+
+            var argument = new HistoryModel
+            {
+                WorkflowId = "1"
+            };
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.SaveHistory(argument));
+
+            // Assert
+            Assert.DoesNotThrow(testDelegate);
+        }
+        #endregion
+
+        #region SaveNonWorkflowSpecificHistory
+        [Test]
+        public void SaveNonWorkflowSpecificHistory_HandlesNullArgument()
+        {
+            // Arrange
+            IServerHistoryStorage storage = new ServerStorage(_context);
+            HistoryModel nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.SaveNonWorkflowSpecificHistory(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+        #endregion
+
+        #region UpdateWorkflow
+        [Test]
+        public void UpdateWorkflow_HandlesNullArgument()
+        {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+            ServerWorkflowModel nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.UpdateWorkflow(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         [Test]
-
-        public void TestUpdateEventOnWorkflow()
+        public void UpdateWorkflow_WhenWorkflowDoesNotExistNotFoundExceptionIsThrown()
         {
-            
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+
+            var argument = new ServerWorkflowModel
+            {
+                Id = "2"
+            };
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.UpdateWorkflow(argument));
+
+            // Assert
+            Assert.Throws<NotFoundException>(testDelegate);
         }
+        #endregion
+
+        #region UserExists
 
         [Test]
-
-        public void TestRemoveEventFromWorkflow()
+        public void UserExists_HandlesNullArgument()
         {
-            
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+            string nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.UserExists(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
+        [TestCase("TestingName", true)]
+        [TestCase("NonExistingUser", false)]
+        [TestCase("", false)]
+        [TestCase("  ", false)]
+        public async Task UserExists_ReturnsCorrectBooleanValue(string user, bool expectedResult)
+        {
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+
+            // Act
+            var actualResult = await storage.UserExists(user);
+
+            // Assert
+            Assert.AreEqual(expectedResult,actualResult);
+        }
+        #endregion
+
+        #region WorkflowExists
         [Test]
-
-        public void TestGetAllWorkflows()
+        public void WorkflowExists_HandlesNullArgument()
         {
-            
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+            string nullArgument = null;
+
+            // Act
+            var testDelegate = new TestDelegate(async () => await storage.WorkflowExists(nullArgument));
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
-        [Test]
-
-        public void TestGetWorkflow()
+        [TestCase("1", true)]
+        [TestCase("NonExistingWorkflow", false)]
+        [TestCase("  ", false)]
+        public async Task WorkflowExists_ReturnsCorrectBooleanValue(string workflowId, bool expectedResult)
         {
-            
+            // Arrange
+            IServerStorage storage = new ServerStorage(_context);
+
+            // Act
+            var actualResult = await storage.WorkflowExists(workflowId);
+
+            // Assert
+            Assert.AreEqual(expectedResult, actualResult);
         }
-
-        [Test]
-
-        public void TestAddNewWorkflow()
-        {
-            
-        }
-
-        [Test]
-
-        public void TestUpdateWorkflow()
-        {
-            
-        }
-
-        [Test]
-
-        public void TestRemoveWorkflow()
-        {
-            
-        }
-
-        [Test]
-
-        public void TestRoleExists()
-        {
-            
-        }
-
-        [Test]
-
-        public void TestGetRole()
-        {
-            
-        }
-
+        #endregion
     }
 }

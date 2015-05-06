@@ -65,7 +65,11 @@ namespace Server.Storage
 
         public async Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel)
         {
-            // TODO: Is this correct / sensible? If I provide a non-null object, I can make this method return whatever role I want it to...
+            if (userModel == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (userModel.ServerRolesModels != null) return userModel.ServerRolesModels;
 
             var user = await _db.Users.FindAsync(userModel.Name);
@@ -138,6 +142,11 @@ namespace Server.Storage
 
         public async Task<bool> UserExists(string username)
         {
+            if (username == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             return await _db.Users.AnyAsync(u => u.Name.Equals(username));
         }
 
@@ -239,7 +248,7 @@ namespace Server.Storage
         /// </summary>
         /// <param name="workflowId">Id of the workflow</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNulLException">Thrown when provided argument is null</exception>
+        /// <exception cref="ArgumentNullException">Thrown when provided argument is null</exception>
         public async Task<bool> WorkflowExists(string workflowId)
         {
             if (String.IsNullOrEmpty(workflowId))
