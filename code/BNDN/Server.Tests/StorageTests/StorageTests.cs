@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Common.Exceptions;
 using Moq;
@@ -34,29 +35,25 @@ namespace Server.Tests.StorageTests
 
             //USERS:
             users = new List<ServerUserModel> { new ServerUserModel { Name = "TestingName", Password = PasswordHasher.HashPassword("TestingPassword") } };
-            //context.Object.Users = new FakeDbSet<ServerUserModel>(users.AsQueryable()).Object;
-            var mockSetUsers = new FakeDbSet<ServerUserModel>(users);
+            var fakeUserSet = new FakeDbSet<ServerUserModel>(users.AsQueryable()).Object;
 
             //WORKFLOWS:
             workflows = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "1", Name = "TestingName" } };
-            //context.Object.Workflows = new FakeDbSet<ServerWorkflowModel>(workflows.AsQueryable()).Object;
-            var mockSetWorkflows = new FakeDbSet<ServerWorkflowModel>(workflows);
+            var fakeWorkflowsSet = new FakeDbSet<ServerWorkflowModel>(workflows.AsQueryable()).Object;
 
             //EVENTS:
             events = new List<ServerEventModel> { new ServerEventModel { Id = "1", ServerWorkflowModelId = "1", Uri = "http://testing.com", ServerWorkflowModel = new ServerWorkflowModel() { Id = "1", Name = "TestingName" } } };
-            //context.Object.Events = new FakeDbSet<ServerEventModel>(events.AsQueryable()).Object;
-            var mockSetEvents = new FakeDbSet<ServerEventModel>(events);
+            var fakeEventsSet = new FakeDbSet<ServerEventModel>(events.AsQueryable()).Object;
 
             //ROLES:
             roles = new List<ServerRoleModel> { new ServerRoleModel { Id = "1", ServerWorkflowModelId = "TestingName" } };
-            //context.Object.Roles = new FakeDbSet<ServerRoleModel>(roles.AsQueryable()).Object;
-            var mockSetRoles = new FakeDbSet<ServerRoleModel>(roles);
+            var fakeRolesSet = new FakeDbSet<ServerRoleModel>(roles.AsQueryable()).Object;
 
             // Final prep
-            context.Setup(m => m.Users).Returns(mockSetUsers.Object);
-            context.Setup(m => m.Workflows).Returns(mockSetWorkflows.Object);  
-            context.Setup(m => m.Events).Returns(mockSetEvents.Object);
-            context.Setup(m => m.Roles).Returns(mockSetRoles.Object);
+            context.Setup(m => m.Users).Returns(fakeUserSet);
+            context.Setup(m => m.Workflows).Returns(fakeWorkflowsSet);  
+            context.Setup(m => m.Events).Returns(fakeEventsSet);
+            context.Setup(m => m.Roles).Returns(fakeRolesSet);
 
             context.Setup(c => c.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -125,19 +122,19 @@ namespace Server.Tests.StorageTests
 
             //USERS:
             var users = new List<ServerUserModel> { new ServerUserModel { Name = "TestingName", Password = PasswordHasher.HashPassword("TestingPassword") } };
-            context.Object.Users = new FakeDbSet<ServerUserModel>(users).Object;
+            var fakeUsersSet = new FakeDbSet<ServerUserModel>(users.AsQueryable()).Object;
 
             //WORKFLOWS:
             var workflows = new List<ServerWorkflowModel> { new ServerWorkflowModel { Id = "1", Name = "TestingName" }, new ServerWorkflowModel() { Id = "1", Name = "ConflictingWorkflowDueToIdenticalId" } };
-            context.Object.Workflows = new FakeDbSet<ServerWorkflowModel>(workflows).Object;
+            context.Object.Workflows = new FakeDbSet<ServerWorkflowModel>(workflows.AsQueryable()).Object;
 
             //EVENTS:
             var events = new List<ServerEventModel> { new ServerEventModel { Id = "1", ServerWorkflowModelId = "1", Uri = "http://testing.com", ServerWorkflowModel = new ServerWorkflowModel() { Id = "1", Name = "TestingName" } } };
-            context.Object.Events = new FakeDbSet<ServerEventModel>(events).Object;
+            context.Object.Events = new FakeDbSet<ServerEventModel>(events.AsQueryable()).Object;
 
             //ROLES:
             var roles = new List<ServerRoleModel> { new ServerRoleModel { Id = "1", ServerWorkflowModelId = "TestingName" } };
-            context.Object.Roles = new FakeDbSet<ServerRoleModel>(roles).Object;
+            context.Object.Roles = new FakeDbSet<ServerRoleModel>(roles.AsQueryable()).Object;
 
             //Assign the mocked StorageContext for use in tests.
             _context = context.Object;
@@ -334,7 +331,7 @@ namespace Server.Tests.StorageTests
             {
                 Assert.Fail();
             }
-            Assert.Fail();
+
             Assert.AreNotEqual(inputPassword,georgeInContext.Password);
         }
 
@@ -390,19 +387,19 @@ namespace Server.Tests.StorageTests
 
             //USERS:
             users = new List<ServerUserModel> { new ServerUserModel { Name = "TestingName", Password = PasswordHasher.HashPassword("TestingPassword") } };
-            var mockSetUsers = new FakeDbSet<ServerUserModel>(users);
+            var mockSetUsers = new FakeDbSet<ServerUserModel>(users.AsQueryable());
 
             //WORKFLOWS:
             workflows = new List<ServerWorkflowModel> ();       // This is the difference from the Setup() method
-            var mockSetWorkflows = new FakeDbSet<ServerWorkflowModel>(workflows);
+            var mockSetWorkflows = new FakeDbSet<ServerWorkflowModel>(workflows.AsQueryable());
 
             //EVENTS:
             events = new List<ServerEventModel> { new ServerEventModel { Id = "1", ServerWorkflowModelId = "1", Uri = "http://testing.com", ServerWorkflowModel = new ServerWorkflowModel() { Id = "1", Name = "TestingName" } } };
-            var mockSetEvents = new FakeDbSet<ServerEventModel>(events);
+            var mockSetEvents = new FakeDbSet<ServerEventModel>(events.AsQueryable());
 
             //ROLES:
             roles = new List<ServerRoleModel> { new ServerRoleModel { Id = "1", ServerWorkflowModelId = "TestingName" } };
-            var mockSetRoles = new FakeDbSet<ServerRoleModel>(roles);
+            var mockSetRoles = new FakeDbSet<ServerRoleModel>(roles.AsQueryable());
 
             // Final prep
             context.Setup(m => m.Users).Returns(mockSetUsers.Object);
