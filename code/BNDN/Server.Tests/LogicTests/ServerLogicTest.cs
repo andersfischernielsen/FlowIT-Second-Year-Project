@@ -153,6 +153,43 @@ namespace Server.Tests.LogicTests
             Assert.AreEqual(expectedWorkflow.Id, "3");
         }
 
+        [TestCase(null)]
+        [TestCase("")]
+        public async void TestAddEventToWorkflow_Throws_ArgumentNull(string workflowId)
+        {
+            TestDelegate testDelegate1 = async () => await _toTest.AddEventToWorkflow(workflowId, null);
+            TestDelegate testDelegate2 = async () => await _toTest.AddEventToWorkflow(null, new EventAddressDto());
+
+            Assert.Throws<ArgumentNullException>(testDelegate1);
+            Assert.Throws<ArgumentNullException>(testDelegate1);
+        }
+
+        [Test]
+        public async void TestAddNewWorkflow_Throws_ArgumentNull()
+        {
+            TestDelegate testDelegate = async () => await _toTest.AddNewWorkflow(null);
+
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public async void TestRemoveWorkflow_Throws_ArgumentNull()
+        {
+            TestDelegate testDelegate = async () => await _toTest.RemoveWorkflow(null);
+
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [TestCase(null,null)]
+        [TestCase("", null)]
+        [TestCase(null, "")]
+        public async void TestRemoveEventFromWorkflow_Throws_ArgumentNull(string workflowId, string eventId)
+        {
+            TestDelegate testDelegate = async () => await _toTest.RemoveEventFromWorkflow(workflowId, eventId);
+
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
         [Test]
         public async Task TestGetAllWorkflows()
         {
@@ -361,6 +398,105 @@ namespace Server.Tests.LogicTests
 
         #region AddRolesToUser
 
+        [TestCase(null)]
+        [TestCase("")]
+        public void AddRolesToUser_Throws_NullArgument(string username)
+        {
+            TestDelegate testDelegate1 = async () => await _toTest.AddRolesToUser(username, null);
+            TestDelegate testDelegate2 = async () => await _toTest.AddRolesToUser(null, new List<WorkflowRole>());
+
+            Assert.Throws<ArgumentNullException>(testDelegate1);
+            Assert.Throws<ArgumentNullException>(testDelegate2);
+        }
+
+        [Test]
+        public async void AddRolesToUser_Succes_UserExists()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.UserExists(It.IsAny<string>())).ReturnsAsync(true);
+            mock.Setup(m => m.RoleExists(It.IsAny<ServerRoleModel>())).ReturnsAsync(true);
+            mock.Setup(m => m.AddRolesToUser(It.IsAny<string>(),It.IsAny<IEnumerable<ServerRoleModel>>())).Returns(Task.Delay(0));
+
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddRolesToUser("Wid", new List<WorkflowRole>());
+            //Assert
+            Assert.DoesNotThrow(testDelegate);
+        }
+
+        [Test]
+        public async void AddRolesToUser_Succes_UserExistsMoreRoles()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.UserExists(It.IsAny<string>())).ReturnsAsync(true);
+            mock.Setup(m => m.RoleExists(It.IsAny<ServerRoleModel>())).ReturnsAsync(true);
+            mock.Setup(m => m.AddRolesToUser(It.IsAny<string>(), It.IsAny<IEnumerable<ServerRoleModel>>())).Returns(Task.Delay(0));
+
+            var roles = new List<WorkflowRole> { 
+                new WorkflowRole { Role = "role1", Workflow = "Wid" },
+                new WorkflowRole { Role = "role2", Workflow = "Wid" },
+                new WorkflowRole { Role = "role3", Workflow = "Wid2" } 
+            };
+
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddRolesToUser("Wid", roles);
+            //Assert
+            Assert.DoesNotThrow(testDelegate);
+        }
+
+        [Test]
+        public async void AddRolesToUser_Throws_UserDoesNotExistsMoreRoles()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.UserExists(It.IsAny<string>())).ReturnsAsync(true);
+            mock.Setup(m => m.RoleExists(It.IsAny<ServerRoleModel>())).ReturnsAsync(false);
+            mock.Setup(m => m.AddRolesToUser(It.IsAny<string>(), It.IsAny<IEnumerable<ServerRoleModel>>())).Returns(Task.Delay(0));
+
+            var roles = new List<WorkflowRole> { 
+                new WorkflowRole { Role = "role1", Workflow = "Wid" },
+                new WorkflowRole { Role = "role2", Workflow = "Wid" },
+                new WorkflowRole { Role = "role3", Workflow = "Wid2" } 
+            };
+
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddRolesToUser("Wid", roles);
+            //Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
+        [Test]
+        public async void AddRolesToUser_Throws_UserDoesNotExist()
+        {
+            //Arrange
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.UserExists(It.IsAny<string>())).ReturnsAsync(false);
+            mock.Setup(m => m.AddRolesToUser(It.IsAny<string>(), It.IsAny<IEnumerable<ServerRoleModel>>())).Returns(Task.Delay(0));
+
+            IServerLogic logic = new ServerLogic(mock.Object);
+            //Act
+            TestDelegate testDelegate = async () => await logic.AddRolesToUser("Wid", new List<WorkflowRole>());
+            //Assert
+            Assert.Throws<NotFoundException>(testDelegate);
+        }
+
         #endregion
+
+        [Test]
+        public void Dispose_Test()
+        {
+            var mock = new Mock<IServerStorage>();
+            mock.Setup(m => m.Dispose()).Verifiable("");
+            IServerLogic logic = new ServerLogic(mock.Object);
+            using (logic)
+            {
+                
+            }
+            mock.Verify(storage => storage.Dispose(),Times.Once);
+        }
     }
 }
