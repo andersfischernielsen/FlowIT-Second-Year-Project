@@ -218,7 +218,7 @@ namespace Event.Tests.LogicTests
         [TestCase(null,"")]
         [TestCase("", null)]
         [TestCase(null, null)]
-        public async void WaitForMyTurn_ParameterIsNull(string workflowId, string eventId)
+        public void WaitForMyTurn_ParameterIsNull(string workflowId, string eventId)
         {
             //Arrange
             ILockingLogic lockingLogic = SetupDefaultLockingLogic();
@@ -231,7 +231,7 @@ namespace Event.Tests.LogicTests
             LockingLogic.LockQueue.Clear();
         }
         [Test]
-        public async void WaitForMyTurn_LockDtoIsNull()
+        public void WaitForMyTurn_LockDtoIsNull()
         {
             //Arrange
             ILockingLogic lockingLogic = SetupDefaultLockingLogic();
@@ -249,7 +249,7 @@ namespace Event.Tests.LogicTests
         [TestCase("\n")]
         [TestCase("\t")]
         [TestCase(null)]
-        public async void WaitForMyTurn_LockDtoOwnerIsNull(string lockOwner)
+        public void WaitForMyTurn_LockDtoOwnerIsNull(string lockOwner)
         {
             //Arrange
             ILockingLogic lockingLogic = SetupDefaultLockingLogic();
@@ -263,7 +263,7 @@ namespace Event.Tests.LogicTests
         }
 
         [Test]
-        public async void WaitForMyTurn_QueueHasAnElementWhichDoesNotGetRemoved()
+        public void WaitForMyTurn_QueueHasAnElementWhichDoesNotGetRemoved()
         {
             //Arrange
             var mockStorage = new Mock<IEventStorage>();
@@ -870,7 +870,7 @@ namespace Event.Tests.LogicTests
         }
 
         [Test] 
-        public async void LockAll_Fails_1ElementRelationListNullEventId()
+        public void LockAll_Fails_1ElementRelationListNullEventId()
         {
             //Arrange
             var mockStorage = new Mock<IEventStorage>();
@@ -890,7 +890,7 @@ namespace Event.Tests.LogicTests
 
         [TestCase(null)]
         [TestCase("Eid")]
-        public async void LockAll_Fails_WhenParametersAreNull(string eventId)
+        public void LockAll_Fails_WhenParametersAreNull(string eventId)
         {
             //Arrange
             var mockStorage = new Mock<IEventStorage>();
@@ -909,7 +909,7 @@ namespace Event.Tests.LogicTests
         }
 
         [Test]
-        public async void LockAll_Fail_NullEventIdAndConnectionFails_UnlockSomeThrows()
+        public void LockAll_Fail_NullEventIdAndConnectionFails_UnlockSomeThrows()
         {
             //Arrange
             var mockStorage = new Mock<IEventStorage>();
@@ -1002,7 +1002,7 @@ namespace Event.Tests.LogicTests
 
         #region LockSelf tests
         [Test]
-        public async void LockSelf_Success()
+        public void LockSelf_Success()
         {
             // Arrange
             ILockingLogic logic = SetupDefaultLockingLogic();
@@ -1568,7 +1568,7 @@ namespace Event.Tests.LogicTests
         #region UnlockSelf tests
 
         [Test]
-        public async void UnlockSelf_Success()
+        public void UnlockSelf_Success()
         {
             // Arrange
             ILockingLogic logic = SetupDefaultLockingLogic();

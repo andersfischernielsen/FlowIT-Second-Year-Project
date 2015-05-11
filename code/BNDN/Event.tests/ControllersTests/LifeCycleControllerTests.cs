@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Common.DTO.Event;
 using Common.DTO.History;
 using Common.DTO.Shared;
 using Event.Controllers;
 using Event.Interfaces;
-using Event.Logic;
 using Event.Models;
 using Event.Models.UriClasses;
 using Moq;

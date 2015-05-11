@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.History;
 using Common.DTO.Server;
@@ -16,7 +14,6 @@ using NUnit.Framework;
 using Server.Controllers;
 using Server.Exceptions;
 using Server.Interfaces;
-using Server.Logic;
 
 namespace Server.Tests.ControllerTests
 {
@@ -63,7 +60,7 @@ namespace Server.Tests.ControllerTests
 
         #region Login
         [Test]
-        public void LoginReturnsRolesOnExistingUser()
+        public async Task LoginReturnsRolesOnExistingUser()
         {
             // Arrange
             var loginDto = new LoginDto() {Username = "Hans", Password = "1234"};
@@ -74,17 +71,17 @@ namespace Server.Tests.ControllerTests
             var returnDto = new RolesOnWorkflowsDto();
             returnDto.RolesOnWorkflows = rolesDictionary;
 
-            _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).Returns(Task.Run(() => returnDto));
+            _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).ReturnsAsync(returnDto);
 
             // Act
-            var result = _usersController.Login(loginDto).Result;
+            var result = await _usersController.Login(loginDto);
 
             // Assert
             Assert.AreEqual(returnDto,result);
         }
 
         [Test]
-        public void Login_LogsWhenRolesAreSuccesfullyReturned()
+        public async Task Login_LogsWhenRolesAreSuccesfullyReturned()
         {
             // Arrange
             bool logMethodWasCalled = false;
@@ -94,28 +91,32 @@ namespace Server.Tests.ControllerTests
             var returnDto = new RolesOnWorkflowsDto();
             returnDto.RolesOnWorkflows = rolesDictionary;
 
-            _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).Returns(Task.Run(() => returnDto));
+            _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).ReturnsAsync(returnDto);
 
             _historyLogic.Setup(m => m.SaveNoneWorkflowSpecificHistory(It.IsAny<HistoryModel>()))
-                .Callback((HistoryModel history) => logMethodWasCalled = true);
+                .Returns((HistoryModel history) => Task.Run(() => logMethodWasCalled = true));
 
             // Act
-            _usersController.Login(loginDto);
+            await _usersController.Login(loginDto);
 
             // Assert
             Assert.IsTrue(logMethodWasCalled);
         }
 
         [Test]
-        public void Login_HandsOverLoginDtoUnAffectedToLogicLayer()
+        public async Task Login_HandsOverLoginDtoUnAffectedToLogicLayer()
         {
             // Arrange
             var inputlist = new List<LoginDto>();
-            _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).Callback((LoginDto dto) => inputlist.Add(dto));
+            _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).Returns((LoginDto dto) => Task.Run(() =>
+            {
+                inputlist.Add(dto);
+                return (RolesOnWorkflowsDto) null;
+            }));
             var inputDto = new LoginDto() {Username = "Hans", Password = "snah123"};
 
             // Act
-            _usersController.Login(inputDto);
+            await _usersController.Login(inputDto);
 
             // Assert
             Assert.AreEqual(inputDto,inputlist.First());

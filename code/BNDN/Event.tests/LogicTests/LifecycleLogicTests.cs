@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
-using Event.Exceptions;
 using Event.Interfaces;
 using Event.Logic;
-using Event.Migrations;
 using Event.Models;
 using Moq;
 using NUnit.Framework;
@@ -115,29 +112,9 @@ namespace Event.Tests.LogicTests
                 Assert.IsInstanceOf<EventExistsException>(e);
             }
         }
-
-        /*public void CreateEvent_CreatesEventOnStorage()
-        {
-            
-        }*/
         #endregion
 
         #region DeleteEvent tests
-
-        /*[Test]
-        public void DeleteEvent_CalledWithEmptyStringWillNotFail()
-        {
-            // Arrange
-            var mockStorage = new Mock<IEventStorage>();
-            var mockResetStorage = new Mock<IEventStorageForReset>();
-            var mockLockingLogic = new Mock<ILockingLogic>();
-            mockLockingLogic.Setup(m => m.IsAllowedToOperate(It.IsAny<string>()))
-            ILifecycleLogic logic = new LifecycleLogic((IEventStorage)mockStorage.Object, (IEventStorageForReset)mockResetStorage.Object, (ILockingLogic)mockLockingLogic.Object);
-
-            var task = logic.DeleteEvent("nonexistingId");
-
-            Assert.IsNull(task.Exception);          // "Task.Exception:  If the Task completed successfully or has not yet thrown any exceptions, this will return null."
-        }*/
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -335,12 +312,54 @@ namespace Event.Tests.LogicTests
             Assert.AreEqual(executed, eventDto.Executed);
             Assert.AreEqual(included, eventDto.Included);
             Assert.AreEqual(pending, eventDto.Pending);
-            
-            //DOESNT WORK BECAUSE NUNIT COMAPRES ON REFERENCE IN THE RELATIONS, SO THE LIST ARE NEVER THE SAME
-            //CollectionAssert.AreEquivalent(con, conAct);
-            //CollectionAssert.AreEquivalent(res, resAct);
-            //CollectionAssert.AreEquivalent(exc, excAct);
-            //CollectionAssert.AreEquivalent(inc, incAct);
+
+            Assert.AreEqual(con.Count, conAct.Count);
+            for (var i = 0; i < con.Count; i++)
+            {
+                var expDto = con[i];
+                var actDto = conAct[i];
+
+                Assert.AreEqual(expDto.WorkflowId, actDto.WorkflowId);
+                Assert.AreEqual(expDto.Id, actDto.Id);
+                Assert.AreEqual(expDto.Roles, actDto.Roles);
+                Assert.AreEqual(expDto.Uri, actDto.Uri);
+            }
+
+            Assert.AreEqual(res.Count, resAct.Count);
+            for (var i = 0; i < res.Count; i++)
+            {
+                var expDto = res[i];
+                var actDto = resAct[i];
+
+                Assert.AreEqual(expDto.WorkflowId, actDto.WorkflowId);
+                Assert.AreEqual(expDto.Id, actDto.Id);
+                Assert.AreEqual(expDto.Roles, actDto.Roles);
+                Assert.AreEqual(expDto.Uri, actDto.Uri);
+            }
+
+            Assert.AreEqual(exc.Count, excAct.Count);
+            for (var i = 0; i < exc.Count; i++)
+            {
+                var expDto = exc[i];
+                var actDto = excAct[i];
+
+                Assert.AreEqual(expDto.WorkflowId, actDto.WorkflowId);
+                Assert.AreEqual(expDto.Id, actDto.Id);
+                Assert.AreEqual(expDto.Roles, actDto.Roles);
+                Assert.AreEqual(expDto.Uri, actDto.Uri);
+            }
+
+            Assert.AreEqual(inc.Count, incAct.Count);
+            for (var i = 0; i < inc.Count; i++)
+            {
+                var expDto = inc[i];
+                var actDto = incAct[i];
+
+                Assert.AreEqual(expDto.WorkflowId, actDto.WorkflowId);
+                Assert.AreEqual(expDto.Id, actDto.Id);
+                Assert.AreEqual(expDto.Roles, actDto.Roles);
+                Assert.AreEqual(expDto.Uri, actDto.Uri);
+            }
             
             CollectionAssert.AreEquivalent(roles, eventDto.Roles);
 

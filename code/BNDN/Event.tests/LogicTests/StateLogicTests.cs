@@ -272,7 +272,6 @@ namespace Event.Tests.LogicTests
         #endregion
 
         #region GetStateDto
-        // Todo: Make tests on GetStateDto() that takes the loop in IsExecutable into account.
         [Test]
         public async Task GetStateDto_Returns_Executable_State()
         {

@@ -18,7 +18,7 @@ namespace Server.Interfaces
         /// Tries to log in/return all the roles a given user (stored in a LoginDto) has on all workflows.
         /// </summary>
         /// <param name="loginDto"></param>
-        /// <returns></returns>
+        /// <returns>The roles of the user which is logged, which can then be returned to the client for usage.</returns>
         Task<RolesOnWorkflowsDto> Login(LoginDto loginDto);
 
         /// <summary>

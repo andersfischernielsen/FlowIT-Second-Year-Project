@@ -155,17 +155,17 @@ namespace Server.Tests.LogicTests
 
         [TestCase(null)]
         [TestCase("")]
-        public async void TestAddEventToWorkflow_Throws_ArgumentNull(string workflowId)
+        public void TestAddEventToWorkflow_Throws_ArgumentNull(string workflowId)
         {
             TestDelegate testDelegate1 = async () => await _toTest.AddEventToWorkflow(workflowId, null);
             TestDelegate testDelegate2 = async () => await _toTest.AddEventToWorkflow(null, new EventAddressDto());
 
             Assert.Throws<ArgumentNullException>(testDelegate1);
-            Assert.Throws<ArgumentNullException>(testDelegate1);
+            Assert.Throws<ArgumentNullException>(testDelegate2);
         }
 
         [Test]
-        public async void TestAddNewWorkflow_Throws_ArgumentNull()
+        public void TestAddNewWorkflow_Throws_ArgumentNull()
         {
             TestDelegate testDelegate = async () => await _toTest.AddNewWorkflow(null);
 
@@ -173,7 +173,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void TestRemoveWorkflow_Throws_ArgumentNull()
+        public void TestRemoveWorkflow_Throws_ArgumentNull()
         {
             TestDelegate testDelegate = async () => await _toTest.RemoveWorkflow(null);
 
@@ -183,7 +183,7 @@ namespace Server.Tests.LogicTests
         [TestCase(null,null)]
         [TestCase("", null)]
         [TestCase(null, "")]
-        public async void TestRemoveEventFromWorkflow_Throws_ArgumentNull(string workflowId, string eventId)
+        public void TestRemoveEventFromWorkflow_Throws_ArgumentNull(string workflowId, string eventId)
         {
             TestDelegate testDelegate = async () => await _toTest.RemoveEventFromWorkflow(workflowId, eventId);
 
@@ -219,7 +219,7 @@ namespace Server.Tests.LogicTests
 
         }
         [Test]
-        public async Task TestGetEventsOnWorkflow_Throws_NullArgument()
+        public void TestGetEventsOnWorkflow_Throws_NullArgument()
         {
             TestDelegate testDelegate = async () => await _toTest.GetEventsOnWorkflow(null);
 
@@ -236,7 +236,7 @@ namespace Server.Tests.LogicTests
             Assert.AreEqual(actual.Name, result.Name);
         }
         [Test]
-        public async Task TestGetWorkflow_NullArgument()
+        public void TestGetWorkflow_NullArgument()
         {
             TestDelegate testDelegate = async () => await _toTest.GetWorkflow(null);
 
@@ -325,7 +325,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void Login_Throws_GetUserReturnsNull()
+        public void Login_Throws_GetUserReturnsNull()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -342,7 +342,7 @@ namespace Server.Tests.LogicTests
 
         #region AddUser
         [Test]
-        public async void AddUser_Success_NormalUserWithoutRoles()
+        public void AddUser_Success_NormalUserWithoutRoles()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -355,7 +355,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void AddUser_Success_NormalUserWithRoleThatAlreadyExists()
+        public void AddUser_Success_NormalUserWithRoleThatAlreadyExists()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -370,7 +370,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void AddUser_Throws_NormalUserWithRoleThatDoesNotAlreadyExists()
+        public void AddUser_Throws_NormalUserWithRoleThatDoesNotAlreadyExists()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -384,7 +384,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void AddUser_Throws_NullArgument()
+        public void AddUser_Throws_NullArgument()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -410,7 +410,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void AddRolesToUser_Succes_UserExists()
+        public void AddRolesToUser_Succes_UserExists()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -426,7 +426,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void AddRolesToUser_Succes_UserExistsMoreRoles()
+        public void AddRolesToUser_Succes_UserExistsMoreRoles()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -448,7 +448,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void AddRolesToUser_Throws_UserDoesNotExistsMoreRoles()
+        public void AddRolesToUser_Throws_UserDoesNotExistsMoreRoles()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();
@@ -470,7 +470,7 @@ namespace Server.Tests.LogicTests
         }
 
         [Test]
-        public async void AddRolesToUser_Throws_UserDoesNotExist()
+        public void AddRolesToUser_Throws_UserDoesNotExist()
         {
             //Arrange
             var mock = new Mock<IServerStorage>();

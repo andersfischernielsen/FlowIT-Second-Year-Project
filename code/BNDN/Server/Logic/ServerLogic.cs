@@ -56,7 +56,6 @@ namespace Server.Logic
         }
 
 
-        // TODO: Document this method; I (Morten) don't get what it does. 
         public async Task<RolesOnWorkflowsDto> Login(LoginDto loginDto)
         {
             var user = await _storage.GetUser(loginDto.Username, loginDto.Password);

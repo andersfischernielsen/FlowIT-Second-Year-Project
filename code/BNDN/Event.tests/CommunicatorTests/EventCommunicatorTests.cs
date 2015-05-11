@@ -248,7 +248,7 @@ namespace Event.Tests.CommunicatorTests
         }
 
         [Test]
-        public async void SendPending_FailsOnUriNotPointingAnEventMachine()
+        public void SendPending_FailsOnUriNotPointingAnEventMachine()
         {
             //Arrange
             var eventCommunicator = new EventCommunicator();
@@ -305,7 +305,7 @@ namespace Event.Tests.CommunicatorTests
         }
 
         [Test]
-        public async void SendIncluded_FailsOnUriNotPointingAnEventMachine()
+        public void SendIncluded_FailsOnUriNotPointingAnEventMachine()
         {
             //Arrange
             var eventCommunicator = new EventCommunicator();
@@ -363,7 +363,7 @@ namespace Event.Tests.CommunicatorTests
 
 
         [Test]
-        public async void SendExcluded_FailsOnUriNotPointingAnEventMachine()
+        public void SendExcluded_FailsOnUriNotPointingAnEventMachine()
         {
             //Arrange
             var eventCommunicator = new EventCommunicator();
@@ -421,7 +421,7 @@ namespace Event.Tests.CommunicatorTests
 
 
         [Test]
-        public async void Lock_FailsOnUriNotPointingAnEventMachine()
+        public void Lock_FailsOnUriNotPointingAnEventMachine()
         {
             //Arrange
             var eventCommunicator = new EventCommunicator();
@@ -479,7 +479,7 @@ namespace Event.Tests.CommunicatorTests
 
 
         [Test]
-        public async void Unlock_FailsOnUriNotPointingAnEventMachine()
+        public void Unlock_FailsOnUriNotPointingAnEventMachine()
         {
             //Arrange
             var eventCommunicator = new EventCommunicator();
@@ -510,9 +510,5 @@ namespace Event.Tests.CommunicatorTests
             mock.Verify(t => t.Delete(It.IsAny<string>()), Times.Once);
         }
         #endregion
-
-        
-
-        
     }
 }

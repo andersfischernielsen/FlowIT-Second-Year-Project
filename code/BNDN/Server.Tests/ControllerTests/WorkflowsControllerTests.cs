@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.History;
 using Common.DTO.Shared;
@@ -14,7 +13,6 @@ using NUnit.Framework;
 using Server.Controllers;
 using Server.Exceptions;
 using Server.Interfaces;
-using Server.Logic;
 using Server.Models;
 
 namespace Server.Tests.ControllerTests
@@ -251,22 +249,6 @@ namespace Server.Tests.ControllerTests
 
             // Assert
             Assert.AreEqual(1, result.Count());
-        }
-
-        [Test]
-        public void Get_workflow_not_found()
-        {
-            //TODO: Rewrite this test to return a lambda that ensures that the list is empty, then throw the correct exception.
-            //TODO: Possibly add the list as an outer variable, and then use that for every test (<- Smart).
-
-            //// Arrange
-            //_mock.Setup(logic => logic.GetEventsOnWorkflow(It.IsAny<string>())).Callback(() => { throw new Exception("You dun goofd!"); });
-
-            //var controller = new WorkflowsController(_mock.Object);
-
-            //// Assert
-            //var exception = Assert.Throws<HttpResponseException>(() => controller.Get("testWorkflow1"));
-            //Assert.AreEqual(HttpStatusCode.BadRequest, exception.Response.StatusCode);
         }
         #endregion
 

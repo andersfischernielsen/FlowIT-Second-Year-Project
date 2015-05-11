@@ -162,12 +162,11 @@ namespace Server.Interfaces
         /// <exception cref="NotFoundException">If username does not match a user.</exception>
         Task AddRolesToUser(string username, IEnumerable<ServerRoleModel> roles);
 
-        // TODO: Someone else than Morten proof-read this documentation, please!
         /// <summary>
         /// Attempts to login using the provided ServerUserModel
         /// </summary>
         /// <param name="userModel">Represents the user</param>
-        /// <returns></returns>
+        /// <returns>The roles associated with the user.</returns>
         Task<ICollection<ServerRoleModel>> Login(ServerUserModel userModel);
         #endregion
     }
