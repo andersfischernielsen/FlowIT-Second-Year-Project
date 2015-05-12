@@ -11,7 +11,8 @@ namespace Server.Storage
     /// </summary>
     public static class PasswordHasher
     {
-        private static readonly int SaltValueSize = 4;
+        private const int SaltValueSize = 4;
+        private const int SaltLength = SaltValueSize * UnicodeEncoding.CharSize;
         private static readonly UnicodeEncoding Unicode = new UnicodeEncoding();
         private static readonly HashAlgorithm Hash = new SHA512Managed();
         
@@ -108,17 +109,15 @@ namespace Server.Storage
         /// <returns></returns>
         public static bool VerifyHashedPassword(string password, string profilePassword)
         {
-            var saltLength = SaltValueSize * UnicodeEncoding.CharSize;
-
             if (string.IsNullOrEmpty(profilePassword) ||
                 string.IsNullOrEmpty(password) ||
-                profilePassword.Length < saltLength)
+                profilePassword.Length < SaltLength)
             {
                 return false;
             }
 
             // Strip the salt value off the front of the stored password.
-            var saltValue = profilePassword.Substring(0, saltLength);
+            var saltValue = profilePassword.Substring(0, SaltLength);
 
             var hashedPassword = HashPassword(password, saltValue);
             

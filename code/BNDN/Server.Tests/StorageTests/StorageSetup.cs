@@ -11,10 +11,12 @@ namespace Server.Tests.StorageTests
 {
     internal class FakeDbSet<TEntity> where TEntity : class
     {
+
         public DbSet<TEntity> Object { get; private set; }
 
         public FakeDbSet(IQueryable<TEntity> queryable)
         {
+
             // Code to get all of the async stuff to work.
 
             var eventStateMockSet = new Mock<DbSet<TEntity>>();
@@ -32,7 +34,7 @@ namespace Server.Tests.StorageTests
 
             Object = eventStateMockSet.Object;
         }
-        private class TestDbAsyncQueryProvider<TEntity1> : IDbAsyncQueryProvider
+        internal class TestDbAsyncQueryProvider<TEntity1> : IDbAsyncQueryProvider
         {
             private readonly IQueryProvider _inner;
 

@@ -8,20 +8,30 @@ namespace Client.ViewModels
 {
     public class LoginViewModel : ViewModelBase
     {
-        public Action CloseAction { get; set; }       
-        public static Dictionary<string, IList<string>> RolesForWorkflows { get; set; }
+        public Action CloseAction { get; set; }
+        private Dictionary<string, ICollection<string>> RolesForWorkflows { get; set; }
 
         private bool _loginStarted;
         private readonly Uri _serverAddress;
+        private readonly IServerConnection _serverConnection;
 
         public LoginViewModel()
         {
             var settings = Settings.LoadSettings();
             _serverAddress = new Uri(settings.ServerAddress);
+            _serverConnection = new ServerConnection(_serverAddress);
 
             Username = settings.Username;
             Status = "";
             Password = "";
+            CloseAction += () => new MainWindow(RolesForWorkflows).Show();
+        }
+
+        public LoginViewModel(IServerConnection serverConnection, Uri serverAddress, Action mainWindowAction)
+        {
+            _serverConnection = serverConnection;
+            CloseAction += mainWindowAction;
+            _serverAddress = serverAddress;
         }
 
         #region Databindings
@@ -69,10 +79,7 @@ namespace Client.ViewModels
 
             try
             {
-                using (IServerConnection connection = new ServerConnection(_serverAddress))
-                {
-                    RolesForWorkflows = (await connection.Login(Username, Password)).RolesOnWorkflows;
-                }
+                RolesForWorkflows = (await _serverConnection.Login(Username, Password)).RolesOnWorkflows;
                 Status = "Login successful";
 
                 // Save settings
@@ -82,8 +89,7 @@ namespace Client.ViewModels
                     Username = Username
                 }.SaveSettings();
 
-                new MainWindow(RolesForWorkflows).Show();
-                CloseAction.Invoke();
+                CloseAction();
             }
             catch (LoginFailedException)
             {
@@ -104,6 +110,6 @@ namespace Client.ViewModels
 
         #endregion
 
-        
+
     }
 }

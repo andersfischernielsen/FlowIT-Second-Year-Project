@@ -109,6 +109,8 @@
     <Compile Include="ViewModels\EventViewModel.cs" />
     <Compile Include="ViewModels\HistoryListViewModel.cs" />
     <Compile Include="ViewModels\HistoryViewModel.cs" />
+    <Compile Include="ViewModels\IWorkflowListViewModel.cs" />
+    <Compile Include="ViewModels\IWorkflowViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\WorkflowListViewModel.cs" />

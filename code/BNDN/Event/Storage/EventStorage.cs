@@ -13,7 +13,7 @@ namespace Event.Storage
 {
     /// <summary>
     /// EventStorage is the application-layer that rests on top of the actual storage-facility (a database)
-    /// EventStorage implements IEventStorage-interface.
+    /// EventStorage implements IEventStorage and IEventHistoryStorage interfaces.
     /// </summary>
     public class EventStorage : IEventStorage, IEventHistoryStorage
     {
@@ -32,16 +32,13 @@ namespace Event.Storage
         /// <param name="context">Context to be used by EventStorage</param>
         public EventStorage(IEventContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
             _context = context;
         }
 
-        /// <summary>
-        /// Initializes a new Event, based on the provided EventModel.
-        /// </summary>
-        /// <param name="eventModel"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException">Thrown when an Event with the same id already exists</exception>
-        /// <exception cref="ArgumentNullException">Thrown when provided EventModel was null</exception>
         public async Task InitializeNewEvent(EventModel eventModel)
         {
             if (eventModel == null)
@@ -59,14 +56,6 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// DeleteEvent deletes the Event, belonging to the given workflowId and with the given eventId
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event to be deleted</param>
-        /// <returns>Task</returns>
-        /// <exception cref="ArgumentNullException">Will be thrown if either workflowId or eventId is null</exception>
-        /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments</exception>
         public async Task DeleteEvent(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -93,18 +82,14 @@ namespace Event.Storage
 
         public async Task Reload(string workflowId, string eventId)
         {
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
+            }
             await _context.Entry(await _context.Events.SingleAsync(e => e.WorkflowId == workflowId && e.Id == eventId)).ReloadAsync();
         }
 
         #region Properties
-
-        /// <summary>
-        /// Tells whether an Event exists in the storage.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns>True if the an Event with eventId exists at workflow with workflowId</returns>
-        /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null</exception>
         public async Task<bool> Exists(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -115,14 +100,6 @@ namespace Event.Storage
             return await _context.Events.AnyAsync(e => e.WorkflowId == workflowId && e.Id == eventId);
         }
 
-        /// <summary>
-        /// Returns the URI-address of the Event belonging to the given workflowId and identified by eventId 
-        /// </summary>
-        /// <param name="workflowId">Identifies the workflow the event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either eventId or workFlowId is null</exception>
-        /// <exception cref="NotFoundException">Thrown if no event matches the identifying arguments</exception>
         public async Task<Uri> GetUri(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -139,14 +116,6 @@ namespace Event.Storage
             return new Uri((await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).OwnUri);
         }
 
-        /// <summary>
-        /// Returns the name of an Event. 
-        /// </summary>
-        /// <param name="workflowId">Id of thw workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if no Event exists with the given workflowId and EventId</exception>
         public async Task<string> GetName(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -164,14 +133,6 @@ namespace Event.Storage
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Name;
         }
 
-        /// <summary>
-        /// GetRoles returns the Roles, that are allowed to execute an Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown when no Event matches the provided workflowId and eventId</exception>
         public async Task<IEnumerable<string>> GetRoles(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -189,14 +150,6 @@ namespace Event.Storage
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Roles.Select(role => role.Role);
         }
 
-        /// <summary>
-        /// Returns the Executed value for the specified event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage</exception>
         public async Task<bool> GetExecuted(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -214,16 +167,6 @@ namespace Event.Storage
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Executed;
         }
 
-
-        /// <summary>
-        /// Sets the Executed value for the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="executedValue"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if either workflowId or eventId is null</exception>
-        /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage</exception>
         public async Task SetExecuted(string workflowId, string eventId, bool executedValue)
         {
             if (workflowId == null || eventId == null)
@@ -246,18 +189,10 @@ namespace Event.Storage
             {
                 throw new FailedToUpdateStateException();
             }
-            
+
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Returns the Included value of the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage</exception>
         public async Task<bool> GetIncluded(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -275,16 +210,6 @@ namespace Event.Storage
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Included;
         }
 
-        // TODO: This method needs testing. 
-        /// <summary>
-        /// Sets the Included value for the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="includedValue">The value that included should be set to</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the provided arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the event does not exist in the storage</exception>
         public async Task SetIncluded(string workflowId, string eventId, bool includedValue)
         {
             if (workflowId == null || eventId == null)
@@ -297,24 +222,15 @@ namespace Event.Storage
                 throw new NotFoundException();
             }
 
-            // TODO: Try-catch here...?
             await EventIsInALegalState(workflowId, eventId);
 
             var @event = (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId));
-            
+
             @event.Included = includedValue;
 
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Returns the Included value of the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the Event does not exist</exception>
         public async Task<bool> GetPending(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -331,14 +247,6 @@ namespace Event.Storage
             return (await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId)).Pending;
         }
 
-        /// <summary>
-        /// Sets the Pending value for the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="pendingValue"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task SetPending(string workflowId, string eventId, bool pendingValue)
         {
             if (workflowId == null || eventId == null)
@@ -357,14 +265,6 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Returns the LockDto for the specified Event.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
         public async Task<LockDto> GetLockDto(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -382,26 +282,16 @@ namespace Event.Storage
             var @event =
                 await
                     _context.Events.SingleOrDefaultAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
-            if (@event.LockOwner == null) return null;      // TODO: With Exists() check above, this should be obsolete...? Right?
-                                                            // TODO: From Mikael: Nope, Exists checks whether the event exists. This checks if there is a lockOwner set.
+            if (@event.LockOwner == null) return null;
+
             return new LockDto
             {
                 WorkflowId = @event.WorkflowId,
-                Id = @event.Id,
+                EventId = @event.Id,
                 LockOwner = @event.LockOwner
             };
         }
 
-        /// <summary>
-        /// The setter for this property should not be used to unlock the Event. If setter is provided with a null-value
-        /// an ArgumentNullException will be raised. Instead, use ClearLock()-method to remove any Lock on this Event.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="lockOwner">Id of the lockowner</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
         public async Task SetLock(string workflowId, string eventId, string lockOwner)
         {
             if (workflowId == null || eventId == null || lockOwner == null)
@@ -415,7 +305,7 @@ namespace Event.Storage
             }
 
             await EventIsInALegalState(workflowId, eventId);
-            
+
             var @event =
                 await _context.Events.SingleAsync(model => model.WorkflowId == workflowId && model.Id == eventId);
             if (@event.LockOwner != null && @event.LockOwner != lockOwner)
@@ -428,16 +318,6 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
-
-        /// <summary>
-        /// This method should be used for unlocking an Event as opposed to using the setter for LockDto
-        /// (Setter for LockDto will raise an ArgumentNullException if provided a null-value)
-        /// The method simply removes all (should be either 1 or 0) LockDto element(s) held in database. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if an Event with the specified ids does not exist.</exception>
         public async Task ClearLock(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -459,13 +339,6 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Returns the Condition-relations for the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<HashSet<RelationToOtherEventModel>> GetConditions(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -491,14 +364,6 @@ namespace Event.Storage
             return hashSet;
         }
 
-        /// <summary>
-        /// GetResponses returns a HashSet containing the response relations for the provided event.
-        /// Notice, that this method will not return null, but may return an empty set.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<HashSet<RelationToOtherEventModel>> GetResponses(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -526,16 +391,9 @@ namespace Event.Storage
             return hashSet;
         }
 
-        /// <summary>
-        /// Returns the Exclusion-relations on the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<HashSet<RelationToOtherEventModel>> GetExclusions(string workflowId, string eventId)
         {
-            if (workflowId == null ||eventId == null)
+            if (workflowId == null || eventId == null)
             {
                 throw new ArgumentNullException();
             }
@@ -561,14 +419,6 @@ namespace Event.Storage
             return hashSet;
         }
 
-        /// <summary>
-        /// GetResponses returns a HashSet containing the inclusion relations for the provided event.
-        /// Notice, that this method will not return null, but may return an empty set.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<HashSet<RelationToOtherEventModel>> GetInclusions(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
@@ -638,14 +488,12 @@ namespace Event.Storage
         }
         #endregion
 
-        /// <summary>
-        /// Saves the given historyModel to storage.
-        /// </summary>
-        /// <param name="toSave">The history that is to be saved</param>
-        /// <returns></returns>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         public async Task SaveHistory(HistoryModel toSave)
         {
+            if (toSave == null)
+            {
+                throw new ArgumentNullException("toSave");
+            }
             if (!await Exists(toSave.WorkflowId, toSave.EventId))
             {
                 throw new NotFoundException();
@@ -655,13 +503,6 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Retrieves the History for a specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event, whose history is to be retrieved</param>
-        /// <returns></returns>
-        /// <exception cref="NotFoundException">Thrown if the specified Event does not exist</exception>
         public async Task<IQueryable<HistoryModel>> GetHistoryForEvent(string workflowId, string eventId)
         {
             if (!await Exists(workflowId, eventId))

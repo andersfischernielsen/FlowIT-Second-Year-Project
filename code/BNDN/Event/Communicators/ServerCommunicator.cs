@@ -15,15 +15,14 @@ namespace Event.Communicators
     /// </summary>
     public class ServerCommunicator : IServerFromEvent
     {
-        private readonly HttpClientToolbox _httpClient;
-        private readonly string _serverBaseAddress;
-        
+        public readonly HttpClientToolbox _httpClient;
+
         // _eventId represents this Event's id, and _workflowId the workflow that this Event is a part of.
         private readonly string _eventId;
         private readonly string _workflowId;
 
 
-        public ServerCommunicator(String baseAddress, string eventId, string workFlowId)
+        public ServerCommunicator(string baseAddress, string eventId, string workFlowId)
         {
             if (baseAddress == null || eventId == null || workFlowId == null)
             {
@@ -32,16 +31,24 @@ namespace Event.Communicators
 
             _workflowId = workFlowId;
              _eventId = eventId;
-            _serverBaseAddress = baseAddress;
-            _httpClient = new HttpClientToolbox(_serverBaseAddress);
+            _httpClient = new HttpClientToolbox(baseAddress);
         }
 
-        /// <summary>
-        /// Attempts to Post an Event to Server
-        /// </summary>
-        /// <param name="addressDto">Contains the information about the Event that is to be posted to Server</param>
-        /// <returns></returns>
-        /// <exception cref="FailedToPostEventAtServerException">Thrown if posting of Event at Server fails.</exception>
+        ///<summary>
+    	///A constructor with dependency injection for testing uses.
+    	///</summary>
+        public ServerCommunicator(string eventId, string workFlowId, HttpClientToolbox httpClient)
+        {
+            if (eventId == null || workFlowId == null || httpClient == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            _workflowId = workFlowId;
+            _eventId = eventId;
+            _httpClient = httpClient;
+        }
+
         public async Task PostEventToServer(EventAddressDto addressDto)
         {
             var path = string.Format("workflows/{0}", _workflowId);
@@ -55,11 +62,6 @@ namespace Event.Communicators
             }
         }
 
-        /// <summary>
-        /// Attempts to Delete an Event from Server
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="FailedToDeleteEventFromServerException">Thrown if deletion of Event at Server fails</exception>
         public async Task DeleteEventFromServer()
         {
             var path = string.Format("workflows/{0}/{1}", _workflowId, _eventId);
