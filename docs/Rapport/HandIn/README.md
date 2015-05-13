@@ -51,7 +51,7 @@ Password
 
 
 
-## Gas Workflow
+## Gas Consumption Workflow
 
 The workflow has several roles with (case sensistive) passwords:
 
