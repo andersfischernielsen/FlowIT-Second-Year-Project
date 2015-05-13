@@ -1,1 +1,29 @@
 \subsection{Final Workflow}
+
+\begin{figure}
+\centering
+\includegraphics[width=0,5\linewidth]{Figures/strawberry}
+\caption{\label{fig:FinalWorkflow} Final workflow}
+\end{figure}
+
+The final workflow turned out more complex than the initial interpretation. After feedback from the external partner, the team has added the role \textit{Nurse}, which was not described in the textual description. Furthermore we divided the examinations and the appointments to different events. Although similar, they are not identical. 
+\begin{itemize}
+\item All events, except \textbf{DownloadScheduling}, \textbf{ReportToUBS}, and \textbf{CheckInPatient} are excluded to begin with.
+\item All events, except \textbf{DownloadScheduling} and \textbf{ReportToUBS}, are self excluding, meaning once they are carried out, they cannot be executed again, unless they are subsequently included by some other activity. 
+\item The only requirement is, once a patient has been checked in, the government will \textit{eventually} be charged, this is clarified by the response relation between the events \textbf{CheckInPatient} and \textbf{ChargeGovernment}. This may happen either after the patient has gone through the workflow a number of times or a single time. Notice that we are able to leave out a lot of response relations, because the single response relation drives the workflow towards \textbf{ChargeGovernment}.
+\end{itemize}
+
+In the following section, the final workflow and its different branches are described. Before branching out, every patient entering the hospital is handled the same way by the hospital employees.
+
+\begin{enumerate}
+\item \textbf{CheckInPatient}: Requires that the government will eventually be charged, hence the response relation to \textbf{ChargeGovernment}. It excludes \textbf{ReferToROTA}; why will be explained later. 
+\item \textbf{ReceiveAttendanceRecord:} \textbf{ReceiveAttendanceRecord} has inclusion relations to both \textbf{PutPatientInAppointmentQueue} and \textbf{PutPatientInExaminationQueue}. 
+\item \textbf{PutPatientInExaminationQueue} and \textbf{PutPatientInAppointmentQueue} exclude each other, since the given hospital description allows only one of them to occur. \newline
+As soon as one of these event are executed, one of the two branches are chosen.
+\end{enumerate}
+
+From here on, the workflow splits into two separate branches. We first describe the branch related to a patient that is put in an appointment queue: 
+\begin{enumerate}
+\item \textbf{PutPatientInAppointmentQueue}: This event includes the \textbf{PreparePatientForAppointment} event and excludes itself.
+\item PreparePatientForAppointment: This event includes PerformAppointment and excludes itself.
+\end{enumerate}

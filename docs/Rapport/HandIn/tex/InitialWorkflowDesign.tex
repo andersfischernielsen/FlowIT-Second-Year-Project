@@ -1,1 +1,15 @@
 \subsection{Initial Workflow Design}
+In this section, the solution for the workflow description given by the external partner is described. The feedback from the external partner is discussed and the revised workflow is explained. Finally, a workflow given by the lecturers is explained.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\linewidth]{Figures/strawberry}
+\caption{\label{fig:InitialWorkflowDesign} The initially drafted workflow}
+\end{figure}
+
+Through analysis of the textual description given by the external partner the initial workflow design was developed. Events were created based on the actions described in the text, and roles were found by looking for actors doing those actions. The relations were based on rules and the order of which the patient went through the events.\newline
+The team intentionally decided to make a rather simple design of the initial workflow to make sure that the all the actions of the healthcare system were supported and all relations defined in DCR graph notation were in use. \\
+
+The team focused on representing the activities directly handled by the employees of the hospital. The patient’s activities such as entering the hospital is left out, as it is not the responsibility of an employee. The different types of employees were assigned to their respective events. The following roles where found necessary: CheckInReceptionist, QueueReceptionist, Examiner, and Specialist. \\
+
+The initial healthcare workflow has three events which is initially executable: \textbf{DownloadScheduling} and \textbf{ReportToUBS} that both can be executed at any time and hold no constraints to other activities. The third initially executable event is \textbf{CheckInPatient} which is the starting point when a patient enters the hospital and addresses the \textit{CheckInReceptionist}. When checked in, the patient is handed an attendance record. Then the \textit{QueueReceptionist} handles the \textbf{ReceiveAttendanceRecord} event. The \textit{QueueReceptionist} then assigns the patient to a queue: \textbf{AppointmentQueue} or \textbf{ExaminationQueue}. When a patient has been through either an examination or an appointment with a specialist a medical report is made. Depending on which queue the patient was in, the medical report is conducted by the \textit{Specialist} for appointments or the \textit{Examiner} for examinations. Based on the medical report the \textit{CheckInReceptionist} gives prescriptions if needed. Afterwards the \textit{CheckInReceptionist} schedules the patient to either a meeting with another \textit{Specialist}, further examinations, or surgery which are all represented as events in the graph. In any case the government is charged. In the medical report, it is also possible for a patient to be referred to ROTA, which is a fast track queue for patients needing treatment urgently. In this case the government is also eventually charged.
