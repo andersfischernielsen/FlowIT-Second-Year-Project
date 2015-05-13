@@ -1,0 +1,14 @@
+\subsection{Scope}
+The system should fulfill the following requirements:
+\begin{itemize}
+\item The system must be able to handle generic DCR graphs and the logic they follow. This is to be tested on a DCR graph produced from a workflow of a Brazilian hospital and a DCR graph given by our lecturers.
+\item The system must be able to create, reconfigure, and delete workflows.
+\item The architecture of the system must resemble a peer-to-peer distribution.
+\item The implementation should be based on REST services. 
+\item The system should provide a graphical user interface (UI) to the user. 
+\item The UI should be able to present an event log or history, that describes which operations have been executed, aborted or changed in a given workflow. Because “log” and “lock” sounds the same the team chose to call the “logging” feature “History”.
+\item The system must persist data such that it can be restarted and handle isolated occurrences of crashes.
+\item The system must implement concurrency control that ensures that an illegal state cannot be reached.
+\item The system must implement role based access control (RBAC) that ensures that a user is only able to make changes that the given user has permission to make. 
+\item The system must allow reconfiguration of already existing events and their relations. This can be achieved by deleting and then recreating the individual events. 
+\end{itemize}

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Client.Connections;
 using Client.Exceptions;
-using Common;
+using Common.DTO.Event;
+using Common.DTO.Shared;
 using Common.Exceptions;
 
 namespace Client.ViewModels
@@ -13,8 +15,9 @@ namespace Client.ViewModels
     {
         private readonly EventAddressDto _eventAddressDto;
         private EventStateDto _eventStateDto;
-        private readonly WorkflowViewModel _parent;
+        private readonly IWorkflowViewModel _parent;
         private static readonly Brush WhiteBrush, IncludedBrush, PendingBrush, ExecutedBrush;
+        private readonly IEventConnection _eventConnection;
 
         static EventViewModel()
         {
@@ -40,12 +43,25 @@ namespace Client.ViewModels
             WhiteBrush.Freeze();
         }
 
-        public EventViewModel(EventAddressDto eventAddressDto, WorkflowViewModel workflow)
+        public EventViewModel(EventAddressDto eventAddressDto, IWorkflowViewModel workflow)
         {
+            if (eventAddressDto == null || workflow == null)
+            {
+                throw new ArgumentNullException();
+            }
             _eventAddressDto = eventAddressDto;
             _parent = workflow;
             _eventStateDto = new EventStateDto();
-            GetState();
+            _eventConnection = new EventConnection();
+            GetStateInternal();
+        }
+
+        public EventViewModel(IEventConnection eventConnection, EventAddressDto eventAddressDto, IWorkflowViewModel parent)
+        {
+            _parent = parent;
+            _eventStateDto = new EventStateDto();
+            _eventAddressDto = eventAddressDto;
+            _eventConnection = eventConnection;
         }
 
         #region Databindings
@@ -150,15 +166,17 @@ namespace Client.ViewModels
 
         #region Actions
 
-        public async void GetState()
+        private async void GetStateInternal()
+        {
+            await GetState();
+        }
+
+        public async Task GetState()
         {
             Status = "";
             try
             {
-                using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
-                {
-                    _eventStateDto = await eventConnection.GetState(_parent.WorkflowId, _eventAddressDto.Id);
-                }
+                _eventStateDto = await _eventConnection.GetState(Uri, _parent.WorkflowId, Id);
                 NotifyPropertyChanged("");
             }
             catch (NotFoundException)
@@ -186,13 +204,11 @@ namespace Client.ViewModels
         public async void Execute()
         {
             Status = "";
+            await _parent.DisableExecuteButtons();
             try
             {
-                using (IEventConnection eventConnection = new EventConnection(_eventAddressDto.Uri))
-                {
-                    await eventConnection.Execute(_parent.WorkflowId, _eventAddressDto.Id);
-                }
-                _parent.GetEvents();
+                await _eventConnection.Execute(_eventAddressDto.Uri, _parent.WorkflowId, _eventAddressDto.Id, _parent.Roles);
+                _parent.RefreshEvents();
             }
             catch (NotFoundException)
             {
@@ -219,7 +235,6 @@ namespace Client.ViewModels
             {
                 Status = e.Message;
             }
-
         }
         #endregion
     }

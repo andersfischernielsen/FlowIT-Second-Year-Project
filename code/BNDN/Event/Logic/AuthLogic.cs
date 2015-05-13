@@ -24,15 +24,6 @@ namespace Event.Logic
             _storage = storage;
         }
 
-        /// <summary>
-        /// IsAuthorized will, if provided a set of roles when called, determine whether at least one of the 
-        /// provided roles match the roles needed to execute the specified Event
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <param name="roles">The set of roles, that you may have, but you wish to check is authorized to execute the specified Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task<bool> IsAuthorized(string workflowId, string eventId, IEnumerable<string> roles)
         {
             if (eventId == null || workflowId == null || roles == null)
@@ -40,10 +31,7 @@ namespace Event.Logic
                 throw new ArgumentNullException("eventId", "eventId was null");
             }
 
-           var eventRoles = await _storage.GetRoles(workflowId, eventId);
-
-            // TODO: This should be obsolete by now, right, because GetRoles will not return null, since it checks for Event-existence?
-            if (eventRoles == null) throw new NotFoundException();
+            var eventRoles = await _storage.GetRoles(workflowId, eventId);
 
             return eventRoles.Intersect(roles).Any();
         }

@@ -5,20 +5,24 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Client.Connections;
-using Common;
+using Client.Exceptions;
+using Common.DTO.Shared;
+using Common.Exceptions;
 
 namespace Client.ViewModels
 {
     public class HistoryListViewModel : ViewModelBase
     {
-        private readonly Uri _serverAddress;
+        private readonly IServerConnection _serverConnection;
+        private readonly IEventConnection _eventConnection;
 
         public HistoryListViewModel()
         {
             HistoryViewModelList = new ObservableCollection<HistoryViewModel>();
-
             var settings = Settings.LoadSettings();
-            _serverAddress = new Uri(settings.ServerAddress);
+            var serverAddress = new Uri(settings.ServerAddress);
+            _serverConnection = new ServerConnection(serverAddress);
+            _eventConnection = new EventConnection();
         }
 
         public HistoryListViewModel(string workflowId)
@@ -27,7 +31,21 @@ namespace Client.ViewModels
             WorkflowId = workflowId;
 
             var settings = Settings.LoadSettings();
-            _serverAddress = new Uri(settings.ServerAddress);
+            var serverAddress = new Uri(settings.ServerAddress);
+
+            _serverConnection = new ServerConnection(serverAddress);
+            _eventConnection = new EventConnection();
+
+            GetHistory();
+        }
+
+        public HistoryListViewModel(string workflowId, IServerConnection serverConnection, IEventConnection eventConnection)
+        {
+            HistoryViewModelList = new ObservableCollection<HistoryViewModel>();
+            WorkflowId = workflowId;
+
+            _serverConnection = serverConnection;
+            _eventConnection = eventConnection;
 
             GetHistory();
         }
@@ -35,6 +53,7 @@ namespace Client.ViewModels
         #region DataBindings
 
         private string _workflowId;
+        private string _status;
 
         public string WorkflowId
         {
@@ -50,6 +69,15 @@ namespace Client.ViewModels
 
         public ObservableCollection<HistoryViewModel> HistoryViewModelList { get; set; }
 
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                NotifyPropertyChanged("Status");
+            }
+        }
 
         #region Actions
 
@@ -63,37 +91,66 @@ namespace Client.ViewModels
             HistoryViewModelList.Clear();
             NotifyPropertyChanged("");
 
-            List<EventAddressDto> eventAddresses;
+            IEnumerable<EventAddressDto> eventAddresses;
             ConcurrentBag<HistoryViewModel> history;
 
-            // create a server connection
-            using (IServerConnection serverConnection = new ServerConnection(_serverAddress))
+            try
             {
-
+                // create a server connection
                 // get all addresses of events. This is neccesary since events might not be present if Adam removes events due to roles.
-                eventAddresses = (await serverConnection.GetEventsFromWorkflow(WorkflowId))
-                    .AsParallel()
-                    .ToList();
+                eventAddresses = await _serverConnection.GetEventsFromWorkflow(WorkflowId);
 
                 // add the history of the server
-                history = new ConcurrentBag<HistoryViewModel>((await serverConnection.GetHistory(WorkflowId)).Select(dto => new HistoryViewModel(dto) { Title = WorkflowId }));
+                history =
+                    new ConcurrentBag<HistoryViewModel>(
+                        (await _serverConnection.GetHistory(WorkflowId)).Select(
+                            dto => new HistoryViewModel(dto) { Title = WorkflowId }));
+            }
+            catch (NotFoundException)
+            {
+                Status = "Workflow wasn't found on server. Please refresh the workflow and try again.";
+                return;
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "The server could not be found. Please try again later or contact your Flow administrator";
+                return;
+            }
+            catch (Exception)
+            {
+                Status = "An unexpected error has occured. Please try again later.";
+                return;
             }
 
             var tasks = eventAddresses.Select(async dto =>
             {
-                using (IEventConnection eventConnection = new EventConnection(dto.Uri))
-                {
-                    var list =
-                        (await eventConnection.GetHistory(WorkflowId, dto.Id)).Select(
-                            historyDto => new HistoryViewModel(historyDto) {Title = dto.Id});
-                    list.ToList().ForEach(model => history.Add(model));
-                }
+                var list =
+                    (await _eventConnection.GetHistory(dto.Uri, WorkflowId, dto.Id)).Select(
+                        historyDto => new HistoryViewModel(historyDto) { Title = dto.Id });
+                list.ToList().ForEach(history.Add);
             });
 
-            await Task.WhenAll(tasks);
+            try
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (NotFoundException)
+            {
+                Status = "An event wasn't found. Please refresh the workflow and try again.";
+                return;
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "An event-server could not be found. Please try again later or contact your Flow administrator";
+                return;
+            }
+            catch (Exception)
+            {
+                Status = "An unexpected error has occured. Please try again later.";
+                return;
+            }
 
             // order them by timestamp
-            // TODO: Currently, DateTimes are not parsed correctly.
             var orderedHistory = history.ToList().OrderByDescending(model => model.TimeStamp);
 
             // move the list into the observable collection.

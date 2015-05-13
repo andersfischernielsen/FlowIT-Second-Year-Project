@@ -2,32 +2,50 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Client.Connections;
+using Client.Exceptions;
 using Client.Views;
-using Common;
+using Common.DTO.Event;
+using Common.DTO.Shared;
+using Common.Exceptions;
 
 namespace Client.ViewModels
 {
-    public class WorkflowViewModel : ViewModelBase
+    public class WorkflowViewModel : ViewModelBase, IWorkflowViewModel
     {
         private readonly WorkflowDto _workflowDto;
         private bool _resetEventRuns;
-        private readonly WorkflowListViewModel _parent;
+        private readonly IWorkflowListViewModel _parent;
+        private readonly IEnumerable<string> _roles;
+        private readonly IEventConnection _eventConnection;
+        private readonly IServerConnection _serverConnection;
 
         public string WorkflowId { get { return _workflowDto.Id; } }
 
-        public WorkflowViewModel(WorkflowListViewModel parent)
+        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IEnumerable<string> roles)
         {
-            _parent = parent;
-            EventList = new ObservableCollection<EventViewModel>();
-            _workflowDto = new WorkflowDto();
-        }
-
-        public WorkflowViewModel(WorkflowListViewModel parent, WorkflowDto workflowDto)
-        {
+            if (parent == null || workflowDto == null || roles == null)
+            {
+                throw new ArgumentNullException();
+            }
             _parent = parent;
             EventList = new ObservableCollection<EventViewModel>();
             _workflowDto = workflowDto;
+            _roles = roles;
+            _eventConnection = new EventConnection();
+            _serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress));
+        }
+
+        public WorkflowViewModel(IWorkflowListViewModel parent, WorkflowDto workflowDto, IEnumerable<string> roles,
+            IEventConnection eventConnection, IServerConnection serverConnection, ObservableCollection<EventViewModel> eventList)
+        {
+            _parent = parent;
+            _workflowDto = workflowDto;
+            _roles = roles;
+            _eventConnection = eventConnection;
+            _serverConnection = serverConnection;
+            EventList = eventList;
         }
 
         #region Databindings
@@ -65,37 +83,42 @@ namespace Client.ViewModels
             }
         }
 
+        public IEnumerable<string> Roles
+        {
+            get { return _roles; }
+        }
+
         #endregion
 
         #region Actions
+
+        public async void RefreshEvents()
+        {
+            var tasks = EventList.Select(async eventViewModel => await eventViewModel.GetState());
+            await Task.WhenAll(tasks);
+        }
+
 
         public async void GetEvents()
         {
             SelectedEventViewModel = null;
             EventList.Clear();
 
-            var settings = Settings.LoadSettings();
-            var username = settings.Username;
-
-            List<EventViewModel> events;
-            using (IServerConnection connection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress)))
-            {
-                events = (await connection.GetEventsFromWorkflow(WorkflowId))
+            var events = (await _serverConnection.GetEventsFromWorkflow(WorkflowId))
                 .AsParallel()
-                .Where(e => e.Roles.Any(r => r == username)) //Only selects the events, the current user can execute
+                .Where(e => e.Roles.Intersect(_roles).Any()) //Only selects the events, the current user can execute
                 .Select(eventAddressDto => new EventViewModel(eventAddressDto, this))
                 .ToList();
-            }
-            
+
             EventList = new ObservableCollection<EventViewModel>(events);
 
-            SelectedEventViewModel = EventList.Count >= 1 ? EventList[0] : null;
-            
+            SelectedEventViewModel = EventList.FirstOrDefault();
+
             NotifyPropertyChanged("");
         }
 
         /// <summary>
-        /// Creates a new window with the log of the 
+        /// Creates a new window with the log of the workflow
         /// </summary>
         public void GetHistory()
         {
@@ -104,6 +127,11 @@ namespace Client.ViewModels
                 var historyView = new HistoryView(new HistoryListViewModel(WorkflowId));
                 historyView.Show();
             }
+        }
+
+        public async Task DisableExecuteButtons()
+        {
+            await Task.WhenAll(EventList.Select(e => Task.Run(() => e.Executable = false)));
         }
 
         /// <summary>
@@ -116,40 +144,54 @@ namespace Client.ViewModels
             if (_resetEventRuns) return;
             _resetEventRuns = true;
 
-            List<EventAddressDto> adminEventList;
-            using (
-                IServerConnection serverConnection = new ServerConnection(new Uri(Settings.LoadSettings().ServerAddress))
-                )
+            IEnumerable<EventAddressDto> adminEventList;
+            try
             {
-                adminEventList = (await serverConnection.GetEventsFromWorkflow(WorkflowId))
-                .AsParallel()
-                .ToList();
+                adminEventList = (await _serverConnection.GetEventsFromWorkflow(WorkflowId));
             }
-
-            
+            catch (NotFoundException)
+            {
+                Status = "The workflow wasn't found. Please refresh the list of workflows.";
+                _resetEventRuns = false;
+                return;
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "The server is currently unavailable. Please try again later.";
+                _resetEventRuns = false;
+                return;
+            }
+            catch (Exception)
+            {
+                Status = "An unexpected error has occurred. Please refresh or try again later.";
+                _resetEventRuns = false;
+                return;
+            }
 
             // Reset all the events.
-            foreach (var eventViewModel in adminEventList)
+            try
             {
-                using (IEventConnection connection = new EventConnection(eventViewModel.Uri))
+                foreach (var eventViewModel in adminEventList)
                 {
-                    await connection.ResetEvent(WorkflowId, eventViewModel.Id);
+                    await _eventConnection.ResetEvent(eventViewModel.Uri, WorkflowId, eventViewModel.Id);
                 }
+                NotifyPropertyChanged("");
+                GetEvents();
             }
-            NotifyPropertyChanged("");
-            GetEvents();
+            catch (NotFoundException)
+            {
+                Status = "One of the events wasn't found. Please refresh the list of workflows.";
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "An event-server is currently unavailable. Please try again later.";
+            }
+            catch (Exception)
+            {
+                Status = "An unexpected error has occurred. Please refresh or try again later.";
+            }
             _resetEventRuns = false;
         }
         #endregion
-
-        /// <summary>
-        /// This method is used by the list in the UI to represent each object.
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            //.FormatString(this string myString) is an extension.
-            return Name;
-        }
     }
 }

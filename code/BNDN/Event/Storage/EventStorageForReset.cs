@@ -20,21 +20,23 @@ namespace Event.Storage
         /// <param name="context">The database-context, with which this layer communicates with.</param>
         public EventStorageForReset(IEventContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
             _context = context;
         }
 
-        /// <summary>
-        /// ClearLock clears the Lock on the specified Event, if possible. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
         public async Task ClearLock(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
             {
                 throw new ArgumentNullException();
+            }
+
+            if (!await Exists(workflowId, eventId))
+            {
+                throw new NotFoundException();
             }
 
             // Clear any LockDto-element (should only exist a single)
@@ -44,21 +46,13 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Will restore the Event to it's initial state. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event, that is to be reset.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if any of the arguments are null</exception>
-        /// <exception cref="NotFoundException">Thrown if the Event does not exist</exception>
         public async Task ResetToInitialState(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)
             {
                 throw new ArgumentNullException();
             }
-            if (! await Exists(workflowId, eventId))
+            if (!await Exists(workflowId, eventId))
             {
                 throw new NotFoundException();
             }
@@ -73,13 +67,6 @@ namespace Event.Storage
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Determines whether a specified Event exists in the database. 
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow, the Event belongs to</param>
-        /// <param name="eventId">Id of the Event</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the specified Event does not exist</exception>
         public async Task<bool> Exists(string workflowId, string eventId)
         {
             if (workflowId == null || eventId == null)

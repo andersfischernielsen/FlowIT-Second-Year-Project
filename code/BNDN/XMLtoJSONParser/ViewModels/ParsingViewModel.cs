@@ -20,6 +20,8 @@ namespace XMLtoJSONParser.ViewModels
         public ParsingViewModel()
         {
             _uploadButtonActive = true;
+            _serverUri = "http://";
+            _eventUris = "http://";
         }
 
         public string XmlFilePath
@@ -127,8 +129,7 @@ namespace XMLtoJSONParser.ViewModels
         {
             if (string.IsNullOrEmpty(XmlFilePath) || string.IsNullOrEmpty(EventUris) || string.IsNullOrEmpty(WorkflowId))
             {
-                // Todo: Shouldn't this show some kind of error message to the user?
-                await DcrParser.Parse(XmlFilePath, WorkflowId, new string[1]).CreateJsonFile();
+                MessageBox.Show("You have to fill in the information first.");
             }
             else
             {
@@ -197,7 +198,13 @@ namespace XMLtoJSONParser.ViewModels
                 {
                     try
                     {
-                        await uploader.UploadUsers(roles, DefaultPassword);
+                        if (!await uploader.UploadUsers(roles, DefaultPassword))
+                        {
+                            // Some of the users wasn't created, but updated with new roles.
+                            MessageBox.Show("One or more of the users in this workflow already exists" +
+                                            Environment.NewLine +
+                                            "These users have the same password as before, but the new roles have been added");
+                        }
                     }
                     catch (Exception e)
                     {

@@ -5,8 +5,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.History;
+using Common.DTO.Shared;
 using Common.Exceptions;
-using Common.History;
 using Server.Exceptions;
 using Server.Interfaces;
 using Server.Logic;
@@ -56,7 +58,7 @@ namespace Server.Controllers
             await _historyLogic.SaveNoneWorkflowSpecificHistory(new HistoryModel
             {
                 HttpRequestType = "GET",
-                Message = "Called: Get",
+                Message = "Succesfully called: Get",
                 MethodCalledOnSender = "Get"
             });
 
@@ -78,7 +80,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     WorkflowId = workflowId,
-                    Message = "Called: Get",
+                    Message = "Succesfully called: Get",
                     HttpRequestType = "GET",
                     MethodCalledOnSender = "Get(" + workflowId + ")"
                 });
@@ -157,7 +159,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     HttpRequestType = "POST",
-                    Message = "Called: PostWorkflow",
+                    Message = "Succesfully called: PostWorkflow",
                     MethodCalledOnSender = "PostWorkflow",
                     WorkflowId = workflowDto.Id
                 });
@@ -234,7 +236,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     EventId = eventToAddDto.Id,
-                    Message = "Called: PostEventWorkflow",
+                    Message = "Succesfully called: PostEventWorkflow",
                     MethodCalledOnSender = "PostEventWorkflow(" + workflowId + ")",
                     HttpRequestType = "POST",
                     WorkflowId = workflowId
@@ -306,87 +308,6 @@ namespace Server.Controllers
         }
         #endregion
 
-        #region PUT requests
-        // TODO: Discuss: Is this method ever used? Should we not delete...? Or do we keep it to stay REST'ed...?
-        /// <summary>
-        /// UpdateEventToWorkFlow updates an Event in a workflow with the specified workflowid. 
-        /// </summary>
-        /// <param name="workflowId"></param>
-        /// <param name="eventToBeUpdated"></param>
-        [Route("Workflows/{workflowId}")]
-        [HttpPut]
-        public async Task UpdateEventToWorkFlow(string workflowId, [FromBody] EventAddressDto eventToBeUpdated)
-        {
-            // Check if provided input can be mapped onto an EventAddressDto
-            if (!ModelState.IsValid)
-            {
-                var toThrow = new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                                                "Provided input could not be mapped onto an EventAddressDto"));
-                await _historyLogic.SaveHistory(new HistoryModel
-                {
-                    HttpRequestType = "POST",
-                    Message = "Threw: " + toThrow.GetType(),
-                    MethodCalledOnSender = "PostEventWorkflow",
-                    WorkflowId = workflowId
-                });
-
-                throw toThrow;
-            }
-
-            try
-            {
-                // Add this Event to the specified workflow
-                await _logic.UpdateEventOnWorkflow(workflowId, eventToBeUpdated);
-                await _historyLogic.SaveHistory(new HistoryModel
-                {
-                    EventId = eventToBeUpdated.Id,
-                    WorkflowId = workflowId,
-                    Message = "Called: UpdateEventOnWorkFlow",
-                    HttpRequestType = "PUT",
-                    MethodCalledOnSender = "UpdateEventOnWorkFlow(" + workflowId + ")"
-                });
-            }
-            catch (ArgumentNullException e)
-            {
-                _historyLogic.SaveHistory(new HistoryModel
-                {
-                    HttpRequestType = "POST",
-                    Message = "Threw: " + e.GetType(),
-                    MethodCalledOnSender = "PostEventWorkflow",
-                    WorkflowId = workflowId
-                });
-
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    "Seems input was not satisfactory"));
-            }
-            catch (NotFoundException e)
-            {
-                _historyLogic.SaveHistory(new HistoryModel
-                {
-                    HttpRequestType = "POST",
-                    Message = "Threw: " + e.GetType(),
-                    MethodCalledOnSender = "PostEventWorkflow",
-                    WorkflowId = workflowId
-                });
-
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,
-                    "Either the Event or the workflow could not be found at Server"));
-            }
-            catch (Exception e)
-            {
-                _historyLogic.SaveHistory(new HistoryModel
-                {
-                    HttpRequestType = "POST",
-                    Message = "Threw: " + e.GetType(),
-                    MethodCalledOnSender = "PostEventWorkflow",
-                    WorkflowId = workflowId
-                });
-
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e.Message));
-            }
-        }
-        #endregion
-
         #region DELETE requests
         /// <summary>
         /// Will delete a specified Event from a specified workflow
@@ -405,7 +326,7 @@ namespace Server.Controllers
                 {
                     EventId = eventId,
                     WorkflowId = workflowId,
-                    Message = "Called: DeleteEventFromWorkflow",
+                    Message = "Succesfully called: DeleteEventFromWorkflow",
                     HttpRequestType = "DELETE",
                     MethodCalledOnSender = "DeleteEventFromWorkflow(" + workflowId + ", " + eventId + ")",
                 });
@@ -469,7 +390,7 @@ namespace Server.Controllers
                 await _historyLogic.SaveHistory(new HistoryModel
                 {
                     WorkflowId = workflowId,
-                    Message = "Called: DeleteWorkflow",
+                    Message = "Succesfully called: DeleteWorkflow",
                     HttpRequestType = "DELETE",
                     MethodCalledOnSender = "DeleteWorkflow(" + workflowId + ")",
                 });

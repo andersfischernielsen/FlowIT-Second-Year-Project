@@ -60,21 +60,21 @@
     <Compile Include="Exceptions\UnauthorizedException.cs" />
     <Compile Include="Exceptions\NotExecutableException.cs" />
     <Compile Include="Exceptions\NotFoundException.cs" />
-    <Compile Include="HttpClientWrapper.cs" />
-    <Compile Include="IHttpClient.cs" />
-    <Compile Include="LoginDto.cs" />
-    <Compile Include="History\HistoryDto.cs" />
-    <Compile Include="History\HistoryModel.cs" />
-    <Compile Include="RoleDto.cs" />
-    <Compile Include="HttpClientToolbox.cs" />
-    <Compile Include="EventAddressDto.cs" />
-    <Compile Include="EventDto.cs" />
-    <Compile Include="EventStateDto.cs" />
+    <Compile Include="Tools\HttpClientWrapper.cs" />
+    <Compile Include="Tools\IHttpClient.cs" />
+    <Compile Include="DTO\Server\LoginDto.cs" />
+    <Compile Include="DTO\History\HistoryDto.cs" />
+    <Compile Include="DTO\History\HistoryModel.cs" />
+    <Compile Include="DTO\Event\RoleDto.cs" />
+    <Compile Include="Tools\HttpClientToolbox.cs" />
+    <Compile Include="DTO\Shared\EventAddressDto.cs" />
+    <Compile Include="DTO\Event\EventDto.cs" />
+    <Compile Include="DTO\Event\EventStateDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RolesOnWorkflowsDto.cs" />
-    <Compile Include="UserDto.cs" />
-    <Compile Include="WorkflowDto.cs" />
-    <Compile Include="WorkflowRole.cs" />
+    <Compile Include="DTO\Server\RolesOnWorkflowsDto.cs" />
+    <Compile Include="DTO\Event\UserDto.cs" />
+    <Compile Include="DTO\Event\WorkflowDto.cs" />
+    <Compile Include="DTO\Server\WorkflowRole.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

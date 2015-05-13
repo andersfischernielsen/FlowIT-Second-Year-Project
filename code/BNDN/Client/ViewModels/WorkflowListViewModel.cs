@@ -4,31 +4,49 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Client.Connections;
 using Client.Exceptions;
-using Common;
+using Common.DTO.Event;
 
 namespace Client.ViewModels
 {
-    public class WorkflowListViewModel : ViewModelBase
+    public class WorkflowListViewModel : ViewModelBase, IWorkflowListViewModel
     {
-        private readonly Uri _serverAddress;
-
-        public WorkflowListViewModel()
-        {
-            WorkflowList = new ObservableCollection<WorkflowViewModel>();
-
-            var settings = Settings.LoadSettings();
-            _serverAddress = new Uri(settings.ServerAddress);
-
-            GetWorkflows();
-        }
-
-        #region Databindings
-
+        public Action CloseAction { get; set; }
         public ObservableCollection<WorkflowViewModel> WorkflowList { get; set; }
 
         private WorkflowViewModel _selecteWorkflowViewModel;
         private string _status;
+        private readonly Dictionary<string, ICollection<string>> _rolesForWorkflows;
+        private readonly IServerConnection _serverConnection;
 
+        public WorkflowListViewModel()
+        {
+
+        }
+
+        public WorkflowListViewModel(Dictionary<string, ICollection<string>> rolesForWorkflows)
+        {
+            if (rolesForWorkflows == null)
+            {
+                throw new ArgumentNullException("rolesForWorkflows");
+            }
+            WorkflowList = new ObservableCollection<WorkflowViewModel>();
+
+            var settings = Settings.LoadSettings();
+            _rolesForWorkflows = rolesForWorkflows;
+
+            _serverConnection = new ServerConnection(new Uri(settings.ServerAddress));
+
+            GetWorkflows();
+        }
+
+        public WorkflowListViewModel(IServerConnection serverConnection, Dictionary<string, ICollection<string>> rolesForWorkflows, ObservableCollection<WorkflowViewModel> workflowList)
+        {
+            WorkflowList = workflowList;
+            _rolesForWorkflows = rolesForWorkflows;
+            _serverConnection = serverConnection;
+        }
+
+        #region Databindings
         public WorkflowViewModel SelectedWorkflowViewModel
         {
             get { return _selecteWorkflowViewModel; }
@@ -49,6 +67,11 @@ namespace Client.ViewModels
             }
         }
 
+        public Dictionary<string, ICollection<string>> RolesForWorkflows
+        {
+            get { return _rolesForWorkflows; }
+        }
+
         #endregion
 
         #region Actions
@@ -63,27 +86,36 @@ namespace Client.ViewModels
             SelectedWorkflowViewModel = null;
             WorkflowList.Clear();
 
-            IList<WorkflowDto> workflows;
-            using (IServerConnection connection = new ServerConnection(_serverAddress))
+            IEnumerable<WorkflowDto> workflows;
+            try
             {
-                try
-                {
-                    workflows = await connection.GetWorkflows();
-                }
-                catch (HostNotFoundException)
-                {
-                    Status = "The host of the server was not found. If the problem persists, contact you Flow administrator";
-                    return;
-                }
-                catch (Exception e)
-                {
-                    Status = e.Message;
-                    return;
-                }
+                workflows = await _serverConnection.GetWorkflows();
+            }
+            catch (HostNotFoundException)
+            {
+                Status = "The host of the server was not found. If the problem persists, contact you Flow administrator";
+                return;
+            }
+            catch (Exception e)
+            {
+                Status = e.Message;
+                return;
             }
 
-            WorkflowList = new ObservableCollection<WorkflowViewModel>(workflows.Select(workflowDto => new WorkflowViewModel(this, workflowDto)));
-            SelectedWorkflowViewModel = WorkflowList.Count >= 1 ? WorkflowList[0] : null;
+            WorkflowList = new ObservableCollection<WorkflowViewModel>();
+
+            foreach (var workflowDto in workflows)
+            {
+                ICollection<string> roles;
+                if (!_rolesForWorkflows.TryGetValue(workflowDto.Id, out roles))
+                {
+                    // The user has no roles associated with this workflow.
+                    continue;
+                }
+                WorkflowList.Add(new WorkflowViewModel(this, workflowDto, roles));
+            }
+
+            SelectedWorkflowViewModel = WorkflowList.FirstOrDefault();
 
             NotifyPropertyChanged("");
         }

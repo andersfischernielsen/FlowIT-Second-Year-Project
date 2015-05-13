@@ -56,13 +56,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControllersTests\LifeCycleControllerTests.cs" />
     <Compile Include="ControllersTests\StateControllerTests.cs" />
-    <Compile Include="EventCommunicatorTests.cs" />
+    <Compile Include="CommunicatorTests\EventCommunicatorTests.cs" />
+    <Compile Include="CommunicatorTests\ServerCommunicatorTests.cs" />
     <Compile Include="LogicTests\AuthLogicTests.cs" />
     <Compile Include="LogicTests\LifecycleLogicTests.cs" />
     <Compile Include="LogicTests\LockLogicTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LogicTests\StateLogicTests.cs" />
+    <Compile Include="StorageTests\EventStorageForResetTests.cs" />
     <Compile Include="StorageTests\EventStorageTests.cs" />
     <Compile Include="StorageTests\StorageSetup.cs" />
   </ItemGroup>

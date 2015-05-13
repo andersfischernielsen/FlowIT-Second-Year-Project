@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.History;
 using Common.Exceptions;
-using Common.History;
 
 namespace Client.Connections
 {
@@ -21,7 +22,7 @@ namespace Client.Connections
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="LockedException">If an event is locked</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        Task<EventStateDto> GetState(string workflowId, string eventId);
+        Task<EventStateDto> GetState(Uri uri, string workflowId, string eventId);
 
         /// <summary>
         /// Returns the history of the event.
@@ -30,7 +31,7 @@ namespace Client.Connections
         /// <exception cref="NotFoundException">If the resource isn't found</exception>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        Task<IEnumerable<HistoryDto>> GetHistory(string workflowId, string eventId);
+        Task<IEnumerable<HistoryDto>> GetHistory(Uri uri, string workflowId, string eventId);
 
         /// <summary>
         /// Reset an event. Only to be used for testing!
@@ -39,7 +40,7 @@ namespace Client.Connections
         /// <exception cref="NotFoundException">If the resource isn't found</exception>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        Task ResetEvent(string workflowId, string eventId);
+        Task ResetEvent(Uri uri, string workflowId, string eventId);
 
         /// <summary>
         /// Execute a task
@@ -51,6 +52,6 @@ namespace Client.Connections
         /// <exception cref="NotExecutableException">If an event is not executable, when execute is pressed</exception>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        Task Execute(string workflowId, string eventId);
+        Task Execute(Uri uri, string workflowId, string eventId, IEnumerable<string> roles);
     }
 }

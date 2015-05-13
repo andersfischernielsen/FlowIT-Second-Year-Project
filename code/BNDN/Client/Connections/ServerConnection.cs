@@ -4,8 +4,12 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Client.Exceptions;
 using Common;
+using Common.DTO.Event;
+using Common.DTO.History;
+using Common.DTO.Server;
+using Common.DTO.Shared;
 using Common.Exceptions;
-using Common.History;
+using Common.Tools;
 
 namespace Client.Connections
 {
@@ -62,7 +66,7 @@ namespace Client.Connections
         /// <returns>A list of information about workflows, which can be shown on the UI.</returns>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        public async Task<IList<WorkflowDto>> GetWorkflows()
+        public async Task<IEnumerable<WorkflowDto>> GetWorkflows()
         {
             try
             {
@@ -83,7 +87,7 @@ namespace Client.Connections
         /// <exception cref="NotFoundException">If the resource isn't found</exception>
         /// <exception cref="HostNotFoundException">If the host wasn't found.</exception>
         /// <exception cref="Exception">If an unexpected error happened</exception>
-        public Task<IList<EventAddressDto>> GetEventsFromWorkflow(string workflowId)
+        public Task<IEnumerable<EventAddressDto>> GetEventsFromWorkflow(string workflowId)
         {
             try
             {

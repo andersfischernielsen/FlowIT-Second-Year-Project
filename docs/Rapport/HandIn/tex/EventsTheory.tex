@@ -1,0 +1,15 @@
+\subsubsection{Events}
+Events represent activities within a workflow. In the example, Figure \ref{SampleGasFlow}, there are five events, among others \textbf{Read Gasmeter} and \textbf{Bill Customer}. An event may have a role associated with it e.g. the event \textbf{Read Gasmeter} has a \textit{Customer}, and the event \textbf{Bill Customer} an \textit{Inspector}. The role determines who are allowed to execute the event. \\
+
+A state for each event is needed for the functionality of a DCR graph to be implemented. The state of an event is comprised of the following information, see Table XYZ: \\
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|}\hline 
+ & Options & Default value \\ \hline 
+Pending & false $\vert$ true & false \\ \hline 
+Included & false $\vert$ true & true \\ \hline
+Executed & false $\vert$ true & false \\ \hline
+
+\end{tabular} 
+
+\end{table}

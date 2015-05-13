@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.History;
+using Common.Exceptions;
+using Common.DTO.History;
 
 namespace Server.Interfaces
 {
+    /// <summary>
+    /// IServerHistoryStorage is a Storage used for saving logging history data.
+    /// </summary>
     public interface IServerHistoryStorage : IDisposable
     {
         /// <summary>
@@ -16,9 +20,12 @@ namespace Server.Interfaces
         Task SaveNonWorkflowSpecificHistory(HistoryModel toSave);
 
         /// <summary>
-        /// Get every HistoryModel in storage for a given workflow.
+        /// Returns the history at the Server for the specified workflow.
         /// </summary>
+        /// <param name="workflowId">Id of the workflow at the Server, whose history is to be obtained.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
+        /// <exception cref="NotFoundException">Thrown if the workflow could not be found.</exception>
         Task<IQueryable<HistoryModel>> GetHistoryForWorkflow(string workflowId);
     }
 }

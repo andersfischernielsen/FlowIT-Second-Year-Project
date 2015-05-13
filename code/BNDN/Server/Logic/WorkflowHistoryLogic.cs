@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.History;
+using Common.DTO.History;
 using Server.Interfaces;
 using Server.Storage;
 
@@ -13,7 +13,7 @@ namespace Server.Logic
     /// </summary>
     public class WorkflowHistoryLogic : IWorkflowHistoryLogic
     {
-        private readonly IServerStorage _storage;
+        private readonly IServerHistoryStorage _storage;
 
         /// <summary>
         /// Default constructor. 
@@ -24,11 +24,13 @@ namespace Server.Logic
         }
 
         /// <summary>
-        /// Returns the Server-history for the specified workflow. 
+        /// Dependency injection constructor for testing purposes. 
         /// </summary>
-        /// <param name="workflowId">Id of the workflow, whose history is to be obtained</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
+        public WorkflowHistoryLogic(IServerHistoryStorage storage)
+        {
+            _storage = storage;
+        }
+
         public async Task<IEnumerable<HistoryDto>> GetHistoryForWorkflow(string workflowId)
         {
             if (workflowId == null)
@@ -40,12 +42,6 @@ namespace Server.Logic
             return models.Select(model => new HistoryDto(model));
         }
 
-        /// <summary>
-        /// Saves the history given in the provided toSave.
-        /// </summary>
-        /// <param name="toSave">Contains the information about the history that should be saved</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
         public async Task SaveHistory(HistoryModel toSave)
         {
             if (toSave == null)
@@ -56,12 +52,6 @@ namespace Server.Logic
             await _storage.SaveHistory(toSave);
         }
 
-        /// <summary>
-        /// Saves a history that is non-specific to a workflow. 
-        /// </summary>
-        /// <param name="toSave">Information to be saved</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">Thrown if the argument is null</exception>
         public async Task SaveNoneWorkflowSpecificHistory(HistoryModel toSave)
         {
             if (toSave == null)

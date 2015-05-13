@@ -12,9 +12,6 @@
             <ColumnDefinition Width="250"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Grid.DataContext>
-            <viewModels:WorkflowListViewModel/>
-        </Grid.DataContext>
         <Grid x:Name="WorkFlowGrid" Margin="0" Width="249" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="45"/>
@@ -22,13 +19,18 @@
             </Grid.RowDefinitions>
             <Label Content="Workflows" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Margin="10,0"/>
             <ListBox Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding WorkflowList}" SelectedItem="{Binding SelectedWorkflowViewModel}" Margin="10,10,10,60">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="viewModels:WorkflowViewModel">
+                        <Label Content="{Binding Name}"></Label>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetEventsOnWorkflow"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="170" Style="{DynamicResource ButtonDefaultStyle}">
+            <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="1" VerticalAlignment="Bottom" Width="229" Style="{DynamicResource ButtonDefaultStyle}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="GetWorkflows"/>
@@ -42,10 +44,10 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Content="Events" Margin="10,0" VerticalAlignment="Top" FontSize="24" HorizontalAlignment="Left"/>
-            <TextBlock Grid.Row="0" Text="{Binding Status}" MaxWidth="500" TextAlignment="Center" TextWrapping="Wrap" Foreground="Red" Margin="10,0" VerticalAlignment="Top" FontSize="16" HorizontalAlignment="Right" />
+            <TextBlock Grid.Row="0" Text="{Binding Status}" MaxWidth="450" TextAlignment="Right" TextWrapping="Wrap" Foreground="Red" VerticalAlignment="Top" FontSize="16" HorizontalAlignment="Right" />
             <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ListBoxStyle}" Grid.Row="1" ItemsSource="{Binding SelectedWorkflowViewModel.EventList}" SelectedItem="{Binding SelectedWorkflowViewModel.SelectedEventViewModel}" Margin="10,10,10,60">
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate DataType="viewModels:EventViewModel">
                         <UniformGrid Rows="1" Columns="3">
                             <Label Content="{Binding Name}" HorizontalAlignment="Left"/>
                             <UniformGrid Rows="1" Columns="3">

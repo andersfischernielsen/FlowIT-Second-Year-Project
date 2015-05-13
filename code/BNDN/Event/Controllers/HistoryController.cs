@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Common.History;
+using Common.DTO.History;
 using Event.Interfaces;
 using Event.Logic;
 
@@ -54,7 +54,7 @@ namespace Event.Controllers
 
             catch (Exception e) 
             {
-                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId);
 
                 throw;
             }
