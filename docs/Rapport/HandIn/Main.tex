@@ -1,16 +1,17 @@
-\input{tex/Preamble}
+\include{tex/Preamble}
 
 \begin{document}
 
 % Frontpage
 
-\includepdf[pages=1]{Figures/ITUForside.pdf}
+\includepdf[pages=1]{Figures/ITUForsideUdfyldt}
 \thispagestyle{empty}
 \input{tex/Frontpage}
 
 % Table of contents
 \tableofcontents
 
+\newpage
 % Actual content
 \input{tex/Introduction}
 \input{tex/Requirements}
@@ -20,5 +21,8 @@
 \input{tex/SystemImplementation}
 \input{tex/Testing}
 \input{tex/Reflection}
+\input{tex/Conclusion}
+
+\input{tex/Appendix}
 
 \end{document}
