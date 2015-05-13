@@ -10,7 +10,7 @@
     </Window.DataContext>
     <UniformGrid Rows="3" Margin="10,10,10,10">
         <StackPanel Orientation="Vertical" VerticalAlignment="Top">
-            <xctk:WatermarkTextBox Name="Username" Style="{StaticResource FillTextBoxStyle}" Watermark="Role" Margin="10,10,10,0 " TextWrapping="Wrap" Text="{Binding Username}" />
+            <xctk:WatermarkTextBox Name="Username" Style="{StaticResource FillTextBoxStyle}" Watermark="Username" Margin="10,10,10,0 " TextWrapping="Wrap" Text="{Binding Username}" />
             <PasswordBox Name="Password" Style="{StaticResource PasswordBoxWatermark}" Margin="10,10,10,0" PasswordChanged="Password_PasswordChanged"/>
         </StackPanel>
         <TextBlock VerticalAlignment="Center" TextWrapping="WrapWithOverflow" Style="{StaticResource HeaderTextBlockStyle}" FontStyle="Italic" Text="{Binding Status}" Margin="10,0,10,0"/>

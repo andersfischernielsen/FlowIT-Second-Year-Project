@@ -1,9 +1,5 @@
 #System Architecture Overview
 
-## Purpose of the system
-
-The basic idea of the system is to enable users (through a Windows-client) to have an overview of and execute the events within a workflow. An "event" is one part / a step of a workflow. 
-
 ## System description
 
 To fulfill the requirements of the project, three subsystems are created: a central server ("Server"), a client ("Client) and events ("Event"). The three subsystems are described in the following section.
