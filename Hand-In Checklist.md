@@ -1,6 +1,7 @@
 # Hand-In Checklist
 
 ## Report
+- Fix screenshots of code to have nice colors and white background.
 - Make sure that screenshots in report are correct
 - Make sure that models in report are correct
 - "TeX-ify" report to a .PDF
