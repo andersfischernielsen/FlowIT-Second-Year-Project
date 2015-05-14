@@ -1,0 +1,107 @@
+section{List of Work Contribution}
+The following list shows the estimated contribution of each member in a given part of the project. The ordering of names specifies which members have had the biggest responsibility of the component.
+
+\begin{itemize}
+	\item Architecture\\
+	Split equally between all team members.
+	\item Client
+	\begin{itemize}
+		\item Views\\
+		AWIS, MLIN, AFIN
+		\item View Models\\
+		AWIS, MLIN, ADAE
+		\item Connections\\
+		AWIS, MLIN, ADAE
+	\end{itemize}
+	\item Client Tests
+	\begin{itemize}
+		\item View Models Tests\\
+		MLIN, CSJE
+		\item Connections Tests\\
+		MLIN
+	\end{itemize}
+	\item Common
+	\begin{itemize}
+		\item DTO\\
+		AFIN, rest of team
+		\item HTTPClient toolbox\\
+		MLIN, AWIS
+	\end{itemize}
+	\item Common Tests
+	\begin{itemize}
+		\item DTO\\
+		AFIN, rest of team
+		\item HTTPClient toolbox\\
+		MLIN
+	\end{itemize}
+	\item Server
+	\begin{itemize}
+		\item Storage\\
+		AWIS, AFIN, ADAE, CSJE
+		\item Logic\\
+		MOALB, AFIN, ADAE, MLIN 
+		\item Access Control\\
+		MLIN, AFIN, AWIS
+		\item Exception Handling\\
+		MOALB, AFIN
+		\item History\\
+		AFIN, AWIS
+	\end{itemize}
+	\item Server Tests
+	\begin{itemize}
+		\item Storage Tests\\
+		MOALB, AFIN
+		\item Logic Tests\\
+		AWIS, AFIN, MOALB
+		\item History Tests\\
+		AFIN
+	\end{itemize}
+	\item Event
+	\begin{itemize}
+		\item Concurrency\\
+		ADAE, CSJE, AWIS
+		\item Access Control\\
+		AFIN, MLIN
+		\item Storage\\
+		AFIN, ADAE, CSJE, MLIN, AWIS
+		\item Logic\\
+		MLIN, MOALB, AFIN 
+		\item Communicators\\
+		MLIN, MOALB
+		\item Exception Handling\\
+		MOALB
+		\item History\\
+		AFIN, AWIS
+	\end{itemize}
+	\item Event Tests
+	\begin{itemize}
+		\item Concurrency Tests\\
+		AWIS
+		\item Access Control Tests\\
+		MLIN
+		\item Storage Tests\\
+		MLIN, MOALB, AFIN
+		\item Logic Tests\\
+		MLIN, MOALB, AWIS, ADAE
+		\item Communicators Tests\\
+		AWIS, AFIN
+		\item History Tests\\
+		AFIN
+	\end{itemize}
+	\item DCR graph\\
+	ADAE, CSJE
+	\item Workflows
+	\begin{itemize}
+		\item Initial draft of the Brazilian Healthcare Workflow\\
+		CSJE, ADAE, MOALB
+		\item Revised version of the Brazilian Healthcare Workflow\\
+		CSJE, MOALB
+	\end{itemize}
+	\item SCRUM Process\\
+	CSJE, MOALB
+	\item Report\\
+	Equally divided between all team members.
+\end{itemize}
+
+The team believes that overall the contribution has been equally divided between the members.
+
