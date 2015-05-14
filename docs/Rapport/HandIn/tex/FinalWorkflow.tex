@@ -1,4 +1,4 @@
-\subsection{Final Workflow}
+\subsection{Final Workflow \label{sec:FinalWorkflow}}
 
 \begin{figure}
 \centering
@@ -25,5 +25,22 @@ As soon as one of these event are executed, one of the two branches are chosen.
 From here on, the workflow splits into two separate branches. We first describe the branch related to a patient that is put in an appointment queue: 
 \begin{enumerate}
 \item \textbf{PutPatientInAppointmentQueue}: This event includes the \textbf{PreparePatientForAppointment} event and excludes itself.
-\item PreparePatientForAppointment: This event includes PerformAppointment and excludes itself.
+\item \textbf{PreparePatientForAppointment}: This event includes \textbf{PerformAppointment} and excludes itself.
+\item \textbf{PerformAppointment}: This event includes \textbf{CreateMedicalReport} and excludes itself.  
+\item \textbf{CreateMedicalReport:} From this point forth, there are five different paths a patient could take, and hence \textbf{CreateMedicalReport} has five inclusion relations to the events explained in point 5 to 8 as well as the event \textbf{ChargeGovernment}.
+\item \textbf{RecommendAppointmentWithSpecialist}: Because a \textit{Specialist} may either  recommend an appointment with another specialist, request more exams or both, \textbf{RecommendAppointmentWithSpecialist} does not exclude \textbf{RequestMoreExams}. However, it excludes \textbf{RecommendMedicationAndHavePatientReturn}, \textbf{RecommendSurgery}, and \textbf{ChargeGovernment}, as these are not legal options from here on. \textbf{ChargeGovernment} is not an option, since this will not take place at this point. \textbf{RecommendAppointmentWithSpecialist} includes \textbf{ReferToROTA}, since a specialist may refer the patient to ROTA. 
+\item \textbf{RequestMoreExams}: Has similar relations as those described in point 5, but starting from \textbf{RequestMoreExams} instead.
+\item R\textbf{ecommendMedicationAndHavePatientReturn} and \textbf{RecommendSurgery} both exclude the events mentioned in point 5 and 6, \textbf{ChargeGovernment} as well as each other. They have include relations to both \textbf{ReferToROTA} and \textbf{CheckInPatient}. If the patient is checked in again, we do not want to \textbf{ReferToROTA} to be available for execution anymore, and this explains the exclusion relation from \textbf{CheckInPatient} to \textbf{ReferToROTA} mentioned earlier in the description of the final workflow.
+\item \textbf{ReferToROTA} includes only \textbf{CheckInPatient}, as this is what is allowed to happen from here on. Notice, that we do not model whether the referral is approved or not; but we assume that in either case, the patient will return to the hospital. We do not include the rejection or approval of the ROTA referral as this takes place outside of the hospital.
 \end{enumerate}
+
+Now, the second branch will be described. To clarify, this is the branch in which a patient was put into an examination queue:
+\begin{enumerate}
+\item \textbf{PutPatientInExaminationQueue}: This event includes the \textbf{PreparePatientForExamination} event and excludes itself.
+\item \textbf{PreparePatientForExamination}: This event includes \textbf{PerformExamination} and excludes itself.
+\item \textbf{PerformExamination}: This event includes \textbf{CreateMedicalExaminationReport}, and excludes itself.
+\item \textbf{CreateMedicalExaminationReport}: This event includes \textbf{ChargeGovernment}, and excludes itself. \textbf{ChargeGovernment} has its pending value set to true, because of the response relation from \textbf{CheckInPatient}.
+\end{enumerate}
+
+\textbf{ChargeGovernment} is the event which puts the workflow in a successful state, since the \textit{Pending} value of \textbf{ChargeGovernment} is set to true, when a patient is checked in. When executing this event the government is finally charged. The government is not charged with each visit to the hospital, but is eventually charged for the full treatment of a patient. \newline
+It is possible for both branches to end in this state.

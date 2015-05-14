@@ -1,13 +1,71 @@
 \subsection{Running the Client}
+When first compiled, the Client will automatically be set to contact the Server running in Azure. Just double click the Client.exe - found in $<$Handin folder$>$/CompiledClient/ -  with the Flow icon to start the program.
+
+\subsubsection{The Login Window}
+The first thing shown to the user is a login window, see Figure \ref{fig:LoginWindow}. When the application is run for the first time the Username and Password fields will be empty with a watermark that states what the fields are used for. \newline
+The top field is for the username. The next field is for the password. In the system, passwords are case sensitive. \newline
+To login with the entered username and password, click the “Login” button in the bottom of the window. \newline
+Between the password field and the “Login” button there is an empty area. This area is used to give the user feedback on what is happening behind the scenes. \newline
+The workflows described in Section \ref{sec:FinalWorkflow} \nameref{sec:FinalWorkflow} and \ref{sec:WorkflowGivenByLecturer} \nameref{sec:WorkflowGivenByLecturer} have all been added to the system to get the user started. The usernames are the roles listed in Section \ref{sec:WorkflowElaboration} \nameref{sec:WorkflowElaboration}, and the password is set to “Password” without quotation marks. Remember that each workflow has the user \textit{Admin}, which can execute all events.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\linewidth]{Figures/strawberry}
+\caption{\label{fig:LoginWindow} Screenshot of Client's LoginWindow}
+\end{figure}
+
 
 \subsubsection{The Main Window}
+When the user is logged in a new window appears. It has two main components: The list of workflows, and the list of events for the selected workflows. These components can easily be found in Figure \ref{fig:MainWindowClient}. The list of workflows will show all of the workflows in which the user has been assigned a role. This means that a \textit{GasStationOwner} will not see workflows related to hospitals. The first workflow in the list to the left is automatically selected for the user. \newline
+When a workflow is selected, only the events the user has access to is shown. It might take a short while for the data to be retrieved. Each event has a name, three boxes which informs the user of the state, and an “Execute” button which is enabled if the event is executable. \newline
+The “Refresh” button in the bottom left corner will reload all workflows from the Server, and then load the events of the first workflow in the workflow list.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\caption{\label{fig:MainWindowClient} Screenshot of Client's Main window}
+\end{figure}
 
 \paragraph{State of Events}
+Each event shown in the client has three boxes showing its state, see Figure \ref{fig:StateFieldsMainClient}
+\begin{itemize}
+\item The leftmost box states whether the event is pending or not. There will be a red exclamation mark when the event is pending.
+\item The center box tells whether the event is included or not. If the box is blue the event included. Otherwise it is excluded.
+\item The right hand box tells whether an event has been executed at least once, or not. When the event is executed a green checkmark will appear in the box.
+\end{itemize}
+The “Execute” button will only be enabled when the event is executable. When enabled and clicked, all “Execute” buttons will be disabled and then try to execute the event. If execution succeeds the events will refresh their state to show the new state of the workflow, otherwise if something goes wrong the status bar will be updated.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\caption{\label{fig:StateFieldsMainClient}Screenshot from Client's Mainwindow, demonstrating the possible look for the three fields for the state of an event}
+\end{figure}
 
 \paragraph{The Status Bar}
+In the main window a status bar will appear in the top right corner if an error occurs, see Figure \ref{fig:StatusBar}. An error will be presented in a red color in the status bar. If the error occurred during execution of an event, the “Execute” buttons will not be enabled again until the “Refresh” button is clicked.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\caption{\label{fig:StatusBar}Screenshot from Client's Mainwindow, demonstrating the status bar displaying an error}
+\end{figure}
 
 \paragraph{Reset Workflow}
+The team chose to implement a “Reset Workflow” button, which reset all events within the current workflow to their initial values. When the reset is done, the client will refresh all workflows and events to reflect the new state of the workflow.
+
 
 \subsubsection{History}
+In the bottom right corner of the main window a “History” button is located. When clicked, it will open a new window, see Figure \ref{fig:HistoryClient}. \newline
+This window will show the workflow specific history of the Server, and the history for each of the events in the workflow with the newest history entries first. \newline
+The History window has a status bar in the top right corner. If anything should go wrong when interacting with the Server or EventAPIs, a status text will appear.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\caption{\label{fig:HistoryClient}Screenshot from Client's History, demonstrating the status bar displaying an error}
+\end{figure}
+
 
 \subsubsection{The Settings File}
+When a user is successfully logged in through the Client, a small settings file will be saved on the disk. This file will include the username of the last successful login, and the address of the Server on which the login was completed. If the settings file does not exist, the Client will point to the hosted Azure Server. This can be changed through the settings file. \\
+The settings file is saved as settings.json in the same directory as the Client.exe file. It is a JSON object with up to two properties, ServerAddress and Username. If the ServerAddress is set to “http://localhost:13768/” the Client will access the local Server.
