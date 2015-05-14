@@ -28,7 +28,9 @@ As an example, the event \textbf{Read Gasmeter} belonging to the workflow Pay Ga
 \url{http://www.myRestService.com/events/PayGas/ReadGasmeter}
 \end{center}
 
-\subsubsection{System Deployment}
+
+\subsubsection{System Deployment \label{sec:SystemDeployment}}
 The nature of a distributed system means that it is running across several computers. Hosting the system on a cloud platform like Amazon EC2 or Microsoft Azure was an obvious choice. With the team’s chosen system architecture, the system requires the Server to be present. Hosting the Server in a fixed, known location makes communication between the Client, the EventAPI, and the Server easier. 
 
 Choosing Microsoft Azure for hosting the system instead of other hosting platforms was simply a result of the convenience of using Azure. The platform has Visual Studio integration and Microsoft supplies students at the IT University of Copenhagen with a free hosting service that offers enough scalability for this project. The entire backend of the system is therefore hosted on Azure across several virtual machines. One virtual machine hosts the Server that Clients access when they first enter the system. Several EventAPIs are hosted across other virtual machines. 
+
