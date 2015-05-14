@@ -1,5 +1,25 @@
 \subsection{RESTful APIs}
+This section covers to what extent the team believes the Server and the EventAPI are RESTful. API is here used to refer to the Server and the EventAPI. 
 
 \subsubsection{Restfulness of the System}
+The APIs exposes their resources through a RESTful interface. Creating objects in the system is done through HTTP POST requests. Updating objects and information is done using PUT requests. Retrieving information is done through GET requests, where the request has no information apart from URL request parameters.
+ 
+No knowledge of the implementation of the APIs is accessible from outside the system. Only incoming and outgoing information is accessible unless stated below. 
+
+Users of the APIs do not need to know about the internal state and representation of data in the APIs. Users of the APIs send and receive information in Data Transfer Objects - DTOs - as JSON.\\
+
+The APIs act as resource providers that provide information when requested to do so, without needing to know anything about the users of the APIs and vice versa. 
+
+RESTful layering is also present in the implementation in the sense that a user of the APIs at no given time knows whether it is communicating directly with an API or whether the request is handed to an intermediary.
 
 \subsubsection{UnRESTful Parts of the System}
+Some behaviour at the APIs cannot be described as RESTful. The \texttt{Execute} method on the EventAPI's \texttt{StateController} is one example. The intent of this method is to execute an event. 
+
+\texttt{Execute} is called with a PUT request. A PUT request should replace the targeted resource with the resource provided in the request. However, \texttt{Execute} does not. The resource that is given in the PUT request is instead used as input for executing the method. 
+
+The central problem is that the execution of an event hardly corresponds to a resource, instead it is an operation that the caller wants the EventAPI to carry out. 
+
+The second problem is that this deviation propagates to the caller of the EventAPI as well. 
+Now the caller also needs to know that the method should be invoked through a non-compliant HTTP PUT request. Now there is coupling between the implementation on EventAPI and how clients should invoke \texttt{Execute}. Architecturally this resembles SOAP\footnote{\url{http://en.wikipedia.org/wiki/SOAP}} more than REST, since it is function based.\\
+
+A possible fix for this would be to PUT some sort of Execute resource to a given event, which would then be stored on the event after execution. It could be argued that a resource is then simply stored at the event even though the state of the event changes.

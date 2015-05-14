@@ -1,7 +1,34 @@
 \subsection{Distribution}
+One of the requirements to the system was that it had to be distributed.
+ 
+The intention was that events should be distributed across several EventAPIs. The fact that the Server is centralized could potentially create a performance bottleneck and the Server has therefore been developed to have as little responsibility as possible to minimize this issue. Reducing this bottleneck comes down to two things: Handling as few requests as possible and not doing heavy processing. The sooner a Client can be routed away from the Server to EventAPIs, the better. The Server supplies the Client with a list of events. From then on, the Client now communicates directly with EventAPIs bypassing the Server as a middle man.\\
+
+Since events can be deployed on an infinite number of EventAPI instances, the system is distributed. Processing requests across several EventAPI instances - instead of just a single EventAPI - helps balancing the workload to avoid performance bottlenecks. 
+Making the system distributed presented some problems which are explained in Section \ref{ConcurrencyControl} \nameref{ConcurrencyControl}
 
 \subsubsection{Location Transparency}
+The EventAPI has been designed in such a way that it does not distinguish between events located at the same EventAPI and events located at other EventAPI instances. The same logic is used for either case. \\
+
+This implies that an EventAPI will issue a HTTP request to itself, even though the target event is located at the same EventAPI instance. 
+
+Therefore, the team believes events have location transparency.
 
 \subsubsection{\label{sec:GlobalID}Global Identification of Events}
+An event is uniquely determined by the combination of its own ID (eventId) and the ID of the workflow the event belongs to (workflowId). Two events on the same workflow cannot share the same eventId. Therefore two events cannot share the same global ID. 
+This property allows for an event to be uniquely determined in the system and it allows exposing a directory-like structure in the URLs as prescribed by REST - see Section \ref{sec:REST} \nameref{sec:REST}. 
+EventAPIs locate their resources as such: \\
+
+\begin{center}
+$<$baseurl$>$/events/$<$workflowId$>$/$<$eventId$>$
+\end{center}
+
+As an example, the event \textbf{Read Gasmeter} belonging to the workflow Pay Gas would be located on the following URL:  
+
+\begin{center}
+\url{http://www.myRestService.com/events/PayGas/ReadGasmeter}
+\end{center}
 
 \subsubsection{System Deployment}
+The nature of a distributed system means that it is running across several computers. Hosting the system on a cloud platform like Amazon EC2 or Microsoft Azure was an obvious choice. With the team’s chosen system architecture, the system requires the Server to be present. Hosting the Server in a fixed, known location makes communication between the Client, the EventAPI, and the Server easier. 
+
+Choosing Microsoft Azure for hosting the system instead of other hosting platforms was simply a result of the convenience of using Azure. The platform has Visual Studio integration and Microsoft supplies students at the IT University of Copenhagen with a free hosting service that offers enough scalability for this project. The entire backend of the system is therefore hosted on Azure across several virtual machines. One virtual machine hosts the Server that Clients access when they first enter the system. Several EventAPIs are hosted across other virtual machines. 
