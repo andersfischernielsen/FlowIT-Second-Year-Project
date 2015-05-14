@@ -3,35 +3,35 @@ Relations describe constraints among events. There are 4 basic relations, explai
 
 \textbf{Condition - yellow arrow:} This relation states that to execute the event \textbf{B}, event \textbf{A} must be executed or excluded first. See Figure \ref{fig:ConditionRelation}.
 
-\begin{figure}[H!]
+\begin{figure}[h!]
 \centering
-\includegraphics[width=0.5\linewidth]{Figures/strawberry}
+\includegraphics[width=0.5\linewidth]{Figures/conditions}
 \caption{\label{fig:ConditionRelation} Illustration of Condition relation between event \textbf{A} and event \textbf{B}}
 \end{figure} 
 
 \textbf{Exclude - red arrow:} An exclusion relation states that once event \textbf{A} has been executed, the \textit{Included} boolean of event \textbf{B} must be set to false, such that event \textbf{B} is excluded. Note that an event may exclude itself, meaning once the event has executed, the \textit{Included} value of the event must be set to false such that it is excluded.  See figure \ref{fig:ExclusionRelation}.
 
-\begin{figure}[H!]
+\begin{figure}[h!]
 \centering
-\includegraphics[width=0.5\linewidth]{Figures/strawberry}
+\includegraphics[width=0.8\linewidth]{Figures/exclusion}
 \caption{\label{fig:ExclusionRelation} Illustration of exclusion relation between event \textbf{A} and event \textbf{B}}
 \end{figure} 
 
 
 \textbf{Include - green arrow:} This relation states that event \textbf{A} includes event \textbf{B}. This means that  after the execution of event \textbf{A}, the \textit{Included} value of event \textbf{B} must be set to true, such that event \textbf{B} is included. See Figure \ref{fig:InclusionRelation}
 
-\begin{figure}[H!]
+\begin{figure}[h!]
 \centering
-\includegraphics[width=0.5\linewidth]{Figures/strawberry}
+\includegraphics[width=0.5\linewidth]{Figures/inclusion}
 \caption{\label{fig:InclusionRelation} Illustration of inclusion relation between event \textbf{A} and event \textbf{B}}
 \end{figure} 
 
 
 \textbf{Response - blue arrow:} The response relation states that once event \textbf{A} is executed, event \textbf{B} is expected to be executed eventually. Once event \textbf{A} has been executed, the \textit{Pending} value of event \textbf{B} must be set to true. See Figure \ref{fig:ResponseRelation}
 
-\begin{figure}[H!]
+\begin{figure}[h!]
 \centering
-\includegraphics[width=0.5\linewidth]{Figures/strawberry}
+\includegraphics[width=0.5\linewidth]{Figures/response}
 \caption{\label{fig:ResponseRelation} Illustration of response relation between event \textbf{A} and event \textbf{B}}
 \end{figure} 
 
