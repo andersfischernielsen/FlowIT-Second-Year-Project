@@ -1,5 +1,48 @@
 \subsection{Design of Server and EventAPI}
+This section will give an insight into the design characteristics of the Server and the EventAPI.
+
+The team has chosen to use ASP.NET WebAPI\footnote{\url{http://www.asp.net/web-api}} to implement the web services Server and EventAPI. ASP.NET WebAPI uses Controllers, which are objects that handles incoming HTTP requests. In the following, Controller should hence not be confused with a Controller as found in the Model-View-Controller\footnote{\url{http://en.wikipedia.org/wiki/Model–view–controller}} design pattern. 
 
 \subsubsection{Multi-layered Design}
+We have based our architectural design of Server and EventAPI on a multi-layered approach. With a multi-layered approach the team achieved separation between classes - low coupling - and independence among classes - high cohesion. Each layer has a distinct responsibility, and provides its service to the layer above it. How the Server and EventAPI are implementing layered architecture, can be seen in Figures \ref{fig:ServerLayer} and \ref{fig:EventAPILayer}. It can be seen that both the Server and EventAPI has the layers Controller, Logic, and Storage. The Controller layer is responsible for handling HTTP requests. The Logic layer implements the business logic, concurrency, and access control. The Storage layer facilitates storage and retrieval of data needed by the Logic layer. Additionally the EventAPI has a Communication layer which provides communication to the Server or other EventAPIs.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:ServerLayer}  Representation of the layers in the Server}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:EventAPILayer}  Representation of the layers in the EventAPI}
+\end{figure}
 
 \subsubsection{Execution of an Event}
+This section intends on giving the reader a clearer understanding of what takes place and it what order, when an event is requested to execute.\\
+
+The algorithm for execution of an event \textbf{A} is:
+
+\begin{enumerate}
+\item \textbf{A} receives HTTP request for execution.
+\item \textbf{A} checks which event needs to be executed.
+\item \textbf{A} checks whether the sender of the HTTP request has the necessary role to execute the event. 
+\item \textbf{A} checks whether it is currently locked. If it is, the request is put into a lock queue and wait until \textbf{A} is unlocked.
+\item Check whether \textbf{A} is executable. This includes
+	\begin{enumerate}
+	\item \textbf{A} checks if its Include value is true.
+	\item \textbf{A} checks for each of its conditions that they are either executed or excluded.
+	\end{enumerate}
+\item \textbf{A} attempts to lock all reponse, inclusion, and exclusion events ordered alphabetically by Id. The lock should use the eventId of the \textbf{A} as the lockowner; this includes locking itself the same way. Read more in the Section \ref{ConcurrencyControl} \nameref{ConcurrencyControl}.
+\item \textbf{A} requests all response events to update their pending to true.
+\item \textbf{A} requests all inclusion events to update their included to true.
+\item \textbf{A} requests all exclusion events to update their included to false.
+\item \textbf{A} sets its own Executed to true.
+\item \textbf{A} sets its own Pending to false.
+\item \textbf{A} attempts to unlock all of the events it previously locked.
+\item \textbf{A} responds to the caller that everything went well.
+\end{enumerate}
+
+If a check fails, or failure occurs, event A will unlock all locked events and respond to the caller with an error message.
+
+The implementation of this algorithm is initiated by \texttt{StateController}'s \texttt{Execute} method and delegated to \texttt{StateLogic}'s \texttt{Execute} method. 

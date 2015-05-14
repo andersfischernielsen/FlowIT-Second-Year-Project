@@ -1,3 +1,16 @@
 \subsection{Design of Client}
+This section presents the design of the Client. When the team designed the system, the intent was to make the Client "as stupid as possible".
+
+The intention was that the Client should provide a visual representation of raw data with a thin shell of error handling. To some extent this design was achieved.
+
+The only data logic the Client has implemented is the filtering of workflows and events.
+The rest of the Client is just lists of data, which is presented in a design which the team believes presents a good overview. 
 
 \subsubsection{MVVM-principles in Client}
+The Client was implemented with the Model-View-ViewModel (MVVM) design principle in mind. Using Windows Presentation Foundation (WPF) this is made possible by “binding” views to the properties of view models.
+
+The MVVM principle makes it possible to separate the views from both the model and the business logic. Additionally, it converts data into a form suitable for presentation in the view, by adding a layer - the view model - in between the view and the model. The view model also maps user actions to logic functionality.
+
+In the system, all view models inherits from a base class, which enables invoking a method whenever a property changes. WPF uses this to update the views in the GUI, whenever data changes.
+
+Using MVVM also enables easier testing, since all user interface actions are methods of the view models.
