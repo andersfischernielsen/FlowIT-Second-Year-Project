@@ -1,1 +1,9 @@
 \subsection{Interface-based Programming}
+This section presents how the team decided to let the system architecture be structured around interface-based programming. \\ 
+
+At the drafting of the initial system architecture, strict boundaries of the responsibility of modules were a clear goal. Using interfaces to specify functionality of a component and only exposing the interface to other components of the system helps in achieving the desired separation. \newline
+Necessary methods were drafted for every interface before focusing on implementation details. When implementation of the system began, using interfaces enabled quicker prototyping, e.g. when implementing storage and retrieval retrieval of data in the system. \newline 
+The team had specified a storage interface for storing objects, which could quickly be implemented using in-memory lists. This meant that work could move on to other components, without spending too much time perfecting the storage component. \newline
+Swapping modules was also made easier using interface-based programming. For instance after implementing the necessary functionality of other components, the team was able to switch out the concrete implementation of the storage component with a persistent storage module. This was possible without having to rewrite or modify other components of the system.\newline
+Using interfaces for adding functionality to existing implementations was also of great use in the system architecture. After having implemented most functionality, new requirements were added to the project description. This meant that some extra functionality - namely logging of requests and errors - had to be added. \newline
+Specifying this functionality in an interface and then making sure that existing modules implemented this interface enabled an easy implementation without major issues. 
