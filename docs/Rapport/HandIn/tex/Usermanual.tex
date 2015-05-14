@@ -1,4 +1,14 @@
-\section{Usermanual}
+\section{Usermanual \label{sec:Usermanual}}
+The VS solution contains nine different VS projects:
+\begin{itemize}
+\item A Client project, containing a Windows client which is used for interacting with the workflows and events.
+\item A Server project, containing a Server which stores information about workflows. 
+\item An Event project, containing an EventAPI which stores, handles, and simulates a number of events.
+\item Furthermore the VS solution has a DCR graph parser which is only meant to be used for debugging and administration. The graph parser is therefore not tested or documented.
+\item Besides these projects, a Common project is used for shared classes.
+\item Four test projects that test the Client, Server, EventAPI and Common subsystems respectively.
+\end{itemize}
+The team have chosen to use Microsoft Azure as the web hosting solution for the Server and EventAPI projects. Read more about this in Section \ref{sec:SystemDeployment} \nameref{sec:SystemDeployment}. \newline
 
 \input{tex/CompilingtheProject}
 \input{tex/RunningtheClient}
