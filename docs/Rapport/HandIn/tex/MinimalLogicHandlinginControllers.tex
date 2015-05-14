@@ -1,7 +1,68 @@
 \subsection{Minimal Logic Handling in Controllers}
+The following section describes the implemented structure of the controllers in the Server and the EventAPI. Controllers across the EventAPI and the Server share architectural similarities since both are implemented as REST web services. \\
+
+During the implementation of the Server and the EventAPI it was a design goal for the Controllers to do as little work as possible besides receiving the incoming HTTP requests and checking for invalid input. \\ 
+
+It was therefore the intention of the design that controllers should only have the following four responsibilities:
+\begin{itemize}
+\item Checking that input can be converted into an instance of the given argument type
+\item Delegate the call to a logic layer
+\item Catch and form relevant exceptions which is mapped to HTTP responses
+\item Request a history entry to be recorded in all three cases
+\end{itemize}
+
+As far as possible the controllers should not handle any logic, but instead simply pass on the incoming information to another layer that will then process and return the necessary information. This ensures encapsulation of responsibility and enables the use of several smaller classes for handling domain-specific logic. The team aimed for several controllers, since one big controller with a lot of different functionality is hard to test and reuse.\\
+
+An implementation of the aforementioned design intention is presented below, see Figure \ref{fig:LockController}.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:LockController}A code snippet from \texttt{LockController} in EventAPI. \texttt{Lock} checks for input validity, and if it is valid, it delegates the work to the \texttt{LockLogic} layer. The try-catch design will be discussed in the following section. }
+\end{figure}
+
 
 \subsubsection{Exception and Response Handling}
+First of all, there are a number of exceptions that may arise through the execution of an HTTP request. The team's exception handling approach comes down to distinguishing between two types of exceptions. Those that can be handled locally and those where the exception are propagated all the way up to the controller level. In a given scenario the responsibilities of the involved components determine the scenario type. 
+
+In the following subsections the handling of either of these two types of exceptions will be elaborated.
 
 \paragraph{Exception is Handled Immediately}
+If an exception can be dealt with locally and the upper layers do not need to know about what caused the exception, an action is taken accordingly. An example of such an exception scenario is found in the logic layer. Assuming an event during execution has locked four out of six related events, but when attempting to lock the fifth an exception is thrown. The logic must unlock the four locked events before returning to the caller. In this scenario the logic layer can - and should - deal with the exception. The requested operation cannot be completed and therefore a “clean up” by unlocking the four events.\\
+
+The implementation of this is presented below, see Figure \ref{fig:LockList}.
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:LockList}Code-snippet from \texttt{LockingLogic} \texttt{LockList} method. Example of an exception that are thrown in modules below the LockingLogic layer, but are handled locally. Local exception handling is performed because the layer can actually do something about the exception. }
+\end{figure}
 
 \paragraph{Exception is Propagated Upwards}
+If it is not possible for a layer to take proper action when an exception is thrown, it is propagated upwards to a layer which has interest in and can handle the exception.
+When an exception occurs and the operation has to abort, the user of the Server or EventAPI must be notified of the error. 
+
+In these scenarios there really is no obvious action to take in the lower layers. In some cases it is even possible for a layer to wrap the existing exception in another exception type which provides more information to the calling layer. If an exception is propagated to the controller layer, an appropriate HTTP response, based on the exception, is sent to the caller.\\
+
+For instance, if a request is made to create an event with an ID identical to the ID of an already existing event, no countermeasure besides returning a bad request response to the caller exists. The lower layer should not determine what to do here, and therefore it propagates the exception upwards to the upper layer. \texttt{HttpResponseExceptions} thrown by the controller layer results in an HTTP error code being returned to the caller to give an idea of what went wrong.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:InitializeNewEvent}Code-snippet from the method \texttt{InitializeNewEvent} in \texttt{EventStorage}}
+\end{figure}
+
+In the code-snippet seen in Figure \ref{fig:InitializeNewEvent}, it is realized that the event that is to be created have already been created. An \texttt{EventExistsException} is therefore thrown. This exception is then allowed to propagate up to \texttt{LifecycleController}, seen in Figure \ref{fig:CreateEvent}, where it is caught. The catching of the exception ultimately leads to \texttt{LifecycleController} issuing a bad request response. 
+
+This also explains the need for the try-catch blocks pointed out in the previous section.  Note that catching different exceptions lead to slightly different HTTP response exceptions being issued to the caller each with a more descriptive error message than a default error message.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:CreateEvent}Code-snippet from the method \texttt{CreateEvent} in \texttt{LifecycleController}}
+\end{figure}
+
+It is important to note that with this approach the decision on what type of response to issue back to caller is made at the controller layer. \\
+
+One could imagine an alternative approach where the throwing layer - in this case \texttt{EventStorage} - would decide on what response to return. This would break the encapsulation of the class since a lower layer would interfere with the responsibilities of a higher layer. 
+
+By throwing an exception stating what the issue was at the lower level and then let top layers handle the exception, we encapsulate the responsibilities of the layers.

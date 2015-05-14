@@ -1,4 +1,9 @@
-\subsection{Concurrency Control}
+\subsection{\label{ConcurrencyControl}Concurrency Control} 
+This section will describe the motivation for having concurrency control, which solutions were considered, and the solution that was ultimately implemented.\\
+
+Two major solutions to concurrency control are in use in software today: pessimistic concurrency control\footnote{Distributed Systems - Concepts and Design p. 692} (PCC) and optimistic concurrency control\footnote{Distributed Systems - Concepts and Design p. 707} (OCC).\\
+
+PCC uses the concept of locking which prevents multiple transactions from accessing shared data simultaneously. OCC on the other hand uses a working copy of shared data to carry out a transaction and the changes are validated before possibly committing. If a transaction discovers a conflict between itself and a concurrent transaction, the implementation will decide which transaction aborts.
 
 \input{tex/ConcurrencyMotivation}
 \input{tex/ImplementedConcurrencySolution}

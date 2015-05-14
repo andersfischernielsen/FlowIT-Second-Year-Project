@@ -1,7 +1,35 @@
-\subsection{Role-Based Access Control}
+\subsection{\label{sec:RBAC}Role-Based Access Control}
+This section describes how RBAC was implemented in the delivered system. RBAC is implemented across the system. Server, Client, and EventAPI all handle roles and in conjunction make RBAC possible.
 
 \subsubsection{Motivation}
+Without RBAC any user would be allowed to execute any event within a workflow. This would allow for troublesome and unintended effects. Examples of this could be drug addicts prescribing themselves morphine or taxpayers approving their own annual statement. 
+
+RBAC will prevent users who cannot prove that they have one of the roles required from executing the event. For instance, in the workflow "Pay Annual Gas Bill", only users who can prove themselves to be a \textit{Customer} would be allowed to execute the \textbf{Read Gas Meter} event.
+
+In short, because events within a workflow are assigned only to some roles, the system needs a way of ensuring that only people assigned with these roles are allowed to execute the given events. This was the motivation for implementing role-based access control. 
 
 \subsubsection{Implemented Solution}
+In the finished system a user can be assigned multiple roles and an event supports execution by multiple roles. This was implemented to make it easy to parse exported graphs from \url{DCRGraphs.net} into system events. \\
+
+In the relational database of the Server, user passwords are hashed with the SHA-512 algorithm to ensure that no sensitive information is stored in clear text. 
+
+Furthermore, to secure against dictionary attacks \footnote{\url{http://en.wikipedia.org/wiki/Dictionary_attack}} the passwords are salted by adding a few randomly generated characters in front of all the passwords before and after they are hashed.\\
+
+The way the system implements role-based access control is such that a user issues a login call to the Server with a username and password. The Server will then retrieve the user by username, hash the provided password, and try to match the provided hashed password against a salted hash retrieved in the database of the Server. 
+
+If a match is found the server will send a list of the roles assigned to the user to the Client. Roles are defined in the workflow a given event belongs to, which means that multiple workflows can share role IDs without giving unwanted access to the wrong users.\\
+
+The Client receives a dictionary of roles, where the key is the ID of the workflow and the value is a list of roles for the given workflow.
+
+When the Client retrieves the addresses of events from the Server, the Client is able to discard the events on which the user has no execution rights, due to the fact that the Server will map an event to the roles the event supports.\\
+
+During implementation it was also determined that users should not be able to be given roles that are not used by events in a given workflow. 
+
+This limits the possibility of users getting access to events not assigned to them because an administrator of the given workflow did not check the current database for unused roles. Roles are not removed from the server when it is no longer in use. In this scenario it is possible for a user to be assigned an unused role.
 
 \subsubsection{Discussion of the Implemented Solution}
+The implemented solution is not ideally secure. All communications are sent via the HTTP protocol which transfers data in clear text. HTTPS could have been enforced but was not done due to HTTPS warnings caused by using self signed, and therefore untrusted, certificates. \\
+
+Roles are also sent as JSON, which means that everyone with some insight into the implementation of the system could forge a list of roles and try to execute an event using that list, or simply just copy the roles from an intercepted request. One way to overcome the latter problem is to encrypt the list of roles, and send the encrypted access rights instead. This solution requires a shared secret which is only known to the Server and the EventAPI. The use of asymmetric encryption could also be used such that the access rights would include a value which would uniquely identify the Server. This value would then be encrypted so that only EventAPIs could read it and verify that the access rights were from the Server. The latter solution can pose problems because the server should deliver a unique value for every EventAPI, as they should not share encryption keys. The lifetimes of these access rights and unique values should also be limited because the longer a secret is used the greater the risk of its misuse will be.\\
+
+"Distributed Systems - Concepts and Design"\footnote{Distrubuted Systems - Concepts and Design p. 475} mentions a way to login where the password is never transmitted over the network. This method makes the client send a request containing a username to login at a server. The server then responds with the access rights which are encrypted with a key that can be derived from the password.

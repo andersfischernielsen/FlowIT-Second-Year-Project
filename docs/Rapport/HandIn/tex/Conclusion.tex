@@ -1,1 +1,12 @@
 \section{Conclusion}
+The finished system meets the stated requirements. The system is dynamic and can be used for almost any DCR graph exported from \url{DCRGraphs.net} unless the graph contains nested events which was not in the scope of the project.  \\ 
+
+The system supports creation, reconfiguration, and deletion of workflows, however reconfiguration must be done by deleting and creating events. The system is based on the principles of REST, and provides a UI for using these services. The system provides a log of operations that have been executed or aborted on these REST services and what changes have occurred in workflows and events. \\
+
+The system fulfills the stated requirement for peer-to-peer distribution among events. Persistence of data is achieved by saving data in a distributed manner on database servers. \\ 
+
+The role-based access control allows the system to verify users, allow different users different access rights, and different users the same rights, which are the features required by the requirement elicitation. The concurrency control is pessimistic and allows for multiple events to concurrently execute. The system is built to not creating deadlocks and therefore execution should never abort, if crashes or internal errors do not occur. \\ 
+
+The system has been tested using by both automated unit-tests as well as varying amounts of manual integration, system, and acceptance testing.\\
+
+Overall the team is satisfied with the project.
