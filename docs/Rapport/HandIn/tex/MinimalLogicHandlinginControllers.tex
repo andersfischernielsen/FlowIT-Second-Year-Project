@@ -17,8 +17,8 @@ An implementation of the aforementioned design intention is presented below, see
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.3\linewidth]{figures/strawberry}
-\caption{\label{fig:LockController}A code snippet from \texttt{LockController} in EventAPI. \texttt{Lock} checks for input validity, and if it is valid, it delegates the work to the \texttt{LockLogic} layer. The try-catch design will be discussed in the following section. }
+\includegraphics[width=\linewidth]{figures/LockController}
+\caption{\label{fig:LockController}A code snippet from \texttt{LockController} in EventAPI. \texttt{Lock} checks for input validity, and if it is valid, it delegates the work to the \texttt{LockingLogic} layer. The try-catch design will be discussed in the following section. }
 \end{figure}
 
 
@@ -33,7 +33,7 @@ If an exception can be dealt with locally and the upper layers do not need to kn
 The implementation of this is presented below, see Figure \ref{fig:LockList}.
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\includegraphics[width=\linewidth]{figures/LockingLogic}
 \caption{\label{fig:LockList}Code-snippet from \texttt{LockingLogic} \texttt{LockList} method. Example of an exception that are thrown in modules below the LockingLogic layer, but are handled locally. Local exception handling is performed because the layer can actually do something about the exception. }
 \end{figure}
 
@@ -47,7 +47,7 @@ For instance, if a request is made to create an event with an ID identical to th
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\includegraphics[width=\linewidth]{figures/EventStorage2}
 \caption{\label{fig:InitializeNewEvent}Code-snippet from the method \texttt{InitializeNewEvent} in \texttt{EventStorage}}
 \end{figure}
 
@@ -57,7 +57,7 @@ This also explains the need for the try-catch blocks pointed out in the previous
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\includegraphics[width=\linewidth]{figures/LifecycleController}
 \caption{\label{fig:CreateEvent}Code-snippet from the method \texttt{CreateEvent} in \texttt{LifecycleController}}
 \end{figure}
 
