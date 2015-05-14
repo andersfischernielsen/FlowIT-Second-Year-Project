@@ -1,1 +1,21 @@
-\subsection{Thoughts on the Delivered Project}
+\subsection{Reflections on the System}
+The team is mostly satisfied and proud of the system, even though the team is aware of the fact that some issues remain. By using well known and tested frameworks, best practices in object oriented programming, and following the architectural style of REST, the team feels that the system is robust with an architecture that is easy to extend.
+
+\subsubsection{What the Team Dislikes}
+The team have not prioritised a comprehensive solution to RBAC as it was not deemed as the feature with the most relevance to the system. However the team is not completely satisfied with the solution and believe it could be much more intelligent and secure. \\
+
+The GUI of the Client is designed for the sake of basic usability. There was only a requirement for a UI which did not necessarily need to be graphical. The team does not think the Client is the most user friendly GUI nor the most well designed. Had the team focused more on the Client, it could have been possible for instance to implement a feature which would allow the user to choose between showing and hiding events that are not executable at a given time. \\
+
+Even though testing was a priority for the team, it was not carried out thoroughly enough. Unfortunately a bug was found after code freeze which could produce faulty states, as described in the section \nameref{ConcurrencyControl} , and the team feels that this should be fixed in a future release. \\
+
+\subsubsection{What the Team Likes}
+Initial discussions about the system architecture were great for specifying an architecture that everyone in the team understood and agreed on. Many of the key decisions were taken before starting implementing the system, and these discussions really helped reach a satisfying implementation. \\
+
+The team feels that the interface-based programming was used in a satisfying manner, with only a small amount of coupling between classes. Having a layered architecture throughout the system was a goal from the beginning, and implementing these layers as initially discussed succeeded. By doing so, the principle of having small controllers with well defined purposes made it possible to have low coupling between classes. Designating responsibilities to layers and following these when handling exceptions was also done in a pleasing manner according to the team. \\
+
+Transferring data in an independent manner was beneficial in that it allowed the team to change and add DTOs during implementation. Adding additional functionality during the project was made a lot easier due to this. 
+The team felt that the RESTfulness of the system was developed in accordance with their expectations. Omitting some specified and required functionality could have made the system even more RESTful, but overall the team is satisfied with implementation. 
+
+The use of dependency injection was widespread, which helped the team in testing components.\\
+
+Even though the team focused a lot on testing, it was not done thoroughly enough as previously mentioned. Most methods in the major classes of the system have been tested with acceptable test coverage. Mocking was used to a great extent in testing, which made testing faster and easier for the team.

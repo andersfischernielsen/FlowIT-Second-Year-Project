@@ -1,1 +1,23 @@
 \subsubsection{Discussion of Implemented Solution}
+OCC is presented as a solution which allows for more concurrency than PCC because of the absence of locks. Supporters of OCC argue that this solution is superior when few conflicts arise. 
+
+The team discussed the use of OCC but came to the conclusion that it would require a substantially higher amount of work to implement than PCC. This is due to the fact that OCC needs to operate on top of a transaction abstraction in order to be able to abort and restart transactions. Furthermore OCC has to create a working copy as well as using protocols for validation and committing. Additionally a logic deciding what transaction to abort in case of conflicts needs to be implemented. Finally, using OCC, a transaction can do a considerable amount of work before it would be aborted, thus wasting resources.
+
+The team estimated that PCC would require a smaller amount of work to implement while still providing serial equivalence and ensuring the completion of started transactions. Unfortunately PCC does create processing overhead in the form of locks, but the team argued that PCC would still be the most feasible solution, since performance was not a priority in this project.\\
+
+One of the flaws in the final solution is the fact that reads are made first and then locks are acquired on the write set. This creates a window of opportunity where changes to the read values could occur. Since the process does not check up on the read set again, we could reach a state where non-executable events execute. 
+
+Two possible solutions to this problem are, to either acquire locks on both the read and write set before executing, or to check the read set again after acquiring locks on the write set. This bug could produce an illegal state in the final system and should be fixed in a future release. The bug was found after code freeze and was not deemed sufficiently critical to be fixed before hand-in.\\
+
+The argumentation for why globally ordered locking is safe from deadlocks can be explained using set theory.
+
+Assume two events, \textbf{A} and \textbf{B}, exist. \textbf{A} and \textbf{B} have lock sets, whose elements are events. If the intersection of the lock sets of \textbf{A} and \textbf{B} is not the empty set, then the intersection is the set of events which can create deadlocks between \textbf{A} and \textbf{B}. Because events have unique and comparable IDs the intersection can be in a total order. Since the order will be the same for both \textbf{A} and \textbf{B}, then the event \textbf{C} must be the first element in the ordered set for both \textbf{A} and \textbf{B}.
+
+\textbf{A} and \textbf{B} will send lock request in the total order applied to their respective lock sets. \textbf{A} and \textbf{B} will therefore request the lock on \textbf{C} before any other event in the intersection set. If it is assumed that the lock request from \textbf{A} will arrive at \textbf{C} first, the request from \textbf{B} is put in the request queue. \textbf{A} will finish acquiring all the locks on the rest of the events in its lock set. When all locks are acquired and the changes to the elements are done. \textbf{A} will unlock all events in its lock set and allow \textbf{B} to acquire the locks in its lock set and commit its changes. No deadlocks can occur and serially equivalence has been achieved. 
+
+Even in the case that another event \textbf{D} has an intersection set with \textbf{B} and acquires locks while \textbf{B} is waiting for \textbf{B} to finish, serial equivalence is still achieved, since it is not known whether event \textbf{B} or \textbf{D} was executed first in an asynchronous system since a happens-before relation between the two is not established. \\
+
+Overall it is believed that the implementation of concurrency control is correct and efficient enough since the current performance bottleneck of the system is the latency of sending HTTP requests.
+
+If further requirements would require OCC to be implemented, some performance increase could potentially be gained, though this would require a sizable amount of work on both logic and architecture.
+
