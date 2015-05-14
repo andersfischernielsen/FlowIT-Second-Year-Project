@@ -10,7 +10,7 @@ The workflows described in Section \ref{sec:FinalWorkflow} \nameref{sec:FinalWor
 
 \begin{figure}
 \centering
-\includegraphics[width=0.5\linewidth]{Figures/strawberry}
+\includegraphics[width=0.5\linewidth]{Figures/LoginWindow}
 \caption{\label{fig:LoginWindow} Screenshot of Client's LoginWindow}
 \end{figure}
 
@@ -22,7 +22,7 @@ The “Refresh” button in the bottom left corner will reload all workflows fro
 
 \begin{figure}
 \centering
-\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\includegraphics[width=\linewidth]{Figures/FlowMainWindow}
 \caption{\label{fig:MainWindowClient} Screenshot of Client's Main window}
 \end{figure}
 
@@ -37,7 +37,7 @@ The “Execute” button will only be enabled when the event is executable. When
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\includegraphics[width=0.3\linewidth]{Figures/EventState}
 \caption{\label{fig:StateFieldsMainClient}Screenshot from Client's Mainwindow, demonstrating the possible look for the three fields for the state of an event}
 \end{figure}
 
@@ -46,7 +46,7 @@ In the main window a status bar will appear in the top right corner if an error 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\includegraphics[width=0.8\linewidth]{Figures/StatusBar}
 \caption{\label{fig:StatusBar}Screenshot from Client's Mainwindow, demonstrating the status bar displaying an error}
 \end{figure}
 
@@ -61,11 +61,11 @@ The History window has a status bar in the top right corner. If anything should 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\includegraphics[width=\linewidth]{Figures/HistoryWindow}
 \caption{\label{fig:HistoryClient}Screenshot from Client's History, demonstrating the status bar displaying an error}
 \end{figure}
 
 
-\subsubsection{The Settings File}
+\subsubsection{The Settings File \label{sec:SettingsFile}}
 When a user is successfully logged in through the Client, a small settings file will be saved on the disk. This file will include the username of the last successful login, and the address of the Server on which the login was completed. If the settings file does not exist, the Client will point to the hosted Azure Server. This can be changed through the settings file. \\
 The settings file is saved as settings.json in the same directory as the Client.exe file. It is a JSON object with up to two properties, ServerAddress and Username. If the ServerAddress is set to “http://localhost:13768/” the Client will access the local Server.
