@@ -1,1 +1,21 @@
 \subsection{Feedback from External Partner}
+The initial workflow was presented to our external partner. He reviewed the team’s initial healthcare workflow, and clarified some elements in the workflow that were misinterpreted. The following section will describe these elements.\\
+
+First of all, response relations should be used to force the user to end in an accepting state where there are no pending activities.\\
+
+It should not be possible for the same patient to be checked in multiple times without having seen a \textit{Specialist}.\\
+
+Preparation of a patient is not handled by either an \textit{Examiner} or a \textit{Specialist}, but a new role, \textit{Nurse}, is introduced to handle this. \\
+
+The external partner also explained that a \textit{Specialist} and an \textit{Examiner} are not to share any activities, as they are not doing the same job. An \textit{Examiner} is not able to recommend any further treatment - after a patient has left the \textit{Examiner}’s office, a medical examination report is conducted and the government is charged. A \textit{Specialist} has multiple options to what a patient’s further treatment should involve, which is not specified thoroughly in the initial workflow. \\
+
+The initial workflow only allows the patient to be handled by the hospital once. This does not allow for a patient to return e.g. for further examination. When a patient has been taken care of by an \textit{Examiner} or a \textit{specialist}, further treatment is planned if needed and the government is charged. This was not the intention. Instead information about all treatments given to a patient should be stored until all treatments are completed. This means that a patient should be able to check in multiple times without the government being charged, but it is required that a patient sees either an \textit{Examiner} or a \textit{Specialist} between each check in. \\
+
+ROTA is a fast track queue for patients needing urgent treatment. Only Specialists can refer patients to ROTA if the patient needs to either:
+\begin{itemize}
+\item see another \textit{Specialist}
+\item have further exams
+\item both of the above
+\item needs surgery
+\end{itemize}
+The urgency of each case is decided by an \textit{Auditor}, who is working for the Brazilian government. 

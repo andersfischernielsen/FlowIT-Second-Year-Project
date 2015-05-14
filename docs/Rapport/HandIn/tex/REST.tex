@@ -1,9 +1,30 @@
 \subsection{REST}
+A web service is one or more servers that allows for clients to retrieve and manipulate resources at the server(s).  \newline
+Representational State Transfer (\textit{REST}\footnote{Distributed Systems - Concepts and Design p. 386.}) is an architectural style used in web services. No knowledge about the internal logic of a REST service should be required to use the REST service. The user of a REST service should not need to know whether communication is happening directly with the service or with an intermediary layer. This is known as RESTful layering. \newline
+A REST implementation should fulfill these four principles\footnote{\url{http://www.ibm.com/developerworks/library/ws-restful/ws-restful-pdf.pdf}} 
+
+\begin{itemize}
+\item Use HTTP methods\footnote{ \url{http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html}} as intended for CRUD\footnote{\url{http://en.wikipedia.org/wiki/Create,_read,_update_and_delete}} operations.
+\item Be stateless - no context is stored of clients between requests. 
+\item Resources should be accessed by URLs that expose a directory-like structure.
+\item Transfer resources as XML or JSON.
+\end{itemize}
+These are explained in the following sections.
 
 \subsubsection{HTTP Methods for CRUD Operations}
+A GET request should return a resource. POST requests should be used for creating new resources at the server, while DELETE and PUT requests are used for respectively deleting and updating resources. GET, PUT, and DELETE requests should be idempotent, which means that multiple identical requests result in the same response. POST on the other hand is not supposed to be idempotent, such that multiple identical requests create multiple resources at the server.
 
 \subsubsection{Be Stateless}
+For a REST service to be stateless, a server must not store the state of the clients. The canonical example is a client reading pages in a document held at a server. The client must request one page at a time. Instead of the server knowing what page the client is currently at, this responsibility is given to the client so that the client must provide this information when requesting the next page. \\
+
+This has the following consequence: Previously, clients could simply issue a GET request for the next page and the server would be able to determine the next page based on the last requests of the clients. With REST the client must issue a GET request for a specific page to receive a given page. The server does not have to store an internal representation of the state of the client.
 
 \subsubsection{Resource Directory Structure}
+A RESTful service must provide access to its resources in a directory-like structure. An example of this could be that a server stores a collection of books, which consists of chapters that are then split into pages. To access a given page the resource should be located at: \newline
+\begin{center}
+\url{http://myRestService.com/Books/ATaleOfTwoCities/ChapterOne/12}
+\end{center}
+A GET request issued at this address would find page 12 of chapter one in the book “A Tale of Two Cities”.
 
 \subsubsection{Transfer XML or JSON}
+Typically a REST service will serve its resources as either XML, JSON, or both. It should also be able to recieve content in both formats.

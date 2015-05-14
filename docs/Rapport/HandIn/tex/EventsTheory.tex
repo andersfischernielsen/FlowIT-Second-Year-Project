@@ -1,8 +1,8 @@
 \subsubsection{Events}
 Events represent activities within a workflow. In the example, Figure \ref{SampleGasFlow}, there are five events, among others \textbf{Read Gasmeter} and \textbf{Bill Customer}. An event may have a role associated with it e.g. the event \textbf{Read Gasmeter} has a \textit{Customer}, and the event \textbf{Bill Customer} an \textit{Inspector}. The role determines who are allowed to execute the event. \\
 
-A state for each event is needed for the functionality of a DCR graph to be implemented. The state of an event is comprised of the following information, see Table XYZ: \\
-\begin{table}
+A state for each event is needed for the functionality of a DCR graph to be implemented. The state of an event is comprised of the following information, see Table \ref{tab:TableOFDefaultValues} \\
+\begin{table}[h!]
 \centering
 \begin{tabular}{|c|c|c|}\hline 
  & Options & Default value \\ \hline 
@@ -11,5 +11,7 @@ Included & false $\vert$ true & true \\ \hline
 Executed & false $\vert$ true & false \\ \hline
 
 \end{tabular} 
-
+\caption{\label{tab:TableOFDefaultValues} Default values for event state}
 \end{table}
+
+\textit{Executed} describes if the event has been executed at least once. Depending on the value of \textit{Included} the event is either included: true, or excluded: false. \textit{Pending} describes if the event is expected to be executed eventually. For an event without relations to be executable the event must be included. After the execution of any event, their \textit{Pending} value must be set to false, and the \textit{Executed} value to true.
