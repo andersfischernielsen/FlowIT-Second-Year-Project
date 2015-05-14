@@ -1,1 +1,12 @@
 \subsection{Overview}
+The following has been implemented in the final system:
+\begin{itemize}
+\item A peer-to-peer architecture which can be distributed across an arbitrary number of web services.
+\item The workflow system is generic in the sense that it supports not only a single, built in workflow. Furthermore a workflow is able to dynamically change while it is running.
+\item Workflow events have \textit{location transparency}; events can be held at different servers or at the same server. The internal logic does not differ across locations. 
+\item A \textit{graphical user interface} that provides a more appealing user experience for the end user to interact with. 
+\item \textit{History}, enabling the user to see a log of what happened at both the Server and at a single event.
+\item \textit{Persistence}, if the machines running the Server or an EventAPI are shut down, once restarted they will be able to restore from where they left off.
+\item Role-based access control, which ensures that a user is only able to execute events that the given user has permission to.
+\item \textit{Locking} prevents simultaneous access to events. Simultaneous access could otherwise cause a corrupted state in a workflow. 
+\end{itemize}
