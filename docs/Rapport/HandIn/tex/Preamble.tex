@@ -24,10 +24,15 @@
 \usepackage{pdfpages}
 \renewcommand{\arraystretch}{1.5}
 \renewcommand{\tabcolsep}{0.15cm}
-\usepackage{hyperref}
+\usepackage[plainpages=false,pdfpagelabels,pageanchor=false]{hyperref} % aktive links
 \hypersetup{colorlinks=false}
 \parindent=0pt
 
 % Depth of table of contents and subsubsubsections
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{3}
+
+\usepackage{memhfixc}  % rettelser til hyperref
+\hypersetup{%
+	pdfborder = {0 0 0}
+}
