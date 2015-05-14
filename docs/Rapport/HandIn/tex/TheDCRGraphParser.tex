@@ -1,1 +1,10 @@
 \subsection{The DCR Graph Parser}
+Because the team did not want to issue every HTTP request manually every time a workflow should be created in the system, a simple DCR graph parser was developed, see Figure \ref{fig:DcrGraphParserScreenShot} The parser can upload workflows and events to the Server and EventAPIs respectively. The program was developed as an internal tool, and as such not a tool designed for hand-in. The team thought it might be useful if the readers wanted to try out another workflow than the ones provided. \newline
+The parser will not handle failures. It does not clean up after itself if an error should occur.
+A short user manual for the DCR graph parser can be found in the Appendix, Section \ref{sec:UsermanualForDcrGraphParser} \nameref{sec:UsermanualForDcrGraphParser}. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\linewidth]{Figures/strawberry}
+\caption{\label{fig:DcrGraphParserScreenShot} Screenshot of the simple DCR graph parser, that was developed}
+\end{figure}
