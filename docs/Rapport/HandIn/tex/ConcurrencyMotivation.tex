@@ -1,1 +1,6 @@
 \subsubsection{Motivation}
+Since the system is distributed, multiple users will be able to work on the same workflow at the same time. It is important that when multiple concurrent transactions happen, the workflows in the system will not enter any illegal states. Furthermore, it is important that two concurrent transactions will complete and do so in a serially equivalent manner. \\
+
+Concurrency control must be implemented to cope with conflicts between operations in different transactions sent to the same receiver. These conflicts include lost updates and dirty reads, thereby possibly reaching an illegal state. \\
+
+The team considered both OCC and PCC to work around the stated problems since both solutions would solve these.

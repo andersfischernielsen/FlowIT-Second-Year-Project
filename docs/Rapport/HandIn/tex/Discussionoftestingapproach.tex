@@ -1,1 +1,9 @@
 \subsection{Discussion of Testing Approach}
+The JetBrains DotCover tool has been used to check the amount of code covered by tests. DotCover does not guarantee that sufficient testing has been performed, it can only tell the developer using it which statements have and have not been tested and evaluate which methods are the most risky and should have a higher priority in testing. This helped the team identify the most critical components to test in the system, and also helped to give an overview of remaining tests. After finishing the system, DotCover gave an assessment of test coverage. The result was 79\% test coverage with 947 test cases. 
+
+The testing approach has mainly been centered around unit testing with focus on testing internal logic.
+Integration testing has also been used to test the communication between components, but not as in-depth as stated above. 
+
+Since the system was developed with less focus devoted to development of a powerful front-end client, testing the back-end logic was deemed to be more important. \\
+
+The weakest point in the testing suite is arguably the lack of integration testing. Since mocking is used in almost all the tests, we do not have enough assurance that the components interact properly. Therefore either top-down or bottom-up automated integration tests should be the top priority of an extension of the test suite. This would create much more certainty that the system functions as it should as well as allow for more security when changing module implementation.

@@ -1,1 +1,16 @@
 \subsection{Unit Testing}
+The major components handling data have been unit tested to ensure that their functionality was correct. Test projects uses the naming convention \textit{TargetProject}.tests.
+
+Automated unit testing has been written using the NUnit testing framework\footnote{\url{http://www.nunit.org/}}. Only code written by the team has been tested. Frameworks and libraries have been assumed tested. \\
+
+Dependency injection and mocking, using the Moq library\footnote{\url{https://www.nuget.org/packages/Moq/}}, has been used extensively in many unit tests to ensure that the implementations of interfaces were tested in an isolated and predictable environment.
+
+More specifically mocking a storage module and saving objects in a list for validation was often used. By validating the objects coming in and out of methods it is possible to assert with greater certainty that the implementation being tested is working as expected.
+
+Components have been unit tested in their order of importance. \\
+
+Assertions of exceptions being thrown in boundary cases were also performed in methods where these were expected to be thrown.
+
+Black and white box testing have both been used. Most unit tests were developed by testing the expected functionality of a method, not the implementation of the method. 
+
+In certain cases white box testing with branch coverage has been done. Throwing of special exception types is a great example of this.

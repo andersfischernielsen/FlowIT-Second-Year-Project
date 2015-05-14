@@ -1,5 +1,49 @@
 \subsection{Persistence}
+This section describes how the finished system achieves persistence on the Server and the EventAPI. In this section an entity refers to the in-memory representation of a row in a relational database.\\
+
+Data persistence is needed in case of system crashes or restarts. Therefore both the Server and the EventAPI implement data persistency in the form of an SQL database. 
+
+To map a relational data model to in-memory objects Microsoft's Entity Framework was used. By having persistent data, the system became more robust. This became more apparent when the deployment on Microsoft’s Azure hosting platform was taken into consideration. Azure will shut down the deployed Server and EventAPIs when not in use. Resuming from a stored state is therefore a necessity if data should not be lost.  
 
 \subsubsection{The Relational Database}
+To persist data of events and workflows on both the Server and the EventAPI two relational data models were created. When mapping objects to relational data the concepts of redundancy and normalization were used.
+
+Data models are only used in the storage layer of the subsystems. POST and PUT requests with DTOs are converted to entities by a logic layer and are finally persisted. 
+
+Similarly GET requests requires the logic to retrieve entities from the database and convert them to the wanted DTOs which can then be sent with a HTTP response. 
+Data independence was achieved by having different kinds of data - data for transferring,  DTOs, and data for saving, entities. This enabled implementing new DTOs or easily adding data to an existing entity without changing anything in the DTOs.\\
+
+The data model of the EventAPI contains seven models, and can be seen on Figure \ref{fig:EventAPIDataModel}. The History entity has no relations to other entities which is intentional, because History data should not be deleted - even if an event is deleted. Furthermore, four models are created - one for each type of graph relation. This design choice was made to be able to extend the relations individually in the future. These models derive from the same base class and it is therefore easy to extend all of them simultaneously. 
+
+The three fields \textit{InitialExecuted}, \textit{InitialPending}, and \textit{InitialIncluded} on the Event model are used to reset an event to its initial state. Multiple roles on an Event are allowed which is seen on the one-to-many relation from Event to Role. 
+
+Notice that an Event has a composite key of the WorkflowId and EventId - two events can have the same Id as long as they do not exist on the same workflow - see Section \ref{sec:GlobalID} \nameref{sec:GlobalID}.\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:EventAPIDataModel}The Data Model of an EventAPI}
+\end{figure}
+
+The data model of the Server can be seen in Figure \ref{fig:ServerDataModel}. The data model contains seven entities. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.3\linewidth]{figures/strawberry}
+\caption{\label{fig:ServerDataModel}The Data Model of the Server}
+\end{figure}
+
+Notice the EventRoles table. This table is created to normalize the many-to-many relation between events and roles. The EventRoles entity is never used outside of the database. This entity helps Entity Framework minimize the amount of redundant data. The model allows for an event to have many roles and roles to be on many events, but a role is unique for a workflow. 
+
+Since two events should be able to have the same ID on two different workflows, the Event model has a composite key of the WorkflowId and EventId. 
+To support role-based access control a hashed and salted password for each user is stored, see Section \ref{sec:RBAC} \nameref{sec:RBAC}.
 
 \subsubsection{Data Distribution}
+The aforementioned data models allows storage of workflow and event information on the Server and the EventAPI, respectively. By storing data in multiple locations a bottleneck is removed since all data does not have to be stored and retrieved in one place. \\
+
+On the Server, by only storing where to find events, but not any information about the state of each event, the Server and events are encapsulated since the Server has no need to know the state of individual events. An event keeps track of its own state, the Server simply serves event addresses. 
+
+Furthermore, fewer errors are encountered by not saving copies of states of related events on each event. Instead events are forced to request data each time they need it. This, once again, encapsulates events and their responsibilities. It should be noted that this benefit comes at the cost of a performance impact.\\
+
+By distributing data it is not possible to get access to all of the data of events at once and get an overview of the stored information of every event. This can function as a defense mechanism if an attacker would want to access all the data in the system. 
+A problem with distributed data is that the roles of the system - when using role-based access control - have to be agreed on systemwide, which complicates matters. 

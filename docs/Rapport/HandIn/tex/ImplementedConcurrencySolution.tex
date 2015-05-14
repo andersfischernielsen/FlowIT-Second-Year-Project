@@ -1,1 +1,17 @@
 \subsubsection{Implemented Solution}
+The chosen concurrency control method was PCC. The implementation uses strict two-phase locking. At first a growing phase is carried out, in which the event will try to lock every other event it needs to complete the transaction. The event will then execute, update the states of the relation, and finally release all locks. 
+
+If the event fails to acquire the needed locks in the growing phase it will abort the transaction by unlocking events that were locked in the growing phase. 
+
+Strict two-phase locking ensures that the order in which the transactions are completed will be serially equivalent as well as preventing certain situations where deadlocks could otherwise occur.
+
+If an event is locked, both reads and writes are delayed until the event is unlocked. Reading of an event is not allowed before the event is unlocked, because of the assumption that if an event is locked then it will almost certainly change its state and therefore affect the read values.\\
+
+To prevent transactions from aborting, e.g. if they have to acquire a lock on an event which has already been locked, a "First In First Out" queue of lock requests has been implemented. 
+When an event is unlocked, the next request in the queue, if any, will lock the event if it requires to update the state of the event. Reads, as mentioned, do not lock the event. This is due to the fact that read operations do not conflict each other in PCC.
+
+If it takes more than ten seconds to acquire read or write access, the request will abort and the system will return a timeout exception to the caller.\\
+
+To prevent deadlocks a global order in which the events will acquire locks have been implemented. The order is alphabetical and is based on the \textit{eventId}. As the event itself is in the ordered list, it is locked in the global order as well. The order of unlocking is not important as long as the executing event unlocks itself last. If an event unlocked itself before others, it might be prevented from unlocking the other events. \\
+
+With this approach deadlocks will never be encountered as every event has to lock in the same order. Argumentation for why this works is given in the next section.
