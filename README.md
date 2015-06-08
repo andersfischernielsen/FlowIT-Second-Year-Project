@@ -1,4 +1,4 @@
-# FlowIT
+# Second Year Project - FlowIT
 This system supports the parsing and execution of DCR graphs in a distributed system. The system has been deployed to several Microsoft Azure instances, and supports concurrent execution of events. 
 
 The project was developed in the course Software Development in Large Teams with International Collaboration at the IT University of Copenhagen in collaboration with a Brazilian hospital in order to support their provided patient workflow.  
@@ -114,8 +114,10 @@ No handling for restoring the system after crashes has been implemented.
 ## Testing
 
 A variety of testing approaches have been used to test the system during development. These include unit, integration, system, and acceptance testing in varying degrees. Acceptance testing has been applied after some initial tests were developed.
-A testing evaluation was performed nearing the end of the project to decide on which modules should be tested, and in which order. Some components play a larger role than others in the system and have therefore been put through more scrutinising tests.
-The coverage analysis tool JetBrains DotCover assisted in this by providing coverage analysis and an overview of the test coverage.
+
+A testing evaluation was performed nearing the end of the project to decide on which modules should be tested, and in which order. Some components play a larger role than others in the system and have therefore been put through more scrutinising tests.
+
+The coverage analysis tool JetBrains DotCover assisted in this by providing coverage analysis and an overview of the test coverage.
 
 
 ## DCR Graphs
