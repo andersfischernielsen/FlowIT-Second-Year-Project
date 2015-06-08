@@ -4,6 +4,9 @@ This system supports the parsing and execution of DCR graphs in a distributed sy
 The project was developed in the course Software Development in Large Teams with International Collaboration at the IT University of Copenhagen in collaboration with a Brazilian hospital in order to support their provided patient workflow.  
 
 ## Architecture
+
+![Illustration of Condition relation between event A and event B](other/docs/Rapport/HandIn/Figures/SimplifiedSystemOverview.png)
+
 The following has been implemented in the final system:
 
 - A peer-to-peer architecture which can be distributed across an arbitrary number of web services.
