@@ -30,6 +30,45 @@ The Visual Studio solution contains nine different Visual Studio projects:
 
 Microsoft Azure has been chosen as the web hosting solution for the Server and EventAPI projects.
 
+### Main parts 
+The system contains three main parts:
+
+#### Client
+The client is the software an end user will typically interact with when using the system. The user uses the Client to execute events in a workflow, reset a workflow, or see a history of what happened at the events and at the Server. The Client interacts with the Server and possibly several EventAPIs.
+
+#### Server
+The Server is a centralized instance that holds information about all workflows. For each work- flow it provides the addresses of all events in the given workflow. The Server is contacted by the Client, when the Client wants to know what workflows exist at the Server and know what events are related to a specific workflow.
+
+Furthermore, the EventAPI also interacts with the Server, when an event wants to add itself to an already existing workflow at the Server. The Server is intended to be a REST-based service.
+
+In the current setup, the Client has no way of discovering the Server automatically, and hence the Client is hardcoded to the address of the Server, stored in a configuration file. It is possible to have multiple Servers, however a workflow must be located at a single Server. Furthermore a Client can only contact one server per instance.
+
+#### EventAPI
+The EventAPI holds events and is responsible for the execution of events. The Client will con- tact the EventAPI when asking for the state of events. The EventAPI contacts the Server when events are created or deleted. EventAPI is a REST-service.
+
+### Design
+
+#### Concurrency Control
+Two major solutions to concurrency control are in use in software today: pessimistic concurrency control (PCC) and optimistic concurrency control (OCC).
+PCC uses the concept of locking which prevents multiple transactions from accessing shared data simultaneously. OCC on the other hand uses a working copy of shared data to carry out a transaction and the changes are validated before possibly committing. If a transaction discovers a conflict between itself and a concurrent transaction, the implementation will decide which transaction aborts.
+
+PCC has ultimately been implemented in the system.
+
+#### Interface-based Programming
+This section presents how the team decided to let the system architecture be structured around interface-based programming.
+At the drafting of the initial system architecture, strict boundaries of the responsibility of mod- ules were a clear goal. Using interfaces to specify functionality of a component and only exposing the interface to other components of the system helps in achieving the desired separation. 
+
+#### Dependency Injection
+Dependency injection hence allows for injecting different implementations of the same interface. A major motivation for using dependency injection was not to inject different implementations during runtime, but instead for the team to mock dependencies when unit testing classes.
+
+#### ASP.NET WebAPI
+ASP.NET WebAPI has been used to implement the web services Server and EventAPI. ASP.NET WebAPI uses Controllers, which are objects that handles incoming HTTP requests. In the following, Controller should hence not be confused with a Controller as found in the Model-View-Controller design pattern.
+
+#### Multi-layered Design
+We have based our architectural design of Server and EventAPI on a multi-layered approach. With a multi-layered approach the team achieved separation between classes - low coupling - and independence among classes - high cohesion. 
+
+Each layer has a distinct responsibility, and provides its service to the layer above it.
+
 ## Compiling the Project
 The team has strived for making it as easy as possible for the user to be able to run the programs and start the two web service projects EventAPI and Server.
 
