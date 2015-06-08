@@ -1,5 +1,7 @@
 # FlowIT
-This system supports the parsing and execution of DCR graphs in a distributed system. The system has been deployed to several Microsoft Azure instances, and supports concurrent execution of events. The project was developed in the course Software Development in Large Teams with International Collaboration at the IT University of Copenhagen in collaboration with a Brazilian hospital in order to support their provided patient workflow.  
+This system supports the parsing and execution of DCR graphs in a distributed system. The system has been deployed to several Microsoft Azure instances, and supports concurrent execution of events. 
+
+The project was developed in the course Software Development in Large Teams with International Collaboration at the IT University of Copenhagen in collaboration with a Brazilian hospital in order to support their provided patient workflow.  
 
 ## Architecture
 The following has been implemented in the final system:
@@ -67,6 +69,12 @@ The system does not provide a UI for creation of DCR graphs. The team recommends
 It is not in the scope of the project to support nested events on a workflow as is possible in the full specification of DCR graphs.
 No handling for restoring the system after crashes has been implemented.
 
+## Testing
+
+A variety of testing approaches have been used to test the system during development. These include unit, integration, system, and acceptance testing in varying degrees. Acceptance testing has been applied after some initial tests were developed.
+A testing evaluation was performed nearing the end of the project to decide on which modules should be tested, and in which order. Some components play a larger role than others in the system and have therefore been put through more scrutinising tests.
+The coverage analysis tool JetBrains DotCover assisted in this by providing coverage analysis and an overview of the test coverage.
+
 
 ## DCR Graphs
 DCR Dynamic Condition Response Graphs (DCR graphs) enables the creation of non-linear workflows. A detailed explanation of DCR graphs can be seen here (LINK).
@@ -77,38 +85,30 @@ DCR graphs present an alternative notation to the notation of standard flow-orie
 Relations describe constraints among events. There are 4 basic relations, explained in the following section.
 
 ####Condition
-This relation states that to execute the event B, event A must be executed or excluded first. (IMAGE)
+This relation states that to execute the event B, event A must be executed or excluded first.
 
-Illustration of Condition relation between event A and event B
+![Illustration of Condition relation between event A and event B](other/docs/Rapport/HandIn/Figures/conditions.png)
 
 ####Exclude
 An exclusion relation states that once event A has been executed, the Included boolean of event B must be set to false, such that event B is excluded. Note that an event may exclude itself, meaning once the event has executed, the Included value of the event must be set to false such that it is excluded. 
 
-Illustration of exclusion relation between event A and event B. Event C is self excluding.
-
+![Illustration of exclusion relation between event A and event B. Event C is self excluding](other/docs/Rapport/HandIn/Figures/exclusion.png)
 
 ####Include
 This relation states that event A includes event B. This means that after the execution of event A, the Included value of event B must be set to true, such that event B is included.
 
-Illustration of inclusion relation between event A and event B 
+![Illustration of inclusion relation between event A and event B](other/docs/Rapport/HandIn/Figures/inclusion.png)
 
 ####Response
 The response relation states that once event A is executed, event B is expected to be executed eventually. Once event A has been executed, the Pending value of event B must be set to true.
 
-Illustration of response relation between event A and event B
-
+![Illustration of response relation between event A and event B](other/docs/Rapport/HandIn/Figures/response.png)
 
 Therefore for an event to be executable, the Included value must be true, and each of its condition relations must be either excluded or executed.
 Furthermore an execution of an event leads to its Executed and Pending values to be set to true and false respectively. 
 Each of the executed events’ response relations must have their Pending value set to true, each of their inclusion relations must have their Included value set to true, and their exclusion relations must have their Included value set to false.
 
 The three concepts: state, events, and relations, are be mirrored in the system.
-
-## Testing
-
-A variety of testing approaches have been used to test the system during development. These include unit, integration, system, and acceptance testing in varying degrees. Acceptance testing has been applied after some initial tests were developed.
-A testing evaluation was performed nearing the end of the project to decide on which modules should be tested, and in which order. Some components play a larger role than others in the system and have therefore been put through more scrutinising tests.
-The coverage analysis tool JetBrains DotCover assisted in this by providing coverage analysis and an overview of the test coverage.
 
 
  	
