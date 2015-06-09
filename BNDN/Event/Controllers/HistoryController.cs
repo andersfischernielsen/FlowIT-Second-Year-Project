@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Common.DTO.History;
 using Event.Interfaces;
 using Event.Logic;
 
-namespace Event.Controllers 
+namespace Event.Controllers
 {
     /// <summary>
     /// HistoryController handles HTTP-request regarding Event History
     /// </summary>
-    public class HistoryController : ApiController 
+    public class HistoryController : ApiController
     {
         private readonly IEventHistoryLogic _historyLogic;
 
@@ -32,8 +30,6 @@ namespace Event.Controllers
             _historyLogic = historyLogic;
         }
 
-        
-
         /// <summary>
         /// Get the entire History for a given Event.
         /// </summary>
@@ -42,21 +38,21 @@ namespace Event.Controllers
         /// <returns></returns>
         [Route("history/{workflowId}/{eventId}")]
         [HttpGet]
-        public async Task<IEnumerable<HistoryDto>> GetHistory(string workflowId, string eventId)
+        public async Task<IHttpActionResult> GetHistory(string workflowId, string eventId)
         {
-            try 
+            try
             {
                 var toReturn = await _historyLogic.GetHistoryForEvent(workflowId, eventId);
                 await _historyLogic.SaveSuccesfullCall("GET", "GetHistory", eventId, workflowId);
 
-                return toReturn;
+                return Ok(toReturn);
             }
 
-            catch (Exception e) 
+            catch (Exception e)
             {
-                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId);
+                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId).Wait();
 
-                throw;
+                return InternalServerError(e);
             }
         }
 
