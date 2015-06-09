@@ -60,6 +60,7 @@
     <Compile Include="ControllersTests\StateControllerTests.cs" />
     <Compile Include="CommunicatorTests\EventCommunicatorTests.cs" />
     <Compile Include="CommunicatorTests\ServerCommunicatorTests.cs" />
+    <Compile Include="HttpActionResultFlowExtensions.cs" />
     <Compile Include="LogicTests\AuthLogicTests.cs" />
     <Compile Include="LogicTests\LifecycleLogicTests.cs" />
     <Compile Include="LogicTests\LockLogicTests.cs" />

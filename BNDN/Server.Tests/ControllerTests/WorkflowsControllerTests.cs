@@ -34,6 +34,7 @@ namespace Server.Tests.ControllerTests
             _mock.Setup(logic => logic.Dispose());
 
             _controller = new WorkflowsController(_mock.Object, _historyLogic.Object) { Request = new HttpRequestMessage() };
+            _controller.Configuration = new HttpConfiguration();
         }
 
         #region GET Workflows
@@ -44,7 +45,7 @@ namespace Server.Tests.ControllerTests
             _mock.Setup(logic => logic.GetAllWorkflows()).ReturnsAsync(new List<WorkflowDto>());
 
             // Act
-            var result = await _controller.Get();
+            var result = await (await _controller.Get()).GetMessageContent<IEnumerable<WorkflowDto>>();
 
             // Assert
             Assert.IsEmpty(result);
@@ -56,7 +57,7 @@ namespace Server.Tests.ControllerTests
             _mock.Setup(logic => logic.GetAllWorkflows()).ReturnsAsync(new List<WorkflowDto>{ new WorkflowDto { Id = "testWorkflow", Name = "Test Workflow"}});
 
             // Act
-            var result = (await _controller.Get()).ToList();
+            var result = (await (await _controller.Get()).GetMessageContent<IEnumerable<WorkflowDto>>()).ToList();
 
             // Assert
             Assert.AreEqual(1, result.Count());
@@ -78,7 +79,7 @@ namespace Server.Tests.ControllerTests
             _mock.Setup(logic => logic.GetAllWorkflows()).ReturnsAsync(workflowDtos);
 
             // Act
-            var result = await _controller.Get();
+            var result = await (await _controller.Get()).GetMessageContent<IEnumerable<WorkflowDto>>();
 
             // Assert
             Assert.AreEqual(10, result.Count());
@@ -225,7 +226,7 @@ namespace Server.Tests.ControllerTests
             _mock.Setup(logic => logic.GetEventsOnWorkflow(workflowId)).ReturnsAsync(list);
 
             // Act
-            var result = await _controller.Get(workflowId);
+            var result = await (await _controller.Get(workflowId)).GetMessageContent<IEnumerable<EventAddressDto>>();
 
             // Assert
             Assert.IsInstanceOf<IEnumerable<EventAddressDto>>(result);
@@ -245,7 +246,7 @@ namespace Server.Tests.ControllerTests
             });
 
             // Act
-            var result = await _controller.Get("id1");
+            var result = await (await _controller.Get("id1")).GetMessageContent<IEnumerable<EventAddressDto>>();
 
             // Assert
             Assert.AreEqual(1, result.Count());

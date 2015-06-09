@@ -35,7 +35,11 @@ namespace Server.Tests.ControllerTests
             _historyLogicMock.Setup(hl => hl.GetHistoryForWorkflow(It.IsAny<string>()))
                 .ReturnsAsync(_historyDtos);
 
-            _controller = new HistoryController(_historyLogicMock.Object) {Request = new HttpRequestMessage()};
+            _controller = new HistoryController(_historyLogicMock.Object)
+            {
+                Request = new HttpRequestMessage(),
+                Configuration = new HttpConfiguration()
+            };
         }
 
         #region Constructor and Dispose
@@ -85,7 +89,7 @@ namespace Server.Tests.ControllerTests
             }
 
             // Act
-            var result = await _controller.GetHistory("workflowId");
+            var result = await (await _controller.GetHistory("workflowId")).GetMessageContent<List<HistoryDto>>();
 
             // Assert
             Assert.AreSame(_historyDtos, result);

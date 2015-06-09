@@ -28,7 +28,11 @@ namespace Event.Tests.ControllersTests
 
             _historyLogicMock = new Mock<IEventHistoryLogic>();
 
-            _stateController = new StateController(_stateLogicMock.Object, _historyLogicMock.Object) { Request = new HttpRequestMessage() };
+            _stateController = new StateController(_stateLogicMock.Object, _historyLogicMock.Object)
+            {
+                Request = new HttpRequestMessage(),
+                Configuration = new HttpConfiguration()
+            };
         }
 
         #region Constructor & Dispose
@@ -71,7 +75,7 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
 
             // Act
-            var result = await _stateController.GetExecuted("workflowId", "eventId", "senderId");
+            var result = await (await _stateController.GetExecuted("workflowId", "eventId", "senderId")).GetMessageContent<bool>();
 
             // Assert
             Assert.IsTrue(result);
@@ -84,7 +88,7 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsExecuted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var result = await _stateController.GetExecuted("workflowId", "eventId", "senderId");
+            var result = await (await _stateController.GetExecuted("workflowId", "eventId", "senderId")).GetMessageContent<bool>();
 
             // Assert
             Assert.IsFalse(result);
@@ -159,7 +163,7 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
 
             // Act
-            var result = await _stateController.GetIncluded("workflowId", "eventId", "senderId");
+            var result = await (await _stateController.GetIncluded("workflowId", "eventId", "senderId")).GetMessageContent<bool>();
 
             // Assert
             Assert.IsTrue(result);
@@ -172,7 +176,7 @@ namespace Event.Tests.ControllersTests
             _stateLogicMock.Setup(sl => sl.IsIncluded(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
 
             // Act
-            var result = await _stateController.GetIncluded("workflowId", "eventId", "senderId");
+            var result = await (await _stateController.GetIncluded("workflowId", "eventId", "senderId")).GetMessageContent<bool>();
 
             // Assert
             Assert.IsFalse(result);
@@ -272,7 +276,7 @@ namespace Event.Tests.ControllersTests
                 })));
 
             // Act
-            var result = await _stateController.GetState("workflowId", "eventId", "senderId");
+            var result = await (await _stateController.GetState("workflowId", "eventId", "senderId")).GetMessageContent<EventStateDto>();
 
             // Assert
             Assert.AreEqual("eventId", result.Id);

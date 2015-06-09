@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Common.DTO.Event;
 using Common.DTO.History;
 using Common.DTO.Shared;
@@ -91,7 +92,10 @@ namespace Event.Tests.ControllersTests
             _lifecycleMock.Setup(m => m.ResetEvent(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.Run(() => true)).Verifiable();
 
-            _toTest = new LifecycleController(_lifecycleMock.Object, _historyMock.Object);
+            _toTest = new LifecycleController(_lifecycleMock.Object, _historyMock.Object)
+            {
+                Configuration = new HttpConfiguration()
+            };
         }
 
         [SetUp]
@@ -161,7 +165,7 @@ namespace Event.Tests.ControllersTests
             _eventTestList.Add(@event);
 
             //Execute.
-            var test = await _toTest.GetEvent(")(!&lkjasdkøåøæ+*¨´           $$§§", ")(!&lkjasdkøåøæ+*¨´           $$§§");
+            var test = await (await _toTest.GetEvent(")(!&lkjasdkøåøæ+*¨´           $$§§", ")(!&lkjasdkøåøæ+*¨´           $$§§")).GetMessageContent<EventDto>();
             
             //Assert.
             Assert.DoesNotThrow(async () => await _toTest.GetEvent("notExisting", "notExistingEither"));

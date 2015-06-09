@@ -31,6 +31,7 @@ namespace Server.Tests.ControllerTests
             _historyLogic = new Mock<IWorkflowHistoryLogic>();
             
             _usersController = new UsersController(_logicMock.Object, _historyLogic.Object) {Request = new HttpRequestMessage()};
+            _usersController.Configuration = new HttpConfiguration();
         }
 
         private IEnumerable<WorkflowRole> GetSomeRoles()
@@ -74,7 +75,7 @@ namespace Server.Tests.ControllerTests
             _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).ReturnsAsync(returnDto);
 
             // Act
-            var result = await _usersController.Login(loginDto);
+            var result = await (await _usersController.Login(loginDto)).GetMessageContent<RolesOnWorkflowsDto>();
 
             // Assert
             Assert.AreEqual(returnDto,result);
@@ -140,7 +141,7 @@ namespace Server.Tests.ControllerTests
 
         [TestCase(typeof(UnauthorizedException))]
         [TestCase(typeof(Exception))]
-        public void Login_WhenExceptionIsThrownHistoryIsCalled1(Type exceptionType)
+        public async Task Login_WhenExceptionIsThrownHistoryIsCalled1(Type exceptionType)
         {
             // Arrange
             bool logMethodWasCalled = false;
@@ -149,10 +150,10 @@ namespace Server.Tests.ControllerTests
             _logicMock.Setup(m => m.Login(It.IsAny<LoginDto>())).ThrowsAsync((Exception)exceptionType.GetConstructors().First().Invoke(null));
 
             _historyLogic.Setup(m => m.SaveNoneWorkflowSpecificHistory(It.IsAny<HistoryModel>()))
-                .Callback((HistoryModel history) => logMethodWasCalled = true);
+                .Returns((HistoryModel history) => Task.Run(() => logMethodWasCalled = true));
 
             // Act
-            _usersController.Login(loginDto);
+            await _usersController.Login(loginDto);
 
             // Assert
             Assert.IsTrue(logMethodWasCalled);
@@ -197,7 +198,7 @@ namespace Server.Tests.ControllerTests
             bool hasLogged = false;
             LoginDto loginDto = null;
             _historyLogic.Setup(m => m.SaveNoneWorkflowSpecificHistory(It.IsAny<HistoryModel>()))
-                .Callback((HistoryModel model) => hasLogged = true);
+                .Returns((HistoryModel model) => Task.Run(() => hasLogged = true));
 
             // Act
             var testDelegate = new TestDelegate(async () => await _usersController.Login(loginDto));
