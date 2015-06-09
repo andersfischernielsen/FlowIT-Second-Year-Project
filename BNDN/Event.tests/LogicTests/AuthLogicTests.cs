@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Event.Tests.LogicTests
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     class AuthLogicTests
     {
         private Mock<IEventStorage> _storageMock;

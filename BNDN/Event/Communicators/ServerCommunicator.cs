@@ -4,6 +4,7 @@ using Common;
 using Common.DTO.Shared;
 using Common.Tools;
 using Event.Exceptions;
+using Event.Exceptions.ServerInteraction;
 using Event.Interfaces;
 
 namespace Event.Communicators
@@ -78,7 +79,16 @@ namespace Event.Communicators
 
         public void Dispose()
         {
-            _httpClient.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _httpClient.Dispose();
+            }
         }
     }
 }

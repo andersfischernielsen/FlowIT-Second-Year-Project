@@ -6,6 +6,7 @@ using Server.Models;
 
 namespace Server.Storage
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class StorageContext : DbContext, IServerContext
     {
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

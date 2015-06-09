@@ -8,12 +8,6 @@ namespace Server.Models
 {
     public class ServerWorkflowModel
     {
-        public ServerWorkflowModel()
-        {
-            ServerRolesModels = new List<ServerRoleModel>();
-            ServerEventModels = new List<ServerEventModel>();
-        }
-
         [Required, Key]
         public string Id { get; set; }
 

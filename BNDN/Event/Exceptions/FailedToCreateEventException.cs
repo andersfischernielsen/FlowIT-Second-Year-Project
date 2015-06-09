@@ -5,6 +5,7 @@ using System.Web;
 
 namespace Event.Exceptions
 {
+    [Serializable]
     public class FailedToCreateEventException : Exception
     {
     }

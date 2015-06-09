@@ -10,7 +10,7 @@ using Server.Logic;
 
 namespace Server.Tests.LogicTests
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     class WorkflowsHistoryLogicTests
     {
         private Mock<IServerHistoryStorage> _storageMock;

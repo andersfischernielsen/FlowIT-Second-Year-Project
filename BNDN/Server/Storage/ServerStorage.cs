@@ -352,12 +352,18 @@ namespace Server.Storage
             await _db.SaveChangesAsync();
         }
 
-
-
-
         public void Dispose()
         {
-            _db.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _db.Dispose();
+            }
         }
 
         public async Task SaveHistory(HistoryModel toSave)

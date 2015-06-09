@@ -6,7 +6,8 @@ using Event.Models.UriClasses;
 
 namespace Event.Storage
 {
-    public class EventContext : DbContext, IEventContext
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
+    public sealed class EventContext : DbContext, IEventContext
     {
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

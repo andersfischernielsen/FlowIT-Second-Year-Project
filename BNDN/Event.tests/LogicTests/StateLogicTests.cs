@@ -6,6 +6,7 @@ using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
 using Event.Exceptions;
+using Event.Exceptions.EventInteraction;
 using Event.Interfaces;
 using Event.Logic;
 using Event.Models;
@@ -14,7 +15,7 @@ using NUnit.Framework;
 
 namespace Event.Tests.LogicTests
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     class StateLogicTests
     {
         private StateLogic _stateLogic;

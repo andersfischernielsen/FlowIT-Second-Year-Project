@@ -4,7 +4,7 @@ using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
 using Event.Communicators;
-using Event.Exceptions;
+using Event.Exceptions.EventInteraction;
 using Event.Interfaces;
 using Event.Models;
 using Event.Storage;
@@ -338,10 +338,19 @@ namespace Event.Logic
 
         public void Dispose()
         {
-            _storage.Dispose();
-            _lockingLogic.Dispose();
-            _authLogic.Dispose();
-            _eventCommunicator.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _storage.Dispose();
+                _lockingLogic.Dispose();
+                _authLogic.Dispose();
+                _eventCommunicator.Dispose();
+            }
         }
     }
 }

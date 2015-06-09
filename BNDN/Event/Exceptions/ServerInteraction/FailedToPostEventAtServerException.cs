@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
-namespace Event.Exceptions
+namespace Event.Exceptions.ServerInteraction
 {
+    [Serializable]
     public class FailedToPostEventAtServerException : Exception
     {
     }

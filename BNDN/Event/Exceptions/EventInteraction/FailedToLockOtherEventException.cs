@@ -1,7 +1,8 @@
 using System;
 
-namespace Event.Exceptions
+namespace Event.Exceptions.EventInteraction
 {
+    [Serializable]
     public class FailedToLockOtherEventException : Exception
     {
     }

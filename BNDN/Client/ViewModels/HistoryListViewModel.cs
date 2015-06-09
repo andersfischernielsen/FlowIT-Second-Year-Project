@@ -11,7 +11,7 @@ using Common.Exceptions;
 
 namespace Client.ViewModels
 {
-    public class HistoryListViewModel : ViewModelBase
+    public class HistoryListViewModel : ViewModelBase, IDisposable
     {
         private readonly IServerConnection _serverConnection;
         private readonly IEventConnection _eventConnection;
@@ -158,5 +158,23 @@ namespace Client.ViewModels
             NotifyPropertyChanged("");
         }
         #endregion
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _serverConnection.Dispose();
+                _eventConnection.Dispose();
+            }
+        }
     }
 }

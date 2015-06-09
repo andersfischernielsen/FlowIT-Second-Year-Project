@@ -64,7 +64,16 @@ namespace Server.Logic
 
         public void Dispose()
         {
-            _storage.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _storage.Dispose();
+            }
         }
     }
 }

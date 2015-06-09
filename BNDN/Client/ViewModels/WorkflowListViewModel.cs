@@ -8,7 +8,7 @@ using Common.DTO.Event;
 
 namespace Client.ViewModels
 {
-    public class WorkflowListViewModel : ViewModelBase, IWorkflowListViewModel
+    public class WorkflowListViewModel : ViewModelBase, IWorkflowListViewModel, IDisposable
     {
         public Action CloseAction { get; set; }
         public ObservableCollection<WorkflowViewModel> WorkflowList { get; set; }
@@ -129,5 +129,22 @@ namespace Client.ViewModels
             if (SelectedWorkflowViewModel != null) SelectedWorkflowViewModel.GetEvents();
         }
         #endregion
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _serverConnection.Dispose();
+            }
+        }
     }
 }

@@ -4,12 +4,13 @@ using Common.DTO.Shared;
 using Common.Tools;
 using Event.Communicators;
 using Event.Exceptions;
+using Event.Exceptions.ServerInteraction;
 using Moq;
 using NUnit.Framework;
 
 namespace Event.Tests.CommunicatorTests
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     public class ServerCommunicatorTests
     {
         private ServerCommunicator _toTest;

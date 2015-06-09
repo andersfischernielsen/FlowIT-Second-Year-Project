@@ -13,7 +13,7 @@ using NUnit.Framework;
 
 namespace Common.Tests
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     public class HttpClientToolboxTests
     {
         private HttpClientToolbox _toolbox;

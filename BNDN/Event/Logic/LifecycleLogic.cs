@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Common;
 using Common.DTO.Event;
 using Common.DTO.Shared;
 using Common.Exceptions;
@@ -192,7 +191,18 @@ namespace Event.Logic
 
         public void Dispose()
         {
-            _storage.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _storage.Dispose();
+                _lockLogic.Dispose();
+                _resetStorage.Dispose();
+            }
         }
     }
 }

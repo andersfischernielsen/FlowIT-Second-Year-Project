@@ -11,7 +11,7 @@ using Common.Exceptions;
 
 namespace Client.ViewModels
 {
-    public class EventViewModel : ViewModelBase
+    public class EventViewModel : ViewModelBase, IDisposable
     {
         private readonly EventAddressDto _eventAddressDto;
         private EventStateDto _eventStateDto;
@@ -237,5 +237,22 @@ namespace Client.ViewModels
             }
         }
         #endregion
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _eventConnection.Dispose();
+            }
+        }
     }
 }

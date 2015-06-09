@@ -12,7 +12,7 @@ using Common.Exceptions;
 
 namespace Client.ViewModels
 {
-    public class WorkflowViewModel : ViewModelBase, IWorkflowViewModel
+    public class WorkflowViewModel : ViewModelBase, IWorkflowViewModel, IDisposable
     {
         private readonly WorkflowDto _workflowDto;
         private bool _resetEventRuns;
@@ -193,5 +193,23 @@ namespace Client.ViewModels
             _resetEventRuns = false;
         }
         #endregion
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _serverConnection.Dispose();
+                _eventConnection.Dispose();
+            }
+        }
     }
 }

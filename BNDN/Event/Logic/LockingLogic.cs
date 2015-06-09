@@ -330,8 +330,17 @@ namespace Event.Logic
 
         public void Dispose()
         {
-            _storage.Dispose();
-            _eventCommunicator.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _storage.Dispose();
+                _eventCommunicator.Dispose();
+            }
         }
 
         /// <summary>

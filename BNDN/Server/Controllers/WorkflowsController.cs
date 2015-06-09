@@ -405,6 +405,7 @@ namespace Server.Controllers
         protected override void Dispose(bool disposing)
         {
             _logic.Dispose();
+            _historyLogic.Dispose();
             base.Dispose(disposing);
         }
     }

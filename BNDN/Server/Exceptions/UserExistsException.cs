@@ -2,6 +2,7 @@
 
 namespace Server.Exceptions
 {
+    [Serializable]
     public class UserExistsException : Exception
     {
     }

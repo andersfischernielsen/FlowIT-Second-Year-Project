@@ -7,13 +7,6 @@ namespace Event.Models
 {
     public class EventModel
     {
-        public EventModel()
-        {
-            ResponseUris = new List<ResponseUri>();
-            InclusionUris = new List<InclusionUri>();
-            ExclusionUris = new List<ExclusionUri>();
-            ConditionUris = new List<ConditionUri>();
-        }
         [Key, Column(Order = 0)]
         public string WorkflowId { get; set; }
         [Key, Column(Order = 1)]

@@ -15,7 +15,7 @@ using NUnit.Framework;
 
 namespace Client.Tests.Connections
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     public class ServerConnectionTests
     {
         private ServerConnection _connection;

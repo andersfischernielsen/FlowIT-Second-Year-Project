@@ -5,11 +5,6 @@ namespace Server.Models
 {
     public class ServerUserModel
     {
-        public ServerUserModel()
-        {
-            ServerRolesModels = new List<ServerRoleModel>();
-        }
-
         [Key]
         public string Name { get; set; }
         public string Password { get; set; }

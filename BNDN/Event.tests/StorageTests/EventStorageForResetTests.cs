@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 namespace Event.Tests.StorageTests
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     class EventStorageForResetTests
     {
         private EventStorageForReset _storageForReset;

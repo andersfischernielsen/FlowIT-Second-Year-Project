@@ -14,7 +14,7 @@ using NUnit.Framework;
 
 namespace Client.Tests.ViewModels
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     class WorkflowViewModelTests
     {
         private WorkflowViewModel _model;

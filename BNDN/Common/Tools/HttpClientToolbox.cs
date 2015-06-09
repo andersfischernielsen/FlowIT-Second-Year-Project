@@ -209,9 +209,18 @@ namespace Common.Tools
             await EnsureSuccessStatusCode(response);
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
-            HttpClient.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                HttpClient.Dispose();
+            }
         }
 
         /// <summary>

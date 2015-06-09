@@ -121,7 +121,16 @@ namespace Client.Connections
 
         public void Dispose()
         {
-            _http.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _http.Dispose();
+            }
         }
     }
 }
