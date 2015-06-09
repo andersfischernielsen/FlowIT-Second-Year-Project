@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Results;
 using Common.DTO.Event;
 using Common.DTO.History;
 using Common.DTO.Server;
@@ -96,9 +97,8 @@ namespace Server.Controllers
                     Message = "Threw: " + e.GetType(),
                     MethodCalledOnSender = "Login",
                 }).Wait();
-                
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
-                    "Username or password does not correspond to a user."));
+
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.Unauthorized, e));
             }
             catch (Exception e)
             { 
