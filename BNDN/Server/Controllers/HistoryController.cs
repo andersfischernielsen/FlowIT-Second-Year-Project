@@ -63,17 +63,17 @@ namespace Server.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" }).Wait();
                 return BadRequest("Seems input was not satisfactory");
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                _historyLogic.SaveHistory(new HistoryModel { EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" }).Wait();
                 return NotFound();
             }
             catch (Exception e) 
             {
-                _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" });
+                _historyLogic.SaveHistory(new HistoryModel {EventId = "", HttpRequestType = "GET", Message = "Threw: " + e.GetType(), WorkflowId = workflowId, MethodCalledOnSender = "GetHistory" }).Wait();
                 return InternalServerError(e);
             }
         }
