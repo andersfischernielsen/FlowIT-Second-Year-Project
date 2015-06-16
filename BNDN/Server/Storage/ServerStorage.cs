@@ -18,14 +18,18 @@ namespace Server.Storage
     {
         private readonly IServerContext _db;
 
-        public ServerStorage(IServerContext context = null)
+        public ServerStorage(IServerContext context)
         {
-            _db = context ?? new StorageContext();
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+            _db = context;
         }
 
         public async Task<ServerUserModel> GetUser(string username, string password)
         {
-            if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 throw new ArgumentNullException();
             }
@@ -251,7 +255,7 @@ namespace Server.Storage
         /// <exception cref="ArgumentNullException">Thrown when provided argument is null</exception>
         public async Task<bool> WorkflowExists(string workflowId)
         {
-            if (String.IsNullOrEmpty(workflowId))
+            if (string.IsNullOrEmpty(workflowId))
             {
                 throw new ArgumentNullException();
             }

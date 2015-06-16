@@ -25,15 +25,6 @@ namespace Server.Controllers
         private readonly IWorkflowHistoryLogic _historyLogic;
 
         /// <summary>
-        /// Default constructor used during runtime
-        /// </summary>
-        public UsersController()
-        {
-            _logic = new ServerLogic(new ServerStorage());
-            _historyLogic = new WorkflowHistoryLogic();
-        }
-
-        /// <summary>
         /// Constructor used for dependency-injection during testing
         /// </summary>
         /// <param name="logic"></param>

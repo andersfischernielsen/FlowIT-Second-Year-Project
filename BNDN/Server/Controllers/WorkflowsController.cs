@@ -7,8 +7,6 @@ using Common.DTO.Shared;
 using Common.Exceptions;
 using Server.Exceptions;
 using Server.Interfaces;
-using Server.Logic;
-using Server.Storage;
 
 namespace Server.Controllers
 {
@@ -19,15 +17,6 @@ namespace Server.Controllers
     {
         private readonly IServerLogic _logic;
         private readonly IWorkflowHistoryLogic _historyLogic;
-
-        /// <summary>
-        /// Default constructor used during runtime
-        /// </summary>
-        public WorkflowsController()
-        {
-            _logic = new ServerLogic(new ServerStorage());
-            _historyLogic = new WorkflowHistoryLogic();
-        }
 
         /// <summary>
         /// Constructor used for dependency-injection udring testing
