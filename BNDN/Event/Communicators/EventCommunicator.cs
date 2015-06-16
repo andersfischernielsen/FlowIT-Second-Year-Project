@@ -16,14 +16,6 @@ namespace Event.Communicators
         public readonly HttpClientToolbox HttpClient;
 
         /// <summary>
-        /// Create a new EventCommunicator with no outgoing communication addresses.
-        /// </summary>
-        public EventCommunicator()
-        {
-            HttpClient = new HttpClientToolbox();
-        }
-
-        /// <summary>
         /// For testing purposes; (inject a mocked HttpClientToolbox).
         /// </summary>
         /// <param name="toolbox"> The HttpClientToolbox to use for testing purposes.</param>

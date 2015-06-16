@@ -15,12 +15,13 @@ namespace Event.Logic
     {
         private readonly IEventHistoryStorage _storage;
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public EventHistoryLogic()
+        public EventHistoryLogic(IEventHistoryStorage storage)
         {
-            _storage = new EventStorage();
+            if (storage == null)
+            {
+                throw new ArgumentNullException("storage");
+            }
+            _storage = storage;
         }
 
         public async Task SaveException(Exception ex, string requestType, string method, string eventId = "", string workflowId = "")

@@ -23,17 +23,6 @@ namespace Event.Logic
         private readonly ILockingLogic _lockLogic;
 
         /// <summary>
-        /// Default constructor
-        /// </summary>
-        public LifecycleLogic()
-        {
-            var context = new EventContext();
-            _storage = new EventStorage(context);
-            _resetStorage = new EventStorageForReset(context);
-            _lockLogic = new LockingLogic(_storage, new EventCommunicator());
-        }
-
-        /// <summary>
         /// Constructor to be used for dependency-injection
         /// </summary>
         /// <param name="storage">Storage-layer</param>

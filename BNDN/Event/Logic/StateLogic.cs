@@ -22,18 +22,6 @@ namespace Event.Logic
         private readonly IEventFromEvent _eventCommunicator;
 
         /// <summary>
-        /// Runtime Constructor.
-        /// Uses default implementations of IEventStorage, ILockingLogic, IAuthLogic and IEventFromEvent.
-        /// </summary>
-        public StateLogic()
-        {
-            _storage = new EventStorage();
-            _eventCommunicator = new EventCommunicator();
-            _lockingLogic = new LockingLogic(_storage, _eventCommunicator);
-            _authLogic = new AuthLogic(_storage);
-        }
-
-        /// <summary>
         /// Constructor used for dependency injection.
         /// </summary>
         /// <param name="storage">An implementation of IEventStorage</param>
