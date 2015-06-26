@@ -45,5 +45,10 @@ namespace Event.Storage
         public DbSet<InclusionUri> Inclusions { get; set; }
         public DbSet<ExclusionUri> Exclusions { get; set; }
         public DbSet<HistoryModel> History { get; set; }
+
+        public static EventContext Create()
+        {
+            return new EventContext();
+        }
     }
 }

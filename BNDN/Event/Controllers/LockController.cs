@@ -64,22 +64,22 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "POST", "Lock").Wait();
+                _historyLogic.SaveException(e, "POST", "Lock");
                 return BadRequest("Lock: Seems input was not satisfactory");
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "POST", "Lock").Wait();
+                _historyLogic.SaveException(e, "POST", "Lock");
                 return Conflict();
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "POST", "Lock").Wait();
+                _historyLogic.SaveException(e, "POST", "Lock");
                 return NotFound();
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "POST", "Lock").Wait();
+                _historyLogic.SaveException(e, "POST", "Lock");
                 return InternalServerError(e);
             }
         }
@@ -102,22 +102,22 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "DELETE", "Unlock").Wait();
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
                 return BadRequest("Unlock: Could not unlock: One or more of the provided arguments was null");
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "DELETE", "Unlock").Wait();
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
                 return Conflict();
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "DELETE", "Unlock").Wait();
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
                 return NotFound();
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "DELETE", "Unlock").Wait();
+                _historyLogic.SaveException(e, "DELETE", "Unlock");
                 return InternalServerError(e);
             }
 

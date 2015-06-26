@@ -46,7 +46,7 @@ namespace Event.Controllers
 
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetHistory", eventId, workflowId);
 
                 return InternalServerError(e);
             }

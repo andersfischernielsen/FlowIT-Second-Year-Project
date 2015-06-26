@@ -57,17 +57,17 @@ namespace Event.Controllers
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId);
                 return NotFound();
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId);
                 return Conflict();
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId);
                 return BadRequest("GetExecuted: Seems input was not satisfactory");
             }
 
@@ -93,17 +93,17 @@ namespace Event.Controllers
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId);
                 return NotFound();
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId);
                 return Conflict();
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetExecuted", eventId, workflowId);
                 return BadRequest("GetIncluded: Seems input was not satisfactory");
             }
         }
@@ -130,17 +130,17 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetState", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetState", eventId, workflowId);
                 return BadRequest("GetState: Seems input was not satisfactory");
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetState", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetState", eventId, workflowId);
                 return NotFound();
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetState", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetState", eventId, workflowId);
                 return Conflict();
             }
         }
@@ -173,22 +173,22 @@ namespace Event.Controllers
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId);
                 return NotFound();
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId);
                 return BadRequest("UpdateIncluded: Provided input was null");
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId);
                 return Conflict();
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdateIncluded", eventId, workflowId);
                 return InternalServerError(e);
             }
         }
@@ -221,22 +221,22 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId);
                 return BadRequest("UpdatePending: Provided input was null");
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId);
                 return NotFound();
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId);
                 return Conflict();
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "UpdatePending", eventId, workflowId);
                 return InternalServerError(e);
             }
 
@@ -271,33 +271,33 @@ namespace Event.Controllers
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId);
 
                 return NotFound();
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId);
                 return Conflict();
             }
             catch (UnauthorizedException e)
             {
-                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId);
                 return Unauthorized(Request.Headers.Authorization);
             }
             catch (NotExecutableException e)
             {
-                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId);
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed, e));
             }
             catch (FailedToLockOtherEventException e)
             {
-                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId);
                 return Conflict();
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "Execute", eventId, workflowId);
                 return InternalServerError(e);
             }
         }

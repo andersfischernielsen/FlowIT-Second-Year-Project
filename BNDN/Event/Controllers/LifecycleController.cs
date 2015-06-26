@@ -65,18 +65,18 @@ namespace Event.Controllers
             }
             catch (EventExistsException e)
             {
-                _historyLogic.SaveException(e, "POST", "CreateEvent").Wait();
+                _historyLogic.SaveException(e, "POST", "CreateEvent");
                 return Conflict();
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "POST", "CreateEvent").Wait();
+                _historyLogic.SaveException(e, "POST", "CreateEvent");
                 return BadRequest("CreateEvent: Seems input was not satisfactory");
             }
             catch (Exception e)
             {
                 // Will catch any other Exception
-                _historyLogic.SaveException(e, "POST", "CreateEvent").Wait();
+                _historyLogic.SaveException(e, "POST", "CreateEvent");
 
                 return InternalServerError(e);
             }
@@ -100,22 +100,22 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "DELETE", "DeleteEvent").Wait();
+                _historyLogic.SaveException(e, "DELETE", "DeleteEvent");
                 return BadRequest("DeleteEvent: Seems input was not satisfactory");
             }
             catch (LockedException e)
             {
-                _historyLogic.SaveException(e, "DELETE", "DeleteEvent").Wait();
+                _historyLogic.SaveException(e, "DELETE", "DeleteEvent");
                 return Conflict();
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "DELETE", "DeleteEvent").Wait();
+                _historyLogic.SaveException(e, "DELETE", "DeleteEvent");
                 return NotFound();
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "DELETE", "DeleteEvent").Wait();
+                _historyLogic.SaveException(e, "DELETE", "DeleteEvent");
                 return InternalServerError(e);
             }
         }
@@ -140,17 +140,17 @@ namespace Event.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "PUT", "ResetEvent", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "ResetEvent", eventId, workflowId);
                 return BadRequest("ResetEvent: Seems input was not satisfactory");
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "PUT", "ResetEvent", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "ResetEvent", eventId, workflowId);
                 return NotFound();
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "PUT", "ResetEvent", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "PUT", "ResetEvent", eventId, workflowId);
                 return InternalServerError(e);
             }
         }
@@ -174,17 +174,17 @@ namespace Event.Controllers
             }
             catch (NotFoundException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId);
                 return NotFound();
             }
             catch (ArgumentNullException e)
             {
-                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId);
                 return BadRequest("Seems input was not satisfactory");
             }
             catch (Exception e)
             {
-                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId).Wait();
+                _historyLogic.SaveException(e, "GET", "GetEvent", eventId, workflowId);
                 return InternalServerError(e);
             }
         }
